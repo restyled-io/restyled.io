@@ -29,7 +29,7 @@ import Network.Wai.Handler.Warp             (Settings, defaultSettings,
                                              defaultShouldDisplayException,
                                              runSettings, setHost,
                                              setOnException, setPort, getPort)
-import Network.Wai.Middleware.RequestLogger (Destination (Logger),
+import Network.Wai.Middleware.RequestLogger (Destination (Callback, Logger),
                                              IPAddrSource (..),
                                              OutputFormat (..), destination,
                                              mkRequestLogger, outputFormat)
@@ -95,18 +95,18 @@ makeApplication foundation = do
     return $ logWare $ defaultMiddlewaresNoLogging appPlain
 
 makeLogWare :: App -> IO Middleware
-makeLogWare foundation =
-    mkRequestLogger def
-        { outputFormat =
-            if appDetailedRequestLogging $ appSettings foundation
-                then Detailed True
-                else Apache
-                        (if appIpFromHeader $ appSettings foundation
-                            then FromFallback
-                            else FromSocket)
-        , destination = Logger $ loggerSet $ appLogger foundation
-        }
-
+makeLogWare foundation = mkRequestLogger def
+    { outputFormat = if appSettings foundation `allowsLevel` LevelDebug
+        then Detailed True
+        else Apache apacheIpSource
+    , destination = if appSettings foundation `allowsLevel` LevelInfo
+        then Logger $ loggerSet $ appLogger foundation
+        else Callback $ \_ -> return ()
+    }
+  where
+    apacheIpSource = if appIpFromHeader $ appSettings foundation
+        then FromFallback
+        else FromSocket
 
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings

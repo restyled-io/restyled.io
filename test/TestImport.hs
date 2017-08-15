@@ -11,13 +11,14 @@ import ClassyPrelude         as X hiding (delete, deleteBy, Handler)
 import Database.Persist      as X hiding (get)
 import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool, rawExecute, rawSql, unSingle, connEscapeName)
 import Foundation            as X
+import LoadEnv               (loadEnvFrom)
 import Model                 as X
 import Test.Hspec            as X
 import Text.Shakespeare.Text (st)
-import Yesod.Default.Config2 (useEnv, loadYamlSettings)
 import Yesod.Auth            as X
-import Yesod.Test            as X
 import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
+import Yesod.Default.Config2 (useEnv, loadYamlSettings)
+import Yesod.Test            as X
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -35,8 +36,9 @@ runHandler handler = do
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
+    loadEnvFrom ".env.test"
     settings <- loadYamlSettings
-        ["config/test-settings.yml", "config/settings.yml"]
+        ["config/settings.yml"]
         []
         useEnv
     foundation <- makeFoundation settings

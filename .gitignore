@@ -19,3 +19,6 @@ cabal.sandbox.config
 *~
 \#*
 restyled.cabal
+
+.env*
+!.env.test

@@ -64,10 +64,7 @@ type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
 instance Yesod App where
     -- Controls the base of generated URLs. For more information on modifying,
     -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
-    approot = ApprootRequest $ \app req ->
-        case appRoot $ appSettings app of
-            Nothing -> getApprootText guessApproot app req
-            Just root -> root
+    approot = ApprootMaster $ appRoot . appSettings
 
     -- Store session data on the client in encrypted cookies,
     -- default session idle timeout is 120 minutes
@@ -167,12 +164,7 @@ instance Yesod App where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
-    -- What messages should be logged. The following includes all messages when
-    -- in development, and warnings and errors in production.
-    shouldLog app _source level =
-        appShouldLogAll (appSettings app)
-            || level == LevelWarn
-            || level == LevelError
+    shouldLog app _source level = appSettings app `allowsLevel` level
 
     makeLogger = return . appLogger
 
