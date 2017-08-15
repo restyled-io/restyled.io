@@ -92,6 +92,7 @@ tests:
     dependencies:
     - restyled
     - hspec >=2.0.0
+    - hspec-expectations-lifted
     - yesod-test
 
 # Define flags used by "yesod devel" to make compilation faster

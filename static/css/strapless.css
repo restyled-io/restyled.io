@@ -1,0 +1,1644 @@
+/*! normalize.css v7.0.0 | MIT License | github.com/necolas/normalize.css */
+/* Document
+   ========================================================================== */
+/**
+ * 1. Correct the line height in all browsers.
+ * 2. Prevent adjustments of font size after orientation changes in
+ *    IE on Windows Phone and in iOS.
+ */
+html {
+  line-height: 1.15;
+  /* 1 */
+  -ms-text-size-adjust: 100%;
+  /* 2 */
+  -webkit-text-size-adjust: 100%;
+  /* 2 */
+}
+/* Sections
+   ========================================================================== */
+/**
+ * Remove the margin in all browsers (opinionated).
+ */
+body {
+  margin: 0;
+}
+/**
+ * Add the correct display in IE 9-.
+ */
+article,
+aside,
+footer,
+header,
+nav,
+section,
+footer {
+  display: block;
+}
+/**
+ * Correct the font size and margin on `h1` elements within `section` and
+ * `article` contexts in Chrome, Firefox, and Safari.
+ */
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+/* Grouping content
+   ========================================================================== */
+/**
+ * Add the correct display in IE 9-.
+ * 1. Add the correct display in IE.
+ */
+figcaption,
+figure,
+main {
+  /* 1 */
+  display: block;
+}
+/**
+ * Add the correct margin in IE 8.
+ */
+figure {
+  margin: 1em 40px;
+}
+/**
+ * 1. Add the correct box sizing in Firefox.
+ * 2. Show the overflow in Edge and IE.
+ */
+hr {
+  box-sizing: content-box;
+  /* 1 */
+  height: 0;
+  /* 1 */
+  overflow: visible;
+  /* 2 */
+}
+/**
+ * 1. Correct the inheritance and scaling of font size in all browsers.
+ * 2. Correct the odd `em` font sizing in all browsers.
+ */
+pre {
+  font-family: monospace, monospace;
+  /* 1 */
+  font-size: 1em;
+  /* 2 */
+}
+/* Text-level semantics
+   ========================================================================== */
+/**
+ * 1. Remove the gray background on active links in IE 10.
+ * 2. Remove gaps in links underline in iOS 8+ and Safari 8+.
+ */
+a {
+  background-color: transparent;
+  /* 1 */
+  -webkit-text-decoration-skip: objects;
+  /* 2 */
+}
+/**
+ * 1. Remove the bottom border in Chrome 57- and Firefox 39-.
+ * 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.
+ */
+abbr[title] {
+  border-bottom: none;
+  /* 1 */
+  text-decoration: underline;
+  /* 2 */
+  text-decoration: underline dotted;
+  /* 2 */
+}
+/**
+ * Prevent the duplicate application of `bolder` by the next rule in Safari 6.
+ */
+b,
+strong {
+  font-weight: inherit;
+}
+/**
+ * Add the correct font weight in Chrome, Edge, and Safari.
+ */
+b,
+strong {
+  font-weight: bolder;
+}
+/**
+ * 1. Correct the inheritance and scaling of font size in all browsers.
+ * 2. Correct the odd `em` font sizing in all browsers.
+ */
+code,
+kbd,
+samp {
+  font-family: monospace, monospace;
+  /* 1 */
+  font-size: 1em;
+  /* 2 */
+}
+/**
+ * Add the correct font style in Android 4.3-.
+ */
+dfn {
+  font-style: italic;
+}
+/**
+ * Add the correct background and color in IE 9-.
+ */
+mark {
+  background-color: #ff0;
+  color: #000;
+}
+/**
+ * Add the correct font size in all browsers.
+ */
+small {
+  font-size: 80%;
+}
+/**
+ * Prevent `sub` and `sup` elements from affecting the line height in
+ * all browsers.
+ */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sub {
+  bottom: -0.25em;
+}
+sup {
+  top: -0.5em;
+}
+/* Embedded content
+   ========================================================================== */
+/**
+ * Add the correct display in IE 9-.
+ */
+audio,
+video {
+  display: inline-block;
+}
+/**
+ * Add the correct display in iOS 4-7.
+ */
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+/**
+ * Remove the border on images inside links in IE 10-.
+ */
+img {
+  border-style: none;
+}
+/**
+ * Hide the overflow in IE.
+ */
+svg:not(:root) {
+  overflow: hidden;
+}
+/* Forms
+   ========================================================================== */
+/**
+ * 1. Change the font styles in all browsers (opinionated).
+ * 2. Remove the margin in Firefox and Safari.
+ */
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: sans-serif;
+  /* 1 */
+  font-size: 100%;
+  /* 1 */
+  line-height: 1.15;
+  /* 1 */
+  margin: 0;
+  /* 2 */
+}
+/**
+ * Show the overflow in IE.
+ * 1. Show the overflow in Edge.
+ */
+button,
+input {
+  /* 1 */
+  overflow: visible;
+}
+/**
+ * Remove the inheritance of text transform in Edge, Firefox, and IE.
+ * 1. Remove the inheritance of text transform in Firefox.
+ */
+button,
+select {
+  /* 1 */
+  text-transform: none;
+}
+/**
+ * 1. Prevent a WebKit bug where (2) destroys native `audio` and `video`
+ *    controls in Android 4.
+ * 2. Correct the inability to style clickable types in iOS and Safari.
+ */
+button,
+html [type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+  /* 2 */
+}
+/**
+ * Remove the inner border and padding in Firefox.
+ */
+button::-moz-focus-inner,
+[type="button"]::-moz-focus-inner,
+[type="reset"]::-moz-focus-inner,
+[type="submit"]::-moz-focus-inner {
+  border-style: none;
+  padding: 0;
+}
+/**
+ * Restore the focus styles unset by the previous rule.
+ */
+button:-moz-focusring,
+[type="button"]:-moz-focusring,
+[type="reset"]:-moz-focusring,
+[type="submit"]:-moz-focusring {
+  outline: 1px dotted ButtonText;
+}
+/**
+ * Correct the padding in Firefox.
+ */
+fieldset {
+  padding: 0.35em 0.75em 0.625em;
+}
+/**
+ * 1. Correct the text wrapping in Edge and IE.
+ * 2. Correct the color inheritance from `fieldset` elements in IE.
+ * 3. Remove the padding so developers are not caught out when they zero out
+ *    `fieldset` elements in all browsers.
+ */
+legend {
+  box-sizing: border-box;
+  /* 1 */
+  color: inherit;
+  /* 2 */
+  display: table;
+  /* 1 */
+  max-width: 100%;
+  /* 1 */
+  padding: 0;
+  /* 3 */
+  white-space: normal;
+  /* 1 */
+}
+/**
+ * 1. Add the correct display in IE 9-.
+ * 2. Add the correct vertical alignment in Chrome, Firefox, and Opera.
+ */
+progress {
+  display: inline-block;
+  /* 1 */
+  vertical-align: baseline;
+  /* 2 */
+}
+/**
+ * Remove the default vertical scrollbar in IE.
+ */
+textarea {
+  overflow: auto;
+}
+/**
+ * 1. Add the correct box sizing in IE 10-.
+ * 2. Remove the padding in IE 10-.
+ */
+[type="checkbox"],
+[type="radio"] {
+  box-sizing: border-box;
+  /* 1 */
+  padding: 0;
+  /* 2 */
+}
+/**
+ * Correct the cursor style of increment and decrement buttons in Chrome.
+ */
+[type="number"]::-webkit-inner-spin-button,
+[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+/**
+ * 1. Correct the odd appearance in Chrome and Safari.
+ * 2. Correct the outline style in Safari.
+ */
+[type="search"] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  outline-offset: -2px;
+  /* 2 */
+}
+/**
+ * Remove the inner padding and cancel buttons in Chrome and Safari on macOS.
+ */
+[type="search"]::-webkit-search-cancel-button,
+[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+/**
+ * 1. Correct the inability to style clickable types in iOS and Safari.
+ * 2. Change font properties to `inherit` in Safari.
+ */
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  /* 1 */
+  font: inherit;
+  /* 2 */
+}
+/* Interactive
+   ========================================================================== */
+/*
+ * Add the correct display in IE 9-.
+ * 1. Add the correct display in Edge, IE, and Firefox.
+ */
+details,
+menu {
+  display: block;
+}
+/*
+ * Add the correct display in all browsers.
+ */
+summary {
+  display: list-item;
+}
+/* Scripting
+   ========================================================================== */
+/**
+ * Add the correct display in IE 9-.
+ */
+canvas {
+  display: inline-block;
+}
+/**
+ * Add the correct display in IE.
+ */
+template {
+  display: none;
+}
+/* Hidden
+   ========================================================================== */
+/**
+ * Add the correct display in IE 10-.
+ */
+[hidden] {
+  display: none;
+}
+body {
+  background-color: white;
+  color: #595959;
+  font-size: 18px;
+  line-height: 1.62;
+  margin-bottom: 0;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+  padding-top: 58px;
+}
+@media screen and (min-width: 720px) {
+  body {
+    font-size: 20px;
+  }
+}
+body > * {
+  margin: 0 auto;
+}
+nav {
+  background-color: #866379;
+  color: white;
+  height: 46px;
+  line-height: 460px;
+  font-size: 18px;
+  max-height: 46px;
+  padding: 0;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  z-index: 1000;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 0;
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+nav li a:active {
+  background-color: #866379;
+  color: white;
+}
+nav li a:active:active {
+  background-color: #674c5d;
+}
+nav li a:active:active {
+  box-shadow: inset 0 1px 0 #513c4a;
+}
+nav > section {
+  padding: 0;
+  max-width: 980px;
+}
+nav > section > * {
+  display: none;
+  float: left;
+  position: relative;
+  border: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 46px;
+  vertical-align: middle;
+  overflow: hidden;
+}
+@media screen and (min-width: 720px) {
+  nav > section > * {
+    display: block;
+  }
+}
+nav > section > *:first-child {
+  display: block;
+  margin-right: 24px;
+}
+@media screen and (min-width: 480px) {
+  nav > section > *:first-child {
+    margin-right: 46px;
+  }
+}
+nav > section > *:last-child {
+  display: block;
+  float: right;
+  line-height: 40px;
+}
+nav ul {
+  height: 46px;
+}
+nav li {
+  float: left;
+  height: 46px;
+  line-height: 46px;
+  list-style: none;
+}
+nav li a {
+  display: block;
+  float: left;
+  color: inherit;
+}
+nav a {
+  text-decoration: none;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+nav h1 {
+  display: block;
+  float: left;
+  font-size: 26px;
+  line-height: 46px;
+  padding: 0;
+  color: inherit;
+}
+section {
+  width: 100%;
+  margin: 0 auto;
+  padding: 12px;
+}
+section:first-child {
+  margin-top: 0;
+}
+section > * {
+  margin: 0 auto;
+  max-width: 980px;
+}
+section > *:only-child {
+  padding-top: 1em;
+  padding-bottom: 1em;
+  margin-bottom: 0;
+}
+section > aside,
+section > footer {
+  margin-bottom: 1em;
+}
+section > * + * {
+  margin-top: 12px;
+}
+section.action {
+  background-color: #ecdad8;
+  color: #595251;
+}
+section.reaction {
+  background-color: #f2ceca;
+  color: #5b4d4c;
+}
+section.info {
+  background-color: #c6dff1;
+  color: #4a545a;
+}
+section.warning {
+  background-color: #fcd5c2;
+  color: #5f5049;
+}
+section.success {
+  background-color: #c9e3c9;
+  color: #4b554b;
+}
+section.failure {
+  background-color: #eeb3b3;
+  color: #4f3c3c;
+}
+main {
+  padding: 12px;
+  max-width: 825px;
+  margin: 0 auto;
+  margin-bottom: 1em;
+  text-align: center;
+  background-color: #f0ebee;
+  color: #5a5859;
+}
+main > * {
+  margin-bottom: 12px;
+}
+main p,
+main form {
+  text-align: left;
+}
+main h1,
+main h2 {
+  text-align: center;
+}
+main h1 + p,
+main h2 + p,
+main h1 + form,
+main h2 + form {
+  text-align: center;
+  font-size: 125%;
+  margin-bottom: 1em;
+}
+main img {
+  margin: 0 auto;
+  max-width: 100%;
+}
+section > main {
+  border-radius: 6px;
+}
+main h1,
+main h2,
+main h3,
+main h4,
+main h5,
+main h6 {
+  margin-bottom: .62em;
+}
+main button,
+main .button,
+main input[type="button"],
+main input[type="submit"] {
+  font-size: 110%;
+}
+main button:only-child,
+main .button:only-child,
+main input[type="button"]:only-child,
+main input[type="submit"]:only-child {
+  font-size: 125%;
+  margin-bottom: 1em;
+}
+@media screen and (min-width: 980px) {
+  main {
+    border-radius: 6px;
+  }
+}
+main.action {
+  background-color: #e6cacb;
+  color: #564c4c;
+}
+main.reaction {
+  background-color: #ecb3b4;
+  color: #4f3c3c;
+}
+main.info {
+  background-color: #abd8ea;
+  color: #405158;
+}
+main.warning {
+  background-color: #fcc7ba;
+  color: #5e4b46;
+}
+main.success {
+  background-color: #b1d4ac;
+  color: #424f41;
+}
+main.failure {
+  background-color: #e48692;
+  color: #43272b;
+}
+button,
+.button,
+input[type="button"],
+input[type="submit"] {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  min-height: 32px;
+  padding: 0.6em 12px;
+  touch-action: manipulation;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  outline: none;
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1.15;
+  background-color: #866379;
+  color: white;
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+button:active,
+.button:active,
+input[type="button"]:active,
+input[type="submit"]:active {
+  background-color: #674c5d;
+}
+button:active,
+.button:active,
+input[type="button"]:active,
+input[type="submit"]:active {
+  box-shadow: inset 0 1px 0 #513c4a;
+}
+.action button,
+.action .button,
+.action input[type="button"],
+.action input[type="submit"] {
+  background-color: #a3574e;
+  color: white;
+}
+.action button:active,
+.action .button:active,
+.action input[type="button"]:active,
+.action input[type="submit"]:active {
+  background-color: #7f443c;
+}
+.action button:active,
+.action .button:active,
+.action input[type="button"]:active,
+.action input[type="submit"]:active {
+  box-shadow: inset 0 1px 0 #653630;
+}
+button.action,
+.button.action,
+input[type="button"].action,
+input[type="submit"].action {
+  background-color: #a3574e !important;
+  color: white !important;
+}
+button.action:active,
+.button.action:active,
+input[type="button"].action:active,
+input[type="submit"].action:active {
+  background-color: #7f443c !important;
+}
+button.action:active,
+.button.action:active,
+input[type="button"].action:active,
+input[type="submit"].action:active {
+  box-shadow: inset 0 1px 0 #653630 !important;
+}
+.reaction button,
+.reaction .button,
+.reaction input[type="button"],
+.reaction input[type="submit"] {
+  background-color: #b43c2d;
+  color: white;
+}
+.reaction button:active,
+.reaction .button:active,
+.reaction input[type="button"]:active,
+.reaction input[type="submit"]:active {
+  background-color: #892e22;
+}
+.reaction button:active,
+.reaction .button:active,
+.reaction input[type="button"]:active,
+.reaction input[type="submit"]:active {
+  box-shadow: inset 0 1px 0 #6a231a;
+}
+button.reaction,
+.button.reaction,
+input[type="button"].reaction,
+input[type="submit"].reaction {
+  background-color: #b43c2d !important;
+  color: white !important;
+}
+button.reaction:active,
+.button.reaction:active,
+input[type="button"].reaction:active,
+input[type="submit"].reaction:active {
+  background-color: #892e22 !important;
+}
+button.reaction:active,
+.button.reaction:active,
+input[type="button"].reaction:active,
+input[type="submit"].reaction:active {
+  box-shadow: inset 0 1px 0 #6a231a !important;
+}
+.info button,
+.info .button,
+.info input[type="button"],
+.info input[type="submit"] {
+  background-color: #2a77ac;
+  color: white;
+}
+.info button:active,
+.info .button:active,
+.info input[type="button"]:active,
+.info input[type="submit"]:active {
+  background-color: #22608b;
+}
+.info button:active,
+.info .button:active,
+.info input[type="button"]:active,
+.info input[type="submit"]:active {
+  box-shadow: inset 0 1px 0 #1a4b6d;
+}
+button.info,
+.button.info,
+input[type="button"].info,
+input[type="submit"].info {
+  background-color: #2a77ac !important;
+  color: white !important;
+}
+button.info:active,
+.button.info:active,
+input[type="button"].info:active,
+input[type="submit"].info:active {
+  background-color: #22608b !important;
+}
+button.info:active,
+.button.info:active,
+input[type="button"].info:active,
+input[type="submit"].info:active {
+  box-shadow: inset 0 1px 0 #1a4b6d !important;
+}
+.warning button,
+.warning .button,
+.warning input[type="button"],
+.warning input[type="submit"] {
+  background-color: #a93d08;
+  color: white;
+}
+.warning button:active,
+.warning .button:active,
+.warning input[type="button"]:active,
+.warning input[type="submit"]:active {
+  background-color: #822f06;
+}
+.warning button:active,
+.warning .button:active,
+.warning input[type="button"]:active,
+.warning input[type="submit"]:active {
+  box-shadow: inset 0 1px 0 #5e2205;
+}
+button.warning,
+.button.warning,
+input[type="button"].warning,
+input[type="submit"].warning {
+  background-color: #a93d08 !important;
+  color: white !important;
+}
+button.warning:active,
+.button.warning:active,
+input[type="button"].warning:active,
+input[type="submit"].warning:active {
+  background-color: #822f06 !important;
+}
+button.warning:active,
+.button.warning:active,
+input[type="button"].warning:active,
+input[type="submit"].warning:active {
+  box-shadow: inset 0 1px 0 #5e2205 !important;
+}
+.success button,
+.success .button,
+.success input[type="button"],
+.success input[type="submit"] {
+  background-color: #427e42;
+  color: white;
+}
+.success button:active,
+.success .button:active,
+.success input[type="button"]:active,
+.success input[type="submit"]:active {
+  background-color: #346434;
+}
+.success button:active,
+.success .button:active,
+.success input[type="button"]:active,
+.success input[type="submit"]:active {
+  box-shadow: inset 0 1px 0 #274a27;
+}
+button.success,
+.button.success,
+input[type="button"].success,
+input[type="submit"].success {
+  background-color: #427e42 !important;
+  color: white !important;
+}
+button.success:active,
+.button.success:active,
+input[type="button"].success:active,
+input[type="submit"].success:active {
+  background-color: #346434 !important;
+}
+button.success:active,
+.button.success:active,
+input[type="button"].success:active,
+input[type="submit"].success:active {
+  box-shadow: inset 0 1px 0 #274a27 !important;
+}
+.failure button,
+.failure .button,
+.failure input[type="button"],
+.failure input[type="submit"] {
+  background-color: #d13030;
+  color: white;
+}
+.failure button:active,
+.failure .button:active,
+.failure input[type="button"]:active,
+.failure input[type="submit"]:active {
+  background-color: #a72525;
+}
+.failure button:active,
+.failure .button:active,
+.failure input[type="button"]:active,
+.failure input[type="submit"]:active {
+  box-shadow: inset 0 1px 0 #881e1e;
+}
+button.failure,
+.button.failure,
+input[type="button"].failure,
+input[type="submit"].failure {
+  background-color: #d13030 !important;
+  color: white !important;
+}
+button.failure:active,
+.button.failure:active,
+input[type="button"].failure:active,
+input[type="submit"].failure:active {
+  background-color: #a72525 !important;
+}
+button.failure:active,
+.button.failure:active,
+input[type="button"].failure:active,
+input[type="submit"].failure:active {
+  box-shadow: inset 0 1px 0 #881e1e !important;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  text-align: center;
+  line-height: 1.62;
+  font-weight: bold;
+}
+h1:only-child,
+h2:only-child,
+h3:only-child,
+h4:only-child,
+h5:only-child,
+h6:only-child {
+  margin-top: 0;
+}
+h1 {
+  font-size: 2.5em;
+}
+h2 {
+  font-size: 2.2em;
+}
+h3 {
+  font-size: 1.9em;
+}
+h4 {
+  font-size: 1.7em;
+}
+h5 {
+  font-size: 1.3em;
+}
+h6 {
+  font-size: 1.1em;
+}
+h1 + h1,
+h1 + h2,
+h1 + h3,
+h1 + h4,
+h2 + h1,
+h2 + h2,
+h2 + h3,
+h2 + h4,
+h3 + h1,
+h3 + h2,
+h3 + h3,
+h3 + h4,
+h4 + h1,
+h4 + h2,
+h4 + h3,
+h4 + h4 {
+  margin-top: 0;
+}
+h5,
+h6 {
+  margin-top: .5em;
+  text-transform: uppercase;
+}
+p.action,
+form.action {
+  background-color: #e6cacb;
+  color: #564c4c;
+}
+p.reaction,
+form.reaction {
+  background-color: #ecb3b4;
+  color: #4f3c3c;
+}
+p.info,
+form.info {
+  background-color: #abd8ea;
+  color: #405158;
+}
+p.warning,
+form.warning {
+  background-color: #fcc7ba;
+  color: #5e4b46;
+}
+p.success,
+form.success {
+  background-color: #b1d4ac;
+  color: #424f41;
+}
+p.failure,
+form.failure {
+  background-color: #e48692;
+  color: #43272b;
+}
+p.action,
+p.reaction,
+p.info,
+p.warning,
+p.success,
+p.failure,
+form.action,
+form.reaction,
+form.info,
+form.warning,
+form.success,
+form.failure {
+  padding: 12px 1em;
+}
+span.action,
+a.action {
+  background: transparent;
+  color: #a3574e;
+}
+span.reaction,
+a.reaction {
+  background: transparent;
+  color: #b43c2d;
+}
+span.info,
+a.info {
+  background: transparent;
+  color: #2a77ac;
+}
+span.warning,
+a.warning {
+  background: transparent;
+  color: #a93d08;
+}
+span.success,
+a.success {
+  background: transparent;
+  color: #427e42;
+}
+span.failure,
+a.failure {
+  background: transparent;
+  color: #d13030;
+}
+span.action,
+span.reaction,
+span.info,
+span.warning,
+span.success,
+span.failure {
+  font-weight: bold;
+}
+form {
+  padding: 1em 12px;
+  margin-bottom: 0;
+}
+form p,
+form form {
+  padding: 0;
+}
+form input[type="text"],
+form input[type="email"],
+form textarea {
+  width: 100%;
+  min-width: 18ch;
+  padding: 1ch;
+  margin-bottom: 1em;
+  border: 1px solid #6c6c6c;
+}
+form aside input[type="text"],
+form aside input[type="email"],
+form aside textarea,
+form footer input[type="text"],
+form footer input[type="email"],
+form footer textarea {
+  margin-bottom: 6px;
+}
+@media screen and (min-width: 720px) {
+  form aside,
+  form footer {
+    margin-bottom: 0;
+  }
+}
+form input + form input,
+form input + form label,
+form label + form input,
+form label + form label {
+  margin-top: 12px;
+}
+form h1:first-child,
+form h2:first-child,
+form h3:first-child,
+form h4:first-child,
+form h5:first-child,
+form h6:first-child {
+  margin-top: 0;
+}
+aside,
+footer {
+  margin-bottom: 12px;
+  border-radius: 6px;
+  text-align: left;
+}
+aside > form,
+footer > form {
+  padding: 0;
+  margin-bottom: 1em;
+}
+aside > *,
+footer > * {
+  margin-bottom: 7.44px;
+}
+aside > *:last-child,
+footer > *:last-child {
+  margin-bottom: 0;
+}
+aside aside,
+footer footer {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+aside:only-child,
+footer:only-child {
+  margin-bottom: 0;
+}
+aside:only-child input,
+footer:only-child input {
+  margin-bottom: 0 !important;
+}
+aside.action,
+aside.reaction,
+aside.info,
+aside.warning,
+aside.success,
+aside.failure,
+footer.action,
+footer.reaction,
+footer.info,
+footer.warning,
+footer.success,
+footer.failure {
+  padding: 12px 1em;
+}
+aside button,
+aside .button,
+aside input[type="button"],
+aside input[type="submit"],
+footer button,
+footer .button,
+footer input[type="button"],
+footer input[type="submit"] {
+  width: 100%;
+}
+@media screen and (min-width: 480px) {
+  aside button,
+  aside .button,
+  aside input[type="button"],
+  aside input[type="submit"],
+  footer button,
+  footer .button,
+  footer input[type="button"],
+  footer input[type="submit"] {
+    width: auto;
+    margin-bottom: 0;
+  }
+}
+@media screen and (min-width: 480px) {
+  aside,
+  footer {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+  }
+  aside > *,
+  footer > * {
+    margin-left: 7.44px;
+    margin-bottom: 0;
+  }
+  aside > *:first-child,
+  footer > *:first-child {
+    margin-left: 0;
+  }
+  aside > p,
+  aside > form,
+  footer > p {
+    margin-right: 0;
+    margin-left: 14.88px;
+    margin-bottom: 0;
+  }
+  aside > form,
+  footer > form {
+    margin-bottom: 0;
+  }
+  aside > p + *,
+  aside > form + *,
+  footer > p + * {
+    margin-left: 24px;
+  }
+  aside h1,
+  aside h2,
+  aside h3,
+  aside h4,
+  aside h5,
+  aside h6,
+  footer h1,
+  footer h2,
+  footer h3,
+  footer h4,
+  footer h5,
+  footer h6 {
+    margin: 0 24px;
+  }
+}
+aside.action,
+footer.action {
+  background-color: #ecdad8;
+  color: #595251;
+}
+aside.reaction,
+footer.reaction {
+  background-color: #f2ceca;
+  color: #5b4d4c;
+}
+aside.info,
+footer.info {
+  background-color: #c6dff1;
+  color: #4a545a;
+}
+aside.warning,
+footer.warning {
+  background-color: #fcd5c2;
+  color: #5f5049;
+}
+aside.success,
+footer.success {
+  background-color: #c9e3c9;
+  color: #4b554b;
+}
+aside.failure,
+footer.failure {
+  background-color: #eeb3b3;
+  color: #4f3c3c;
+}
+footer {
+  margin-bottom: 0 !important;
+}
+body > footer {
+  padding-top: 12px;
+  margin-top: 48px;
+  width: auto;
+  max-width: 100%;
+  border-radius: 0;
+}
+footer aside,
+footer footer {
+  max-width: 980px;
+}
+footer.action,
+footer.reaction,
+footer.info,
+footer.warning,
+footer.success,
+footer.failure {
+  padding: 12px;
+}
+@media screen and (min-width: 480px) {
+  footer {
+    -webkit-align-items: flex-end;
+    align-items: flex-end;
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+  }
+}
+label {
+  display: block;
+}
+table {
+  border-radius: 6px;
+  max-width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+table.action th {
+  background-color: #a3574e;
+  color: white;
+}
+table.action td {
+  color: #473a38;
+}
+table.action tr {
+  background-color: #d3a7a2;
+}
+table.action tr:nth-of-type(odd) {
+  background-color: #d6aea9;
+}
+table.reaction th {
+  background-color: #b43c2d;
+  color: white;
+}
+table.reaction td {
+  color: #422c29;
+}
+table.reaction tr {
+  background-color: #e08e84;
+}
+table.reaction tr:nth-of-type(odd) {
+  background-color: #e2968c;
+}
+table.info th {
+  background-color: #2a77ac;
+  color: white;
+}
+table.info td {
+  color: #2b3e4b;
+}
+table.info tr {
+  background-color: #77b3de;
+}
+table.info tr:nth-of-type(odd) {
+  background-color: #81b9e0;
+}
+table.warning th {
+  background-color: #a93d08;
+  color: white;
+}
+table.warning td {
+  color: #533628;
+}
+table.warning tr {
+  background-color: #f8996b;
+}
+table.warning tr:nth-of-type(odd) {
+  background-color: #f8a278;
+}
+table.success th {
+  background-color: #427e42;
+  color: white;
+}
+table.success td {
+  color: #2e412e;
+}
+table.success tr {
+  background-color: #82bd82;
+}
+table.success tr:nth-of-type(odd) {
+  background-color: #8ac28a;
+}
+table.failure th {
+  background-color: #d13030;
+  color: white;
+}
+table.failure td {
+  color: #251010;
+}
+table.failure tr {
+  background-color: #d95555;
+}
+table.failure tr:nth-of-type(odd) {
+  background-color: #db5e5e;
+}
+table th {
+  background-color: #5e5e5e;
+  color: white;
+}
+table td {
+  color: #676767;
+}
+table tr {
+  background-color: #f2f2f2;
+}
+table tr:nth-of-type(odd) {
+  background-color: #f8f8f8;
+}
+table th,
+table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 7.44px;
+}
+table thead th {
+  vertical-align: bottom;
+}
+table tr:first-child > th:first-child {
+  border-top-left-radius: 6px;
+}
+table tr:first-child > th:last-child {
+  border-top-right-radius: 6px;
+}
+table tr:last-child > td:first-child {
+  border-bottom-left-radius: 6px;
+}
+table tr:last-child > td:last-child {
+  border-bottom-right-radius: 6px;
+}
+table tr > td:first-child,
+table tr > th:first-child {
+  padding-left: 12px;
+}
+table tr > td:last-child,
+table tr > th:last-child {
+  padding-right: 12px;
+}
+blockquote {
+  padding-left: 1em;
+  margin-bottom: 1em;
+  border-left: 5px solid #f0ebee;
+  max-width: 55ch;
+}
+blockquote:nth-of-type(even) {
+  text-align: right;
+  border-left: none;
+  border-right: 5px solid #f0ebee;
+  padding-left: 0;
+  padding-right: 1em;
+}
+blockquote cite {
+  font-style: italic;
+  display: block;
+}
+blockquote cite:before {
+  content: '—';
+  padding-right: 5px;
+}
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+p,
+form,
+article,
+ul,
+dl,
+li,
+aside,
+form,
+footer {
+  margin: 0 auto 1em auto;
+}
+@media screen and (min-width: 480px) {
+  p,
+  form,
+  article,
+  ul,
+  dl,
+  li,
+  aside,
+  form,
+  footer {
+    max-width: 55ch;
+  }
+}
+ul {
+  margin: 0 auto 2em;
+}
+ul,
+ol {
+  padding-left: 2ch;
+}
+dt {
+  font-weight: bold;
+  font-size: 90%;
+}
+dd {
+  margin-bottom: 12px;
+}
+a {
+  color: inherit;
+  text-decoration: underline;
+}
+strong {
+  font-weight: bold;
+}
+fieldset,
+img {
+  border: 0;
+}
+caption,
+figcaption {
+  text-align: left;
+  vertical-align: top;
+  font-weight: normal;
+}
+abbr,
+acronym {
+  border-bottom: .1em dotted;
+  cursor: help;
+}
+code,
+pre {
+  background-color: #4f4f4f;
+  color: white;
+  font-family: monospace;
+  font-size: 85%;
+  vertical-align: middle;
+  padding: 12px 1em;
+  border-radius: 6px;
+  overflow: auto;
+}
+code {
+  padding: .16em .5em;
+  border-radius: 3px;
+}
+pre {
+  margin-bottom: 1em;
+  max-width: 78ch;
+}
+mark,
+::selection {
+  background-color: #afc4b6;
+  color: #3a413d;
+}
+hr {
+  background: #9f9f9f;
+  border-color: transparent;
+  height: 6px;
+  margin-bottom: 1em;
+  max-width: 55ch;
+}
+section > hr,
+body > hr {
+  border-radius: 6px;
+}
+.hide,
+.hidden {
+  display: none !important;
+}
+.clearfix:before,
+.clearfix:after {
+  content: " ";
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+.action {
+  background-color: #dab5b0;
+  color: #493c3b;
+}
+.reaction {
+  background-color: #e59e95;
+  color: #4c3532;
+}
+.info {
+  background-color: #8cbfe3;
+  color: #2f404c;
+}
+.warning {
+  background-color: #f9ab84;
+  color: #53392c;
+}
+.success {
+  background-color: #93c793;
+  color: #314231;
+}
+.failure {
+  background-color: #dd6767;
+  color: #2e1515;
+}
+.color1 {
+  background-color: #E0D5DC;
+  color: #545053;
+}
+.color1a {
+  background-color: #f0ebee;
+  color: #5a5859;
+}
+.color1b {
+  background-color: #ded3d2;
+  color: #534f4f;
+}
+.color1c {
+  background-color: #c4afbc;
+  color: #413a3f;
+}
+.color2 {
+  background-color: #d5e0d9;
+  color: #505451;
+}
+.color2a {
+  background-color: #ebf0ee;
+  color: #585a59;
+}
+.color2b {
+  background-color: #d7ded2;
+  color: #50534f;
+}
+.color2c {
+  background-color: #afc4b6;
+  color: #3a413d;
+}
+.color3 {
+  background-color: #e0d6d5;
+  color: #545050;
+}
+.color3a {
+  background-color: #f0ebeb;
+  color: #5a5858;
+}
+.color3b {
+  background-color: #dedcd2;
+  color: #53534f;
+}
+.color3c {
+  background-color: #c4b1af;
+  color: #413b3a;
+}
+.color4 {
+  background-color: #dcd5e0;
+  color: #525054;
+}
+.color4a {
+  background-color: #efebf0;
+  color: #5a585a;
+}
+.color4b {
+  background-color: #d2d4de;
+  color: #4f4f53;
+}
+.color4c {
+  background-color: #c2b6c9;
+  color: #413d43;
+}
+.gray-darker {
+  background-color: #6c6c6c;
+  color: #ffffff;
+}
+.gray-dark {
+  background-color: #858585;
+  color: #161616;
+}
+.gray {
+  background-color: #9f9f9f;
+  color: #2e2e2e;
+}
+.gray-light {
+  background-color: #b8b8b8;
+  color: #3d3d3d;
+}
+.gray-lighter {
+  background-color: #d2d2d2;
+  color: #4f4f4f;
+}

@@ -39,7 +39,6 @@ data AppSettings = AppSettings
     , appIpFromHeader :: Bool
     , appLogLevel :: LogLevel
     , appMutableStatic :: Bool
-    , appAuthDummyLogin :: Bool
     , appCopyright :: Text
     }
 
@@ -66,7 +65,6 @@ instance FromJSON AppSettings where
         appIpFromHeader <- o .: "ip-from-header"
         appLogLevel <- parseLogLevel <$> o .: "log-level"
         appMutableStatic <- o .: "mutable-static"
-        appAuthDummyLogin <- o .: "auth-dummy-login"
         appCopyright <- o .: "copyright"
 
         -- This value is needed in a pure context, and so can't read from ENV.
