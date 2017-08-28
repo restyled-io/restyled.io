@@ -1,0 +1,7 @@
+*.cabal
+.dockerignore
+.git
+.stack-work
+Dockerfile
+Makefile
+yesod-devel
