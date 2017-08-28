@@ -21,7 +21,7 @@ COPY templates /src/templates
 COPY config /src/config
 COPY static /src/static
 
-#COPY LICENSE /src/
+COPY LICENSE /src/
 
 RUN stack install
 
