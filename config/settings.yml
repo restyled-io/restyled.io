@@ -2,7 +2,7 @@ approot: "_env:APPROOT:http://localhost:3000"
 auth-dummy-login: "_env:AUTH_DUMMY_LOGIN:false"
 copyright: Patrick Brisbin 2017
 database-pool-size: "_env:PGPOOLSIZE:10" # use conventional variable
-database-url: "_env:DATABASE_URL:postgres://postgres:postgres@localhost:5432/restyled"
+database-url: "_env:DATABASE_URL:postgres://postgres:password@localhost:5432/restyled"
 host: "_env:HOST:*4" # any IPv4 host
 ip-from-header: "_env:IP_FROM_HEADER:false"
 log-level: "_env:LOG_LEVEL:info"
