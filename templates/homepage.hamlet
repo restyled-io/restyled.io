@@ -32,7 +32,7 @@
   <aside>
     <small>
       More details are available in our 
-      <a href=#>documentation</a>.
+      <a href=@{DocsR}>documentation</a>.
 
 <section .action>
   <h2>If I built this, would you try it?

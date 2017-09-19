@@ -3,4 +3,5 @@
 /static StaticR Static appStatic
 
 / HomeR GET
+/docs DocsR GET
 /signups SignupR POST

@@ -37,6 +37,7 @@ import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
 
 import Handler.Common
+import Handler.Docs
 import Handler.Home
 import Handler.Signup
 
