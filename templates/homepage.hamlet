@@ -8,9 +8,9 @@
     do something in code, inconsistencies will creep in. Besides measurably
     adding to the time it takes to read and comprehend code, inconsistent style
     across a code base can hide bugs, often
-    <a href=#>very
-    <a href=#>bad
-    <a href=#>ones</a>.
+    <a href=https://github.com/MrMEEE/bumblebee-Old-and-abbandoned/issues/123>very
+    <a href=https://github.com/ValveSoftware/steam-for-linux/issues/3671>bad
+    <a href=https://nakedsecurity.sophos.com/2014/02/24/anatomy-of-a-goto-fail-apples-ssl-bug-explained-plus-an-unofficial-patch/>ones</a>.
 
 <section .info>
   <p>
