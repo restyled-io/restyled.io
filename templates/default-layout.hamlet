@@ -2,8 +2,20 @@
   <section>
     <h1>
       <a href=@{HomeR}>restyled
+
     <ul>
-      <!-- TODO -->
+      <li>
+        <a href=@{DocsR}>Documentation
+
+      $maybe _ <- muser
+        <li>
+          <a href=#>Settings
+        <li>
+          <a href=@{AuthR $ LogoutR}>Sign out
+
+      $nothing
+        <li>
+          <a href=@{AuthR $ oauth2Url "github"}>Sign in
 
 $maybe msg <- mmsg
   <aside #message .info>

@@ -1,3 +1,4 @@
+/auth AuthR Auth getAuth
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 /static StaticR Static appStatic

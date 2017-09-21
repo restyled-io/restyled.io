@@ -1,2 +1,10 @@
 Signup
-    email Text
+  email Text
+
+User
+  credsPlugin Text
+  credsIdent Text
+  email Text
+  githubLogin Text Maybe
+  githubAvatarURL Text Maybe
+  UniqueUser credsPlugin credsIdent

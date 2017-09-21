@@ -26,6 +26,16 @@ import Yesod.Default.Util
 import qualified Data.Text as T
 import qualified Data.ByteString.Char8 as C8
 
+data OAuthCredentials = OAuthCredentials
+    { oacClientId :: Text
+    , oacClientSecret :: Text
+    }
+
+instance FromJSON OAuthCredentials where
+    parseJSON = withObject "OAuthCredentials" $ \o -> OAuthCredentials
+        <$> o .: "client-id"
+        <*> o .: "client-secret"
+
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
     , appRoot :: Text
@@ -35,6 +45,7 @@ data AppSettings = AppSettings
     , appLogLevel :: LogLevel
     , appMutableStatic :: Bool
     , appCopyright :: Text
+    , appGitHubOAuthCredentials :: OAuthCredentials
     }
 
 instance Show AppSettings where
@@ -61,6 +72,7 @@ instance FromJSON AppSettings where
         appLogLevel <- parseLogLevel <$> o .: "log-level"
         appMutableStatic <- o .: "mutable-static"
         appCopyright <- o .: "copyright"
+        appGitHubOAuthCredentials <- ((.: "github") =<< o .: "oauth")
 
 
         return AppSettings{..}

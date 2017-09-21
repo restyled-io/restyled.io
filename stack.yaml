@@ -1,5 +1,8 @@
 resolver: lts-9.5
 packages:
-- .
+- location: .
+- location: ../../thoughtbot/yesod-auth-oauth2
+  extra-dep: true
 extra-deps:
 - load-env-0.1.1
+allow-newer: true

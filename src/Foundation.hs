@@ -3,13 +3,17 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE RecordWildCards #-}
 module Foundation where
 
 import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
+import Safe                 (fromJustNote)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
 
+import Yesod.Auth
+import Yesod.Auth.OAuth2.Github
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
@@ -70,6 +74,7 @@ instance Yesod App where
     defaultLayout widget = do
         master <- getYesod
         mmsg <- getMessage
+        muser <- entityVal <$$> maybeAuth
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
@@ -84,7 +89,7 @@ instance Yesod App where
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
-    authRoute _ = Nothing
+    authRoute _ = Just $ AuthR LoginR
 
     -- Routes not requiring authentication.
     isAuthorized _ _ = return Authorized
@@ -113,6 +118,38 @@ instance Yesod App where
     -- Provide proper Bootstrap styling for default displays, like
     -- error pages
     defaultMessageWidget title body = $(widgetFile "default-message-widget")
+
+instance YesodAuth App where
+    type AuthId App = UserId
+
+    authenticate Creds{..} = runDB $ do
+        let user = User
+                { userCredsPlugin = credsPlugin
+                , userCredsIdent = credsIdent
+                , userEmail = fromJustNote "Authenticated user without email" $
+                    lookup "public_email" credsExtra <|>
+                    lookup "email" credsExtra
+                , userGithubLogin = lookup "login" credsExtra
+                , userGithubAvatarURL = lookup "avatar_url" credsExtra
+                }
+
+        muser <- getBy (UniqueUser credsPlugin credsIdent)
+
+        maybe
+            (Authenticated <$> insert user)
+            (\uid -> Authenticated uid <$ replace uid user)
+            $ entityKey <$> muser
+
+    loginDest _ = HomeR
+    logoutDest _ = HomeR
+
+    authPlugins App{..} =
+        let OAuthCredentials{..} = appGitHubOAuthCredentials appSettings
+        in [oauth2Github oacClientId oacClientSecret]
+
+    authHttpManager = appHttpManager
+
+instance YesodAuthPersist App
 
 -- How to run database actions.
 instance YesodPersist App where
