@@ -122,23 +122,16 @@ instance Yesod App where
 instance YesodAuth App where
     type AuthId App = UserId
 
-    authenticate Creds{..} = runDB $ do
-        let user = User
-                { userCredsPlugin = credsPlugin
-                , userCredsIdent = credsIdent
-                , userEmail = fromJustNote "Authenticated user without email" $
-                    lookup "public_email" credsExtra <|>
-                    lookup "email" credsExtra
-                , userGithubLogin = lookup "login" credsExtra
-                , userGithubAvatarURL = lookup "avatar_url" credsExtra
-                }
-
-        muser <- getBy (UniqueUser credsPlugin credsIdent)
-
-        maybe
-            (Authenticated <$> insert user)
-            (\uid -> Authenticated uid <$ replace uid user)
-            $ entityKey <$> muser
+    authenticate Creds{..} =
+        Authenticated <$> runDB (createOrUpdate $ User
+            { userCredsPlugin = credsPlugin
+            , userCredsIdent = credsIdent
+            , userEmail = fromJustNote "Authenticated user without email" $
+                lookup "public_email" credsExtra <|>
+                lookup "email" credsExtra
+            , userGithubLogin = lookup "login" credsExtra
+            , userGithubAvatarURL = lookup "avatar_url" credsExtra
+            })
 
     loginDest _ = HomeR
     logoutDest _ = HomeR
