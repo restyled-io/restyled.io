@@ -12,7 +12,7 @@
     <a href=https://github.com/ValveSoftware/steam-for-linux/issues/3671>bad
     <a href=https://nakedsecurity.sophos.com/2014/02/24/anatomy-of-a-goto-fail-apples-ssl-bug-explained-plus-an-unofficial-patch/>ones</a>.
 
-<section .info>
+<section>
   <p>
     Many automated tools exist to automatically align code to a defined style. A
     solo developer could wire up their preferred tools with a git pre-commit
