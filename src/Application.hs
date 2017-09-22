@@ -56,9 +56,9 @@ makeFoundation appSettings = do
     -- subsite.
     appHttpManager <- newManager
     appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
-    appStatic <-
-        (if appMutableStatic appSettings then staticDevel else static)
-        (appStaticDir appSettings)
+    appStatic <- (if appMutableStatic appSettings
+        then staticDevel
+        else static) appStaticDir
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a
@@ -143,7 +143,7 @@ appMain = do
     -- Get the settings from all relevant sources
     settings <- loadYamlSettingsArgs
         -- fall back to compile-time values, set to [] to require values at runtime
-        [configSettingsYmlValue]
+        []
 
         -- allow environment variables to override
         useEnv

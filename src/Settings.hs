@@ -11,15 +11,11 @@
 module Settings where
 
 import ClassyPrelude.Yesod hiding (throw)
-import Control.Exception (throw)
-import Data.Aeson (Result(..), fromJSON, withObject)
-import Data.FileEmbed (embedFile)
-import Data.Yaml (decodeEither')
+import Data.Aeson (withObject)
 import Database.Persist.Postgresql (PostgresConf(..))
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.PGDatabaseURL (parsePGConnectionString)
 import Network.Wai.Handler.Warp (HostPreference)
-import Yesod.Default.Config2 (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util
 #if DEVELOPMENT
     (widgetFileReload)
@@ -31,8 +27,7 @@ import qualified Data.Text as T
 import qualified Data.ByteString.Char8 as C8
 
 data AppSettings = AppSettings
-    { appStaticDir :: String
-    , appDatabaseConf :: PostgresConf
+    { appDatabaseConf :: PostgresConf
     , appRoot :: Text
     , appHost :: HostPreference
     , appPort :: Int
@@ -67,10 +62,6 @@ instance FromJSON AppSettings where
         appMutableStatic <- o .: "mutable-static"
         appCopyright <- o .: "copyright"
 
-        -- This value is needed in a pure context, and so can't read from ENV.
-        -- It also doesn't differ between environments, so we might as well
-        -- harcode it.
-        let appStaticDir = "static"
 
         return AppSettings{..}
 
@@ -83,6 +74,11 @@ instance FromJSON AppSettings where
             "error" -> LevelError
             _ -> LevelOther t
 
+-- This value is needed in a pure context, and so can't read from ENV. It also
+-- doesn't differ between environments, so we might as well harcode it.
+appStaticDir :: FilePath
+appStaticDir = "static"
+
 allowsLevel :: AppSettings -> LogLevel -> Bool
 allowsLevel AppSettings{..} = (>= appLogLevel)
 
@@ -94,15 +90,3 @@ widgetFile =
     widgetFileNoReload
 #endif
     def
-
-configSettingsYmlBS :: ByteString
-configSettingsYmlBS = $(embedFile configSettingsYml)
-
-configSettingsYmlValue :: Value
-configSettingsYmlValue = either throw id $ decodeEither' configSettingsYmlBS
-
-compileTimeAppSettings :: AppSettings
-compileTimeAppSettings =
-    case fromJSON $ applyEnvValue False mempty configSettingsYmlValue of
-        Error e -> error e
-        Success settings -> settings

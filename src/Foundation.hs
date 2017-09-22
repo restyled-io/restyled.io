@@ -93,17 +93,14 @@ instance Yesod App where
     -- and names them based on a hash of their content. This allows
     -- expiration dates to be set far in the future without worry of
     -- users receiving stale content.
-    addStaticContent ext mime content = do
-        master <- getYesod
-        let staticDir = appStaticDir $ appSettings master
-        addStaticContentExternal
-            minifym
-            genFileName
-            staticDir
-            (StaticR . flip StaticRoute [])
-            ext
-            mime
-            content
+    addStaticContent ext mime content = addStaticContentExternal
+        minifym
+        genFileName
+        appStaticDir
+        (StaticR . flip StaticRoute [])
+        ext
+        mime
+        content
       where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
