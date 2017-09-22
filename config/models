@@ -4,7 +4,45 @@ Signup
 User
   credsPlugin Text
   credsIdent Text
+
   email Text
+
   githubLogin Text Maybe
   githubAvatarURL Text Maybe
+
   UniqueUser credsPlugin credsIdent
+
+Organization
+  githubId GitHubId
+  githubLogin Text
+
+  UniqueOrganization githubId
+
+  deriving Eq Show
+
+Repository
+  fullName Text
+  isPrivate Bool
+  name Text
+
+  githubId GitHubId
+  githubOwnerId GitHubId
+
+  organization OrganizationId
+
+  UniqueRepository githubId
+
+  deriving Eq Show
+
+PullRequest
+  number Int
+  baseCommitSHA CommitSHA
+  headCommitSHA CommitSHA
+
+  githubId GitHubId
+
+  repository RepositoryId
+
+  UniquePullRequest githubId
+
+  deriving Eq Show

@@ -6,3 +6,4 @@
 / HomeR GET
 /docs DocsR GET
 /signups SignupR POST
+/webhooks WebhooksR POST
