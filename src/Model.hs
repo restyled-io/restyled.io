@@ -35,11 +35,7 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
 
 -- | Yes, we accept the race condition you expect
-createOrUpdate :: DB m b r => r -> ReaderT b m (Key r)
-createOrUpdate v = getByValue v >>= \case
-    Just (Entity k _) -> k <$ replace k v
+findOrCreate :: DB m b r => r -> ReaderT b m (Key r)
+findOrCreate v = getByValue v >>= \case
+    Just (Entity k _) -> pure k
     Nothing -> insert v
-
--- | A verson of @'createOrUpdate'@ that returns a complete @'Entity'@
-createOrUpdateEntity :: DB m b r => r -> ReaderT b m (Entity r)
-createOrUpdateEntity v = Entity <$> createOrUpdate v <*> pure v

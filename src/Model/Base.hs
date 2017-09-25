@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskell #-}
 -- |
 --
 -- N.B. This module only exists to work around the GHC stage restriction, and
@@ -7,22 +8,84 @@
 --
 module Model.Base where
 
-import ClassyPrelude
-import Data.Aeson
+import ClassyPrelude.Yesod
 import Database.Persist.Sql
 
-newtype CommitSHA = CommitSHA Text deriving
+data JobState = Created | InProgress | Done
+    deriving (Eq, Read, Show)
+
+derivePersistField "JobState"
+
+newtype RepoName = RepoName { unRepoName :: Text } deriving
     ( Eq
     , FromJSON
+    , IsString
+    , PathPiece
     , PersistField
     , PersistFieldSql
     , Show
+    , ToJSON
     )
 
-newtype GitHubId = GitHubId Int deriving
+newtype RepoFullName = RepoFullName { unRepoFullName :: Text } deriving
+    ( Eq
+    , FromJSON
+    , IsString
+    , PathPiece
+    , PersistField
+    , PersistFieldSql
+    , Show
+    , ToJSON
+    )
+
+newtype PRNumber = PRNumber { unPRNumber :: Int } deriving
+    ( Eq
+    , FromJSON
+    , PathPiece
+    , PersistField
+    , PersistFieldSql
+    , Show
+    , ToJSON
+    )
+
+newtype PRTitle = PRTitle { unPRTitle :: Text } deriving
+    ( Eq
+    , FromJSON
+    , IsString
+    , PathPiece
+    , PersistField
+    , PersistFieldSql
+    , Semigroup
+    , Show
+    , ToJSON
+    )
+
+newtype Branch = Branch { unBranch :: Text } deriving
+    ( Eq
+    , FromJSON
+    , IsString
+    , PersistField
+    , PersistFieldSql
+    , Semigroup
+    , Show
+    , ToJSON
+    )
+
+newtype CommitSHA = CommitSHA { unCommitSHA :: Text } deriving
+    ( Eq
+    , FromJSON
+    , IsString
+    , PersistField
+    , PersistFieldSql
+    , Show
+    , ToJSON
+    )
+
+newtype GitHubId = GitHubId { unGitHubId :: Int } deriving
     ( Eq
     , FromJSON
     , PersistField
     , PersistFieldSql
     , Show
+    , ToJSON
     )

@@ -3,6 +3,8 @@ auth-dummy-login: "_env:AUTH_DUMMY_LOGIN:false"
 copyright: Patrick Brisbin 2017
 database-pool-size: "_env:PGPOOLSIZE:10" # use conventional variable
 database-url: "_env:DATABASE_URL:postgres://postgres:password@localhost:5432/restyled"
+github-app-id: "_env:GITHUB_APP_ID"
+github-app-key: "_env:GITHUB_APP_KEY"
 host: "_env:HOST:*4" # any IPv4 host
 ip-from-header: "_env:IP_FROM_HEADER:false"
 log-level: "_env:LOG_LEVEL:info"

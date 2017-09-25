@@ -16,6 +16,7 @@ import Database.Persist.Postgresql (PostgresConf(..))
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.PGDatabaseURL (parsePGConnectionString)
 import Network.Wai.Handler.Warp (HostPreference)
+import Model.Base
 import Yesod.Default.Util
 #if DEVELOPMENT
     (widgetFileReload)
@@ -46,6 +47,8 @@ data AppSettings = AppSettings
     , appMutableStatic :: Bool
     , appCopyright :: Text
     , appGitHubOAuthCredentials :: OAuthCredentials
+    , appGitHubAppId :: GitHubId
+    , appGitHubAppKey :: Text
     }
 
 instance Show AppSettings where
@@ -73,7 +76,8 @@ instance FromJSON AppSettings where
         appMutableStatic <- o .: "mutable-static"
         appCopyright <- o .: "copyright"
         appGitHubOAuthCredentials <- ((.: "github") =<< o .: "oauth")
-
+        appGitHubAppId <- o .: "github-app-id"
+        appGitHubAppKey <- o .: "github-app-key"
 
         return AppSettings{..}
 

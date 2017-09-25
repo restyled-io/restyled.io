@@ -4,18 +4,26 @@
 module Handler.Webhooks where
 
 import Import
-import Restyler
-import Webhooks.GitHub.PullRequest
+
+import GitHub.Webhooks.PullRequest
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
+    now <- liftIO $ getCurrentTime
     payload <- requireJsonBody
-    $(logDebug) $ "Payload received: " <> tshow payload
+    $(logDebug) $ "Webhook payload received: " <> tshow payload
 
-    pullRequest <- runDB $ do
-        orgId <- createOrUpdate $ toOrganization payload
-        repoId <- createOrUpdate $ toRepository orgId payload
-        createOrUpdateEntity $ toPullRequest repoId payload
+    runDB $ do
+        repositoryId <- findOrCreate $ toRepository payload
+        pullRequestId <- findOrCreate $ toPullRequest repositoryId payload
 
-    $(logDebug) $ "Restyling PR: " <> tshow pullRequest
-    runRestyler pullRequest
+        insert_ $ WebhookPayload
+            { webhookPayloadCreatedAt = now
+            , webhookPayloadUpdatedAt = now
+            , webhookPayloadState = Created
+            , webhookPayloadInstallationId = pInstallationId payload
+            , webhookPayloadRepository = repositoryId
+            , webhookPayloadPullRequest = pullRequestId
+            }
+
+    sendResponseStatus status201 ()

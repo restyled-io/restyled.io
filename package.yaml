@@ -47,9 +47,14 @@ dependencies:
 - wai
 
 - HTTP
+- http-client
+- http-client-tls
+- http-types
+- jwt
 - load-env
 - network-uri
-- yesod-auth-oauth2
+- process
+- temporary
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
@@ -80,6 +85,20 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - restyled
+    when:
+    - condition: flag(library-only)
+      buildable: false
+
+  restyler:
+    main: main.hs
+    source-dirs: restyler
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - restyled
+    - optparse-applicative
     when:
     - condition: flag(library-only)
       buildable: false

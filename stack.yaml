@@ -1,7 +1,7 @@
 resolver: lts-9.5
 packages:
 - location: .
-- location: ../../thoughtbot/yesod-auth-oauth2
+- location: ../../pbrisbin/haskell-jwt
   extra-dep: true
 extra-deps:
 - load-env-0.1.1

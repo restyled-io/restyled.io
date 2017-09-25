@@ -36,7 +36,6 @@ import Network.Wai.Middleware.RequestLogger (Destination (Callback, Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
-import Yesod.Auth
 
 import Handler.Common
 import Handler.Docs

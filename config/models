@@ -1,48 +1,28 @@
 Signup
   email Text
 
-User
-  credsPlugin Text
-  credsIdent Text
-
-  email Text
-
-  githubLogin Text Maybe
-  githubAvatarURL Text Maybe
-
-  UniqueUser credsPlugin credsIdent
-
-Organization
-  githubId GitHubId
-  githubLogin Text
-
-  UniqueOrganization githubId
-
-  deriving Eq Show
-
 Repository
-  fullName Text
-  isPrivate Bool
-  name Text
+  fullName RepoFullName
 
-  githubId GitHubId
-  githubOwnerId GitHubId
+  UniqueRepositry fullName
 
-  organization OrganizationId
-
-  UniqueRepository githubId
-
-  deriving Eq Show
+  deriving Show
 
 PullRequest
-  number Int
-  baseCommitSHA CommitSHA
-  headCommitSHA CommitSHA
-
-  githubId GitHubId
-
+  number PRNumber
   repository RepositoryId
 
-  UniquePullRequest githubId
+  UniquePullRequest repository number
 
-  deriving Eq Show
+  deriving Show
+
+WebhookPayload
+  createdAt UTCTime
+  updatedAt UTCTime
+  state JobState
+  installationId GitHubId
+
+  repository RepositoryId
+  pullRequest PullRequestId
+
+  deriving Show
