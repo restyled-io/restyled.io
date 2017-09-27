@@ -1,7 +1,9 @@
 resolver: lts-9.5
 packages:
 - location: .
-- location: ../../pbrisbin/haskell-jwt
+- location:
+    git: https://pbrisbin@bitbucket.org/pbrisbin/haskell-jwt.git
+    commit: 202898d8aa20ab4d4fdff3a9efb08a973ecd0bc4
   extra-dep: true
 extra-deps:
 - load-env-0.1.1

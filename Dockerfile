@@ -17,6 +17,7 @@ RUN stack install --dependencies-only
 COPY app /src/app
 COPY src /src/src
 COPY templates /src/templates
+COPY restyler /src/restyler
 
 COPY config /src/config
 COPY static /src/static
