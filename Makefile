@@ -1,8 +1,11 @@
-.PHONY: image
+RELEASE_APP      ?= restyled-io-staging
+RELEASE_REGISTRY ?= registry.heroku.com/$(RELEASE_APP)
 
-image:
+.PHONY: restyled.io
+restyled.io:
 	docker build --tag restyled.io/restyled.io .
 
-release:
-	docker tag restyled.io/restyled.io registry.heroku.com/restyled-io/web
-	docker push registry.heroku.com/restyled-io/web
+.PHONY: release
+release: restyled.io
+	docker tag restyled.io/restyled.io $(RELEASE_REGISTRY)/web
+	docker push $(RELEASE_REGISTRY)/web
