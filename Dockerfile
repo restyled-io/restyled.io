@@ -43,4 +43,4 @@ RUN useradd app
 USER app
 
 ENTRYPOINT []
-CMD ["/app/restyled"]
+CMD ["/app/restyled", "config/settings.yml"]
