@@ -9,8 +9,4 @@ host: "_env:HOST:*4" # any IPv4 host
 ip-from-header: "_env:IP_FROM_HEADER:false"
 log-level: "_env:LOG_LEVEL:info"
 mutable-static: "_env:MUTABLE_STATIC:false"
-oauth:
-  github:
-    client-id: "_env:GITHUB_CLIENT_ID"
-    client-secret: "_env:GITHUB_CLIENT_SECRET"
 port: "_env:PORT:3000"
