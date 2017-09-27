@@ -1,0 +1,75 @@
+version: 2.0
+
+jobs:
+  build_and_test:
+    docker:
+      - image: fpco/stack-build:lts
+      - image: circleci/postgres:9.4.12-alpine
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: restyled_test
+    steps:
+      - checkout
+      - restore_cache:
+          key: stack
+      - run:
+          name: Dependencies
+          command: |
+            stack setup
+            stack build --dependencies-only --test --no-run-tests
+      - run:
+          name: Build
+          command: |
+            stack build --pedantic --test --no-run-tests
+      - save_cache:
+          key: stack
+          paths:
+            - ~/.stack
+            - ./.stack-work
+      - run:
+          name: Test
+          command: stack test
+
+  deploy:
+    docker:
+      - image: docker:17.07.0-ce
+    steps:
+      - checkout
+      - setup_remote_docker:
+          exclusive: true
+          reusable: true
+          version: 17.07.0-ce
+      - run:
+          name: Dependencies
+          command: apk add --update make
+      - run:
+          name: Docker login
+          command: |
+            docker login \
+              --username="$HEROKU_EMAIL" \
+              --password="$HEROKU_API_KEY" \
+              registry.heroku.com
+      - run:
+          name: Pre-pull previous image
+          command:
+            docker pull registry.heroku.com/restyled-io-staging/web || true
+      - run:
+          name: Build Image
+          command: make restyled.io
+      - deploy:
+          name: Staging
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+
+              make release
+            fi
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build_and_test
+      - deploy:
+          requires:
+            - build_and_test
