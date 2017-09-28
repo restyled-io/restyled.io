@@ -82,6 +82,9 @@ makeFoundation appSettings = do
     -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
+    -- Output settings at startup
+    runLoggingT ($(logInfo) $ "settings " <> tshow appSettings) logFunc
+
     -- Return the foundation
     return $ mkFoundation pool
 
