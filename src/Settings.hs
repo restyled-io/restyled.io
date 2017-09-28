@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP               #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes        #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TemplateHaskell   #-}
 -- | Settings are centralized, as much as possible, into this file. This
@@ -11,7 +12,6 @@
 module Settings where
 
 import ClassyPrelude.Yesod hiding (throw)
-import Data.Aeson (withObject)
 import Database.Persist.Postgresql (PostgresConf(..))
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.PGDatabaseURL (parsePGConnectionString)
@@ -26,6 +26,7 @@ import Yesod.Default.Util
 
 import qualified Data.Text as T
 import qualified Data.ByteString.Char8 as C8
+import qualified Env as Env
 
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
@@ -49,34 +50,43 @@ instance Show AppSettings where
         , " db=[", C8.unpack $ pgConnStr appDatabaseConf, "]"
         ]
 
-instance FromJSON AppSettings where
-    parseJSON = withObject "AppSettings" $ \o -> do
-        url <- o .: "database-url"
-        connStr <- either fail return $ parsePGConnectionString url
+type EnvParser a = forall e.
+    (Env.AsUnset e, Env.AsUnread e, Env.AsEmpty e) => Env.Parser e a
 
-        appDatabaseConf <- PostgresConf
-            <$> pure connStr
-            <*> o .: "database-pool-size"
-        appRoot <- o .: "approot"
-        appHost <- fromString <$> o .: "host"
-        appPort <- o .: "port"
-        appIpFromHeader <- o .: "ip-from-header"
-        appLogLevel <- parseLogLevel <$> o .: "log-level"
-        appMutableStatic <- o .: "mutable-static"
-        appCopyright <- o .: "copyright"
-        appGitHubAppId <- o .: "github-app-id"
-        appGitHubAppKey <- o .: "github-app-key"
+loadEnvSettings :: IO AppSettings
+loadEnvSettings = Env.parse id envSettings
 
-        return AppSettings{..}
+envSettings :: EnvParser AppSettings
+envSettings = AppSettings
+    <$> envDatabaseConfig
+    <*> Env.var Env.str "APPROOT" (Env.def "http://localhost:3000")
+    <*> Env.var Env.str "HOST" (Env.def "*4")
+    <*> Env.var Env.auto "PORT" (Env.def 3000)
+    <*> Env.switch "IP_FROM_HEADER" mempty
+    <*> envLogLevel
+    <*> Env.switch "MUTABLE_STATIC" mempty
+    <*> pure "Patrick Brisbin 2017"
+    <*> (GitHubId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
+    <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
 
-      where
-        parseLogLevel :: Text -> LogLevel
-        parseLogLevel t = case T.toLower t of
-            "debug" -> LevelDebug
-            "info" -> LevelInfo
-            "warn" -> LevelWarn
-            "error" -> LevelError
-            _ -> LevelOther t
+envDatabaseConfig :: EnvParser PostgresConf
+envDatabaseConfig = PostgresConf
+    <$> (toConnStr <$> Env.var Env.nonempty "DATABASE_URL"
+            (Env.def "postgres://postgres:password@localhost:5432/restyled"))
+    <*> Env.var Env.auto "PGPOOLSIZE" (Env.def 10)
+  where
+    toConnStr = either error id . parsePGConnectionString
+
+envLogLevel :: EnvParser LogLevel
+envLogLevel = toLogLevel <$> Env.var Env.str "LOG_LEVEL" (Env.def "info")
+  where
+    toLogLevel :: Text -> LogLevel
+    toLogLevel t = case T.toLower t of
+        "debug" -> LevelDebug
+        "info" -> LevelInfo
+        "warn" -> LevelWarn
+        "error" -> LevelError
+        _ -> LevelOther t
 
 -- This value is needed in a pure context, and so can't read from ENV. It also
 -- doesn't differ between environments, so we might as well harcode it.

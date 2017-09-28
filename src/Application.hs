@@ -135,7 +135,7 @@ getApplicationDev = do
 getAppSettings :: IO AppSettings
 getAppSettings = do
     loadEnv
-    loadYamlSettings [configSettingsYml] [] useEnv
+    loadEnvSettings
 
 -- | main function for use by yesod devel
 develMain :: IO ()
@@ -144,13 +144,8 @@ develMain = develMainHelper getApplicationDev
 -- | The @main@ function for an executable running this site.
 appMain :: IO ()
 appMain = do
-    -- Get the settings from all relevant sources
-    settings <- loadYamlSettingsArgs
-        -- fall back to compile-time values, set to [] to require values at runtime
-        []
-
-        -- allow environment variables to override
-        useEnv
+    -- Get the settings from ENV
+    settings <- loadEnvSettings
 
     -- Generate the foundation from the settings
     foundation <- makeFoundation settings
