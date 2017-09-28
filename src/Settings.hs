@@ -39,6 +39,8 @@ data AppSettings = AppSettings
     , appCopyright :: Text
     , appGitHubAppId :: GitHubId
     , appGitHubAppKey :: Text
+    , appRestylerExecutable :: FilePath
+    , appProcessWebhooks :: Bool
     }
 
 instance Show AppSettings where
@@ -48,6 +50,8 @@ instance Show AppSettings where
         , " port=", show appPort
         , " root=", show appRoot
         , " db=[", C8.unpack $ pgConnStr appDatabaseConf, "]"
+        , " restyler=", appRestylerExecutable
+        , " webhooks=", show appProcessWebhooks
         ]
 
 type EnvParser a = forall e.
@@ -68,6 +72,8 @@ envSettings = AppSettings
     <*> pure "Patrick Brisbin 2017"
     <*> (GitHubId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
     <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
+    <*> Env.var Env.str "RESTYLER_EXECUTABLE" (Env.def ".stack-work/dist/x86_64-linux-nopie/Cabal-1.24.2.0/build/restyler/restyler")
+    <*> (not <$> Env.switch "DISCARD_WEBHOOKS" mempty)
 
 envDatabaseConfig :: EnvParser PostgresConf
 envDatabaseConfig = PostgresConf

@@ -6,6 +6,7 @@ module Handler.Webhooks where
 import Import
 
 import GitHub.Webhooks.PullRequest
+import Restyler
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
@@ -13,11 +14,11 @@ postWebhooksR = do
     payload <- requireJsonBody
     $(logDebug) $ "Webhook payload received: " <> tshow payload
 
-    runDB $ do
+    webhookPayloadId <- runDB $ do
         repositoryId <- findOrCreate $ toRepository payload
         pullRequestId <- findOrCreate $ toPullRequest repositoryId payload
 
-        insert_ $ WebhookPayload
+        insert $ WebhookPayload
             { webhookPayloadCreatedAt = now
             , webhookPayloadUpdatedAt = now
             , webhookPayloadState = Created
@@ -25,5 +26,8 @@ postWebhooksR = do
             , webhookPayloadRepository = repositoryId
             , webhookPayloadPullRequest = pullRequestId
             }
+
+    settings <- getsYesod appSettings
+    when (appProcessWebhooks settings) $ runRestyler settings webhookPayloadId
 
     sendResponseStatus status201 ()

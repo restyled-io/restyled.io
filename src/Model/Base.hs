@@ -86,6 +86,7 @@ newtype GitHubId = GitHubId { unGitHubId :: Int } deriving
     , FromJSON
     , PersistField
     , PersistFieldSql
+    , PathPiece
     , Show
     , ToJSON
     )
