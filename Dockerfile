@@ -26,6 +26,9 @@ COPY LICENSE /src/
 
 RUN stack install
 
+# Install actual re-formatting tools
+RUN stack install stylish-haskell
+
 # Runtime
 FROM fpco/stack-run:lts
 MAINTAINER Pat Brisbin <pbrisbin@gmail.com>
@@ -38,6 +41,9 @@ WORKDIR /app
 COPY --from=builder /root/.local/bin/restyled /app/restyled
 COPY --from=builder /src/config /app/config
 COPY --from=builder /src/static /app/static
+
+# Copy any built re-formaters
+COPY --from=builder /root/.local/bin/stylish-haskell /usr/bin/stylish-haskell
 
 RUN useradd app
 USER app
