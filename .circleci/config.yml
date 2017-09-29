@@ -61,7 +61,7 @@ jobs:
           name: Save image cache
           command: make image.save
       - save_cache:
-          key: docker-{{ .Branch }}
+          key: docker-{{ .Branch }}-{{ epoch }}
           paths:
             - /caches/restyled.io.tar
       - deploy:
