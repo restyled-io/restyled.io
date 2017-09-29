@@ -12,7 +12,10 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: stack
+          keys: stack
+            - stack-{{ .Branch }}-{{ checksum "stack.yaml" }}
+            - stack-{{ .Branch }}
+            - stack
       - run:
           name: Dependencies
           command: |
@@ -32,7 +35,7 @@ jobs:
             hlint .
             weeder .
       - save_cache:
-          key: stack
+          key: stack-{{ .Branch }}-{{ checksum "stack.yaml" }}
           paths:
             - ~/.stack
             - ./.stack-work
@@ -46,31 +49,41 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          exclusive: true
-          reusable: true
           version: 17.07.0-ce
       - run:
           name: Dependencies
           command: apk add --update make
+      - restore_cache:
+          keys:
+            - docker-{{ .Branch }}
+            - docker-master
+            - docker
+          paths:
+            - /caches/restyled.io.tar
       - run:
-          name: Docker login
+          name: Load image cache
           command: |
-            docker login \
-              --username="$HEROKU_EMAIL" \
-              --password="$HEROKU_API_KEY" \
-              registry.heroku.com
+            docker load -i /caches/restyled.io.tar || true
       - run:
-          name: Pre-pull previous image
-          command:
-            docker pull registry.heroku.com/restyled-io-staging/web || true
-      - run:
-          name: Build Image
+          name: Build image
           command: make restyled.io
+      - run:
+          name: Save image cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/restyled.io.tar restyled.io/restyled.io
+      - save_cache:
+          key: docker-{{ .Branch }}
+          paths:
+            - /caches/restyled.io.tar
       - deploy:
           name: Staging
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-
+              docker login \
+                --username="$HEROKU_EMAIL" \
+                --password="$HEROKU_API_KEY" \
+                registry.heroku.com
               make release
             fi
 
