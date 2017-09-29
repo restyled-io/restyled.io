@@ -6,8 +6,13 @@
 -- | Common handler functions.
 module Handler.Common where
 
-import Data.FileEmbed (embedFile)
 import Import
+
+import Data.FileEmbed (embedFile)
+import Development.GitRev (gitCommitDate, gitHash)
+
+getRevisionR :: Handler Text
+getRevisionR = return $ $(gitHash) <> " - " <> $(gitCommitDate)
 
 -- These handlers embed files in the executable at compile time to avoid a
 -- runtime dependency, and for efficiency.

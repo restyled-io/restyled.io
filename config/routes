@@ -1,4 +1,5 @@
 /favicon.ico FaviconR GET
+/revision RevisionR GET
 /robots.txt RobotsR GET
 /static StaticR Static appStatic
 

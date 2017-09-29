@@ -17,6 +17,7 @@ library:
   - envparse
   - fast-logger
   - file-embed
+  - gitrev
   - hjsmin
   - HTTP
   - http-client
