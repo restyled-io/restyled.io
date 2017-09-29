@@ -18,22 +18,13 @@ jobs:
             - stack
       - run:
           name: Dependencies
-          command: |
-            set -e
-            stack setup
-            stack install hlint
-            stack install weeder
-            stack build --dependencies-only --test --no-run-tests
+          command: make setup
       - run:
           name: Build
-          command: |
-            stack build --pedantic --test --no-run-tests
+          command: make build
       - run:
           name: Lint
-          command: |
-            set -e
-            hlint .
-            weeder .
+          command: make lint
       - save_cache:
           key: stack-{{ .Branch }}-{{ checksum "stack.yaml" }}
           paths:
@@ -41,7 +32,7 @@ jobs:
             - ./.stack-work
       - run:
           name: Test
-          command: stack test
+          command: make test
 
   deploy:
     docker:
@@ -62,16 +53,13 @@ jobs:
             - /caches/restyled.io.tar
       - run:
           name: Load image cache
-          command: |
-            docker load -i /caches/restyled.io.tar || true
+          command: make image.load || true
       - run:
           name: Build image
-          command: make restyled.io
+          command: make image.build
       - run:
           name: Save image cache
-          command: |
-            mkdir -p /caches
-            docker save -o /caches/restyled.io.tar restyled.io/restyled.io
+          command: make image.save
       - save_cache:
           key: docker-{{ .Branch }}
           paths:
@@ -79,12 +67,10 @@ jobs:
       - deploy:
           name: Staging
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              docker login \
-                --username="$HEROKU_EMAIL" \
-                --password="$HEROKU_API_KEY" \
-                registry.heroku.com
-              make release
+            if [ "$CIRCLE_BRANCH" = "master" ]; then
+              make image.release \
+                DOCKER_USERNAME=$HEROKU_EMAIL \
+                DOCKER_PASSWORD=$HEROKU_API_KEY
             fi
 
 workflows:
