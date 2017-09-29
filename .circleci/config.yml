@@ -16,6 +16,7 @@ jobs:
       - run:
           name: Dependencies
           command: |
+            set -e
             stack setup
             stack install hlint
             stack install weeder
@@ -27,8 +28,9 @@ jobs:
       - run:
           name: Lint
           command: |
-            hlint
-            weeder
+            set -e
+            hlint .
+            weeder .
       - save_cache:
           key: stack
           paths:
