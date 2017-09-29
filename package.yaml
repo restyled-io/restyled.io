@@ -1,68 +1,57 @@
 name:    restyled
 version: "0.0.0"
-
 dependencies:
+- base
 
-# Due to a bug in GHC 8.0.1, we block its usage
-# See: https://ghc.haskell.org/trac/ghc/ticket/12130
-- base >=4.8.2.0 && <4.9 || >=4.9.1.0 && <5
-
-# version 1.0 had a bug in reexporting Handler, causing trouble
-- classy-prelude-yesod >=0.10.2 && <1.0 || >=1.1
-
-- yesod >=1.4.3 && <1.5
-- yesod-core >=1.4.30 && <1.5
-- yesod-auth >=1.4.0 && <1.5
-- yesod-static >=1.4.0.3 && <1.6
-- yesod-form >=1.4.0 && <1.5
-- classy-prelude >=0.10.2
-- classy-prelude-conduit >=0.10.2
-- bytestring >=0.9 && <0.11
-- text >=0.11 && <2.0
-- persistent >=2.0 && <2.8
-- persistent-postgresql >=2.1.1 && <2.8
-- persistent-template >=2.0 && <2.8
-- template-haskell
-- shakespeare >=2.0 && <2.1
-- hjsmin >=0.1 && <0.3
-- monad-control >=0.3 && <1.1
-- wai-extra >=3.0 && <3.1
-- yaml >=0.8 && <0.9
-- http-conduit >=2.1 && <2.3
-- directory >=1.1 && <1.4
-- warp >=3.0 && <3.3
-- data-default
-- aeson >=0.6 && <1.3
-- conduit >=1.0 && <2.0
-- monad-logger >=0.3 && <0.4
-- fast-logger >=2.2 && <2.5
-- wai-logger >=2.2 && <2.4
-- file-embed
-- safe
-- unordered-containers
-- containers
-- vector
-- time
+- aeson
+- bytestring
 - case-insensitive
-- wai
-
+- classy-prelude
+- classy-prelude-conduit
+- classy-prelude-yesod
+- conduit
+- containers
+- data-default
+- directory
+- envparse
+- fast-logger
+- file-embed
+- hjsmin
 - HTTP
 - http-client
 - http-client-tls
+- http-conduit
 - http-types
 - jwt
 - load-env
+- monad-control
+- monad-logger
 - network-uri
+- persistent
+- persistent-postgresql
+- persistent-template
 - process
+- safe
+- shakespeare
+- template-haskell
 - temporary
-- envparse
+- text
+- time
+- unordered-containers
+- vector
+- wai
+- wai-extra
+- wai-logger
+- warp
+- yesod
+- yesod-core
+- yesod-form
+- yesod-static
 
-# The library contains all of our application code. The executable
-# defined below is just a thin wrapper.
 library:
   source-dirs: src
   when:
-  - condition: (flag(dev)) || (flag(library-only))
+  - condition: flag(dev)
     then:
       ghc-options:
       - -Wall
@@ -75,7 +64,6 @@ library:
       - -fwarn-tabs
       - -O2
 
-# Runnable executable for our application
 executables:
   restyled:
     main: main.hs
@@ -86,9 +74,6 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - restyled
-    when:
-    - condition: flag(library-only)
-      buildable: false
 
   restyler:
     main: main.hs
@@ -101,11 +86,7 @@ executables:
     - restyled
     - filepath
     - optparse-applicative
-    when:
-    - condition: flag(library-only)
-      buildable: false
 
-# Test suite
 tests:
   test:
     main: Spec.hs
@@ -113,14 +94,13 @@ tests:
     ghc-options: -Wall
     dependencies:
     - restyled
-    - hspec >=2.0.0
+    - hspec
     - hspec-expectations-lifted
     - yesod-test
 
-# Define flags used by "yesod devel" to make compilation faster
 flags:
   library-only:
-    description: Build for use with "yesod devel"
+    description: Unused, but yesod-devel passes it.
     manual: false
     default: false
   dev:
