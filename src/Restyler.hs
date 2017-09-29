@@ -16,6 +16,7 @@ data RestylerFlags = RestylerFlags
     , rfInstallationId :: GitHubId
     , rfRepository :: RepoFullName
     , rfPullRequest :: PRNumber
+    , rfRestyledRoot :: Text
     }
     deriving Show
 
@@ -26,6 +27,7 @@ toProcessFlags RestylerFlags{..} =
     , "--installation-id", unpack $ toPathPiece rfInstallationId
     , "--repository", unpack $ toPathPiece rfRepository
     , "--pull-request", unpack $ toPathPiece rfPullRequest
+    , "--restyled-root", unpack $ rfRestyledRoot
     ]
 
 runRestyler :: AppSettings -> WebhookPayloadId -> Handler ()
@@ -39,6 +41,7 @@ runRestyler AppSettings{..} webhookPayloadId = do
             <*> pure (webhookPayloadInstallationId webhookPayload)
             <*> (repositoryFullName <$> get404 (webhookPayloadRepository webhookPayload))
             <*> (pullRequestNumber <$> get404 (webhookPayloadPullRequest webhookPayload))
+            <*> pure appRoot
 
     $(logDebug) $ tshow restylerFlags
 
