@@ -14,20 +14,21 @@ postWebhooksR = do
     payload <- requireJsonBody
     $(logDebug) $ "Webhook payload received: " <> tshow payload
 
-    webhookPayloadId <- runDB $ do
-        repositoryId <- findOrCreate $ toRepository payload
-        pullRequestId <- findOrCreate $ toPullRequest repositoryId payload
+    when (pAction payload == Opened) $ do
+        webhookPayloadId <- runDB $ do
+            repositoryId <- findOrCreate $ toRepository payload
+            pullRequestId <- findOrCreate $ toPullRequest repositoryId payload
 
-        insert WebhookPayload
-            { webhookPayloadCreatedAt = now
-            , webhookPayloadUpdatedAt = now
-            , webhookPayloadState = Created
-            , webhookPayloadInstallationId = pInstallationId payload
-            , webhookPayloadRepository = repositoryId
-            , webhookPayloadPullRequest = pullRequestId
-            }
+            insert WebhookPayload
+                { webhookPayloadCreatedAt = now
+                , webhookPayloadUpdatedAt = now
+                , webhookPayloadState = Created
+                , webhookPayloadInstallationId = pInstallationId payload
+                , webhookPayloadRepository = repositoryId
+                , webhookPayloadPullRequest = pullRequestId
+                }
 
-    settings <- getsYesod appSettings
-    when (appProcessWebhooks settings) $ runRestyler settings webhookPayloadId
+        settings <- getsYesod appSettings
+        when (appProcessWebhooks settings) $ runRestyler settings webhookPayloadId
 
     sendResponseStatus status201 ()
