@@ -6,14 +6,17 @@ module Restyler.Main
     ( restylerMain
     ) where
 
-import ClassyPrelude.Yesod
+import ClassyPrelude
 
 import GitHub.Client
 import GitHub.Model
 import Restyler.Clone
-import Restyler.Formatters
+import Restyler.Config
 import Restyler.Options
 import Settings (fromTextTemplate, renderTextUrl, textFile)
+import System.Exit (die)
+import System.Process (callProcess)
+import Yesod.Core (PathPiece(..))
 
 restylerMain :: IO ()
 restylerMain = do
@@ -29,13 +32,17 @@ restylerMain = do
 
     withinClonedRepo (remoteURL accessToken oRepoFullName) $ do
         checkoutBranch False hBranch
-        paths <- changedPaths bBranch
+        Config{..} <- either die return =<< loadConfig
 
-        checkoutBranch True rBranch
-        runFormatters paths
+        when cEnabled $ do
+            paths <- changedPaths bBranch
+            checkoutBranch True rBranch
 
-        commitAll "Restyled"
-        pushOrigin rBranch
+            for_ cRestylers $ \r@Restyler{..} ->
+                callProcess rCommand $ rArguments ++ restylePaths r paths
+
+            commitAll "Restyled"
+            pushOrigin rBranch
 
     pr <- createPullRequest accessToken oRepoFullName rTitle hBranch rBranch
     void $ createComment accessToken oRepoFullName oPullRequestNumber $ commentBody oRestyledRoot pr

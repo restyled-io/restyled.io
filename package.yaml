@@ -7,6 +7,8 @@ dependencies:
 
 library:
   dependencies:
+  - Glob
+  - HTTP
   - aeson
   - bytestring
   - case-insensitive
@@ -18,10 +20,8 @@ library:
   - envparse
   - fast-logger
   - file-embed
-  - filepath
   - gitrev
   - hjsmin
-  - HTTP
   - http-client
   - http-client-tls
   - http-conduit
@@ -48,6 +48,7 @@ library:
   - wai-extra
   - wai-logger
   - warp
+  - yaml
   - yesod
   - yesod-core
   - yesod-form
@@ -97,11 +98,14 @@ tests:
     - restyled
     - bytestring
     - classy-prelude
+    - directory
     - hspec
     - hspec-expectations-lifted
     - load-env
     - persistent
     - shakespeare
+    - temporary
+    - text
     - yesod-core
     - yesod-test
 
