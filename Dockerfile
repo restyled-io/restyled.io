@@ -39,6 +39,7 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY --from=builder /root/.local/bin/restyled.io /app/restyled.io
+COPY --from=builder /root/.local/bin/restyler /app/restyler
 COPY --from=builder /src/config /app/config
 COPY --from=builder /src/static /app/static
 
