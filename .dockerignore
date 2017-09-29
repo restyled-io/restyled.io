@@ -1,7 +1,13 @@
 *.cabal
+*.md
+.circleci/
 .dockerignore
 .git
 .stack-work
 Dockerfile
 Makefile
+fixtures
+tags
+test
+tools
 yesod-devel
