@@ -26,11 +26,12 @@ import ClassyPrelude
 
 import GitHub.Client
 import GitHub.Model
-import System.Process (callProcess)
+import System.Process (callProcess, readProcess)
 import Yesod.Core (PathPiece(..))
 
 import Restyler.Clone
 import Restyler.Options
+import Restyler.Formatters
 
 main :: IO ()
 main = do
@@ -40,19 +41,26 @@ main = do
     pullRequest <- getPullRequest accessToken oRepoFullName oPullRequestNumber
 
     -- N.B. our Base is the source PR's Head
-    let bBranch = rrRef $ prHead pullRequest
+    let branch = rrRef $ prBase pullRequest
+        bBranch = rrRef $ prHead pullRequest
         hBranch = bBranch <> "-restyled"
+        branchName = unpack $ unBranch branch
         bBranchName = unpack $ unBranch bBranch
         hBranchName = unpack $ unBranch hBranch
         restyledPRTitle = prTitle pullRequest <> " (Restyled)"
 
     wasRestyled <- withinClonedRepo accessToken oRepoFullName $ do
+        -- Is there a Haskell libgit2 binding?
         callProcess "git" ["checkout", bBranchName]
         callProcess "git" ["checkout", "-b", hBranchName]
 
-        -- For now, the Null Restyler
-        callProcess "sh" ["-c", "printf \"%s\\n\" \"\" \"zomg restyled\" >> Demo.hs"]
+        changedPaths <- lines
+            <$> readProcess "git" ["diff", "--name-only", branchName] ""
 
+        putStrLn $ "Running formatters on " <> tshow changedPaths
+        runFormatters changedPaths
+
+        -- N.B. this fails if there's nothing to commit
         callProcess "git" ["commit", "-am", "Restyled"]
         callProcess "git" ["push", "-u", "origin", hBranchName]
         return True

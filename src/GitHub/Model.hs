@@ -48,6 +48,7 @@ instance FromJSON RepoRef where
 data PullRequest = PullRequest
     { prNumber :: PRNumber
     , prTitle :: PRTitle
+    , prBase :: RepoRef
     , prHead :: RepoRef
     }
     deriving Show
@@ -56,6 +57,7 @@ instance FromJSON PullRequest where
     parseJSON = withObject "GitHub.PullRequest" $ \o -> PullRequest
         <$> o .: "number"
         <*> o .: "title"
+        <*> o .: "base"
         <*> o .: "head"
 
 data Comment = Comment

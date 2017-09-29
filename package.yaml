@@ -99,6 +99,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - restyled
+    - filepath
     - optparse-applicative
     when:
     - condition: flag(library-only)
