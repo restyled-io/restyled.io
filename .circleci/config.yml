@@ -44,26 +44,26 @@ jobs:
       - run:
           name: Dependencies
           command: apk add --update make
-      - restore_cache:
-          keys:
-            - docker-{{ .Branch }}
-            - docker-master
-            - docker
-          paths:
-            - /caches/restyled.io.tar
-      - run:
-          name: Load image cache
-          command: make image.load || true
+      # - restore_cache:
+      #     keys:
+      #       - docker-{{ .Branch }}
+      #       - docker-master
+      #       - docker
+      #     paths:
+      #       - /caches/restyled.io.tar
+      # - run:
+      #     name: Load image cache
+      #     command: make image.load || true
       - run:
           name: Build image
           command: make image.build
-      - run:
-          name: Save image cache
-          command: make image.save
-      - save_cache:
-          key: docker-{{ .Branch }}-{{ epoch }}
-          paths:
-            - /caches/restyled.io.tar
+      # - run:
+      #     name: Save image cache
+      #     command: make image.save
+      # - save_cache:
+      #     key: docker-{{ .Branch }}-{{ epoch }}
+      #     paths:
+      #       - /caches/restyled.io.tar
       - deploy:
           name: Staging
           command: |
