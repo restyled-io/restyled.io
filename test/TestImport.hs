@@ -13,10 +13,10 @@ import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool, rawEx
 import Foundation            as X
 import LoadEnv               (loadEnvFrom)
 import Model                 as X
+import Settings              (loadEnvSettings)
 import Test.Hspec.Lifted     as X
 import Text.Shakespeare.Text (st)
 import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
-import Yesod.Default.Config2 (useEnv, loadYamlSettings)
 import Yesod.Test            as X
 
 runDB :: SqlPersistM a -> YesodExample App a
@@ -35,10 +35,7 @@ runHandler handler = do
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
     loadEnvFrom ".env.test"
-    settings <- loadYamlSettings
-        ["config/settings.yml"]
-        []
-        useEnv
+    settings <- loadEnvSettings
     foundation <- makeFoundation settings
     wipeDB foundation
     logWare <- liftIO $ makeLogWare foundation
