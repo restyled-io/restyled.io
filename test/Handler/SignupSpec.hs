@@ -16,7 +16,7 @@ spec = withApp $ do
                 addToken
                 byLabel "" "pbrisbin@gmail.com"
 
-            void $ followRedirect
+            void followRedirect
             htmlAnyContain "#message" "Thank you"
 
             emails <- map (signupEmail . entityVal) <$> runDB (selectList [] [])

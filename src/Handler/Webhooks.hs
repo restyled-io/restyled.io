@@ -10,7 +10,7 @@ import Restyler
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
-    now <- liftIO $ getCurrentTime
+    now <- liftIO getCurrentTime
     payload <- requireJsonBody
     $(logDebug) $ "Webhook payload received: " <> tshow payload
 
@@ -18,7 +18,7 @@ postWebhooksR = do
         repositoryId <- findOrCreate $ toRepository payload
         pullRequestId <- findOrCreate $ toPullRequest repositoryId payload
 
-        insert $ WebhookPayload
+        insert WebhookPayload
             { webhookPayloadCreatedAt = now
             , webhookPayloadUpdatedAt = now
             , webhookPayloadState = Created

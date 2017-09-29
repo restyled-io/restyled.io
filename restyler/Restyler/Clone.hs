@@ -19,7 +19,7 @@ withinClonedRepo accessToken repoFullName act = withinTemporaryDirectory $ do
     withCurrentDirectory "repo" act
 
 withinTemporaryDirectory :: IO a -> IO a
-withinTemporaryDirectory act = withSystemTempDirectory "" $ \dir -> do
+withinTemporaryDirectory act = withSystemTempDirectory "" $ \dir ->
     withCurrentDirectory dir act
 
 remoteURL :: AccessToken -> RepoFullName -> Text

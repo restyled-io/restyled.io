@@ -90,7 +90,7 @@ createComment accessToken repoFullName pullRequestNumber body = do
 
 getGitHub :: FromJSON a => Authorization -> Text -> IO a
 getGitHub auth p = do
-    request' <- parseRequest $ "https://api.github.com"
+    request' <- parseRequest "https://api.github.com"
 
     let request = request'
             { path = encodeUtf8 p
@@ -101,12 +101,12 @@ getGitHub auth p = do
 
 postGitHub :: (FromJSON a, ToJSON b) => Authorization -> Text -> Maybe b -> IO a
 postGitHub auth p mbody = do
-    request' <- parseRequest $ "https://api.github.com"
+    request' <- parseRequest "https://api.github.com"
 
     let request = request'
             { method = "POST"
             , path = encodeUtf8 p
-            , requestBody = RequestBodyLBS $ maybe "" encode $ mbody
+            , requestBody = RequestBodyLBS $ maybe "" encode mbody
             , requestHeaders = authorizationHeader auth : defaultHeaders
             }
 
@@ -124,7 +124,7 @@ requestJSON request = do
             , "Error message: " ++ e
             , ""
             ]
-        ) id $ eitherDecode $ body
+        ) id $ eitherDecode body
 
 defaultHeaders :: [Header]
 defaultHeaders =

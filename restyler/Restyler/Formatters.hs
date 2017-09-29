@@ -25,6 +25,5 @@ formatters =
     ]
 
 runFormatters :: [FilePath] -> IO ()
-runFormatters paths = do
-    forM_ formatters $ \Formatter{..} -> do
-        callProcess fExecutable $ fArguments ++ filter fFilter paths
+runFormatters paths = forM_ formatters $ \Formatter{..} ->
+    callProcess fExecutable $ fArguments ++ filter fFilter paths

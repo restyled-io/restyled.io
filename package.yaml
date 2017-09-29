@@ -63,7 +63,7 @@ library:
       - -O2
 
 executables:
-  restyled:
+  restyled.io:
     main: main.hs
     source-dirs: app
     ghc-options:

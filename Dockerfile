@@ -38,7 +38,7 @@ ENV LANG en_US.UTF-8
 RUN mkdir -p /app
 WORKDIR /app
 
-COPY --from=builder /root/.local/bin/restyled /app/restyled
+COPY --from=builder /root/.local/bin/restyled.io /app/restyled.io
 COPY --from=builder /src/config /app/config
 COPY --from=builder /src/static /app/static
 
@@ -49,4 +49,4 @@ RUN useradd app
 USER app
 
 ENTRYPOINT []
-CMD ["/app/restyled"]
+CMD ["/app/restyled.io"]

@@ -17,7 +17,7 @@ jobs:
           name: Dependencies
           command: |
             stack setup
-            #stack install hlint
+            stack install hlint
             stack install weeder
             stack build --dependencies-only --test --no-run-tests
       - run:
@@ -27,7 +27,7 @@ jobs:
       - run:
           name: Lint
           command: |
-            #hlint
+            hlint
             weeder
       - save_cache:
           key: stack

@@ -27,7 +27,7 @@ toProcessFlags RestylerFlags{..} =
     , "--installation-id", unpack $ toPathPiece rfInstallationId
     , "--repository", unpack $ toPathPiece rfRepository
     , "--pull-request", unpack $ toPathPiece rfPullRequest
-    , "--restyled-root", unpack $ rfRestyledRoot
+    , "--restyled-root", unpack rfRestyledRoot
     ]
 
 runRestyler :: AppSettings -> WebhookPayloadId -> Handler ()

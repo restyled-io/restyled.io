@@ -20,37 +20,37 @@ data Options = Options
 
 options :: Parser Options
 options = Options
-    <$> (GitHubId <$> (option auto
+    <$> (GitHubId <$> option auto
         (  long "github-app-id"
         <> metavar "ID"
         <> help "GitHub App Id"
-        )))
+        ))
     <*> (pack <$> strOption
         (  long "github-app-key"
         <> metavar "KEY"
         <> help "GitHub App Key"
         ))
-    <*> (GitHubId <$> (option auto
+    <*> (GitHubId <$> option auto
         (  long "installation-id"
         <> metavar "ID"
         <> help "Installation Id"
-        )))
-    <*> (RepoFullName . pack <$> (strOption
+        ))
+    <*> (RepoFullName . pack <$> strOption
         (  long "repository"
         <> metavar "OWNER/NAME"
         <> help "Repository"
-        )))
-    <*> (PRNumber <$> (option auto
+        ))
+    <*> (PRNumber <$> option auto
         (  long "pull-request"
         <> metavar "NUMBER"
         <> help "Pull Request"
-        )))
-    <*> (pack <$> (strOption
+        ))
+    <*> (pack <$> strOption
         (  long "restyled-root"
         <> metavar "URL"
         <> help "Root for restyled.io"
         <> value "https://restyled.io"
-        )))
+        ))
 
 parseOptions :: IO Options
 parseOptions = execParser $ info (options <**> helper)

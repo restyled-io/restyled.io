@@ -34,7 +34,7 @@ spec = withApp $ do
             webhookPayloadRepository `shouldBe` repositoryId
 
         it "finds an existing Repository by full name" $ do
-            repositoryId <- runDB $ insert $ Repository
+            repositoryId <- runDB $ insert Repository
                 { repositoryFullName = "restyled-io/demo"
                 }
 
@@ -53,10 +53,10 @@ spec = withApp $ do
             webhookPayloadPullRequest `shouldBe` pullRequestId
 
         it "finds an existing PullRequest by repository and number" $ do
-            repositoryId <- runDB $ insert $ Repository
+            repositoryId <- runDB $ insert Repository
                 { repositoryFullName = "restyled-io/demo"
                 }
-            pullRequestId <- runDB $ insert $ PullRequest
+            pullRequestId <- runDB $ insert PullRequest
                 { pullRequestNumber = PRNumber 1
                 , pullRequestRepository = repositoryId
                 }
