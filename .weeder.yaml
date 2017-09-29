@@ -1,0 +1,9 @@
+- package:
+  - name: jwt
+- package:
+  - name: restyled
+  - section:
+    - name: exe:restyled.io
+    - message:
+      - name: Module not compiled
+      - module: DevelMain

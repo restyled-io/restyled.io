@@ -1,14 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Handler.DocsSpec
-  ( main
-  , spec
-  ) where
+module Handler.DocsSpec (spec) where
 
 import TestImport
-
-main :: IO ()
-main = hspec spec
 
 spec :: Spec
 spec = withApp $ describe "Docs" $ it "loads" $ do

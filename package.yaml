@@ -1,54 +1,52 @@
 name:    restyled
 version: "0.0.0"
-dependencies:
-- base
 
-- aeson
-- bytestring
-- case-insensitive
-- classy-prelude
-- classy-prelude-conduit
-- classy-prelude-yesod
-- conduit
-- containers
-- data-default
-- directory
-- envparse
-- fast-logger
-- file-embed
-- hjsmin
-- HTTP
-- http-client
-- http-client-tls
-- http-conduit
-- http-types
-- jwt
-- load-env
-- monad-control
-- monad-logger
-- network-uri
-- persistent
-- persistent-postgresql
-- persistent-template
-- process
-- safe
-- shakespeare
-- template-haskell
-- temporary
-- text
-- time
-- unordered-containers
-- vector
-- wai
-- wai-extra
-- wai-logger
-- warp
-- yesod
-- yesod-core
-- yesod-form
-- yesod-static
+# Dependencies shared in *all* targets
+dependencies:
+  - base
 
 library:
+  dependencies:
+  - aeson
+  - bytestring
+  - case-insensitive
+  - classy-prelude
+  - classy-prelude-yesod
+  - conduit
+  - containers
+  - envparse
+  - fast-logger
+  - file-embed
+  - hjsmin
+  - HTTP
+  - http-client
+  - http-client-tls
+  - http-conduit
+  - http-types
+  - jwt
+  - load-env
+  - monad-control
+  - monad-logger
+  - network-uri
+  - persistent
+  - persistent-postgresql
+  - persistent-template
+  - process
+  - safe
+  - shakespeare
+  - template-haskell
+  - text
+  - time
+  - unordered-containers
+  - vector
+  - wai
+  - wai-extra
+  - wai-logger
+  - warp
+  - yesod
+  - yesod-core
+  - yesod-form
+  - yesod-static
   source-dirs: src
   when:
   - condition: flag(dev)
@@ -84,8 +82,13 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - restyled
+    - classy-prelude
+    - directory
     - filepath
     - optparse-applicative
+    - process
+    - temporary
+    - yesod-core # PathPiece(..)
 
 tests:
   test:
@@ -94,8 +97,14 @@ tests:
     ghc-options: -Wall
     dependencies:
     - restyled
+    - bytestring
+    - classy-prelude
     - hspec
     - hspec-expectations-lifted
+    - load-env
+    - persistent
+    - shakespeare
+    - yesod-core
     - yesod-test
 
 flags:

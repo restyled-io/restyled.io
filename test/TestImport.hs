@@ -2,7 +2,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 module TestImport
-    ( module TestImport
+    ( runDB
+    , withApp
     , module X
     ) where
 
@@ -16,7 +17,6 @@ import Model                 as X
 import Settings              (loadEnvSettings)
 import Test.Hspec.Lifted     as X
 import Text.Shakespeare.Text (st)
-import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
 import Yesod.Test            as X
 
 runDB :: SqlPersistM a -> YesodExample App a
@@ -26,11 +26,6 @@ runDB query = do
 
 runDBWithApp :: App -> SqlPersistM a -> IO a
 runDBWithApp app query = runSqlPersistMPool query (appConnPool app)
-
-runHandler :: Handler a -> YesodExample App a
-runHandler handler = do
-    app <- getTestYesod
-    fakeHandlerGetLogger appLogger app handler
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do

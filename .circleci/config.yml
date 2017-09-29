@@ -17,11 +17,18 @@ jobs:
           name: Dependencies
           command: |
             stack setup
+            #stack install hlint
+            stack install weeder
             stack build --dependencies-only --test --no-run-tests
       - run:
           name: Build
           command: |
             stack build --pedantic --test --no-run-tests
+      - run:
+          name: Lint
+          command: |
+            #hlint
+            weeder
       - save_cache:
           key: stack
           paths:
