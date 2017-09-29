@@ -42,14 +42,26 @@ image.load:
 
 .PHONY: image.build
 image.build:
+	# Annoyingly, we have to build and save the pre-stages distinctly in
+	# order for the layer caching to work on subsequent builds.
+	#
+	# See https://github.com/moby/moby/issues/34715.
+	#
+	docker build \
+	  --cache-from "$(LOCAL_IMAGE)-builder" \
+	  --target builder \
+	  --tag "$(LOCAL_IMAGE)-builder" .
 	docker build \
 	  --cache-from "$(LOCAL_IMAGE)" \
+	  --cache-from "$(LOCAL_IMAGE)-builder" \
 	  --tag "$(LOCAL_IMAGE)" .
 
 .PHONY: image.save
 image.save:
 	mkdir -p "$(IMAGE_CACHE_DIR)"
-	docker save --output "$(IMAGE_CACHE_NAME)" "$(LOCAL_IMAGE)"
+	docker save --output "$(IMAGE_CACHE_NAME)" \
+	  "$(LOCAL_IMAGE)" \
+	  "$(LOCAL_IMAGE)-builder"
 
 .PHONY: image.release
 image.release:
