@@ -11,8 +11,14 @@ import Import
 import Data.FileEmbed (embedFile)
 import Development.GitRev (gitCommitDate, gitHash)
 
-getRevisionR :: Handler Text
-getRevisionR = return $ $(gitHash) <> " - " <> $(gitCommitDate)
+getRevisionR :: Handler TypedContent
+getRevisionR = TypedContent typePlain . toContent <$> readRevision
+  where
+    -- We add a static config/revision in docker builds, but want to fall back
+    -- to dynamic git operation sin develompent
+    readRevision = either
+        (\_ -> $(gitHash) <> " - " <> $(gitCommitDate))
+        decodeUtf8 <$> tryIO (readFile "config/revision")
 
 -- These handlers embed files in the executable at compile time to avoid a
 -- runtime dependency, and for efficiency.

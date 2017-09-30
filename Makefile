@@ -5,6 +5,9 @@ RELEASE_APP      ?= restyled-io-staging
 RELEASE_REGISTRY ?= registry.heroku.com
 RELEASE_IMAGE    ?= $(RELEASE_REGISTRY)/$(RELEASE_APP)/web
 
+# https://stackoverflow.com/questions/19232784/how-to-correctly-escape-sign-when-using-pattern-rules-and-patsubst-in-gnu-ma
+PERCENT = %
+
 all: resetdb setup build lint test
 
 .PHONY: resetdb
@@ -33,10 +36,18 @@ lint:
 test:
 	stack test
 
+.PHONY:
+config/revision:
+	printf "$(PERCENT)s - $(PERCENT)s\n" \
+	  "$$(git rev-parse HEAD)" \
+	  "$$(git log HEAD -1 --format="$(PERCENT)cd")" \
+	  > config/revision
 
 .PHONY: image.build
-image.build:
+image.build: config/revision
 	docker build --tag "$(LOCAL_IMAGE)" .
+	@# cleanup, in case we're testing locally
+	@$(RM) config/revision
 
 .PHONY: image.release
 image.release:
