@@ -5,7 +5,12 @@ module Handler.Docs where
 
 import Import
 
+import Helpers.Markdown
+
 getDocsR :: Handler Html
-getDocsR = defaultLayout $ do
-    setTitle "Restyled - Documentation"
-    $(widgetFile "docs")
+getDocsR = do
+    urlRender <- getUrlRender
+
+    defaultLayout $ do
+        setTitle "Restyled - Documentation"
+        markdownFromTemplate $(textFile "templates/docs.md") urlRender

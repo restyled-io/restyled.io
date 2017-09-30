@@ -29,12 +29,14 @@ library:
   - monad-control
   - monad-logger
   - network-uri
+  - pandoc
   - persistent
   - persistent-postgresql
   - persistent-template
   - process
   - safe
   - shakespeare
+  - skylighting
   - template-haskell
   - text
   - time
