@@ -43,7 +43,7 @@ jobs:
           version: 17.07.0-ce
       - run:
           name: Dependencies
-          command: apk add --update make
+          command: apk add --update git make
       # N.B. no caching because it's too large. we just have to wait.
       - run:
           name: Build image
