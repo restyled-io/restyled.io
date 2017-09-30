@@ -9,10 +9,11 @@ module Helpers.Markdown
 
 import Import
 
+import Language.Haskell.TH.Syntax (Exp, Q)
 import Skylighting
 import Text.Pandoc
-import Text.Shakespeare.Text (textFile)
 import qualified Data.Text.Internal.Builder as TB
+import qualified Text.Shakespeare.Text as ST
 
 markdownFromTemplate :: (render -> TB.Builder) -> render -> Widget
 markdownFromTemplate t r = markdownToWidget $ toStrict $ TB.toLazyText $ t r
@@ -25,17 +26,14 @@ markdownToWidget t = do
     toWidgetHead $ [hamlet|<style>#{css}|]
     toWidget $ [hamlet|#{html}|]
 
-
 markdownToHtml :: Text -> Text
 markdownToHtml = pack
-    . writeHtmlString def
-        { writerHighlight = True
-        --, writerSectionDivs = True
-        }
-    . transformPandoc
+    . writeHtmlString def { writerHighlight = True }
     . handleError
-    . readMarkdown def
+    . readMarkdown def -- { readerExtensions = githubMarkdownExtensions }
     . unpack
 
-transformPandoc :: Pandoc -> Pandoc
-transformPandoc p = traceShowId p
+textFile :: FilePath -> Q Exp
+textFile = ST.textFile
+-- ^ if this works, then why doesn't this work?
+--textFile = if development then ST.textFileReload else ST.textFile
