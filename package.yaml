@@ -88,7 +88,9 @@ executables:
     - filepath
     - optparse-applicative
     - process
+    - shakespeare
     - temporary
+    - text
     - yesod-core # PathPiece(..)
 
 tests:
