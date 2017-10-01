@@ -7,47 +7,28 @@ module Restyler
 
 import Import
 
+import GitHub.Model
+import GitHub.Webhooks.PullRequest
 import System.Exit (ExitCode(..))
 import System.Process (readProcessWithExitCode)
 
-data RestylerFlags = RestylerFlags
-    { rfGitHubAppId :: GitHubId
-    , rfGitHubAppKey :: Text
-    , rfInstallationId :: GitHubId
-    , rfRepository :: RepoFullName
-    , rfPullRequest :: PRNumber
-    , rfRestyledRoot :: Text
-    }
-    deriving Show
-
-toProcessFlags :: RestylerFlags -> [String]
-toProcessFlags RestylerFlags{..} =
-    [ "--github-app-id", unpack $ toPathPiece rfGitHubAppId
-    , "--github-app-key", unpack rfGitHubAppKey
-    , "--installation-id", unpack $ toPathPiece rfInstallationId
-    , "--repository", unpack $ toPathPiece rfRepository
-    , "--pull-request", unpack $ toPathPiece rfPullRequest
-    , "--restyled-root", unpack rfRestyledRoot
-    ]
-
-runRestyler :: AppSettings -> WebhookPayloadId -> Handler ()
-runRestyler AppSettings{..} webhookPayloadId = do
-    restylerFlags <- runDB $ do
-        webhookPayload <- get404 webhookPayloadId
-
-        RestylerFlags
-            <$> pure appGitHubAppId
-            <*> pure appGitHubAppKey
-            <*> pure (webhookPayloadInstallationId webhookPayload)
-            <*> (repositoryFullName <$> get404 (webhookPayloadRepository webhookPayload))
-            <*> (pullRequestNumber <$> get404 (webhookPayloadPullRequest webhookPayload))
-            <*> pure appRoot
+runRestyler :: AppSettings -> Payload -> Handler ()
+runRestyler AppSettings{..} Payload{..} = do
+    let restylerFlags =
+            [ "--github-app-id", unpack $ toPathPiece appGitHubAppId
+            , "--github-app-key", unpack appGitHubAppKey
+            , "--installation-id", unpack $ toPathPiece pInstallationId
+            , "--repository", unpack $ toPathPiece $ rFullName pRepository
+            , "--pull-request", unpack $ toPathPiece $ prNumber pPullRequest
+            , "--restyled-root", unpack appRoot
+            ]
 
     $(logDebug) $ tshow restylerFlags
 
     (ec, out, err) <- liftIO $
-        readProcessWithExitCode
-        appRestylerExecutable (toProcessFlags restylerFlags) ""
+        -- For now we just call the process in-request. The plan is to serialize
+        -- the CLI flags (or the Settings+Payload) onto a queue to a backend.
+        readProcessWithExitCode appRestylerExecutable restylerFlags ""
 
     case ec of
         ExitSuccess -> $(logDebug) $ pack $ unlines
