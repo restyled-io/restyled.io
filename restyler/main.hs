@@ -1,25 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
--- |
---
--- Example:
---
--- > stack exec restyler -- \
--- >   --github-app-id 5355 \
--- >   --github-app-key "$(cat ~/downloads/restyled-io-development.2017-09-19.private-key.pem)" \
--- >   --installation-id 54123 \
--- >   --repository restyled-io/demo \
--- >   --pull-request 1
---
--- 1. Clone the repo, authenticating as a GitHub App
--- 2. Checkout the head branch of the PR
--- 3. Checkout a -restyled branch
--- 4. "Restyle" the code
--- 5. Commit and push
--- 6. Open PR with -restyled branch
--- 7. Comment on original PR, linking to restyled PR
---
 module Main (main) where
 
 import ClassyPrelude
@@ -45,25 +26,17 @@ main = do
         hBranch = bBranch <> "-restyled"
         restyledPRTitle = prTitle pullRequest <> " (Restyled)"
 
-    wasRestyled <- withinClonedRepo (remoteURL accessToken oRepoFullName) $ do
+    withinClonedRepo (remoteURL accessToken oRepoFullName) $ do
         checkoutBranch False bBranch
         checkoutBranch True hBranch
 
-        paths <- changedPaths branch
-        putStrLn $ "Running formatters on " <> tshow paths
-        runFormatters paths
+        runFormatters =<< changedPaths branch
 
         commitAll "Restyled"
         pushOrigin hBranch
-        return True
 
-    when wasRestyled $ do
-        pr <- createPullRequest accessToken oRepoFullName restyledPRTitle bBranch hBranch
-        void $ createComment accessToken oRepoFullName oPullRequestNumber $ commentBody oRestyledRoot pr
-
-        putStrLn $ "Restyled Pull Request: https://github.com/"
-            <> toPathPiece oRepoFullName <> "/pull/"
-            <> toPathPiece (prNumber pr)
+    pr <- createPullRequest accessToken oRepoFullName restyledPRTitle bBranch hBranch
+    void $ createComment accessToken oRepoFullName oPullRequestNumber $ commentBody oRestyledRoot pr
 
 commentBody :: Text -> PullRequest -> Text
 commentBody root pullRequest = unlines
