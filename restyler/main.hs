@@ -30,9 +30,10 @@ main = do
 
     withinClonedRepo (remoteURL accessToken oRepoFullName) $ do
         checkoutBranch False hBranch
-        checkoutBranch True rBranch
+        paths <- changedPaths bBranch
 
-        runFormatters =<< changedPaths bBranch
+        checkoutBranch True rBranch
+        runFormatters paths
 
         commitAll "Restyled"
         pushOrigin rBranch
