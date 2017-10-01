@@ -49,7 +49,7 @@ main = do
         hBranchName = unpack $ unBranch hBranch
         restyledPRTitle = prTitle pullRequest <> " (Restyled)"
 
-    wasRestyled <- withinClonedRepo accessToken oRepoFullName $ do
+    wasRestyled <- withinClonedRepo (remoteURL accessToken oRepoFullName) $ do
         -- Is there a Haskell libgit2 binding?
         callProcess "git" ["checkout", bBranchName]
         callProcess "git" ["checkout", "-b", hBranchName]
@@ -90,3 +90,8 @@ commentBody root pullRequest = unlines
     , "Thanks,"
     , "[Restyled.io](" <> root <> ")"
     ]
+
+remoteURL :: AccessToken -> RepoFullName -> Text
+remoteURL accessToken repoFullName = "https://x-access-token:"
+    <> atToken accessToken <> "@github.com/"
+    <> toPathPiece repoFullName <> ".git"
