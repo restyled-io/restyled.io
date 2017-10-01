@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
 -- |
 --
 -- Example:
@@ -28,6 +29,10 @@ import GitHub.Client
 import GitHub.Model
 import System.Process (callProcess, readProcess)
 import Yesod.Core (PathPiece(..))
+
+import Data.Text.Internal.Builder (toLazyText)
+--import Data.Text.Lazy (toStrict)
+import Text.Shakespeare.Text (renderTextUrl, textFile)
 
 import Restyler.Clone
 import Restyler.Options
@@ -74,19 +79,5 @@ main = do
             <> toPathPiece (prNumber pr)
 
 commentBody :: Text -> PullRequest -> Text
-commentBody root pullRequest = unlines
-    [ "Hi there!"
-    , ""
-    , "I just wanted to let you know that some code in this PR might not match"
-        <> " the team's preferred styles. This process isn't perfect, but when"
-        <> " we ran some auto-reformatting tools on it there were differences."
-        <> " Those differences can be seen in #"
-        <> toPathPiece (prNumber pullRequest) <> "."
-        <> " To incorporate the changes, merge that PR into yours."
-    , ""
-    , "Sorry if this was unexpected. To disable it, see our"
-        <> " [documentation](" <> root <> "/docs#disable)."
-    , ""
-    , "Thanks,"
-    , "[Restyled.io](" <> root <> ")"
-    ]
+commentBody root pullRequest = toStrict $ toLazyText
+    $ $(textFile "templates/restyled-comment.md") renderTextUrl

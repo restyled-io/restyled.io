@@ -16,12 +16,7 @@ import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.PGDatabaseURL (parsePGConnectionString)
 import Network.Wai.Handler.Warp (HostPreference)
 import Model.Base
-import Yesod.Default.Util
-#if DEVELOPMENT
-    (widgetFileReload)
-#else
-    (widgetFileNoReload)
-#endif
+import Yesod.Default.Util (widgetFileNoReload, widgetFileReload)
 
 import qualified Data.Text as T
 import qualified Data.ByteString.Char8 as C8
@@ -102,10 +97,12 @@ allowsLevel :: AppSettings -> LogLevel -> Bool
 allowsLevel AppSettings{..} = (>= appLogLevel)
 
 widgetFile :: String -> Q Exp
-widgetFile =
+widgetFile = (if development then widgetFileReload else widgetFileNoReload) def
+
+development :: Bool
+development =
 #if DEVELOPMENT
-    widgetFileReload
+    True
 #else
-    widgetFileNoReload
+    False
 #endif
-    def

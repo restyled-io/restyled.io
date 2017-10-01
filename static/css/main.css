@@ -1,3 +1,8 @@
 footer {
   text-align: center;
 }
+
+/* Apply our body > * margin to pandoc-wrapped source code */
+body > * > pre {
+  margin: 0 auto;
+}
