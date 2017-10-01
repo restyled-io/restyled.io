@@ -26,7 +26,6 @@ import ClassyPrelude
 
 import GitHub.Client
 import GitHub.Model
-import System.Process (callProcess, readProcess)
 import Yesod.Core (PathPiece(..))
 
 import Restyler.Clone
@@ -44,25 +43,18 @@ main = do
     let branch = rrRef $ prBase pullRequest
         bBranch = rrRef $ prHead pullRequest
         hBranch = bBranch <> "-restyled"
-        branchName = unpack $ unBranch branch
-        bBranchName = unpack $ unBranch bBranch
-        hBranchName = unpack $ unBranch hBranch
         restyledPRTitle = prTitle pullRequest <> " (Restyled)"
 
     wasRestyled <- withinClonedRepo (remoteURL accessToken oRepoFullName) $ do
-        -- Is there a Haskell libgit2 binding?
-        callProcess "git" ["checkout", bBranchName]
-        callProcess "git" ["checkout", "-b", hBranchName]
+        checkoutBranch False bBranch
+        checkoutBranch True hBranch
 
-        changedPaths <- lines
-            <$> readProcess "git" ["diff", "--name-only", branchName] ""
+        paths <- changedPaths branch
+        putStrLn $ "Running formatters on " <> tshow paths
+        runFormatters paths
 
-        putStrLn $ "Running formatters on " <> tshow changedPaths
-        runFormatters changedPaths
-
-        -- N.B. this fails if there's nothing to commit
-        callProcess "git" ["commit", "-am", "Restyled"]
-        callProcess "git" ["push", "-u", "origin", hBranchName]
+        commitAll "Restyled"
+        pushOrigin hBranch
         return True
 
     when wasRestyled $ do
