@@ -23,22 +23,21 @@ main = do
     accessToken <- createAccessToken jwt oInstallationId
     pullRequest <- getPullRequest accessToken oRepoFullName oPullRequestNumber
 
-    -- N.B. our Base is the source PR's Head
-    let branch = rrRef $ prBase pullRequest
-        bBranch = rrRef $ prHead pullRequest
-        hBranch = bBranch <> "-restyled"
-        restyledPRTitle = prTitle pullRequest <> " (Restyled)"
+    let bBranch = rrRef $ prBase pullRequest
+        hBranch = rrRef $ prHead pullRequest
+        rBranch = hBranch <> "-restyled"
+        rTitle = prTitle pullRequest <> " (Restyled)"
 
     withinClonedRepo (remoteURL accessToken oRepoFullName) $ do
-        checkoutBranch False bBranch
-        checkoutBranch True hBranch
+        checkoutBranch False hBranch
+        checkoutBranch True rBranch
 
-        runFormatters =<< changedPaths branch
+        runFormatters =<< changedPaths bBranch
 
         commitAll "Restyled"
-        pushOrigin hBranch
+        pushOrigin rBranch
 
-    pr <- createPullRequest accessToken oRepoFullName restyledPRTitle bBranch hBranch
+    pr <- createPullRequest accessToken oRepoFullName rTitle hBranch rBranch
     void $ createComment accessToken oRepoFullName oPullRequestNumber $ commentBody oRestyledRoot pr
 
 commentBody :: Text -> PullRequest -> Text
