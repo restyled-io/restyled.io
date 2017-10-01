@@ -1,28 +1,2 @@
 Signup
   email Text
-
-Repository
-  fullName RepoFullName
-
-  UniqueRepositry fullName
-
-  deriving Show
-
-PullRequest
-  number PRNumber
-  repository RepositoryId
-
-  UniquePullRequest repository number
-
-  deriving Show
-
-WebhookPayload
-  createdAt UTCTime
-  updatedAt UTCTime
-  state JobState
-  installationId GitHubId
-
-  repository RepositoryId
-  pullRequest PullRequestId
-
-  deriving Show

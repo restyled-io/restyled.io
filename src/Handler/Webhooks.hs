@@ -10,25 +10,14 @@ import Restyler
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
-    now <- liftIO getCurrentTime
     payload <- requireJsonBody
     $(logDebug) $ "Webhook payload received: " <> tshow payload
 
-    when (pAction payload == Opened) $ do
-        webhookPayloadId <- runDB $ do
-            repositoryId <- findOrCreate $ toRepository payload
-            pullRequestId <- findOrCreate $ toPullRequest repositoryId payload
-
-            insert WebhookPayload
-                { webhookPayloadCreatedAt = now
-                , webhookPayloadUpdatedAt = now
-                , webhookPayloadState = Created
-                , webhookPayloadInstallationId = pInstallationId payload
-                , webhookPayloadRepository = repositoryId
-                , webhookPayloadPullRequest = pullRequestId
-                }
-
-        settings <- getsYesod appSettings
-        when (appProcessWebhooks settings) $ runRestyler settings webhookPayloadId
-
-    sendResponseStatus status201 ()
+    if pAction payload == Opened
+        then do
+            settings <- getsYesod appSettings
+            when (appProcessWebhooks settings) $ runRestyler settings payload
+            sendResponseStatus status201 ()
+        else
+            -- It was valid, but we didnt' create anything.
+            sendResponseStatus status200 ()

@@ -1,20 +1,15 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 module GitHub.Webhooks.PullRequest
     ( Action(..)
     , Payload(..)
-    , toRepository
-    , toPullRequest
     ) where
 
 import ClassyPrelude
 
 import Data.Aeson
 import GitHub.Model
-
-import qualified Model as M
 
 data Action = Opened | Closed deriving (Eq, Show)
 
@@ -38,14 +33,3 @@ instance FromJSON Payload where
         <*> o .: "pull_request"
         <*> o .: "repository"
         <*> (o .: "installation" >>= (.: "id"))
-
-toRepository :: Payload -> M.Repository
-toRepository Payload{..} = M.Repository
-    { M.repositoryFullName = rFullName pRepository
-    }
-
-toPullRequest :: M.RepositoryId -> Payload -> M.PullRequest
-toPullRequest repositoryId Payload{..} = M.PullRequest
-    { M.pullRequestNumber = prNumber pPullRequest
-    , M.pullRequestRepository = repositoryId
-    }
