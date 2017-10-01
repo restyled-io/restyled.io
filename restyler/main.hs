@@ -1,20 +1,20 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module Main (main) where
 
-import ClassyPrelude
+import           ClassyPrelude
 
-import Data.Text.Internal.Builder (toLazyText)
-import GitHub.Client
-import GitHub.Model
-import Text.Shakespeare.Text (textFile, renderTextUrl)
-import Yesod.Core (PathPiece(..))
+import           Data.Text.Internal.Builder (toLazyText)
+import           GitHub.Client
+import           GitHub.Model
+import           Text.Shakespeare.Text      (renderTextUrl, textFile)
+import           Yesod.Core                 (PathPiece (..))
 
-import Restyler.Clone
-import Restyler.Options
-import Restyler.Formatters
+import           Restyler.Clone
+import           Restyler.Formatters
+import           Restyler.Options
 
 main :: IO ()
 main = do

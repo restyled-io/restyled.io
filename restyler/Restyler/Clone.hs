@@ -8,12 +8,12 @@ module Restyler.Clone
     , pushOrigin
     ) where
 
-import ClassyPrelude
+import           ClassyPrelude
 
-import Model
-import System.Directory (withCurrentDirectory)
-import System.IO.Temp (withSystemTempDirectory)
-import System.Process (callProcess, readProcess)
+import           Model
+import           System.Directory (withCurrentDirectory)
+import           System.IO.Temp   (withSystemTempDirectory)
+import           System.Process   (callProcess, readProcess)
 
 withinClonedRepo :: Text -> IO a -> IO a
 withinClonedRepo url act = withSystemTempDirectory "" $ \dir -> do
