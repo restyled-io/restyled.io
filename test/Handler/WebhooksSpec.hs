@@ -21,6 +21,10 @@ spec = withApp $ do
             postBody WebhooksR "{}"
             statusIs 400
 
+        it "ignores its own PRs" $ do
+            postFixture "webhooks/github/pull-request-opened-restyled.json"
+            statusIs 200
+
 postFixture :: FilePath -> YesodExample App ()
 postFixture = postBody WebhooksR <=< readFixture
 
