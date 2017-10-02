@@ -5,22 +5,22 @@
 {-# LANGUAGE RecordWildCards #-}
 module Settings where
 
-import ClassyPrelude.Yesod hiding (throw)
+import ClassyPrelude.Yesod hiding (Builder, throw)
+
+import Data.Text.Internal.Builder (Builder, toLazyText)
 import Database.Persist.Postgresql (PostgresConf(..))
 import GitHub.Model (GitHubId(..))
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.PGDatabaseURL (parsePGConnectionString)
 import Network.Wai.Handler.Warp (HostPreference)
-import Yesod.Default.Util
-#if DEVELOPMENT
-    (widgetFileReload)
-#else
-    (widgetFileNoReload)
-#endif
+import Text.Shakespeare (RenderUrl)
+import Yesod.Default.Util (widgetFileNoReload, widgetFileReload)
 
 import qualified Data.ByteString.Char8 as C8
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as LT
 import qualified Env
+import qualified Text.Shakespeare.Text as ST
 
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
@@ -97,10 +97,24 @@ allowsLevel :: AppSettings -> LogLevel -> Bool
 allowsLevel AppSettings{..} = (>= appLogLevel)
 
 widgetFile :: String -> Q Exp
-widgetFile =
+widgetFile = (if development then widgetFileReload else widgetFileNoReload) def
+
+-- | Sugar for the various @'Text'@ transformations need with @'textFile'@
+fromTextTemplate :: (t -> Builder) -> t -> Text
+fromTextTemplate t = toStrict . toLazyText . t
+
+textFile :: FilePath -> Q Exp
+textFile = ST.textFile
+-- ^ if this works, then why is this ill-typed?
+-- textFile = if development then ST.textFileReload else ST.textFile
+
+renderTextUrl :: RenderUrl url -> ST.TextUrl url -> LT.Text
+renderTextUrl = ST.renderTextUrl
+
+development :: Bool
+development =
 #if DEVELOPMENT
-    widgetFileReload
+    True
 #else
-    widgetFileNoReload
+    False
 #endif
-    def

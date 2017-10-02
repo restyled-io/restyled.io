@@ -14,9 +14,11 @@ library:
   - classy-prelude-yesod
   - conduit
   - containers
+  - directory
   - envparse
   - fast-logger
   - file-embed
+  - filepath
   - gitrev
   - hjsmin
   - HTTP
@@ -29,6 +31,7 @@ library:
   - monad-control
   - monad-logger
   - network-uri
+  - optparse-applicative
   - persistent
   - persistent-postgresql
   - persistent-template
@@ -36,6 +39,7 @@ library:
   - safe
   - shakespeare
   - template-haskell
+  - temporary
   - text
   - time
   - unordered-containers
@@ -83,15 +87,6 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - restyled
-    - classy-prelude
-    - directory
-    - filepath
-    - optparse-applicative
-    - process
-    - shakespeare
-    - temporary
-    - text
-    - yesod-core # PathPiece(..)
 
 tests:
   test:

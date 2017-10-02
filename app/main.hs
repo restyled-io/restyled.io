@@ -1,4 +1,5 @@
-import Prelude     (IO)
+module Main (main) where
+
 import Application (appMain)
 
 main :: IO ()
