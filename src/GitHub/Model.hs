@@ -1,18 +1,33 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 module GitHub.Model
-    ( AccessToken(..)
+    ( GitHubId(..)
+    , AccessToken(..)
+    , RepoFullName(..)
     , Repository(..)
+    , Branch(..)
     , RepoRef(..)
+    , PRNumber(..)
+    , PRTitle(..)
     , PullRequest(..)
     , Comment(..)
-    , module Model.Base
     ) where
 
-import ClassyPrelude
+import ClassyPrelude.Yesod
 
 import Data.Aeson
-import Model.Base
+import Database.Persist.Sql
+
+newtype GitHubId = GitHubId { unGitHubId :: Int } deriving
+    ( Eq
+    , FromJSON
+    , PersistField
+    , PersistFieldSql
+    , PathPiece
+    , Show
+    , ToJSON
+    )
 
 data AccessToken = AccessToken
     { atToken :: Text
@@ -25,6 +40,17 @@ instance FromJSON AccessToken where
         <$> o .: "token"
         <*> o .: "expires_at"
 
+newtype RepoFullName = RepoFullName { unRepoFullName :: Text } deriving
+    ( Eq
+    , FromJSON
+    , IsString
+    , PathPiece
+    , PersistField
+    , PersistFieldSql
+    , Show
+    , ToJSON
+    )
+
 data Repository = Repository
     { rFullName :: RepoFullName
     }
@@ -33,6 +59,17 @@ data Repository = Repository
 instance FromJSON Repository where
     parseJSON = withObject "GitHub.Repository" $ \o -> Repository
         <$> o .: "full_name"
+
+newtype Branch = Branch { unBranch :: Text } deriving
+    ( Eq
+    , FromJSON
+    , IsString
+    , PersistField
+    , PersistFieldSql
+    , Semigroup
+    , Show
+    , ToJSON
+    )
 
 data RepoRef = RepoRef
     { rrRepository :: Repository
@@ -44,6 +81,28 @@ instance FromJSON RepoRef where
     parseJSON = withObject "GitHub.RepoRef" $ \o -> RepoRef
         <$> o .: "repo"
         <*> o .: "ref"
+
+newtype PRNumber = PRNumber { unPRNumber :: Int } deriving
+    ( Eq
+    , FromJSON
+    , PathPiece
+    , PersistField
+    , PersistFieldSql
+    , Show
+    , ToJSON
+    )
+
+newtype PRTitle = PRTitle { unPRTitle :: Text } deriving
+    ( Eq
+    , FromJSON
+    , IsString
+    , PathPiece
+    , PersistField
+    , PersistFieldSql
+    , Semigroup
+    , Show
+    , ToJSON
+    )
 
 data PullRequest = PullRequest
     { prNumber :: PRNumber

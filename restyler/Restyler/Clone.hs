@@ -10,7 +10,7 @@ module Restyler.Clone
 
 import ClassyPrelude
 
-import Model
+import GitHub.Model (Branch(..))
 import System.Directory (withCurrentDirectory)
 import System.IO.Temp (withSystemTempDirectory)
 import System.Process (callProcess, readProcess)

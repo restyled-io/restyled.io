@@ -1,21 +1,16 @@
-{-# LANGUAGE CPP               #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes        #-}
-{-# LANGUAGE RecordWildCards   #-}
--- | Settings are centralized, as much as possible, into this file. This
--- includes database connection settings, static file locations, etc.
--- In addition, you can configure a number of different aspects of Yesod
--- by overriding methods in the Yesod typeclass. That instance is
--- declared in the Foundation.hs file.
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RecordWildCards #-}
 module Settings where
 
 import ClassyPrelude.Yesod hiding (throw)
 import Database.Persist.Postgresql (PostgresConf(..))
+import GitHub.Model (GitHubId(..))
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.PGDatabaseURL (parsePGConnectionString)
 import Network.Wai.Handler.Warp (HostPreference)
-import Model.Base
 import Yesod.Default.Util
 #if DEVELOPMENT
     (widgetFileReload)
@@ -23,8 +18,8 @@ import Yesod.Default.Util
     (widgetFileNoReload)
 #endif
 
-import qualified Data.Text as T
 import qualified Data.ByteString.Char8 as C8
+import qualified Data.Text as T
 import qualified Env
 
 data AppSettings = AppSettings
