@@ -22,7 +22,7 @@ withinClonedRepo url act = withSystemTempDirectory "" $ \dir -> do
 
 checkoutBranch :: Bool -> Branch -> IO ()
 checkoutBranch b branch = callProcess "git" $
-    "checkout": if b then ["-b"] else [] ++ [branchArg branch]
+    ["checkout", "--quiet"] ++ ["-b" | b] ++ [branchArg branch]
 
 changedPaths :: Branch -> IO [FilePath]
 changedPaths branch = lines <$>

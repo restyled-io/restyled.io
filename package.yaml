@@ -103,6 +103,7 @@ tests:
     - hspec-expectations-lifted
     - load-env
     - persistent
+    - process
     - shakespeare
     - temporary
     - text
