@@ -2,9 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Handler.WebhooksSpec (spec) where
 
-import TestImport
+import           TestImport
 
-import qualified Data.ByteString.Lazy as LB
+import qualified Data.ByteString.Lazy       as LB
 import qualified Data.ByteString.Lazy.Char8 as L8
 
 spec :: Spec

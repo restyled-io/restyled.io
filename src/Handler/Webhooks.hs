@@ -1,14 +1,14 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module Handler.Webhooks where
 
-import Import
+import           Import
 
-import GitHub.Model
-import GitHub.Webhooks.PullRequest
-import Restyler
+import           GitHub.Model
+import           GitHub.Webhooks.PullRequest
+import           Restyler
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
