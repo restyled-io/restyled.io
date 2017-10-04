@@ -36,7 +36,7 @@ lint:
 test:
 	stack test
 
-.PHONY:
+.PHONY: config/revision
 config/revision:
 	printf "$(PERCENT)s - $(PERCENT)s\n" \
 	  "$$(git rev-parse HEAD)" \
