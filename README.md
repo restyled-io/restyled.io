@@ -1,6 +1,6 @@
 # restyled.io
 
-Homepage for Restyled, http://restyled.io.
+Homepage for Restyled, https://restyled.io.
 
 ## Development & Testing
 
