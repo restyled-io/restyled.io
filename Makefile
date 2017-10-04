@@ -5,6 +5,9 @@ RELEASE_APP      ?= restyled-io-staging
 RELEASE_REGISTRY ?= registry.heroku.com
 RELEASE_IMAGE    ?= $(RELEASE_REGISTRY)/$(RELEASE_APP)/web
 
+DOCKER_USERNAME ?= x
+DOCKER_PASSWORD ?= x
+
 # https://stackoverflow.com/questions/19232784/how-to-correctly-escape-sign-when-using-pattern-rules-and-patsubst-in-gnu-ma
 PERCENT = %
 
