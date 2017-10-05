@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 module GitHub.Model
     ( GitHubId(..)
     , AccessToken(..)
@@ -60,6 +61,11 @@ instance FromJSON Repository where
     parseJSON = withObject "GitHub.Repository" $ \o -> Repository
         <$> o .: "full_name"
 
+instance ToJSON Repository where
+    toJSON Repository{..} = object
+        [ "full_name" .= rFullName
+        ]
+
 newtype Branch = Branch { unBranch :: Text } deriving
     ( Eq
     , FromJSON
@@ -81,6 +87,12 @@ instance FromJSON RepoRef where
     parseJSON = withObject "GitHub.RepoRef" $ \o -> RepoRef
         <$> o .: "repo"
         <*> o .: "ref"
+
+instance ToJSON RepoRef where
+    toJSON RepoRef{..} = object
+        [ "repo" .= rrRepository
+        , "ref" .= rrRef
+        ]
 
 newtype PRNumber = PRNumber { unPRNumber :: Int } deriving
     ( Eq
@@ -118,6 +130,14 @@ instance FromJSON PullRequest where
         <*> o .: "title"
         <*> o .: "base"
         <*> o .: "head"
+
+instance ToJSON PullRequest where
+    toJSON PullRequest{..} = object
+        [ "number" .= prNumber
+        , "title" .= prTitle
+        , "base" .= prBase
+        , "head" .= prHead
+        ]
 
 data Comment = Comment
     { cId :: GitHubId

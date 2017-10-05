@@ -21,6 +21,18 @@ Development requires the following pre-requisites:
      postgres
    ```
 
+1. A Redis instance available on `localhost:6379`
+
+   For example:
+
+   ```console
+   docker run \
+     --detach \
+     --name redis \
+     --publish 6379:6379 \
+     redis
+   ```
+
 Reset/create the database, install dependencies, build, lint, and test the app:
 
 ```console

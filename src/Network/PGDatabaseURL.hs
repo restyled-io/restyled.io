@@ -2,8 +2,6 @@ module Network.PGDatabaseURL
     ( parsePGConnectionString
     ) where
 
-import Prelude
-
 import Data.Maybe (isJust)
 import Data.String (IsString(..))
 import Network.HTTP.Base

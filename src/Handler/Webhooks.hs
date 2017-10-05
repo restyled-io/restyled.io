@@ -8,7 +8,7 @@ import Import
 
 import GitHub.Model
 import GitHub.Webhooks.PullRequest
-import Restyler
+import Restyler.Job
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
@@ -17,8 +17,14 @@ postWebhooksR = do
 
     if acceptPayload payload
         then do
-            settings <- getsYesod appSettings
-            when (appProcessWebhooks settings) $ runRestyler settings payload
+            let job = Job
+                    { jInstallationId = pInstallationId payload
+                    , jRepository = pRepository payload
+                    , jPullRequest = pPullRequest payload
+                    }
+
+            $(logDebug) $ "Enqueuing Restyler Job: " <> tshow job
+            flip enqueueRestylerJob job =<< getsYesod appRedisConn
             sendResponseStatus status201 ()
         else
             -- It was valid, but we didn't create anything

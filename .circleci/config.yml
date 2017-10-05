@@ -8,11 +8,12 @@ jobs:
           GIT_AUTHOR_EMAIL: ci@restyled.io
           GIT_AUTHOR_NAME: Restyled.io CI
           GIT_COMMITTER_EMAIL: ci@restyled.io
-      - image: circleci/postgres:9.4.12-alpine
+      - image: circleci/postgres:9.6.5-alpine
         environment:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: restyled_test
+      - image: redis:4.0.2-alpine
     steps:
       - checkout
       - restore_cache:
