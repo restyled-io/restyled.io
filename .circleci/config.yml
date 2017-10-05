@@ -36,7 +36,9 @@ jobs:
             - ./.stack-work
       - run:
           name: Test
-          command: make test
+          command: |
+            echo "Skipping callRestylers because it runs Docker images"
+            make test SPEC_ARGS="--skip callRestylers"
 
   deploy:
     docker:

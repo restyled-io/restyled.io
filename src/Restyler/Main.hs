@@ -11,11 +11,10 @@ import ClassyPrelude
 import GitHub.Client
 import GitHub.Model
 import Restyler.Clone
-import Restyler.Config
 import Restyler.Options
+import Restyler.Run
 import Settings (fromTextTemplate, renderTextUrl, textFile)
 import System.Exit (die)
-import System.Process (callProcess)
 import Yesod.Core (PathPiece(..))
 
 restylerMain :: IO ()
@@ -32,20 +31,17 @@ restylerMain = do
 
     withinClonedRepo (remoteURL accessToken oRepoFullName) $ do
         checkoutBranch False hBranch
-        Config{..} <- either die return =<< loadConfig
-
-        when cEnabled $ do
-            paths <- changedPaths bBranch
-            checkoutBranch True rBranch
-
-            for_ cRestylers $ \r@Restyler{..} ->
-                callProcess rCommand $ rArguments ++ restylePaths r paths
-
-            commitAll "Restyled"
-            pushOrigin rBranch
+        either die return =<< callRestylers bBranch
+        checkoutBranch True rBranch
+        commitAll $ commitMessage oRestyledRoot pullRequest
+        pushOrigin rBranch
 
     pr <- createPullRequest accessToken oRepoFullName rTitle hBranch rBranch
     void $ createComment accessToken oRepoFullName oPullRequestNumber $ commentBody oRestyledRoot pr
+
+-- TODO: template with more details
+commitMessage :: Text -> PullRequest -> Text
+commitMessage _ _ = "Restyled"
 
 commentBody :: Text -> PullRequest -> Text
 commentBody root pullRequest = fromTextTemplate

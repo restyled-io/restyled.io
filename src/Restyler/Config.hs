@@ -46,13 +46,15 @@ defaultConfig = Config
 allRestylers :: [Restyler]
 allRestylers =
     [ Restyler
-        { rCommand = "stylish-haskell"
+        { rName = "stylish-haskell"
+        , rCommand = "stylish-haskell"
         , rArguments = ["--inplace"]
         , rInclude = ["**/*.hs"]
         }
     , Restyler
         -- N.B. doesn't work yet, but makes tests read more realistically
-        { rCommand = "prettier"
+        { rName = "prettier"
+        , rCommand = "prettier"
         , rArguments = ["--write"]
         , rInclude = ["**/*.js", "**/*.jsx"]
         }
@@ -60,20 +62,18 @@ allRestylers =
 
 namedRestyler :: MonadPlus m => Text -> m Restyler
 namedRestyler name =
-    case find ((== name) . pack . rCommand) allRestylers of
+    case find ((== name) . pack . rName) allRestylers of
         Nothing -> fail $ unpack $ "Unknown restyler name: " <> name <> "."
         Just r -> pure r
 
 instance FromJSON Config where
     parseJSON (Array v) = Config
-        <$> pure True
+        <$> pure (cEnabled defaultConfig)
         <*> mapM parseJSON (V.toList v)
-    parseJSON (Object o) = do
-        let Config{..} = defaultConfig
-
-        Config -- Use default values if un-specified
-            <$> o .:? "enabled" .!= cEnabled
-            <*> o .:? "restylers" .!= cRestylers
+    parseJSON (Object o) = Config
+        -- Use default values if un-specified
+        <$> o .:? "enabled" .!= cEnabled defaultConfig
+        <*> o .:? "restylers" .!= cRestylers defaultConfig
     parseJSON v = typeMismatch "Config object or list of restylers" v
 
 -- | Load from @'configPath'@ if it exists, otherwise '@defaultConfig'
@@ -92,30 +92,27 @@ configPath :: FilePath
 configPath = ".restyled.yaml"
 
 data Restyler = Restyler
-    { rCommand :: String
+    { rName :: String
+    , rCommand :: String
     , rArguments :: [String]
     , rInclude :: [Include]
     }
     deriving (Eq, Show)
 
 instance FromJSON Restyler where
-    parseJSON (Object o) = case HM.toList o of
-        [(k, v)] -> withObject "Override object"
+    parseJSON v@(Object o) = case HM.toList o of
+        [(k, v')] -> withObject "Override object"
             (\o' -> do
                 Restyler{..} <- namedRestyler k
-                Restyler -- Named defaults + overrides
-                    <$> o' .:? "command" .!= rCommand
+                Restyler -- Named + overrides
+                    <$> pure (unpack k)
+                    <*> o' .:? "command" .!= rCommand
                     <*> o' .:? "arguments" .!= rArguments
                     <*> o' .:? "include" .!= rInclude
-            ) v
-
-        _ -> Restyler
-            <$> o .: "command"
-            <*> o .: "arguments"
-            <*> o .: "include"
-
+            ) v'
+        _ -> typeMismatch "Name with override object" v
     parseJSON (String t) = namedRestyler t
-    parseJSON v = typeMismatch "Name, named override, or object" v
+    parseJSON v = typeMismatch "Name or named with override object" v
 
 restylePaths :: Restyler -> [FilePath] -> [FilePath]
 restylePaths Restyler{..} = filter (includePath rInclude)
