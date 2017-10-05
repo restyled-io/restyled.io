@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ ! -f "$1" ]; then
-  echo "usage: tools/webhook PAYLOAD_FILE" >&2
+  echo "usage: tools/webhook PAYLOAD_FILE [HOST]" >&2
   exit 1
 fi
 
@@ -8,4 +8,4 @@ curl \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
   -d @"$1" \
-  http://localhost:3000/webhooks
+  "${2:-http://localhost:3000}"/webhooks
