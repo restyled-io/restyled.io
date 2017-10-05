@@ -16,12 +16,17 @@ import LoadEnv (loadEnv)
 import Restyler.Job
 import System.Exit (ExitCode(..))
 import System.Process (readProcessWithExitCode)
+import System.IO (BufferMode(..), hSetBuffering)
 
 backendMain :: IO ()
 backendMain = do
     loadEnv
     settings <- loadEnvSettings
     conn <- checkedConnect (appRedisConf settings)
+
+    -- Ensure container logs are visible immediately
+    hSetBuffering stdout LineBuffering
+    hSetBuffering stderr LineBuffering
 
     runStdoutLoggingT
         $ filterLogger (const (settings `allowsLevel`))
