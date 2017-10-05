@@ -28,6 +28,7 @@ import Database.Persist.Postgresql
     , pgPoolSize
     , runSqlPool
     )
+import Database.Redis (checkedConnect)
 import Language.Haskell.TH.Syntax (qLocation)
 import LoadEnv (loadEnv)
 import Network.Wai (Middleware)
@@ -66,6 +67,9 @@ makeFoundation appSettings = do
     appStatic <- (if appMutableStatic appSettings
         then staticDevel
         else static) appStaticDir
+
+    -- Persistent Redis connection
+    appRedisConn <- checkedConnect $ appRedisConf appSettings
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

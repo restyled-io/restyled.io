@@ -9,6 +9,7 @@ module Foundation where
 import Import.NoFoundation
 
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
+import Database.Redis (Connection)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Core.Types (Logger)
@@ -25,6 +26,7 @@ data App = App
     { appSettings    :: AppSettings
     , appStatic      :: Static -- ^ Settings for static file serving.
     , appConnPool    :: ConnectionPool -- ^ Database connection pool.
+    , appRedisConn   :: Connection
     , appHttpManager :: Manager
     , appLogger      :: Logger
     }

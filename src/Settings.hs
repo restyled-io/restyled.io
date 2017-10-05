@@ -9,9 +9,11 @@ import ClassyPrelude.Yesod hiding (Builder, throw)
 
 import Data.Text.Internal.Builder (Builder, toLazyText)
 import Database.Persist.Postgresql (PostgresConf(..))
+import Database.Redis (ConnectInfo(..))
 import GitHub.Model (GitHubId(..))
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.PGDatabaseURL (parsePGConnectionString)
+import Network.RedisURL (parseRedisURL)
 import Network.Wai.Handler.Warp (HostPreference)
 import Text.Shakespeare (RenderUrl)
 import Yesod.Default.Util (widgetFileNoReload, widgetFileReload)
@@ -24,6 +26,7 @@ import qualified Text.Shakespeare.Text as ST
 
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
+    , appRedisConf :: ConnectInfo
     , appRoot :: Text
     , appHost :: HostPreference
     , appPort :: Int
@@ -34,7 +37,6 @@ data AppSettings = AppSettings
     , appGitHubAppId :: GitHubId
     , appGitHubAppKey :: Text
     , appRestylerExecutable :: FilePath
-    , appProcessWebhooks :: Bool
     }
 
 instance Show AppSettings where
@@ -45,7 +47,6 @@ instance Show AppSettings where
         , " root=", show appRoot
         , " db=[", C8.unpack $ pgConnStr appDatabaseConf, "]"
         , " restyler=", appRestylerExecutable
-        , " webhooks=", show appProcessWebhooks
         ]
 
 type EnvParser a = forall e.
@@ -57,6 +58,7 @@ loadEnvSettings = Env.parse id envSettings
 envSettings :: EnvParser AppSettings
 envSettings = AppSettings
     <$> envDatabaseConfig
+    <*> envRedisConfig
     <*> Env.var Env.str "APPROOT" (Env.def "http://localhost:3000")
     <*> Env.var Env.str "HOST" (Env.def "*4")
     <*> Env.var Env.auto "PORT" (Env.def 3000)
@@ -67,7 +69,6 @@ envSettings = AppSettings
     <*> (GitHubId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
     <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
     <*> Env.var Env.str "RESTYLER_EXECUTABLE" (Env.def ".stack-work/dist/x86_64-linux-nopie/Cabal-1.24.2.0/build/restyler/restyler")
-    <*> (not <$> Env.switch "DISCARD_WEBHOOKS" mempty)
 
 envDatabaseConfig :: EnvParser PostgresConf
 envDatabaseConfig = PostgresConf
@@ -76,6 +77,12 @@ envDatabaseConfig = PostgresConf
     <*> Env.var Env.auto "PGPOOLSIZE" (Env.def 10)
   where
     toConnStr = either error id . parsePGConnectionString
+
+envRedisConfig :: EnvParser ConnectInfo
+envRedisConfig = toConnectInfo <$> Env.var Env.nonempty "REDIS_URL"
+    (Env.def "redis://localhost:6379")
+  where
+    toConnectInfo = either error id . parseRedisURL
 
 envLogLevel :: EnvParser LogLevel
 envLogLevel = toLogLevel <$> Env.var Env.str "LOG_LEVEL" (Env.def "info")

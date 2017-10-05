@@ -17,6 +17,7 @@ RUN stack install --dependencies-only
 COPY app /src/app
 COPY src /src/src
 COPY templates /src/templates
+COPY backend /src/backend
 COPY restyler /src/restyler
 
 COPY config /src/config
@@ -36,6 +37,7 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY --from=builder /root/.local/bin/restyled.io /app/restyled.io
+COPY --from=builder /root/.local/bin/restyled.io-backend /app/restyled.io-backend
 COPY --from=builder /root/.local/bin/restyler /app/restyler
 COPY --from=builder /src/config /app/config
 COPY --from=builder /src/static /app/static
