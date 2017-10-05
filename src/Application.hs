@@ -1,9 +1,9 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Application
     ( getApplicationDev
@@ -19,23 +19,37 @@ module Application
     , db
     ) where
 
-import Control.Monad.Logger                 (liftLoc, runLoggingT)
-import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
-                                             pgPoolSize, runSqlPool)
 import Import
-import Language.Haskell.TH.Syntax           (qLocation)
-import LoadEnv                              (loadEnv)
+
+import Control.Monad.Logger (liftLoc, runLoggingT)
+import Database.Persist.Postgresql
+    ( createPostgresqlPool
+    , pgConnStr
+    , pgPoolSize
+    , runSqlPool
+    )
+import Language.Haskell.TH.Syntax (qLocation)
+import LoadEnv (loadEnv)
 import Network.Wai (Middleware)
-import Network.Wai.Handler.Warp             (Settings, defaultSettings,
-                                             defaultShouldDisplayException,
-                                             runSettings, setHost,
-                                             setOnException, setPort, getPort)
-import Network.Wai.Middleware.RequestLogger (Destination (Callback, Logger),
-                                             IPAddrSource (..),
-                                             OutputFormat (..), destination,
-                                             mkRequestLogger, outputFormat)
-import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
-                                             toLogStr)
+import Network.Wai.Handler.Warp
+    ( Settings
+    , defaultSettings
+    , defaultShouldDisplayException
+    , getPort
+    , runSettings
+    , setHost
+    , setOnException
+    , setPort
+    )
+import Network.Wai.Middleware.RequestLogger
+    ( Destination(Callback, Logger)
+    , IPAddrSource(..)
+    , OutputFormat(..)
+    , destination
+    , mkRequestLogger
+    , outputFormat
+    )
+import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
 
 import Handler.Common
 import Handler.Docs
@@ -43,19 +57,10 @@ import Handler.Home
 import Handler.Signup
 import Handler.Webhooks
 
--- This line actually creates our YesodDispatch instance. It is the second half
--- of the call to mkYesodData which occurs in Foundation.hs. Please see the
--- comments there for more details.
 mkYesodDispatch "App" resourcesApp
 
--- | This function allocates resources (such as a database connection pool),
--- performs initialization and returns a foundation datatype value. This is also
--- the place to put your migrate statements to have automatic database
--- migrations handled by Yesod.
 makeFoundation :: AppSettings -> IO App
 makeFoundation appSettings = do
-    -- Some basic initializations: HTTP connection manager, logger, and static
-    -- subsite.
     appHttpManager <- newManager
     appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
     appStatic <- (if appMutableStatic appSettings
@@ -67,10 +72,7 @@ makeFoundation appSettings = do
     -- logging function. To get out of this loop, we initially create a
     -- temporary foundation without a real connection pool, get a log function
     -- from there, and then create the real foundation.
-    let mkFoundation appConnPool = App {..}
-        -- The App {..} syntax is an example of record wild cards. For more
-        -- information, see:
-        -- https://ocharles.org.uk/blog/posts/2014-12-04-record-wildcards.html
+    let mkFoundation appConnPool = App{..}
         tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
         logFunc = messageLoggerSource tempFoundation appLogger
 
@@ -85,15 +87,11 @@ makeFoundation appSettings = do
     -- Output settings at startup
     runLoggingT ($(logInfo) $ "settings " <> tshow appSettings) logFunc
 
-    -- Return the foundation
     return $ mkFoundation pool
 
--- | Convert our foundation to a WAI Application by calling @toWaiAppPlain@ and
--- applying some additional middlewares.
 makeApplication :: App -> IO Application
 makeApplication foundation = do
     logWare <- makeLogWare foundation
-    -- Create the WAI application and apply middlewares
     appPlain <- toWaiAppPlain foundation
     return $ logWare $ defaultMiddlewaresNoLogging appPlain
 
