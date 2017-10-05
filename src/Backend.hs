@@ -49,6 +49,8 @@ awaitAndProcessJob AppSettings{..} conn timeout = do
                 , "--restyled-root", unpack appRoot
                 ]
 
+        $(logDebug) $ "exec " <> tshow (appRestylerExecutable:restylerArguments)
+
         (ec, out, err) <- liftIO $
             readProcessWithExitCode appRestylerExecutable restylerArguments ""
 
