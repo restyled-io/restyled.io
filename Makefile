@@ -64,6 +64,12 @@ image.release:
 	docker tag "$(LOCAL_IMAGE)" "$(RELEASE_IMAGE)"
 	docker push "$(RELEASE_IMAGE)"
 
+.PHONY: image.release.backend
+image.release.backend: RELEASE_IMAGE=restyled/restyled
+image.release.backend:
+	docker tag "$(LOCAL_IMAGE)" "$(RELEASE_IMAGE)"
+	docker push "$(RELEASE_IMAGE)"
+
 .PHONY: restylers
 restylers: $(ALL_RESTYLERS)
 	@for r in $^; do \
