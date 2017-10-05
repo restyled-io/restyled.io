@@ -33,6 +33,13 @@ MAINTAINER Pat Brisbin <pbrisbin@gmail.com>
 
 ENV LANG en_US.UTF-8
 
+# Configuration that's static for all deployed containers
+ENV GIT_AUTHOR_EMAIL commits@restyled.io
+ENV GIT_AUTHOR_NAME Restyled.io
+ENV GIT_COMMITTER_EMAIL commits@restyled.io
+ENV GIT_COMMITTER_NAME Restyled.io
+ENV RESTYLER_EXECUTABLE /app/restyler
+
 RUN mkdir -p /app
 WORKDIR /app
 
