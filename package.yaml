@@ -30,6 +30,7 @@ library:
   - load-env
   - monad-control
   - monad-logger
+  - mtl
   - network-uri
   - optparse-applicative
   - persistent

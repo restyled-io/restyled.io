@@ -2,8 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Restyler.Config.IncludeSpec (spec) where
 
-import ClassyPrelude
-import Test.Hspec
+import SpecHelper
 
 import Restyler.Config.Include
 
