@@ -49,6 +49,13 @@ COPY --from=builder /root/.local/bin/restyler /app/restyler
 COPY --from=builder /src/config /app/config
 COPY --from=builder /src/static /app/static
 
+# Install docker
+ENV DOCKER_ARCHIVE docker-17.03.1-ce.tgz
+ENV DOCKER_SRC_URL https://get.docker.com/builds/Linux/x86_64/$DOCKER_ARCHIVE
+RUN \
+  curl -fsSLO "$DOCKER_SRC_URL" && \
+  tar --strip-components=1 -xvzf "$DOCKER_ARCHIVE" -C /usr/local/bin
+
 RUN useradd app
 USER app
 
