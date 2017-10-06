@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 module SpecHelper
     ( module SpecHelper
     , module X
@@ -8,6 +9,7 @@ module SpecHelper
 import ClassyPrelude as X
 
 import Data.Char (isSpace)
+import Restyler.Config (configPath)
 import System.Directory (removeFile, setCurrentDirectory)
 import System.IO.Temp as X (emptySystemTempFile, withSystemTempDirectory)
 import System.Process as X (callProcess, readProcess)
@@ -36,6 +38,12 @@ setupGitTrackedFile name content mbranch = do
 
     callProcess "git" ["add", name]
     callProcess "git" ["commit", "--quiet", "--message", "Write code"]
+
+-- | Setup a YAML config enabling (only) the given restylers by name
+setupConfig :: [Text] -> IO ()
+setupConfig names = setupGitTrackedFile configPath yaml Nothing
+  where
+    yaml = T.unlines $ "---" : map ("- " <>) names ++ [""]
 
 -- | Dedent content
 --

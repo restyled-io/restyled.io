@@ -38,6 +38,23 @@ spec = around (withSystemTempDirectory "") $ do
                 , "+matrix(1, 0, 0, 0, 1, 0, 0, 0, 1);"
                 ]
 
+        context "non-default configuration" $ do
+            describe "hindent" $ do
+                it "works" $ \dir -> do
+                    setupGitRepo dir
+                    setupConfig ["hindent"]
+                    setupGitTrackedFile
+                        "Foo.hs"
+                        "example = case x of Just p -> foo bar\n"
+                        $ Just "develop"
+
+                    callRestylers "master" `shouldProduceDiff`
+                        [ "-example = case x of Just p -> foo bar"
+                        , "+example ="
+                        , "+  case x of"
+                        , "+    Just p -> foo bar"
+                        ]
+
 restylerTestCase :: FilePath -> Text -> [String] -> FilePath -> Expectation
 restylerTestCase name content changes dir = do
     setupGitRepo dir

@@ -58,6 +58,12 @@ allRestylers =
         , rArguments = ["--write"]
         , rInclude = ["**/*.js", "**/*.jsx"]
         }
+    , Restyler
+        { rName = "hindent"
+        , rCommand = "hindent-inplace"
+        , rArguments = ["--"]
+        , rInclude = ["**/*.hs"]
+        }
     ]
 
 namedRestyler :: MonadPlus m => Text -> m Restyler

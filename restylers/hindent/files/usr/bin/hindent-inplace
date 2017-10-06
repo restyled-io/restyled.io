@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# hindent only supports reformating one file at a time, so we'll use this small
+# wrapper to accept options and paths and call hindent once per path with the
+# same options each time.
+#
+#   usage: hindent-inplace [OPTION, ...] [--] [PATH, ...]
+#
+###
+flags=()
+paths=()
+
+while [ -n "$1" ]; do
+  case "$1" in
+    --help)
+      # If we see help, output and exit here
+      hindent --help
+      exit $?
+      ;;
+
+    --) shift; break ;;
+    -*) flags+=( "$1" ) ;;
+    *)  paths+=( "$1" ) ;;
+  esac
+
+  shift
+done
+
+# Collect any remaining paths, in case -- was used.
+paths+=( "$@" )
+
+for path in "${paths[@]}"; do
+  hindent "${args[@]}" "$path"
+done
