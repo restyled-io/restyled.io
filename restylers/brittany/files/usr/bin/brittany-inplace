@@ -1,0 +1,26 @@
+#!/bin/bash
+flags=()
+paths=()
+
+while [ -n "$1" ]; do
+  case "$1" in
+    --help)
+      # If we see help, output and exit here
+      brittany --help
+      exit $?
+      ;;
+
+    --) shift; break ;;
+    -*) flags+=( "$1" ) ;;
+    *)  paths+=( "$1" ) ;;
+  esac
+
+  shift
+done
+
+# Collect any remaining paths, in case -- was used.
+paths+=( "$@" )
+
+for path in "${paths[@]}"; do
+  brittany "${args[@]}" --input "$path" --output "$path"
+done

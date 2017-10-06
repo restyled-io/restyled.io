@@ -64,6 +64,12 @@ allRestylers =
         , rArguments = ["--"]
         , rInclude = ["**/*.hs"]
         }
+    , Restyler
+        { rName = "brittany"
+        , rCommand = "brittany-inplace"
+        , rArguments = ["--"]
+        , rInclude = ["**/*.hs"]
+        }
     ]
 
 namedRestyler :: MonadPlus m => Text -> m Restyler

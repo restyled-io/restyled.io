@@ -55,6 +55,27 @@ spec = around (withSystemTempDirectory "") $ do
                         , "+    Just p -> foo bar"
                         ]
 
+            describe "brittany" $ do
+                it "works" $ \dir -> do
+                    setupGitRepo dir
+                    setupConfig ["brittany"]
+                    setupGitTrackedFile
+                        "Foo.hs"
+                        (dedent [st|
+                            func (MyLongFoo abc def) = 1
+                            func (Bar a d) = 2
+                            func _ = 3
+                        |])
+                        $ Just "develop"
+
+                    callRestylers "master" `shouldProduceDiff`
+                        [ " func (MyLongFoo abc def) = 1"
+                        , "-func (Bar a d) = 2"
+                        , "-func _ = 3"
+                        , "+func (Bar       a   d  ) = 2"
+                        , "+func _                   = 3"
+                        ]
+
 restylerTestCase :: FilePath -> Text -> [String] -> FilePath -> Expectation
 restylerTestCase name content changes dir = do
     setupGitRepo dir
