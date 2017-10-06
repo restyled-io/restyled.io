@@ -14,6 +14,7 @@ import System.Process as X (callProcess, readProcess)
 import Test.Hspec as X
 import Text.Shakespeare.Text as X (st)
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import qualified Prelude as P
 
 setupGitRepo :: FilePath -> IO ()
@@ -22,10 +23,34 @@ setupGitRepo dir = do
     callProcess "git" ["init", "--quiet"]
     callProcess "git" ["commit", "--quiet", "--allow-empty", "--message", "Test"]
 
+-- | Create a tracked file with the given content
+--
+-- Assumes you're already in a repository. Commits in branch if given.
+--
+setupGitTrackedFile :: FilePath -> Text -> Maybe String -> IO ()
+setupGitTrackedFile name content mbranch = do
+    T.writeFile name $ dedent content
+
+    for_ mbranch $ \branch ->
+        callProcess "git" ["checkout", "--quiet", "-b", branch]
+
+    callProcess "git" ["add", name]
+    callProcess "git" ["commit", "--quiet", "--message", "Write code"]
+
 dedent :: Text -> Text
 dedent t = T.unlines $ map (T.drop $ indent lns) lns
   where
-    lns = T.lines $ T.drop 1 t -- assumes an initial "\n"
+    -- | N.B. assumes an initial "\n" and trailing quote-end
+    --
+    -- > [st|
+    -- >   some code
+    -- >   some code
+    -- >   |]
+    --
+    -- This should really use a parser.
+    --
+    lns = dropEnd $ T.lines $ T.drop 1 t
+    dropEnd = reverse . drop 1 . reverse
 
     indent [] = 0
     indent ts = P.minimum $ map (T.length . T.takeWhile isSpace) ts
