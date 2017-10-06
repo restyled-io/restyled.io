@@ -1,9 +1,6 @@
-NAME        ?= restyled.io
-LOCAL_IMAGE ?= $(NAME)/$(NAME)
-
-RELEASE_APP      ?= restyled-io-staging
-RELEASE_REGISTRY ?= registry.heroku.com
-RELEASE_IMAGE    ?= $(RELEASE_REGISTRY)/$(RELEASE_APP)/web
+NAME          ?= restyled
+LOCAL_IMAGE   ?= $(NAME)/$(NAME)
+RELEASE_IMAGE ?= $(LOCAL_IMAGE)
 
 DOCKER_USERNAME ?= x
 DOCKER_PASSWORD ?= x
@@ -40,7 +37,12 @@ lint:
 
 .PHONY: test
 test:
-	stack test --test-arguments "$(SPEC_ARGS)"
+	stack test
+
+.PHONY: test.ci
+test.ci:
+	# skip callRestylers because it requires docker
+	stack test --test-arguments "--skip callRestylers"
 
 .PHONY: config/revision
 config/revision:
@@ -57,16 +59,6 @@ image.build: config/revision
 
 .PHONY: image.release
 image.release:
-	@docker login \
-	  --username "$(DOCKER_USERNAME)" \
-	  --password "$(DOCKER_PASSWORD)" \
-	  "$(RELEASE_REGISTRY)" || echo "docker login failed, release may fail."
-	docker tag "$(LOCAL_IMAGE)" "$(RELEASE_IMAGE)"
-	docker push "$(RELEASE_IMAGE)"
-
-.PHONY: image.release.backend
-image.release.backend: RELEASE_IMAGE=restyled/restyled
-image.release.backend:
 	docker tag "$(LOCAL_IMAGE)" "$(RELEASE_IMAGE)"
 	docker push "$(RELEASE_IMAGE)"
 
