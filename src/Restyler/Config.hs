@@ -37,6 +37,7 @@ defaultConfig = Config
     { cEnabled = True
     , cRestylers =
         [ namedRestyler' "stylish-haskell"
+        , namedRestyler' "prettier"
         ]
     }
   where
@@ -52,7 +53,6 @@ allRestylers =
         , rInclude = ["**/*.hs"]
         }
     , Restyler
-        -- N.B. doesn't work yet, but makes tests read more realistically
         { rName = "prettier"
         , rCommand = "prettier"
         , rArguments = ["--write"]

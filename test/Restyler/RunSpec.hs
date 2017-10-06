@@ -11,18 +11,12 @@ import qualified Data.Text.IO as T
 spec :: Spec
 spec = around (withSystemTempDirectory "") $ do
     describe "callRestylers" $ do
-        it "restyles changed files based on config" $ \dir -> do
+        it "restyles haskell files" $ \dir -> do
             setupGitRepo dir
-
-            -- Default config runs stylish-haskell on .hs files
-            T.writeFile "Foo.hs" $ dedent [st|
+            setupCommittedFile "Foo.hs" $ dedent [st|
             {-# LANGUAGE OverloadedStrings, RecordWildcards
             #-}
             |]
-
-            callProcess "git" ["add", "Foo.hs"]
-            callProcess "git" ["checkout", "--quiet", "-b", "develop"]
-            callProcess "git" ["commit", "--quiet", "--message", "Write code"]
 
             result <- callRestylers "master"
             result `shouldBe` Right ()
@@ -36,3 +30,35 @@ spec = around (withSystemTempDirectory "") $ do
                 [ "+{-# LANGUAGE OverloadedStrings #-}"
                 , "+{-# LANGUAGE RecordWildcards   #-}"
                 ]
+
+        it "restyles javascript files" $ \dir -> do
+            setupGitRepo dir
+            setupCommittedFile "foo.js" $ dedent [st|
+            matrix(
+              1, 0, 0,
+              0, 1, 0,
+              0, 0, 1
+            )
+            |]
+
+            result <- callRestylers "master"
+            result `shouldBe` Right ()
+
+            output <- lines <$> readProcess "git" ["diff"] ""
+            output `shouldContain`
+                [ "-matrix("
+                , "-  1, 0, 0,"
+                , "-  0, 1, 0,"
+                , "-  0, 0, 1"
+                , "-)"
+                ]
+            output `shouldContain`
+                [ "+matrix(1, 0, 0, 0, 1, 0, 0, 0, 1);"
+                ]
+
+setupCommittedFile :: FilePath -> Text -> IO ()
+setupCommittedFile name content = do
+    T.writeFile name content
+    callProcess "git" ["add", name]
+    callProcess "git" ["checkout", "--quiet", "-b", "develop"]
+    callProcess "git" ["commit", "--quiet", "--message", "Write code"]
