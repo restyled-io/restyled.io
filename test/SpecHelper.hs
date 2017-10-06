@@ -29,7 +29,7 @@ setupGitRepo dir = do
 --
 setupGitTrackedFile :: FilePath -> Text -> Maybe String -> IO ()
 setupGitTrackedFile name content mbranch = do
-    T.writeFile name $ dedent content
+    T.writeFile name content
 
     for_ mbranch $ \branch ->
         callProcess "git" ["checkout", "--quiet", "-b", branch]
@@ -37,18 +37,21 @@ setupGitTrackedFile name content mbranch = do
     callProcess "git" ["add", name]
     callProcess "git" ["commit", "--quiet", "--message", "Write code"]
 
+-- | Dedent content
+--
+-- N.B. assumes an initial "\n" and trailing quote-end, which is what happens
+-- when you use the st quasi-quoter in the following style:
+--
+-- > [st|
+-- >   some code
+-- >   some code
+-- >   |]
+--
+-- In other words, do not use this on (e.g.) @\"Some text\n\"@
+--
 dedent :: Text -> Text
 dedent t = T.unlines $ map (T.drop $ indent lns) lns
   where
-    -- | N.B. assumes an initial "\n" and trailing quote-end
-    --
-    -- > [st|
-    -- >   some code
-    -- >   some code
-    -- >   |]
-    --
-    -- This should really use a parser.
-    --
     lns = dropEnd $ T.lines $ T.drop 1 t
     dropEnd = reverse . drop 1 . reverse
 

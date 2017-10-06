@@ -9,8 +9,8 @@ import Restyler.Run
 
 spec :: Spec
 spec = around (withSystemTempDirectory "") $ do
-    context "Default configuration" $ do
-        describe "callRestylers" $ do
+    describe "callRestylers" $ do
+        context "Default configuration" $ do
             it "restyles Haskell" $ restylerTestCase "Foo.hs"
                 [st|
                     {-# LANGUAGE OverloadedStrings, RecordWildcards
@@ -41,9 +41,12 @@ spec = around (withSystemTempDirectory "") $ do
 restylerTestCase :: FilePath -> Text -> [String] -> FilePath -> Expectation
 restylerTestCase name content changes dir = do
     setupGitRepo dir
-    setupGitTrackedFile name content $ Just "develop"
+    setupGitTrackedFile name (dedent content) $ Just "develop"
+    callRestylers "master" `shouldProduceDiff` changes
 
-    result <- callRestylers "master"
+shouldProduceDiff :: IO (Either String ()) -> [String] -> Expectation
+shouldProduceDiff call changes = do
+    result <- call
     result `shouldBe` Right ()
 
     output <- lines <$> readProcess "git" ["diff"] ""
