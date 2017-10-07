@@ -5,24 +5,22 @@
 {-# LANGUAGE RecordWildCards #-}
 module Settings where
 
-import ClassyPrelude.Yesod hiding (Builder, throw)
+import ClassyPrelude.Yesod hiding (Proxy, throw)
 
-import Data.Text.Internal.Builder (Builder, toLazyText)
+import Data.Proxy
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..))
-import GitHub.Model (GitHubId(..))
+import GitHub.Data
+import GitHub.Data.Apps
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.PGDatabaseURL (parsePGConnectionString)
 import Network.RedisURL (parseRedisURL)
 import Network.Wai.Handler.Warp (HostPreference)
-import Text.Shakespeare (RenderUrl)
 import Yesod.Default.Util (widgetFileNoReload, widgetFileReload)
 
 import qualified Data.ByteString.Char8 as C8
 import qualified Data.Text as T
-import qualified Data.Text.Lazy as LT
 import qualified Env
-import qualified Text.Shakespeare.Text as ST
 
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
@@ -34,9 +32,10 @@ data AppSettings = AppSettings
     , appLogLevel :: LogLevel
     , appMutableStatic :: Bool
     , appCopyright :: Text
-    , appGitHubAppId :: GitHubId
+    , appGitHubAppId :: Id App
     , appGitHubAppKey :: Text
-    , appRestylerExecutable :: FilePath
+    , appRestylerImage :: String
+    , appRestylerTag :: Maybe String
     }
 
 instance Show AppSettings where
@@ -46,7 +45,6 @@ instance Show AppSettings where
         , " port=", show appPort
         , " root=", show appRoot
         , " db=[", C8.unpack $ pgConnStr appDatabaseConf, "]"
-        , " restyler=", appRestylerExecutable
         ]
 
 type EnvParser a = forall e.
@@ -66,9 +64,10 @@ envSettings = AppSettings
     <*> envLogLevel
     <*> Env.switch "MUTABLE_STATIC" mempty
     <*> pure "Patrick Brisbin 2017"
-    <*> (GitHubId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
+    <*> (mkId Proxy <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
     <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
-    <*> Env.var Env.str "RESTYLER_EXECUTABLE" (Env.def ".stack-work/dist/x86_64-linux-nopie/Cabal-1.24.2.0/build/restyler/restyler")
+    <*> Env.var Env.str "RESTYLER_IMAGE" (Env.def "restyled/restyler")
+    <*> optional (Env.var Env.str "RESTYLER_TAG" mempty)
 
 envDatabaseConfig :: EnvParser PostgresConf
 envDatabaseConfig = PostgresConf
@@ -105,18 +104,6 @@ allowsLevel AppSettings{..} = (>= appLogLevel)
 
 widgetFile :: String -> Q Exp
 widgetFile = (if development then widgetFileReload else widgetFileNoReload) def
-
--- | Sugar for the various @'Text'@ transformations need with @'textFile'@
-fromTextTemplate :: (t -> Builder) -> t -> Text
-fromTextTemplate t = toStrict . toLazyText . t
-
-textFile :: FilePath -> Q Exp
-textFile = ST.textFile
--- ^ if this works, then why is this ill-typed?
--- textFile = if development then ST.textFileReload else ST.textFile
-
-renderTextUrl :: RenderUrl url -> ST.TextUrl url -> LT.Text
-renderTextUrl = ST.renderTextUrl
 
 development :: Bool
 development =

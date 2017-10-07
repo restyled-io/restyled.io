@@ -5,9 +5,6 @@ RELEASE_IMAGE ?= $(LOCAL_IMAGE)
 DOCKER_USERNAME ?= x
 DOCKER_PASSWORD ?= x
 
-ALL_RESTYLERS         ?= $(wildcard restylers/*)
-RESTYLER_IMAGE_PREFIX ?= restyled/restyler-
-
 # https://stackoverflow.com/questions/19232784/how-to-correctly-escape-sign-when-using-pattern-rules-and-patsubst-in-gnu-ma
 PERCENT = %
 
@@ -39,11 +36,6 @@ lint:
 test:
 	stack test
 
-.PHONY: test.ci
-test.ci:
-	# skip callRestylers because it requires docker
-	stack test --test-arguments "--skip callRestylers"
-
 .PHONY: config/revision
 config/revision:
 	printf "$(PERCENT)s - $(PERCENT)s\n" \
@@ -65,16 +57,3 @@ image.release:
 	  echo "docker login failed, release may fail."
 	docker tag "$(LOCAL_IMAGE)" "$(RELEASE_IMAGE)"
 	docker push "$(RELEASE_IMAGE)"
-
-.PHONY: restylers
-restylers: $(ALL_RESTYLERS)
-	@for r in $^; do \
-	  (cd "$$r" && \
-	    docker build --tag "$(RESTYLER_IMAGE_PREFIX)$$(basename "$$r")" .); \
-	done
-
-.PHONY: restylers.release
-restylers.release: $(ALL_RESTYLERS)
-	@for r in $^; do \
-	  docker push "$(RESTYLER_IMAGE_PREFIX)$$(basename "$$r")"; \
-	done

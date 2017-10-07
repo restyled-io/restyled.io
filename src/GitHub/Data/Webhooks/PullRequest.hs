@@ -1,29 +1,28 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GitHub.Webhooks.PullRequest
+module GitHub.Data.Webhooks.PullRequest
     ( Action(..)
     , Payload(..)
     ) where
 
-import ClassyPrelude
-
 import Data.Aeson
-import GitHub.Model
+import Data.Text (Text)
+import GitHub.Data
+import GitHub.Data.Apps
 
-data Action = Opened | Closed deriving (Eq, Show)
+-- | We only care about Opened so far
+data Action = Opened | Other Text deriving (Eq, Show)
 
 instance FromJSON Action where
     parseJSON = withText "PullRequest.Action" $ \case
         "opened" -> pure Opened
-        "closed" -> pure Closed
-        _ -> mzero
+        t -> pure $ Other t
 
 data Payload = Payload
     { pAction :: Action
     , pPullRequest :: PullRequest
-    , pRepository :: Repository
-    , pInstallationId :: GitHubId
+    , pRepository :: Repo
+    , pInstallationId :: Id Installation
     }
     deriving Show
 
