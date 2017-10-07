@@ -6,23 +6,18 @@ module Handler.Webhooks where
 
 import Import
 
-import GitHub.Model
-import GitHub.Webhooks.PullRequest
+import GitHub.Data
+import GitHub.Data.Webhooks.PullRequest
 import Restyler.Job
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
-    payload <- requireJsonBody
+    payload@Payload{..} <- requireJsonBody
     $(logDebug) $ "Webhook payload received: " <> tshow payload
 
     if acceptPayload payload
         then do
-            let job = Job
-                    { jInstallationId = pInstallationId payload
-                    , jRepository = pRepository payload
-                    , jPullRequest = pPullRequest payload
-                    }
-
+            job <- newJob pInstallationId pRepository pPullRequest
             $(logDebug) $ "Enqueuing Restyler Job: " <> tshow job
             flip enqueueRestylerJob job =<< getsYesod appRedisConn
             sendResponseStatus status201 ()
@@ -31,7 +26,18 @@ postWebhooksR = do
             sendResponseStatus status200 ()
 
 acceptPayload :: Payload -> Bool
-acceptPayload Payload{..} =
-    pAction == Opened && not ("-restyled" `isSuffixOf` branchName)
+acceptPayload Payload{..}
+    -- For now, we only operate when first opened
+    | pAction /= Opened = False
+
+    -- Avoid infinite loop (best-effort)
+    | "-restyled" `isSuffixOf` branchName = False
+
+    -- Always process Public
+    | not $ repoPrivate pRepository = True
+
+    -- TODO: check subscription for private repositories
+    | otherwise = False
+
   where
-    branchName = unBranch $ rrRef $ prHead pPullRequest
+    branchName = pullRequestCommitRef $ pullRequestHead pPullRequest

@@ -18,8 +18,6 @@ COPY app /src/app
 COPY src /src/src
 COPY templates /src/templates
 COPY backend /src/backend
-COPY restyler /src/restyler
-COPY ops /src/ops
 
 COPY config /src/config
 COPY static /src/static
@@ -39,14 +37,12 @@ ENV GIT_AUTHOR_EMAIL commits@restyled.io
 ENV GIT_AUTHOR_NAME Restyled.io
 ENV GIT_COMMITTER_EMAIL commits@restyled.io
 ENV GIT_COMMITTER_NAME Restyled.io
-ENV RESTYLER_EXECUTABLE /app/restyler
 
 RUN mkdir -p /app
 WORKDIR /app
 
 COPY --from=builder /root/.local/bin/restyled.io /app/restyled.io
 COPY --from=builder /root/.local/bin/restyled.io-backend /app/restyled.io-backend
-COPY --from=builder /root/.local/bin/restyler /app/restyler
 COPY --from=builder /src/config /app/config
 COPY --from=builder /src/static /app/static
 

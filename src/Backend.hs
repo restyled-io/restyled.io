@@ -11,12 +11,12 @@ import Import
 
 import Control.Monad.Logger
 import Database.Redis (Connection, checkedConnect)
-import GitHub.Model
+import GitHub.Data (toPathPart)
 import LoadEnv (loadEnv)
 import Restyler.Job
 import System.Exit (ExitCode(..))
-import System.Process (readProcessWithExitCode)
 import System.IO (BufferMode(..), hSetBuffering)
+import System.Process (readProcessWithExitCode)
 
 backendMain :: IO ()
 backendMain = do
@@ -40,19 +40,26 @@ awaitAndProcessJob AppSettings{..} conn timeout = do
     for_ mjob $ \job@Job{..} -> do
         $(logInfo) $ "Running Restyler Job: " <> tshow job
 
-        let restylerArguments =
-                [ "--github-app-id", unpack $ toPathPiece appGitHubAppId
+        let
+            restylerImage :: String
+            restylerImage = appRestylerImage ++ maybe "" (":" ++) appRestylerTag
+
+            restylerArguments :: [String]
+            restylerArguments =
+                [ "--github-app-id", unpack $ toPathPart appGitHubAppId
                 , "--github-app-key", unpack appGitHubAppKey
-                , "--installation-id", unpack $ toPathPiece jInstallationId
-                , "--repository", unpack $ toPathPiece $ rFullName jRepository
-                , "--pull-request", unpack $ toPathPiece $ prNumber jPullRequest
+                , "--installation-id", unpack $ toPathPart jInstallationId
+                , "--owner", unpack $ toPathPart jOwner
+                , "--repo", unpack $ toPathPart jRepo
+                , "--pull-request", unpack $ toPathPart jPullRequest
                 , "--restyled-root", unpack appRoot
                 ]
 
-        $(logDebug) $ "exec " <> tshow (appRestylerExecutable:restylerArguments)
+        $(logDebug) $ "exec " <> tshow (restylerImage:restylerArguments)
 
         (ec, out, err) <- liftIO $
-            readProcessWithExitCode appRestylerExecutable restylerArguments ""
+            readProcessWithExitCode "docker"
+                (["run", "--rm", restylerImage] ++ restylerArguments) ""
 
         case ec of
             ExitSuccess -> $(logDebug) $ pack $ unlines

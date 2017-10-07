@@ -7,7 +7,6 @@ dependencies:
 
 library:
   dependencies:
-  - Glob
   - HTTP
   - aeson
   - bytestring
@@ -16,32 +15,26 @@ library:
   - classy-prelude-yesod
   - conduit
   - containers
-  - directory
   - envparse
   - fast-logger
   - file-embed
+  - github
   - gitrev
   - hedis
   - hjsmin
   - http-client
-  - http-client-tls
   - http-conduit
   - http-types
-  - jwt
   - load-env
   - monad-control
   - monad-logger
-  - mtl
   - network-uri
-  - optparse-applicative
   - persistent
   - persistent-postgresql
   - persistent-template
   - process
-  - safe
   - shakespeare
   - template-haskell
-  - temporary
   - text
   - time
   - unordered-containers
@@ -50,7 +43,6 @@ library:
   - wai-extra
   - wai-logger
   - warp
-  - yaml
   - yesod
   - yesod-core
   - yesod-form
@@ -91,38 +83,6 @@ executables:
     dependencies:
     - restyled
 
-  restyler:
-    main: main.hs
-    source-dirs: restyler
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - restyled
-
-  ops:
-    main: main.hs
-    source-dirs: ops
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - aeson
-    - aeson-qq
-    - amazonka
-    - amazonka-cloudformation
-    - amazonka-core
-    - bytestring
-    - containers
-    - lens
-    - optparse-applicative
-    - optparse-generic
-    - stratosphere
-    - text
-    - unordered-containers
-
 tests:
   test:
     main: Spec.hs
@@ -132,14 +92,11 @@ tests:
     - restyled
     - bytestring
     - classy-prelude
-    - directory
     - hspec
     - hspec-expectations-lifted
     - load-env
     - persistent
-    - process
     - shakespeare
-    - temporary
     - text
     - yesod-core
     - yesod-test
