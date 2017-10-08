@@ -101,6 +101,19 @@ executables:
     dependencies:
     - restyled
 
+  ops:
+    main: main.hs
+    source-dirs: ops
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - aeson
+    - bytestring
+    - stratosphere
+    - text
+
 tests:
   test:
     main: Spec.hs
