@@ -59,6 +59,10 @@ image.build: config/revision
 
 .PHONY: image.release
 image.release:
+	@docker login \
+	  --username "$(DOCKER_USERNAME)" \
+	  --password "$(DOCKER_PASSWORD)" || \
+	  echo "docker login failed, release may fail."
 	docker tag "$(LOCAL_IMAGE)" "$(RELEASE_IMAGE)"
 	docker push "$(RELEASE_IMAGE)"
 
