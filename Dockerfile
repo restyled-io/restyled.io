@@ -59,5 +59,6 @@ RUN \
 RUN useradd app
 USER app
 
-ENTRYPOINT []
+COPY docker/files /
+ENTRYPOINT ["/entrypoint"]
 CMD ["/app/restyled.io"]
