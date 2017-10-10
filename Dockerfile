@@ -19,6 +19,7 @@ COPY src /src/src
 COPY templates /src/templates
 COPY backend /src/backend
 COPY restyler /src/restyler
+COPY ops /src/ops
 
 COPY config /src/config
 COPY static /src/static
