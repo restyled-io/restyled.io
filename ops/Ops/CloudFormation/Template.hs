@@ -31,7 +31,7 @@ cfTemplate env = template
 
         -- Secrets need to be specified every time
         , parameter "GitHubAppId" "Number"
-        , parameter "GitHubAppKey" "String"
+        , parameter "GitHubAppKeyBase64" "String"
 
         -- TODO: Setup RDS and ElastiCache in template
         , parameter "DatabaseURL" "String"

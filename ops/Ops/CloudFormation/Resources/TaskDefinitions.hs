@@ -41,8 +41,8 @@ taskDefinitionResources env =
                         & ecstdkvpName ?~ "GITHUB_APP_ID"
                         & ecstdkvpValue ?~ Ref "GitHubAppId"
                     , ecsTaskDefinitionKeyValuePair
-                        & ecstdkvpName ?~ "GITHUB_APP_KEY"
-                        & ecstdkvpValue ?~ Ref "GitHubAppKey"
+                        & ecstdkvpName ?~ "GITHUB_APP_KEY_BASE64"
+                        & ecstdkvpValue ?~ Ref "GitHubAppKeyBase64"
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "LOG_LEVEL"
                         & ecstdkvpValue ?~ Literal (envAppsLogLevel env)
@@ -97,8 +97,8 @@ taskDefinitionResources env =
                         & ecstdkvpName ?~ "GITHUB_APP_ID"
                         & ecstdkvpValue ?~ Ref "GitHubAppId"
                     , ecsTaskDefinitionKeyValuePair
-                        & ecstdkvpName ?~ "GITHUB_APP_KEY"
-                        & ecstdkvpValue ?~ Ref "GitHubAppKey"
+                        & ecstdkvpName ?~ "GITHUB_APP_KEY_BASE64"
+                        & ecstdkvpValue ?~ Ref "GitHubAppKeyBase64"
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "LOG_LEVEL"
                         & ecstdkvpValue ?~ Literal (envAppsLogLevel env)
