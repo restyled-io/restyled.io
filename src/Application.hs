@@ -102,7 +102,7 @@ makeApplication foundation = do
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation = mkRequestLogger def
     { outputFormat = if appSettings foundation `allowsLevel` LevelDebug
-        then Detailed True
+        then Detailed development
         else Apache apacheIpSource
     , destination = if appSettings foundation `allowsLevel` LevelInfo
         then Logger $ loggerSet $ appLogger foundation
