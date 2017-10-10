@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# This is a bit of a yak... Cloud Formation doesn't allow multi-line values in
+# Stack parameters. Since we want to inject secrets via Stack parameters, they
+# can't contain newlines. But GITHUB_APP_KEY needs newlines...
+#
+# This entrypoint solves this in a (slightly) generic way: it looks for
+# environment variables that end in _BASE64, which are assumed to hold base64
+# encoded (i.e. newline-free) content destined for the un-suffixed version of
+# the same environment variable. The entrypoint decodes and sets these variables
+# before proceeding with normal container startup, so the application code
+# doesn't need to know about or support this translation.
+#
+###
+env | sed '/\(.*\)_BASE64=\(.*\)/!d; s//\1 \2/g' | while read -r k v; do
+  printf "Exporting decoded %s from %s_BASE64...\n" "$k" "$k" >&2
+  export ${!k}=$(base64 -d "$v")
+done
+
+exec "$@"
