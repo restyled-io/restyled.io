@@ -13,8 +13,7 @@ import Stratosphere
 -- - Parameter ref: ImageTag
 -- - Parameter ref: DatabaseURL
 -- - Parameter ref: RedisURL
--- - Parameter ref: GitHubAppId
--- - Parameter ref: GitHubAppKey
+-- - Parameter ref: GitHubAppId - Parameter ref: GitHubAppKey
 --
 taskDefinitionResources :: Environment -> Resources
 taskDefinitionResources env =
@@ -82,6 +81,7 @@ taskDefinitionResources env =
             [ ecsTaskDefinitionContainerDefinition
                 (Join ":" ["restyled/restyled", Ref "ImageTag"])
                 (envPrefix env "Backend")
+                & ecstdcdUser ?~ "root" -- access to Docker deamon
                 & ecstdcdCommand ?~ ["/app/restyled.io-backend"]
                 & ecstdcdEnvironment ?~
                     [ ecsTaskDefinitionKeyValuePair
