@@ -58,7 +58,7 @@ taskDefinitionResources env =
                     & ecstdlcOptions ?~
                         [ ("awslogs-group", String $ envPrefixT env "Apps")
                         , ("awslogs-region", "us-east-1")
-                        , ("awslogs-stream-prefix", String $ "App")
+                        , ("awslogs-stream-prefix", String "App")
                         ])
             ]
         )
@@ -117,7 +117,7 @@ taskDefinitionResources env =
                     & ecstdlcOptions ?~
                         [ ("awslogs-group", String $ envPrefixT env "Apps")
                         , ("awslogs-region", "us-east-1")
-                        , ("awslogs-stream-prefix", String $ "Backend")
+                        , ("awslogs-stream-prefix", String "Backend")
                         ])
             ]
         )
