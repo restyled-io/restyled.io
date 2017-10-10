@@ -12,9 +12,12 @@
 # doesn't need to know about or support this translation.
 #
 ###
+tmp=$(mktemp)
+
 env | sed '/\(.*\)_BASE64=\(.*\)/!d; s//\1 \2/g' | while read -r k v; do
   printf "Exporting decoded %s from %s_BASE64...\n" "$k" "$k" >&2
-  export ${!k}=$(base64 -d "$v")
+  printf "export %s=\"%s\"\n" "$k" "$(base64 -d <<< "$v")" >> "$tmp"
 done
 
+source "$tmp"
 exec "$@"
