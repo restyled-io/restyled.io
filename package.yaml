@@ -110,7 +110,12 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - aeson
+    - amazonka
+    - amazonka-cloudformation
+    - base64-bytestring
     - bytestring
+    - lens
+    - optparse-applicative
     - stratosphere
     - text
 
