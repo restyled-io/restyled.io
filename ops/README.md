@@ -58,7 +58,8 @@ Update an existing Stack's template.
 
 Accepts the same arguments as `template` and a `--stack-name`. **NOTE**: any
 options left out will revert to defaults for the environment; they will not
-preserve existing values, as one might expect.
+preserve existing values, as one might expect. This is equivalent to a call to
+`template`, then a programmatic up of the Stack to use it.
 
 ### `update-stack-parameters`
 

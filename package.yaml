@@ -112,6 +112,7 @@ executables:
     - aeson
     - amazonka
     - amazonka-cloudformation
+    - amazonka-core
     - base64-bytestring
     - bytestring
     - lens

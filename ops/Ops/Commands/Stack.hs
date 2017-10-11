@@ -26,6 +26,7 @@ import Stratosphere
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Network.AWS.CloudFormation as AWS
+import qualified Network.AWS.Waiter as AWS
 
 data CreateParameters = CreateParameters
     { cpStackName :: Text
@@ -62,7 +63,7 @@ createParameterOptions = CreateParameters
         ))
 
 data StackUpdate
-    = TemplateUpdate TemplateOptions
+    = TemplateUpdate Text TemplateOptions
     | ParameterUpdate UpdateParameters
 
 data UpdateParameters = UpdateParameters
@@ -77,7 +78,12 @@ data UpdateParameters = UpdateParameters
     }
 
 updateTemplateOptions :: Parser StackUpdate
-updateTemplateOptions = TemplateUpdate <$> templateOptions
+updateTemplateOptions = TemplateUpdate
+    <$> (T.pack <$> strOption
+        (  long "stack-name"
+        <> help "Name of Stack to update"
+        ))
+    <*> templateOptions
 
 updateParameterOptions :: Parser StackUpdate
 updateParameterOptions = ParameterUpdate <$>
@@ -145,12 +151,38 @@ createStack' env CreateParameters{..} = do
                 & AWS.pParameterValue ?~ cpRedisURL
             ]
 
-    putStrLn "Stack create complete"
-    putStrLn $ "Response Status: " ++ show (rsp ^. AWS.csrsResponseStatus)
-    putStrLn $ "       Stack Id: " ++ show (rsp ^. AWS.csrsStackId)
+    print $ rsp ^. AWS.csrsResponseStatus
+    print $ rsp ^. AWS.csrsStackId
+    putStrLn "Awaiting..."
+
+    accept <- awaitAWS AWS.stackCreateComplete
+        $ AWS.describeStacks
+        & AWS.dStackName ?~ cpStackName
+
+    print accept
 
 updateStack :: StackUpdate -> IO ()
-updateStack (TemplateUpdate _) = undefined
+updateStack (TemplateUpdate stackName tops) = do
+    rsp <- runAWS
+        $ AWS.updateStack stackName
+        & AWS.usTemplateBody ?~ lbsToText (encodeTemplate $ cfTemplate env)
+        & AWS.usParameters .~
+            [ toParameter "GitHubAppId" Nothing
+            , toParameter "GitHubAppKeyBase64" Nothing
+            , toParameter "DatabaseURL" Nothing
+            , toParameter "RedisURL" Nothing
+            , toParameter "ImageTag" Nothing
+            , toParameter "AppServiceCount" Nothing
+            , toParameter "BackendServiceCount" Nothing
+            ]
+
+    print =<< awaitUpdate rsp stackName
+  where
+    env = case tops of
+        Staging -> stagingEnv
+        Prod -> prodEnv
+        Custom e -> e
+
 updateStack (ParameterUpdate UpdateParameters{..}) = do
     key <- mapM readFileBase64 upGitHubAppKey
     rsp <- runAWS
@@ -166,22 +198,29 @@ updateStack (ParameterUpdate UpdateParameters{..}) = do
             , toParameter "BackendServiceCount" $ T.pack . show <$> upBackendServiceCount
             ]
 
-    putStrLn "Stack update complete"
-    putStrLn $ "Response Status: " ++ show (rsp ^. AWS.usrsResponseStatus)
-    putStrLn $ "       Stack Id: " ++ show (rsp ^. AWS.usrsStackId)
-  where
-    toParameter :: Text -> Maybe Text -> AWS.Parameter
-    toParameter k Nothing = AWS.parameter
-        & AWS.pParameterKey ?~ k
-        & AWS.pUsePreviousValue ?~ True
-    toParameter k (Just v) = AWS.parameter
-        & AWS.pParameterKey ?~ k
-        & AWS.pParameterValue ?~ v
+    print =<< awaitUpdate rsp upStackName
 
 readFileBase64 :: FilePath -> IO Text
 readFileBase64 fp = T.filter isSpace . encodeT <$> T.readFile fp
   where
     encodeT = decodeUtf8 . encode . encodeUtf8
+
+toParameter :: Text -> Maybe Text -> AWS.Parameter
+toParameter k Nothing = AWS.parameter
+    & AWS.pParameterKey ?~ k
+    & AWS.pUsePreviousValue ?~ True
+toParameter k (Just v) = AWS.parameter
+    & AWS.pParameterKey ?~ k
+    & AWS.pParameterValue ?~ v
+
+awaitUpdate :: AWS.UpdateStackResponse -> Text -> IO AWS.Accept
+awaitUpdate rsp stackName = do
+    print $ rsp ^. AWS.usrsResponseStatus
+    print $ rsp ^. AWS.usrsStackId
+    putStrLn "Awaiting..."
+    awaitAWS AWS.stackUpdateComplete
+        $ AWS.describeStacks
+        & AWS.dStackName ?~ stackName
 
 lbsToText :: ByteString -> Text
 lbsToText = decodeUtf8 . toStrict
