@@ -64,4 +64,33 @@ albResources env =
         & rrsAliasTarget ?~ route53RecordSetAliasTarget
             (GetAtt "ALB" "DNSName")
             (GetAtt "ALB" "CanonicalHostedZoneID")
+    , resource "HealthCheck"
+        $ Route53HealthCheckProperties
+        $ route53HealthCheck
+        ( route53HealthCheckHealthCheckConfig "HTTPS"
+            & rhchccFullyQualifiedDomainName ?~ Literal (envDomain env)
+            & rhchccResourcePath ?~ "/revision"
+        )
+        & rhcHealthCheckTags ?~
+            [ route53HealthCheckHealthCheckTag "Name" $ envPrefix env "Up"
+            ]
+    , resource "HealthCheckAlarm"
+        $ CloudWatchAlarmProperties
+        $ cloudWatchAlarm
+            "LessThanThreshold"
+            (Literal 1)         -- evaluate over 1 period
+            "HealthCheckStatus"
+            "AWS/Route53"
+            (Literal 60)        -- check every 60s
+            (Literal 1)         -- less than this many OK statuses
+        & cwaAlarmName ?~ envPrefix env "Up"
+        & cwaAlarmDescription ?~ Literal (envFQDN env <> " is up")
+        & cwaDimensions ?~
+            [ cloudWatchAlarmDimension "HealthCheckId" $ Ref "HealthCheck"
+            ]
+        & cwaStatistic ?~ "Minimum"
+        & cwaAlarmActions ?~
+            -- Stratosphere doesn't have Sub yet
+            [ Join "" ["arn:aws:sns:", Ref "AWS::Region", ":", Ref "AWS::AccountId", ":NotifyMe"]
+            ]
     ]
