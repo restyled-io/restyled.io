@@ -41,8 +41,8 @@ set of options for configuring the template:
 
 Create a Cloud Formation Stack from our template.
 
-Accepts the same environment name (or options) as `template`, the stack name
-and, and all non-defaulted parameters:
+Accepts the same environment name (or options) as `template`, the stack name,
+all non-defaulted parameters:
 
 ```
 --stack-name RestylerStaging
@@ -88,10 +88,10 @@ omitted options will preserve existing values.
 AWS infrastructure, so we only have to override the values that matter.
 
 ```console
-stack exec ops -- create-stack custom
-  --name Beta
-  --subdomain beta
-  --image-tag my-feature
+stack exec ops -- create-stack custom \
+  --name Beta \
+  --subdomain beta \
+  --image-tag my-feature \
   --github-app-id 1234 \
   --github-app-key ~/downloads/restyled-io-beta.2017-09-27.private-key.pem \
   --database-url postgres://<snip> \
