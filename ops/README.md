@@ -45,7 +45,7 @@ Accepts the same environment name (or options) as `template`, the stack name,
 all non-defaulted parameters:
 
 ```
---stack-name RestylerStaging
+--stack-name RestyledStaging
 --github-app-id 5851
 --github-app-key ~/downloads/restyled-io-staging.2017-09-27.private-key.pem
 --database-url postgres://...
@@ -70,7 +70,7 @@ non-defaulted parameters (like `create-stack`). Unlike `update-stack-template`,
 omitted options will preserve existing values.
 
 ```
---stack-name RestylerStaging
+--stack-name RestyledStaging
 --image-tag latest
 --app-count 3
 --backend-count 5
