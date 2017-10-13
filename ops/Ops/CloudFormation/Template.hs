@@ -9,6 +9,7 @@ import Ops.CloudFormation.Environment
 import Ops.CloudFormation.Resources.ALB
 import Ops.CloudFormation.Resources.AppsCluster
 import Ops.CloudFormation.Resources.AppsServices
+import Ops.CloudFormation.Resources.DataStores
 import Ops.CloudFormation.Resources.Network
 import Ops.CloudFormation.Resources.TaskDefinitions
 import Stratosphere
@@ -16,6 +17,7 @@ import Stratosphere
 cfTemplate :: Environment -> Template
 cfTemplate env = template
     (  networkResources env
+    <> dataStoreResources env
     <> albResources env
     <> appsClusterResources env
     <> appsServicesResources env
@@ -30,11 +32,12 @@ cfTemplate env = template
             & default' ?~ toJSON (envBackendServiceCount env)
 
         -- Secrets need to be specified every time
+        , parameter "DBUsername" "String"
+        , parameter "DBPassword" "String"
         , parameter "GitHubAppId" "Number"
         , parameter "GitHubAppKeyBase64" "String"
 
-        -- TODO: Setup RDS and ElastiCache in template
-        , parameter "DatabaseURL" "String"
+        -- TODO: Setup ElastiCache in template
         , parameter "RedisURL" "String"
         ]
     & outputs ?~

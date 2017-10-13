@@ -5,15 +5,18 @@ module Ops.CloudFormation.Resources.TaskDefinitions
     ) where
 
 import Data.Aeson (Value(..))
+import Data.Text (Text)
 import Ops.CloudFormation.Environment
 import Stratosphere
 
 -- References:
 --
 -- - Parameter ref: ImageTag
--- - Parameter ref: DatabaseURL
+-- - Parameter ref: DBUsername
+-- - Parameter ref: DBPassword
 -- - Parameter ref: RedisURL
--- - Parameter ref: GitHubAppId - Parameter ref: GitHubAppKey
+-- - Parameter ref: GitHubAppId
+-- - Parameter ref: GitHubAppKeyBase64
 --
 taskDefinitionResources :: Environment -> Resources
 taskDefinitionResources env =
@@ -32,7 +35,7 @@ taskDefinitionResources env =
                         & ecstdkvpValue ?~ ""
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "DATABASE_URL"
-                        & ecstdkvpValue ?~ Ref "DatabaseURL"
+                        & ecstdkvpValue ?~ databaseURL env
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "REDIS_URL"
                         & ecstdkvpValue ?~ Ref "RedisURL"
@@ -89,7 +92,7 @@ taskDefinitionResources env =
                         & ecstdkvpValue ?~ Literal ("https://" <> envFQDN env)
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "DATABASE_URL"
-                        & ecstdkvpValue ?~ Ref "DatabaseURL"
+                        & ecstdkvpValue ?~ databaseURL env
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "REDIS_URL"
                         & ecstdkvpValue ?~ Ref "RedisURL"
@@ -122,4 +125,14 @@ taskDefinitionResources env =
             ]
         )
         & dependsOn ?~ ["AppsClusterLogGroup"]
+    ]
+
+databaseURL :: Environment -> Val Text
+databaseURL env = Join ""
+    [ "postgres://"
+    , Ref "DBUsername", ":"
+    , Ref "DBPassword", "@"
+    , GetAtt "DB" "Endpoint.Address", ":"
+    , GetAtt "DB" "Endpoint.Port", "/"
+    , Literal $ envDBName env
     ]

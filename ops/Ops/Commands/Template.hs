@@ -77,6 +77,16 @@ customOptions = Custom <$> envOptions
             <> value (T.unpack $ envAppsLogLevel defaultEnv)
             ))
         <*> (T.pack <$> strOption
+            (  long "db-type"
+            <> help "Instance type for RDS instance"
+            <> value (T.unpack $ envDBInstanceType defaultEnv)
+            ))
+        <*> (T.pack <$> strOption
+            (  long "db-size"
+            <> help "Instance size (GB) for RDS instance"
+            <> value (T.unpack $ envDBInstanceSize defaultEnv)
+            ))
+        <*> (T.pack <$> strOption
             (  long "image-tag"
             <> help "Image tag for deployed Apps services"
             <> value (T.unpack $ envImageTag defaultEnv)

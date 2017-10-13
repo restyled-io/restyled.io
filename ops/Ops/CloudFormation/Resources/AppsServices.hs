@@ -27,11 +27,13 @@ appsServicesResources env =
                 & ecsslbTargetGroupArn ?~ Ref "ALBTargetGroup"
             ]
         )
-        & dependsOn ?~ ["ALB"]
+        & dependsOn ?~ ["ALB", "DB"]
     , resource "BackendService"
-        $ ECSServiceProperties
+        ( ECSServiceProperties
         $ ecsService (Ref "BackendTaskDefinition")
         & ecssCluster ?~ Ref "AppsCluster"
         & ecssServiceName ?~ envPrefix env "Backend"
         & ecssDesiredCount ?~ Ref "BackendServiceCount"
+        )
+        & dependsOn ?~ ["DB"]
     ]

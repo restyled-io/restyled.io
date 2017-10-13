@@ -48,7 +48,8 @@ all non-defaulted parameters:
 --stack-name RestyledStaging
 --github-app-id 5851
 --github-app-key ~/downloads/restyled-io-staging.2017-09-27.private-key.pem
---database-url postgres://...
+--db-username ...
+--db-password ...
 --redis-url redis://...
 ```
 
@@ -76,7 +77,8 @@ omitted options will preserve existing values.
 --backend-count 5
 --github-app-id 5851
 --github-app-key ~/downloads/restyled-io-staging.2017-09-27.private-key.pem
---database-url postgres://..
+--db-username ...
+--db-password ...
 --redis-url redis://..
 ```
 
@@ -94,7 +96,8 @@ stack exec ops -- create-stack custom \
   --image-tag my-feature \
   --github-app-id 1234 \
   --github-app-key ~/downloads/restyled-io-beta.2017-09-27.private-key.pem \
-  --database-url postgres://<snip> \
+  --db-username <snip> \
+  --db-password <snip> \
   --redis-url redis://<snip> \
 ```
 

@@ -32,7 +32,8 @@ data CreateParameters = CreateParameters
     { cpStackName :: Text
     , cpGitHubAppId :: Int
     , cpGitHubAppKey :: FilePath
-    , cpDatabaseURL :: Text
+    , cpDBUsername :: Text
+    , cpDBPassword :: Text
     , cpRedisURL :: Text
     }
 
@@ -52,9 +53,12 @@ createParameterOptions = CreateParameters
         <> help "Path to PEM key file for GitHub App"
         )
     <*> (T.pack <$> strOption
-        (  long "database-url"
-        <> metavar "URL"
-        <> help "Connection string to PostgreSQL instance"
+        (  long "db-username"
+        <> help "Master username for RDS instance"
+        ))
+    <*> (T.pack <$> strOption
+        (  long "db-password"
+        <> help "Master password for RDS instance"
         ))
     <*> (T.pack <$> strOption
         (  long "redis-url"
@@ -70,7 +74,8 @@ data UpdateParameters = UpdateParameters
     { upStackName :: Text
     , upGitHubAppId :: Maybe Int
     , upGitHubAppKey :: Maybe FilePath
-    , upDatabaseURL :: Maybe Text
+    , upDBUsername :: Maybe Text
+    , upDBPassword :: Maybe Text
     , upRedisURL :: Maybe Text
     , upImageTag :: Maybe Text
     , upAppServiceCount :: Maybe Int
@@ -102,9 +107,12 @@ updateParameterOptions = ParameterUpdate <$>
         <> help "Path to PEM key file for GitHub App"
         ))
     <*> optional (T.pack <$> strOption
-        (  long "database-url"
-        <> metavar "URL"
-        <> help "Connection string to PostgreSQL instance"
+        (  long "db-username"
+        <> help "Master username for the RDS instance"
+        ))
+    <*> optional (T.pack <$> strOption
+        (  long "db-password"
+        <> help "Master password for the RDS instance"
         ))
     <*> optional (T.pack <$> strOption
         (  long "redis-url"
@@ -144,8 +152,11 @@ createStack' env CreateParameters{..} = do
                 & AWS.pParameterKey ?~ "GitHubAppKeyBase64"
                 & AWS.pParameterValue ?~ key
             , AWS.parameter
-                & AWS.pParameterKey ?~ "DatabaseURL"
-                & AWS.pParameterValue ?~ cpDatabaseURL
+                & AWS.pParameterKey ?~ "DBUsername"
+                & AWS.pParameterValue ?~ cpDBUsername
+            , AWS.parameter
+                & AWS.pParameterKey ?~ "DBPassword"
+                & AWS.pParameterValue ?~ cpDBPassword
             , AWS.parameter
                 & AWS.pParameterKey ?~ "RedisURL"
                 & AWS.pParameterValue ?~ cpRedisURL
@@ -169,7 +180,8 @@ updateStack (TemplateUpdate stackName tops) = do
         & AWS.usParameters .~
             [ toParameter "GitHubAppId" Nothing
             , toParameter "GitHubAppKeyBase64" Nothing
-            , toParameter "DatabaseURL" Nothing
+            , toParameter "DBUsername" Nothing
+            , toParameter "DBPassword" Nothing
             , toParameter "RedisURL" Nothing
             , toParameter "ImageTag" Nothing
             , toParameter "AppServiceCount" Nothing
@@ -191,7 +203,8 @@ updateStack (ParameterUpdate UpdateParameters{..}) = do
         & AWS.usParameters .~
             [ toParameter "GitHubAppId" $ T.pack . show <$> upGitHubAppId
             , toParameter "GitHubAppKeyBase64" key
-            , toParameter "DatabaseURL" upDatabaseURL
+            , toParameter "DBUsername" upDBUsername
+            , toParameter "DBPassword" upDBPassword
             , toParameter "RedisURL" upRedisURL
             , toParameter "ImageTag" upImageTag
             , toParameter "AppServiceCount" $ T.pack . show <$> upAppServiceCount

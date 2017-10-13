@@ -5,6 +5,7 @@ module Ops.CloudFormation.Environment
     , defaultEnv
     , stagingEnv
     , prodEnv
+    , envDBName
     , envFQDN
     , envPrefix
     , envPrefixT
@@ -15,6 +16,7 @@ module Ops.CloudFormation.Environment
 import Data.Monoid ((<>))
 import Data.Text (Text)
 import Stratosphere
+import qualified Data.Text as T
 
 data Environment = Environment
     { envApp :: Text
@@ -28,6 +30,8 @@ data Environment = Environment
     , envAppsClusterInstanceRole :: Text
     , envAppsServiceRole :: Text
     , envAppsLogLevel :: Text
+    , envDBInstanceType :: Text
+    , envDBInstanceSize :: Text -- GB
 
     -- The above attributes get compiled into the template as they should rarely
     -- change between deployments of a given stack. The following attributes
@@ -51,6 +55,8 @@ defaultEnv = Environment
     , envAppsClusterInstanceRole = "ecsInstanceRole"
     , envAppsServiceRole = "ecsServiceRole"
     , envAppsLogLevel = "DEBUG"
+    , envDBInstanceType = "db.t2.micro"
+    , envDBInstanceSize = "5"
     , envImageTag = "latest"
     , envAppServiceCount = 1
     , envBackendServiceCount = 1
@@ -66,14 +72,11 @@ prodEnv :: Environment
 prodEnv = defaultEnv
     { envName = "Prod"
     , envSubdomain = Nothing
-    -- When we're ready to pay
-    -- , envAppsClusterSize =
-    -- , envAppsClusterInstanceType =
     , envAppsLogLevel = "INFO"
-    -- When we're ready to pay
-    -- , envAppServiceCount =
-    -- , envBackendServiceCount =
     }
+
+envDBName :: Environment -> Text
+envDBName = ("restyled_" <>) . T.toLower . envName
 
 envFQDN :: Environment -> Text
 envFQDN Environment{..} = maybe "" (<> ".") envSubdomain <> envDomain
