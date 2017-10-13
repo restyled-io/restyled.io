@@ -68,7 +68,7 @@ albResources env =
         $ Route53HealthCheckProperties
         $ route53HealthCheck
         ( route53HealthCheckHealthCheckConfig "HTTPS"
-            & rhchccFullyQualifiedDomainName ?~ Literal (envDomain env)
+            & rhchccFullyQualifiedDomainName ?~ Literal (envFQDN env)
             & rhchccResourcePath ?~ "/revision"
         )
         & rhcHealthCheckTags ?~

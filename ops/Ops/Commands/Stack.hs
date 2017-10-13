@@ -201,7 +201,7 @@ updateStack (ParameterUpdate UpdateParameters{..}) = do
     print =<< awaitUpdate rsp upStackName
 
 readFileBase64 :: FilePath -> IO Text
-readFileBase64 fp = T.filter isSpace . encodeT <$> T.readFile fp
+readFileBase64 fp = T.filter (not . isSpace) . encodeT <$> T.readFile fp
   where
     encodeT = decodeUtf8 . encode . encodeUtf8
 
