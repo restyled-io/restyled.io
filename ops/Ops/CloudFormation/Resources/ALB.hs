@@ -65,7 +65,7 @@ albResources env =
             (GetAtt "ALB" "DNSName")
             (GetAtt "ALB" "CanonicalHostedZoneID")
     , resource "HealthCheck"
-        $ Route53HealthCheckProperties
+        ( Route53HealthCheckProperties
         $ route53HealthCheck
         ( route53HealthCheckHealthCheckConfig "HTTPS"
             & rhchccFullyQualifiedDomainName ?~ Literal (envFQDN env)
@@ -74,6 +74,8 @@ albResources env =
         & rhcHealthCheckTags ?~
             [ route53HealthCheckHealthCheckTag "Name" $ envPrefix env "Up"
             ]
+        )
+        & dependsOn ?~ ["AppService"]
     , resource "HealthCheckAlarm"
         $ CloudWatchAlarmProperties
         $ cloudWatchAlarm
