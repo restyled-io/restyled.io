@@ -32,6 +32,9 @@ set of options for configuring the template:
 --instance-role ecsInstanceRole
 --service-role ecsServiceRole
 --log-level INFO
+--db-size 1000
+--cache-type t2.medium
+--cache-nodes 3
 --image-tag latest
 --app-count 3
 --backend-count 5
@@ -42,12 +45,12 @@ set of options for configuring the template:
 Create a Cloud Formation Stack from our template.
 
 Accepts the same environment name (or options) as `template`, the stack name,
-all non-defaulted parameters:
+and requires all non-defaulted parameters:
 
 ```
 --stack-name RestyledStaging
---github-app-id 5851
---github-app-key ~/downloads/restyled-io-staging.2017-09-27.private-key.pem
+--github-app-id 12345
+--github-app-key /path/to/key.pem
 --db-username ...
 --db-password ...
 ```
@@ -115,6 +118,10 @@ stack exec ops -- template custom
   --instance-role ecsInstanceRole \
   --service-role ecsServiceRole \
   --log-level INFO \
+  --db-type t2.medium \
+  --db-size 250 \
+  --cache-type t2.medium \
+  --cache-nodes 3 \
   --image-tag latest \
   --app-count 3 \
   --backend-count 5 \

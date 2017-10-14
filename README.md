@@ -54,6 +54,10 @@ stack exec yesod devel
 stack repl --ghci-options="-DDEVELOPMENT -O0 -fobject-code"
 ```
 
+## Deployment & Self-Hosting
+
+See [ops/README](./ops/README.md).
+
 ---
 
 [CHANGELOG](./CHANGELOG.md) | [LICENSE](./LICENSE)
