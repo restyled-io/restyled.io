@@ -50,7 +50,6 @@ all non-defaulted parameters:
 --github-app-key ~/downloads/restyled-io-staging.2017-09-27.private-key.pem
 --db-username ...
 --db-password ...
---redis-url redis://...
 ```
 
 ### `update-stack-template`
@@ -79,7 +78,6 @@ omitted options will preserve existing values.
 --github-app-key ~/downloads/restyled-io-staging.2017-09-27.private-key.pem
 --db-username ...
 --db-password ...
---redis-url redis://..
 ```
 
 ## Examples
@@ -98,7 +96,6 @@ stack exec ops -- create-stack custom \
   --github-app-key ~/downloads/restyled-io-beta.2017-09-27.private-key.pem \
   --db-username <snip> \
   --db-password <snip> \
-  --redis-url redis://<snip> \
 ```
 
 ### Create a fully customized stack

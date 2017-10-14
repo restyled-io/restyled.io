@@ -87,6 +87,16 @@ customOptions = Custom <$> envOptions
             <> value (T.unpack $ envDBInstanceSize defaultEnv)
             ))
         <*> (T.pack <$> strOption
+            (  long "cache-type"
+            <> help "Instance type for Redis cluster"
+            <> value (T.unpack $ envCacheInstanceType defaultEnv)
+            ))
+        <*> option auto
+            (  long "cache-nodes"
+            <> help "Number of nodes to make Redis cluster"
+            <> value (envCacheNodes defaultEnv)
+            )
+        <*> (T.pack <$> strOption
             (  long "image-tag"
             <> help "Image tag for deployed Apps services"
             <> value (T.unpack $ envImageTag defaultEnv)

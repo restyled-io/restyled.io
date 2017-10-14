@@ -36,9 +36,6 @@ cfTemplate env = template
         , parameter "DBPassword" "String"
         , parameter "GitHubAppId" "Number"
         , parameter "GitHubAppKeyBase64" "String"
-
-        -- TODO: Setup ElastiCache in template
-        , parameter "RedisURL" "String"
         ]
     & outputs ?~
         [ output "URL" $ Literal $ "https://" <> envFQDN env

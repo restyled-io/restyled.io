@@ -34,7 +34,6 @@ data CreateParameters = CreateParameters
     , cpGitHubAppKey :: FilePath
     , cpDBUsername :: Text
     , cpDBPassword :: Text
-    , cpRedisURL :: Text
     }
 
 createParameterOptions :: Parser CreateParameters
@@ -60,11 +59,6 @@ createParameterOptions = CreateParameters
         (  long "db-password"
         <> help "Master password for RDS instance"
         ))
-    <*> (T.pack <$> strOption
-        (  long "redis-url"
-        <> metavar "URL"
-        <> help "Connection string to Redis instance"
-        ))
 
 data StackUpdate
     = TemplateUpdate Text TemplateOptions
@@ -76,7 +70,6 @@ data UpdateParameters = UpdateParameters
     , upGitHubAppKey :: Maybe FilePath
     , upDBUsername :: Maybe Text
     , upDBPassword :: Maybe Text
-    , upRedisURL :: Maybe Text
     , upImageTag :: Maybe Text
     , upAppServiceCount :: Maybe Int
     , upBackendServiceCount :: Maybe Int
@@ -113,11 +106,6 @@ updateParameterOptions = ParameterUpdate <$>
     <*> optional (T.pack <$> strOption
         (  long "db-password"
         <> help "Master password for the RDS instance"
-        ))
-    <*> optional (T.pack <$> strOption
-        (  long "redis-url"
-        <> metavar "URL"
-        <> help "Connection string to Redis instance"
         ))
     <*> optional (T.pack <$> strOption
         (  long "image-tag"
@@ -157,9 +145,6 @@ createStack' env CreateParameters{..} = do
             , AWS.parameter
                 & AWS.pParameterKey ?~ "DBPassword"
                 & AWS.pParameterValue ?~ cpDBPassword
-            , AWS.parameter
-                & AWS.pParameterKey ?~ "RedisURL"
-                & AWS.pParameterValue ?~ cpRedisURL
             ]
 
     print $ rsp ^. AWS.csrsResponseStatus
@@ -182,7 +167,6 @@ updateStack (TemplateUpdate stackName tops) = do
             , toParameter "GitHubAppKeyBase64" Nothing
             , toParameter "DBUsername" Nothing
             , toParameter "DBPassword" Nothing
-            , toParameter "RedisURL" Nothing
             , toParameter "ImageTag" Nothing
             , toParameter "AppServiceCount" Nothing
             , toParameter "BackendServiceCount" Nothing
@@ -205,7 +189,6 @@ updateStack (ParameterUpdate UpdateParameters{..}) = do
             , toParameter "GitHubAppKeyBase64" key
             , toParameter "DBUsername" upDBUsername
             , toParameter "DBPassword" upDBPassword
-            , toParameter "RedisURL" upRedisURL
             , toParameter "ImageTag" upImageTag
             , toParameter "AppServiceCount" $ T.pack . show <$> upAppServiceCount
             , toParameter "BackendServiceCount" $ T.pack . show <$> upBackendServiceCount

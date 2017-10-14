@@ -32,6 +32,8 @@ data Environment = Environment
     , envAppsLogLevel :: Text
     , envDBInstanceType :: Text
     , envDBInstanceSize :: Text -- GB
+    , envCacheInstanceType :: Text
+    , envCacheNodes :: Integer
 
     -- The above attributes get compiled into the template as they should rarely
     -- change between deployments of a given stack. The following attributes
@@ -57,6 +59,8 @@ defaultEnv = Environment
     , envAppsLogLevel = "DEBUG"
     , envDBInstanceType = "db.t2.micro"
     , envDBInstanceSize = "5"
+    , envCacheInstanceType = "cache.t2.micro"
+    , envCacheNodes = 1
     , envImageTag = "latest"
     , envAppServiceCount = 1
     , envBackendServiceCount = 1

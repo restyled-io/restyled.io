@@ -14,7 +14,6 @@ import Stratosphere
 -- - Parameter ref: ImageTag
 -- - Parameter ref: DBUsername
 -- - Parameter ref: DBPassword
--- - Parameter ref: RedisURL
 -- - Parameter ref: GitHubAppId
 -- - Parameter ref: GitHubAppKeyBase64
 --
@@ -38,7 +37,7 @@ taskDefinitionResources env =
                         & ecstdkvpValue ?~ databaseURL env
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "REDIS_URL"
-                        & ecstdkvpValue ?~ Ref "RedisURL"
+                        & ecstdkvpValue ?~ redisURL env
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "GITHUB_APP_ID"
                         & ecstdkvpValue ?~ Ref "GitHubAppId"
@@ -95,7 +94,7 @@ taskDefinitionResources env =
                         & ecstdkvpValue ?~ databaseURL env
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "REDIS_URL"
-                        & ecstdkvpValue ?~ Ref "RedisURL"
+                        & ecstdkvpValue ?~ redisURL env
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "GITHUB_APP_ID"
                         & ecstdkvpValue ?~ Ref "GitHubAppId"
@@ -135,4 +134,12 @@ databaseURL env = Join ""
     , GetAtt "DB" "Endpoint.Address", ":"
     , GetAtt "DB" "Endpoint.Port", "/"
     , Literal $ envDBName env
+    ]
+
+redisURL :: Environment -> Val Text
+redisURL _ = Join ""
+    [ "redis://"
+    , GetAtt "Cache" "RedisEndpoint.Address", ":"
+    , GetAtt "Cache" "RedisEndpoint.Port", "/"
+    , Literal "0"
     ]
