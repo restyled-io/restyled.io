@@ -4,29 +4,21 @@ module Ops.CloudFormation.Resources.TaskDefinitions
     ( taskDefinitionResources
     ) where
 
-import Data.Aeson (Value(..))
+import Data.Aeson (toJSON)
 import Data.Text (Text)
-import Ops.CloudFormation.Environment
+import Ops.CloudFormation.Parameters
 import Stratosphere
 
--- References:
---
--- - Parameter ref: ImageTag
--- - Parameter ref: DBUsername
--- - Parameter ref: DBPassword
--- - Parameter ref: GitHubAppId
--- - Parameter ref: GitHubAppKeyBase64
---
-taskDefinitionResources :: Environment -> Resources
-taskDefinitionResources env =
+taskDefinitionResources :: Resources
+taskDefinitionResources =
     [ resource "AppTaskDefinition"
         ( ECSTaskDefinitionProperties
         $ ecsTaskDefinition
-        & ecstdFamily ?~ envPrefix env "App"
+        & ecstdFamily ?~ prefixRef "App"
         & ecstdContainerDefinitions ?~
             [ ecsTaskDefinitionContainerDefinition
-                (Join ":" ["restyled/restyled", Ref "ImageTag"])
-                (envPrefix env "App")
+                (Join ":" [Ref "AppsImageName", Ref "AppsImageTag"])
+                (prefixRef "App")
                 & ecstdcdCommand ?~ ["/app/restyled.io"]
                 & ecstdcdEnvironment ?~
                     [ ecsTaskDefinitionKeyValuePair
@@ -34,10 +26,10 @@ taskDefinitionResources env =
                         & ecstdkvpValue ?~ ""
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "DATABASE_URL"
-                        & ecstdkvpValue ?~ databaseURL env
+                        & ecstdkvpValue ?~ databaseURL
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "REDIS_URL"
-                        & ecstdkvpValue ?~ redisURL env
+                        & ecstdkvpValue ?~ redisURL
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "GITHUB_APP_ID"
                         & ecstdkvpValue ?~ Ref "GitHubAppId"
@@ -46,7 +38,7 @@ taskDefinitionResources env =
                         & ecstdkvpValue ?~ Ref "GitHubAppKeyBase64"
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "LOG_LEVEL"
-                        & ecstdkvpValue ?~ Literal (envAppsLogLevel env)
+                        & ecstdkvpValue ?~ Ref "AppsLogLevel"
                     ]
                 & ecstdcdMemoryReservation ?~ Literal 128       -- Soft
                 & ecstdcdMemory ?~ Literal 256                  -- Hard
@@ -57,9 +49,9 @@ taskDefinitionResources env =
                     ]
                 & ecstdcdLogConfiguration ?~ (ecsTaskDefinitionLogConfiguration "awslogs"
                     & ecstdlcOptions ?~
-                        [ ("awslogs-group", String $ envPrefixT env "Apps")
-                        , ("awslogs-region", "us-east-1")
-                        , ("awslogs-stream-prefix", String "App")
+                        [ ("awslogs-group", prefixJSON "Apps")
+                        , ("awslogs-region", toJSON (Ref "AWS::Region" :: Val Text))
+                        , ("awslogs-stream-prefix", "App")
                         ])
             ]
         )
@@ -68,7 +60,7 @@ taskDefinitionResources env =
     , resource "BackendTaskDefinition"
         ( ECSTaskDefinitionProperties
         $ ecsTaskDefinition
-        & ecstdFamily ?~ envPrefix env "Backend"
+        & ecstdFamily ?~ prefixRef "Backend"
         & ecstdVolumes ?~
             [ ecsTaskDefinitionVolume
                 & ecstdvName ?~ "tmp"
@@ -81,20 +73,20 @@ taskDefinitionResources env =
             ]
         & ecstdContainerDefinitions ?~
             [ ecsTaskDefinitionContainerDefinition
-                (Join ":" ["restyled/restyled", Ref "ImageTag"])
-                (envPrefix env "Backend")
+                (Join ":" [Ref "AppsImageName", Ref "AppsImageTag"])
+                (prefixRef "Backend")
                 & ecstdcdUser ?~ "root" -- access to Docker deamon
                 & ecstdcdCommand ?~ ["/app/restyled.io-backend"]
                 & ecstdcdEnvironment ?~
                     [ ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "APPROOT"
-                        & ecstdkvpValue ?~ Literal ("https://" <> envFQDN env)
+                        & ecstdkvpValue ?~ Join "" ["https://", fqdnRef]
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "DATABASE_URL"
-                        & ecstdkvpValue ?~ databaseURL env
+                        & ecstdkvpValue ?~ databaseURL
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "REDIS_URL"
-                        & ecstdkvpValue ?~ redisURL env
+                        & ecstdkvpValue ?~ redisURL
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "GITHUB_APP_ID"
                         & ecstdkvpValue ?~ Ref "GitHubAppId"
@@ -103,7 +95,7 @@ taskDefinitionResources env =
                         & ecstdkvpValue ?~ Ref "GitHubAppKeyBase64"
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "LOG_LEVEL"
-                        & ecstdkvpValue ?~ Literal (envAppsLogLevel env)
+                        & ecstdkvpValue ?~ Ref "AppsLogLevel"
                     ]
                 & ecstdcdMemoryReservation ?~ Literal 128       -- Soft
                 & ecstdcdMemory ?~ Literal 256                  -- Hard
@@ -117,27 +109,27 @@ taskDefinitionResources env =
                     ]
                 & ecstdcdLogConfiguration ?~ (ecsTaskDefinitionLogConfiguration "awslogs"
                     & ecstdlcOptions ?~
-                        [ ("awslogs-group", String $ envPrefixT env "Apps")
-                        , ("awslogs-region", "us-east-1")
-                        , ("awslogs-stream-prefix", String "Backend")
+                        [ ("awslogs-group", prefixJSON "Apps")
+                        , ("awslogs-region", toJSON (Ref "AWS::Region" :: Val Text))
+                        , ("awslogs-stream-prefix", "Backend")
                         ])
             ]
         )
         & dependsOn ?~ ["AppsClusterLogGroup"]
     ]
 
-databaseURL :: Environment -> Val Text
-databaseURL env = Join ""
+databaseURL :: Val Text
+databaseURL = Join ""
     [ "postgres://"
     , Ref "DBUsername", ":"
     , Ref "DBPassword", "@"
     , GetAtt "DB" "Endpoint.Address", ":"
     , GetAtt "DB" "Endpoint.Port", "/"
-    , Literal $ envDBName env
+    , "restyled"
     ]
 
-redisURL :: Environment -> Val Text
-redisURL _ = Join ""
+redisURL :: Val Text
+redisURL = Join ""
     [ "redis://"
     , GetAtt "Cache" "RedisEndpoint.Address", ":"
     , GetAtt "Cache" "RedisEndpoint.Port", "/"

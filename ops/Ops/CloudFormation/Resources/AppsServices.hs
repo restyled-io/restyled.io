@@ -4,36 +4,31 @@ module Ops.CloudFormation.Resources.AppsServices
     ( appsServicesResources
     ) where
 
-import Ops.CloudFormation.Environment
+import Ops.CloudFormation.Parameters
 import Stratosphere
 
--- References:
---
--- - Parameter ref: AppServiceCount
--- - Parameter ref: BackendServiceCount
---
-appsServicesResources :: Environment -> Resources
-appsServicesResources env =
+appsServicesResources :: Resources
+appsServicesResources =
     [ resource "AppService"
         ( ECSServiceProperties
         $ ecsService (Ref "AppTaskDefinition")
         & ecssCluster ?~ Ref "AppsCluster"
-        & ecssServiceName ?~ envPrefix env "App"
-        & ecssRole ?~ Literal (envAppsServiceRole env)
-        & ecssDesiredCount ?~ Ref "AppServiceCount"
+        & ecssServiceName ?~ prefixRef "App"
+        & ecssRole ?~ Ref "AppsServiceRole"
+        & ecssDesiredCount ?~ Ref "AppsAppServiceCount"
         & ecssLoadBalancers ?~
             [ ecsServiceLoadBalancer (Literal 3000)
-                & ecsslbContainerName ?~ envPrefix env "App"
+                & ecsslbContainerName ?~ prefixRef "App"
                 & ecsslbTargetGroupArn ?~ Ref "ALBTargetGroup"
             ]
         )
-        & dependsOn ?~ ["ALB", "DB"]
+        & dependsOn ?~ ["ALB", "Cache", "DB"]
     , resource "BackendService"
         ( ECSServiceProperties
         $ ecsService (Ref "BackendTaskDefinition")
         & ecssCluster ?~ Ref "AppsCluster"
-        & ecssServiceName ?~ envPrefix env "Backend"
-        & ecssDesiredCount ?~ Ref "BackendServiceCount"
+        & ecssServiceName ?~ prefixRef "Backend"
+        & ecssDesiredCount ?~ Ref "AppsBackendServiceCount"
         )
-        & dependsOn ?~ ["DB"]
+        & dependsOn ?~ ["Cache", "DB"]
     ]

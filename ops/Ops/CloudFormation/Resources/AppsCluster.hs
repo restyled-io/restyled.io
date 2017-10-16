@@ -4,16 +4,16 @@ module Ops.CloudFormation.Resources.AppsCluster
     ( appsClusterResources
     ) where
 
-import Ops.CloudFormation.Environment
+import Ops.CloudFormation.Parameters
 import Stratosphere
 
-appsClusterResources :: Environment -> Resources
-appsClusterResources env =
+appsClusterResources :: Resources
+appsClusterResources =
     [ resource "AppsSecurityGroup"
         $ EC2SecurityGroupProperties
-        $ ec2SecurityGroup (envPrefix env "Apps")
+        $ ec2SecurityGroup (prefixRef "Apps")
         & ecsgVpcId ?~ Ref "Vpc"
-        & ecsgTags ?~ tag "Name" (envPrefix env "Apps") : envTags env
+        & ecsgTags ?~ tag "Name" (prefixRef "Apps") : defaultTags
         & ecsgSecurityGroupIngress ?~
             [ ec2SecurityGroupIngressProperty "tcp"
                 & ecsgipFromPort ?~ Literal 31000
@@ -23,14 +23,14 @@ appsClusterResources env =
     , resource "AppsLaunchConfiguration"
         $ AutoScalingLaunchConfigurationProperties
         $ autoScalingLaunchConfiguration
-            (Literal $ envAppsClusterAMI env)
-            (Literal $ envAppsClusterInstanceType env)
-        & aslcIamInstanceProfile ?~ Literal (envAppsClusterInstanceRole env)
+            (FindInMap "RegionAMIs" (Ref "AWS::Region") "Id")
+            (Ref "AppsClusterInstanceType")
+        & aslcIamInstanceProfile ?~ Ref "AppsClusterInstanceRole"
         & aslcSecurityGroups ?~ [Ref "AppsSecurityGroup"]
         & aslcBlockDeviceMappings ?~
             [ autoScalingLaunchConfigurationBlockDeviceMapping "/dev/xvdcz"
                 & aslcbdmEbs ?~ (autoScalingLaunchConfigurationBlockDevice
-                    & aslcbdVolumeSize ?~ Literal 22
+                    & aslcbdVolumeSize ?~ Ref "AppsClusterStorageSize"
                     & aslcbdVolumeType ?~ "gp2")
             ]
         & aslcUserData ?~ Base64 (Join "\n"
@@ -38,7 +38,7 @@ appsClusterResources env =
             , "# Join the apps cluser"
             , Join ""
                 [ "echo ECS_CLUSTER="
-                , envPrefix env "Apps"
+                , prefixRef "Apps"
                 , " >> /etc/ecs/ecs.config"
                 ]
             ])
@@ -51,14 +51,14 @@ appsClusterResources env =
             , Ref "PrivateSubnet2"
             , Ref "PrivateSubnet3"
             ]
-        & asasgDesiredCapacity ?~ Literal (envAppsClusterSize env)
+        & asasgDesiredCapacity ?~ Ref "AppsClusterSize"
         & asasgTags ?~
             [ autoScalingAutoScalingGroupTagProperty
-                "Name" (Literal True) (envPrefix env "Apps")
+                "Name" (Literal True) (prefixRef "Apps")
             , autoScalingAutoScalingGroupTagProperty
-                "App" (Literal True) (Literal $ envApp env)
+                "App" (Literal True) (Ref "App")
             , autoScalingAutoScalingGroupTagProperty
-                "Env" (Literal True) (Literal $ envName env)
+                "Environment" (Literal True) (Ref "Environment")
             ]
         )
         & resUpdatePolicy ?~ (updatePolicy
@@ -67,9 +67,9 @@ appsClusterResources env =
     , resource "AppsCluster"
         $ ECSClusterProperties
         $ ecsCluster
-        & ecscClusterName ?~ envPrefix env "Apps"
+        & ecscClusterName ?~ prefixRef "Apps"
     , resource "AppsClusterLogGroup"
         $ LogsLogGroupProperties
         $ logsLogGroup
-        & llgLogGroupName ?~ envPrefix env "Apps"
+        & llgLogGroupName ?~ prefixRef "Apps"
     ]
