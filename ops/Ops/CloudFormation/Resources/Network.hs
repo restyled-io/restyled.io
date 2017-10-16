@@ -4,37 +4,37 @@ module Ops.CloudFormation.Resources.Network
     ( networkResources
     ) where
 
+import Ops.CloudFormation.Parameters
 import Stratosphere
-import Ops.CloudFormation.Environment
 
-networkResources :: Environment -> Resources
-networkResources env =
+networkResources :: Resources
+networkResources =
     [ resource "Vpc"
         $ EC2VPCProperties
         $ ec2VPC "10.0.0.0/16"
         & ecvpcEnableDnsSupport ?~ Literal True
         & ecvpcEnableDnsHostnames ?~ Literal True
-        & ecvpcTags ?~ tag "Name" (envPrefix env "") : envTags env
+        & ecvpcTags ?~ tag "Name" (prefixRef "") : defaultTags
 
     -- 3 Public Subnets across 3 AZs, routed through an IGW
     , resource "PublicSubnet1"
         $ EC2SubnetProperties
         $ ec2Subnet "10.0.0.0/24" (Ref "Vpc")
-        & ecsAvailabilityZone ?~ "us-east-1a"
+        & ecsAvailabilityZone ?~ Join "" [Ref "AWS::Region", "a"]
         & ecsMapPublicIpOnLaunch ?~ Literal True
-        & ecsTags ?~ tag "Name" (envPrefix env "Public1") : envTags env
+        & ecsTags ?~ tag "Name" (prefixRef "Public1") : defaultTags
     , resource "PublicSubnet2"
         $ EC2SubnetProperties
         $ ec2Subnet "10.0.1.0/24" (Ref "Vpc")
-        & ecsAvailabilityZone ?~ "us-east-1b"
+        & ecsAvailabilityZone ?~ Join "" [Ref "AWS::Region", "b"]
         & ecsMapPublicIpOnLaunch ?~ Literal True
-        & ecsTags ?~ tag "Name" (envPrefix env "Public2") : envTags env
+        & ecsTags ?~ tag "Name" (prefixRef "Public2") : defaultTags
     , resource "PublicSubnet3"
         $ EC2SubnetProperties
         $ ec2Subnet "10.0.2.0/24" (Ref "Vpc")
-        & ecsAvailabilityZone ?~ "us-east-1c"
+        & ecsAvailabilityZone ?~ Join "" [Ref "AWS::Region", "c"]
         & ecsMapPublicIpOnLaunch ?~ Literal True
-        & ecsTags ?~ tag "Name" (envPrefix env "Public2") : envTags env
+        & ecsTags ?~ tag "Name" (prefixRef "Public2") : defaultTags
     , resource "InternetGateway"
         $ EC2InternetGatewayProperties ec2InternetGateway
     , resource "AttachGateway"
@@ -63,21 +63,21 @@ networkResources env =
     , resource "PrivateSubnet1"
         $ EC2SubnetProperties
         $ ec2Subnet "10.0.10.0/24" (Ref "Vpc")
-        & ecsAvailabilityZone ?~ "us-east-1a"
+        & ecsAvailabilityZone ?~ Join "" [Ref "AWS::Region", "a"]
         & ecsMapPublicIpOnLaunch ?~ Literal False
-        & ecsTags ?~ tag "Name" (envPrefix env "Private1") : envTags env
+        & ecsTags ?~ tag "Name" (prefixRef "Private1") : defaultTags
     , resource "PrivateSubnet2"
         $ EC2SubnetProperties
         $ ec2Subnet "10.0.11.0/24" (Ref "Vpc")
-        & ecsAvailabilityZone ?~ "us-east-1b"
+        & ecsAvailabilityZone ?~ Join "" [Ref "AWS::Region", "b"]
         & ecsMapPublicIpOnLaunch ?~ Literal False
-        & ecsTags ?~ tag "Name" (envPrefix env "Private2") : envTags env
+        & ecsTags ?~ tag "Name" (prefixRef "Private2") : defaultTags
     , resource "PrivateSubnet3"
         $ EC2SubnetProperties
         $ ec2Subnet "10.0.12.0/24" (Ref "Vpc")
-        & ecsAvailabilityZone ?~ "us-east-1c"
+        & ecsAvailabilityZone ?~ Join "" [Ref "AWS::Region", "c"]
         & ecsMapPublicIpOnLaunch ?~ Literal False
-        & ecsTags ?~ tag "Name" (envPrefix env "Private3") : envTags env
+        & ecsTags ?~ tag "Name" (prefixRef "Private3") : defaultTags
     , resource "NatEIP"
         $ EC2EIPProperties
         $ ec2EIP

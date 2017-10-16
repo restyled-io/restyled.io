@@ -4,16 +4,11 @@ module Ops.CloudFormation.Resources.DataStores
     ( dataStoreResources
     ) where
 
-import Ops.CloudFormation.Environment
+import Ops.CloudFormation.Parameters
 import Stratosphere
 
--- References:
---
--- - Parameter ref: DBUsername
--- - Parameter ref: DBPassword
---
-dataStoreResources :: Environment -> Resources
-dataStoreResources env =
+dataStoreResources :: Resources
+dataStoreResources =
     [ resource "DBSubnetGroup"
         $ RDSDBSubnetGroupProperties
         $ rdsdbSubnetGroup "RDS subnets"
@@ -23,9 +18,9 @@ dataStoreResources env =
             ]
     , resource "DBSecurityGroup"
         $ EC2SecurityGroupProperties
-        $ ec2SecurityGroup (envPrefix env "DBs")
+        $ ec2SecurityGroup (prefixRef "DBs")
         & ecsgVpcId ?~ Ref "Vpc"
-        & ecsgTags ?~ tag "Name" (envPrefix env "DBs") : envTags env
+        & ecsgTags ?~ tag "Name" (prefixRef "DBs") : defaultTags
         & ecsgSecurityGroupIngress ?~
             [ ec2SecurityGroupIngressProperty "tcp"
                 & ecsgipFromPort ?~ Literal 5432
@@ -34,12 +29,12 @@ dataStoreResources env =
             ]
     , resource "DB"
         ( RDSDBInstanceProperties
-        $ rdsdbInstance (Literal $ envDBInstanceType env)
-        & rdsdbiAllocatedStorage ?~ Literal (envDBInstanceSize env)
-        & rdsdbiDBName ?~ Literal (envDBName env)
+        $ rdsdbInstance (Ref "DBInstanceType")
+        & rdsdbiAllocatedStorage ?~ Ref "DBStorageSize"
+        & rdsdbiDBName ?~ "restyled"
         & rdsdbiEngine ?~ "postgres"
-        & rdsdbiMasterUserPassword ?~ Ref "DBPassword"
         & rdsdbiMasterUsername ?~ Ref "DBUsername"
+        & rdsdbiMasterUserPassword ?~ Ref "DBPassword"
         & rdsdbiDBSubnetGroupName ?~ Ref "DBSubnetGroup"
         & rdsdbiVPCSecurityGroups ?~ [Ref "DBSecurityGroup"]
         )
@@ -54,9 +49,9 @@ dataStoreResources env =
             ]
     , resource "CacheSecurityGroup"
         $ EC2SecurityGroupProperties
-        $ ec2SecurityGroup (envPrefix env "Caches")
+        $ ec2SecurityGroup (prefixRef "Caches")
         & ecsgVpcId ?~ Ref "Vpc"
-        & ecsgTags ?~ tag "Name" (envPrefix env "Caches") : envTags env
+        & ecsgTags ?~ tag "Name" (prefixRef "Caches") : defaultTags
         & ecsgSecurityGroupIngress ?~
             [ ec2SecurityGroupIngressProperty "tcp"
                 & ecsgipFromPort ?~ Literal 6379
@@ -66,11 +61,11 @@ dataStoreResources env =
     , resource "Cache"
         ( ElastiCacheCacheClusterProperties
         $ elastiCacheCacheCluster
-            (Literal $ envCacheInstanceType env) "redis"
-            (Literal $ envCacheNodes env)
+            (Ref "CacheInstanceType") "redis"
+            (Ref "CacheClusterSize")
         & ecccCacheSubnetGroupName ?~ Ref "CacheSubnetGroup"
         & ecccVpcSecurityGroupIds ?~ [Ref "CacheSecurityGroup"]
-        & ecccTags ?~ tag "Name" (envPrefix env "Cache") : envTags env
+        & ecccTags ?~ tag "Name" (prefixRef "Cache") : defaultTags
         )
         -- Apparently this dependency needs to be explicit
         & dependsOn ?~ ["CacheSubnetGroup"]

@@ -1,222 +1,130 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 module Ops.Commands.Stack
-    ( CreateParameters
-    , createParameterOptions
+    ( StackOptions(..)
+    , stackOptions
     , createStack
-    , StackUpdate
-    , updateTemplateOptions
-    , updateParameterOptions
     , updateStack
     ) where
 
-import Control.Lens
+import Control.Lens hiding (argument)
+import Control.Monad (forM, void)
+import Data.Bifunctor (second)
 import Data.ByteString.Base64 (encode)
 import Data.ByteString.Lazy (ByteString, toStrict)
 import Data.Char (isSpace)
-import Data.Monoid ((<>))
+import Data.Semigroup ((<>))
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Ops.AWS
-import Ops.CloudFormation.Environment
+import Ops.CloudFormation.Parameters
 import Ops.CloudFormation.Template
-import Ops.Commands.Template
 import Options.Applicative
-import Stratosphere
+import Stratosphere hiding (argument)
+import qualified Data.Map as M
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Network.AWS.CloudFormation as AWS
-import qualified Network.AWS.Waiter as AWS
 
-data CreateParameters = CreateParameters
-    { cpStackName :: Text
-    , cpGitHubAppId :: Int
-    , cpGitHubAppKey :: FilePath
-    , cpDBUsername :: Text
-    , cpDBPassword :: Text
+data ParameterValue
+    = ParameterValue Text
+    | UsePreviousValue
+
+data StackOptions = StackOptions
+    { soStackName :: Text
+    , soParameters :: M.Map Text ParameterValue
     }
 
-createParameterOptions :: Parser CreateParameters
-createParameterOptions = CreateParameters
+stackOptions :: Parser StackOptions
+stackOptions = StackOptions
     <$> (T.pack <$> strOption
-        (  long "stack-name"
-        <> help "Name of created Stack"
-        ))
-    <*> option auto
-        (  long "github-app-id"
-        <> help "GitHub App Id"
-        )
-    <*> strOption
-        (  long "github-app-key"
-        <> metavar "PATH"
-        <> help "Path to PEM key file for GitHub App"
-        )
-    <*> (T.pack <$> strOption
-        (  long "db-username"
-        <> help "Master username for RDS instance"
-        ))
-    <*> (T.pack <$> strOption
-        (  long "db-password"
-        <> help "Master password for RDS instance"
-        ))
-
-data StackUpdate
-    = TemplateUpdate Text TemplateOptions
-    | ParameterUpdate UpdateParameters
-
-data UpdateParameters = UpdateParameters
-    { upStackName :: Text
-    , upGitHubAppId :: Maybe Int
-    , upGitHubAppKey :: Maybe FilePath
-    , upDBUsername :: Maybe Text
-    , upDBPassword :: Maybe Text
-    , upImageTag :: Maybe Text
-    , upAppServiceCount :: Maybe Int
-    , upBackendServiceCount :: Maybe Int
-    }
-
-updateTemplateOptions :: Parser StackUpdate
-updateTemplateOptions = TemplateUpdate
-    <$> (T.pack <$> strOption
-        (  long "stack-name"
-        <> help "Name of Stack to update"
-        ))
-    <*> templateOptions
-
-updateParameterOptions :: Parser StackUpdate
-updateParameterOptions = ParameterUpdate <$>
-    ( UpdateParameters
-    <$> (T.pack <$> strOption
-        (  long "stack-name"
-        <> help "Name of Stack to update"
-        ))
-    <*> optional (option auto
-        (  long "github-app-id"
-        <> help "GitHub App Id"
-        ))
-    <*> optional (strOption
-        (  long "github-app-key"
-        <> metavar "PATH"
-        <> help "Path to PEM key file for GitHub App"
-        ))
-    <*> optional (T.pack <$> strOption
-        (  long "db-username"
-        <> help "Master username for the RDS instance"
-        ))
-    <*> optional (T.pack <$> strOption
-        (  long "db-password"
-        <> help "Master password for the RDS instance"
-        ))
-    <*> optional (T.pack <$> strOption
-        (  long "image-tag"
-        <> help "Image tag for deployed Apps services"
-        ))
-    <*> optional (option auto
-        (  long "app-count"
-        <> help "Number of App services to run"
-        ))
-    <*> optional (option auto
-        (  long "backend-count"
-        <> help "Number of Backend services to run"
-        ))
-    )
-
-createStack :: TemplateOptions -> CreateParameters -> IO ()
-createStack Staging = createStack' stagingEnv
-createStack Prod = createStack' prodEnv
-createStack (Custom env) = createStack' env
-
-createStack' :: Environment -> CreateParameters -> IO ()
-createStack' env CreateParameters{..} = do
-    key <- readFileBase64 cpGitHubAppKey
-    rsp <- runAWS
-        $ AWS.createStack cpStackName
-        & AWS.csTemplateBody ?~ lbsToText (encodeTemplate $ cfTemplate env)
-        & AWS.csParameters .~
-            [ AWS.parameter
-                & AWS.pParameterKey ?~ "GitHubAppId"
-                & AWS.pParameterValue ?~ T.pack (show cpGitHubAppId)
-            , AWS.parameter
-                & AWS.pParameterKey ?~ "GitHubAppKeyBase64"
-                & AWS.pParameterValue ?~ key
-            , AWS.parameter
-                & AWS.pParameterKey ?~ "DBUsername"
-                & AWS.pParameterValue ?~ cpDBUsername
-            , AWS.parameter
-                & AWS.pParameterKey ?~ "DBPassword"
-                & AWS.pParameterValue ?~ cpDBPassword
-            ]
-
-    print $ rsp ^. AWS.csrsResponseStatus
-    print $ rsp ^. AWS.csrsStackId
-    putStrLn "Awaiting..."
-
-    accept <- awaitAWS AWS.stackCreateComplete
-        $ AWS.describeStacks
-        & AWS.dStackName ?~ cpStackName
-
-    print accept
-
-updateStack :: StackUpdate -> IO ()
-updateStack (TemplateUpdate stackName tops) = do
-    rsp <- runAWS
-        $ AWS.updateStack stackName
-        & AWS.usTemplateBody ?~ lbsToText (encodeTemplate $ cfTemplate env)
-        & AWS.usParameters .~
-            [ toParameter "GitHubAppId" Nothing
-            , toParameter "GitHubAppKeyBase64" Nothing
-            , toParameter "DBUsername" Nothing
-            , toParameter "DBPassword" Nothing
-            , toParameter "ImageTag" Nothing
-            , toParameter "AppServiceCount" Nothing
-            , toParameter "BackendServiceCount" Nothing
-            ]
-
-    print =<< awaitUpdate rsp stackName
+        (long "stack-name" <> metavar "NAME"))
+    <*> (M.fromList <$> many (argument (eitherReader readKeyValue)
+        (metavar "KEY=VALUE" <> help parameterNamesList)))
   where
-    env = case tops of
-        Staging -> stagingEnv
-        Prod -> prodEnv
-        Custom e -> e
+    parameterNamesList = unlines
+        $ replace "GitHubAppKeyBase64" "GitHubAppKey"
+        $ map toExample $ unParameters cfParameters
 
-updateStack (ParameterUpdate UpdateParameters{..}) = do
-    key <- mapM readFileBase64 upGitHubAppKey
-    rsp <- runAWS
-        $ AWS.updateStack upStackName
-        & AWS.usUsePreviousTemplate ?~ True
-        & AWS.usParameters .~
-            [ toParameter "GitHubAppId" $ T.pack . show <$> upGitHubAppId
-            , toParameter "GitHubAppKeyBase64" key
-            , toParameter "DBUsername" upDBUsername
-            , toParameter "DBPassword" upDBPassword
-            , toParameter "ImageTag" upImageTag
-            , toParameter "AppServiceCount" $ T.pack . show <$> upAppServiceCount
-            , toParameter "BackendServiceCount" $ T.pack . show <$> upBackendServiceCount
-            ]
+    replace _ _ [] = []
+    replace a b (x:xs)
+        | a == x = b : replace a b xs
+        | otherwise = x : replace a b xs
 
-    print =<< awaitUpdate rsp upStackName
+    toExample p = T.unpack (parameterName p) ++
+        maybe "" (("=" ++) . T.unpack . toText) (parameterDefault' p)
+
+-- | Read @KEY=VALUE@ to @(Key, 'ParameterValue' VALUE)@
+readKeyValue :: String -> Either String (Text, ParameterValue)
+readKeyValue arg
+    | null arg = Left "argument cannot be empty"
+    | otherwise = Right (key, ParameterValue val)
+  where
+    (key, val) = second (T.drop 1) $ T.breakOn "=" $ T.pack arg
+
+createStack :: StackOptions -> IO ()
+createStack StackOptions{..} = do
+    prs <- replaceGitHubAppKey soParameters
+
+    void $ runAWS
+        $ AWS.createStack soStackName
+        & AWS.csTemplateBody ?~ lbsToText (encodeTemplate cfTemplate)
+        & AWS.csParameters .~ toAWSParameters prs
+
+    putStrLn "Stack created, awaiting..."
+    print =<< awaitAWS AWS.stackCreateComplete
+        (AWS.describeStacks & AWS.dStackName ?~ soStackName)
+
+updateStack :: StackOptions -> IO ()
+updateStack StackOptions{..} = do
+    prs <- replaceGitHubAppKey soParameters
+
+    void $ runAWS
+        $ AWS.updateStack soStackName
+        & AWS.usTemplateBody ?~ lbsToText (encodeTemplate cfTemplate)
+        & AWS.usParameters .~ toAWSParameters
+            (prs `M.union` usePreviousParameters)
+
+    putStrLn "Stack updated, awaiting..."
+    print =<< awaitAWS AWS.stackCreateComplete
+        (AWS.describeStacks & AWS.dStackName ?~ soStackName)
+  where
+    -- | A map of all known parameters with @'UsePreviousValue'@ as the value
+    --
+    -- The map of passed parameters is unioned over these so that any omitted
+    -- parameters will naturally retain their previous values.
+    --
+    usePreviousParameters :: M.Map Text ParameterValue
+    usePreviousParameters = M.fromList
+        $ map ((, UsePreviousValue) . parameterName)
+        $ unParameters cfParameters
+
+replaceGitHubAppKey :: M.Map Text ParameterValue -> IO (M.Map Text ParameterValue)
+replaceGitHubAppKey m = do
+    mcontents <- forM (M.lookup "GitHubAppKey" m) $ \case
+        ParameterValue fp -> ParameterValue <$> readFileBase64 (T.unpack fp)
+        UsePreviousValue -> return UsePreviousValue
+
+    return
+        $ maybe id (M.insert "GitHubAppKeyBase64") mcontents
+        $ M.delete "GitHubAppKey" m
 
 readFileBase64 :: FilePath -> IO Text
-readFileBase64 fp = T.filter (not . isSpace) . encodeT <$> T.readFile fp
+readFileBase64 = (T.filter (not . isSpace) . liftT encode <$>) . T.readFile
   where
-    encodeT = decodeUtf8 . encode . encodeUtf8
+    liftT f = decodeUtf8 . f . encodeUtf8
 
-toParameter :: Text -> Maybe Text -> AWS.Parameter
-toParameter k Nothing = AWS.parameter
-    & AWS.pParameterKey ?~ k
-    & AWS.pUsePreviousValue ?~ True
-toParameter k (Just v) = AWS.parameter
-    & AWS.pParameterKey ?~ k
-    & AWS.pParameterValue ?~ v
-
-awaitUpdate :: AWS.UpdateStackResponse -> Text -> IO AWS.Accept
-awaitUpdate rsp stackName = do
-    print $ rsp ^. AWS.usrsResponseStatus
-    print $ rsp ^. AWS.usrsStackId
-    putStrLn "Awaiting..."
-    awaitAWS AWS.stackUpdateComplete
-        $ AWS.describeStacks
-        & AWS.dStackName ?~ stackName
+toAWSParameters :: M.Map Text ParameterValue -> [AWS.Parameter]
+toAWSParameters = map (uncurry toParameter) . M.toList
+  where
+    toParameter k (ParameterValue v) = AWS.parameter
+        & AWS.pParameterKey ?~ k
+        & AWS.pParameterValue ?~ v
+    toParameter k UsePreviousValue = AWS.parameter
+        & AWS.pParameterKey ?~ k
+        & AWS.pUsePreviousValue ?~ True
 
 lbsToText :: ByteString -> Text
 lbsToText = decodeUtf8 . toStrict
