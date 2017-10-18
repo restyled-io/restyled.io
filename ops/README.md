@@ -8,47 +8,48 @@ Commands for the deployment and operation of Restyled infrastructure.
 
 ```console
 stack build
-stack exec ops -- template
-stack exec ops -- create-stack KEY=VALUE [KEY=VALUE, ...]
-stack exec ops -- update-stack [KEY=VALUE, ...]
+stack exec ops -- COMMAND [OPTION, ...]
 ```
-
-See `create-stack --help` for all available parameters and their defaults.
 
 ## Examples
 
-### Create a Production stack, specifying only required values
+### Deployment
 
 ```console
-stack exec ops -- create-stack --stack-name RestyledProd \
-  GitHubAppId=1234 \
-  GitHubAppKey=~/downloads/restyled-io.2017-09-27.private-key.pem \
-  DBPassword=<snip>
+stack exec ops -- deploy --stack-name RestyledProd --image-tag b1234
 ```
 
-### Create a Beta stack, to test out a branch
+### Scaling
+
+For now, use the AWS console, or `aws cloudformation` CLI to update the
+`AppsAppServiceCount` or `AppsBackendServiceCount` parameter(s).
+
+### "Behind my own firewall" Installation
+
+To create and operate Restyled in your own AWS account, use the template
+directly:
 
 ```console
-stack exec ops -- create-stack --stack-name RestyledBeta \
-  Environment=Beta \
-  Subdomain=beta \
-  ImageTag=my-feature \
-  GitHubAppId=1234 \
-  GitHubAppKey=~/downloads/restyled-io-beta.2017-09-27.private-key.pem \
-  DBPassword=<snip>
+stack exec ops -- template > /path/to/template.json
 ```
 
-### Deploy a new version to an existing stack
+Most parameters are self-explanatory, except for:
 
-```console
-stack exec ops -- update-stack --stack-name RestyledProd \
-  ImageTag=b1234
-```
+- **CertificateARN**:
 
-### Scale up an existing stack
+  It's assumed you've already set up a hosted zone for the domain you intended
+  to deploy to and created an Amazon-managed certificate. When creating your
+  Stack include this `Domain` and the ARN to the certificate in the
+  `CertificateARN` parameter.
 
-```console
-stack exec ops -- update-stack --stack-name RestyledProd \
-  AppsAppServiceCount=5 \
-  AppsBackendServiceCount=5
-```
+- **GitHubAppKeyBase64**:
+
+  Since Cloud Formation parameters can't handle newlines, we accept this
+  parameter as base64-encoded. For example:
+
+  ```console
+  base64 /path/to/private-key.pem | tr -d '\n' | xclip -selection clipboard
+  ```
+
+*NOTE*: Currently, such an installation still talks to `github.com`, but it's on
+the roadmap to support a custom GitHub host, e.g. for use with GH:E.

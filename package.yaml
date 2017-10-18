@@ -114,11 +114,11 @@ executables:
     - amazonka
     - amazonka-cloudformation
     - amazonka-core
-    - base64-bytestring
     - bytestring
     - containers
     - lens
     - optparse-applicative
+    - optparse-generic
     - stratosphere
     - text
     - unordered-containers
