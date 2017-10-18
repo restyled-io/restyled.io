@@ -5,6 +5,9 @@ packages:
     git: https://pbrisbin@bitbucket.org/pbrisbin/haskell-jwt.git
     commit: 202898d8aa20ab4d4fdff3a9efb08a973ecd0bc4
   extra-dep: true
+- location:
+    git: https://github.com/thoughtbot/yesod-auth-oauth2
+    commit: 937ad572a31dcbb2d5fe75b91f689c7a2f6ecfca
+  extra-dep: true
 extra-deps:
 - load-env-0.1.1
-allow-newer: true

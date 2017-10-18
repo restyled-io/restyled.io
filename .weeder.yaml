@@ -1,6 +1,8 @@
 - package:
   - name: jwt
 - package:
+  - name: yesod-auth-oauth2
+- package:
   - name: restyled
   - section:
     - name: exe:restyled.io

@@ -51,12 +51,15 @@ import Network.Wai.Middleware.RequestLogger
     , outputFormat
     )
 import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
+import Yesod.Auth
 
 import Handler.Common
 import Handler.Docs
 import Handler.Home
 import Handler.Signup
 import Handler.Webhooks
+
+import Handler.Admin.Signups
 
 mkYesodDispatch "App" resourcesApp
 

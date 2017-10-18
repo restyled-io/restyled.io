@@ -24,6 +24,11 @@ import qualified Data.Text.Lazy as LT
 import qualified Env
 import qualified Text.Shakespeare.Text as ST
 
+data OAuthKeys = OAuthKeys
+    { oauthKeysClientId :: Text
+    , oauthKeysClientSecret :: Text
+    }
+
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
     , appRedisConf :: ConnectInfo
@@ -36,7 +41,14 @@ data AppSettings = AppSettings
     , appCopyright :: Text
     , appGitHubAppId :: GitHubId
     , appGitHubAppKey :: Text
+    , appGitHubOAuthKeys :: OAuthKeys
     , appRestylerExecutable :: FilePath
+    , appAdmins :: [Text]
+    -- ^ +SECURITY_NOTE+ This relies on the fact that there is no authentication
+    -- method available where users can enter an email themselves. Emails are
+    -- taken only from GitHub credentials, and will only be present there if
+    -- verified with GitHub.
+    , appAllowDummyAuth :: Bool
     }
 
 instance Show AppSettings where
@@ -68,7 +80,12 @@ envSettings = AppSettings
     <*> pure "Patrick Brisbin 2017"
     <*> (GitHubId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
     <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
+    <*> (OAuthKeys
+        <$> Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_ID" mempty
+        <*> Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_SECRET" mempty)
     <*> Env.var Env.str "RESTYLER_EXECUTABLE" (Env.def ".stack-work/dist/x86_64-linux-nopie/Cabal-1.24.2.0/build/restyler/restyler")
+    <*> (map T.strip . T.splitOn "," <$> Env.var Env.str "ADMIN_EMAILS" (Env.def ""))
+    <*> Env.switch "AUTH_DUMMY_LOGIN" mempty
 
 envDatabaseConfig :: EnvParser PostgresConf
 envDatabaseConfig = PostgresConf

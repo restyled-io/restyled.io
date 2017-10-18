@@ -37,6 +37,15 @@ taskDefinitionResources =
                         & ecstdkvpName ?~ "GITHUB_APP_KEY_BASE64"
                         & ecstdkvpValue ?~ Ref "GitHubAppKeyBase64"
                     , ecsTaskDefinitionKeyValuePair
+                        & ecstdkvpName ?~ "GITHUB_OAUTH_CLIENT_ID"
+                        & ecstdkvpValue ?~ Ref "GitHubAppOAuthClientId"
+                    , ecsTaskDefinitionKeyValuePair
+                        & ecstdkvpName ?~ "GITHUB_OAUTH_CLIENT_SECRET"
+                        & ecstdkvpValue ?~ Ref "GitHubAppOAuthClientSecret"
+                    , ecsTaskDefinitionKeyValuePair
+                        & ecstdkvpName ?~ "ADMIN_EMAILS"
+                        & ecstdkvpValue ?~ Ref "AppsAdminEmails"
+                    , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "LOG_LEVEL"
                         & ecstdkvpValue ?~ Ref "AppsLogLevel"
                     ]
@@ -93,6 +102,15 @@ taskDefinitionResources =
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "GITHUB_APP_KEY_BASE64"
                         & ecstdkvpValue ?~ Ref "GitHubAppKeyBase64"
+                    , ecsTaskDefinitionKeyValuePair
+                        & ecstdkvpName ?~ "GITHUB_OAUTH_CLIENT_ID"
+                        & ecstdkvpValue ?~ Ref "GitHubAppOAuthClientId"
+                    , ecsTaskDefinitionKeyValuePair
+                        & ecstdkvpName ?~ "GITHUB_OAUTH_CLIENT_SECRET"
+                        & ecstdkvpValue ?~ Ref "GitHubAppOAuthClientSecret"
+                    , ecsTaskDefinitionKeyValuePair
+                        & ecstdkvpName ?~ "ADMIN_EMAILS"
+                        & ecstdkvpValue ?~ Ref "AppsAdminEmails"
                     , ecsTaskDefinitionKeyValuePair
                         & ecstdkvpName ?~ "LOG_LEVEL"
                         & ecstdkvpValue ?~ Ref "AppsLogLevel"

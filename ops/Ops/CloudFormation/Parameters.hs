@@ -32,6 +32,7 @@ cfParameters =
     , parameter "AppsImageTag" "String" & default' ?~ "latest"
     , parameter "AppsAppServiceCount" "Number" & default' ?~ "1"
     , parameter "AppsBackendServiceCount" "Number" & default' ?~ "1"
+    , parameter "AppsAdminEmails" "String" & default' ?~ ""
     , parameter "AppsLogLevel" "String"
         & default' ?~ "INFO"
         & allowedValues ?~ ["DEBUG", "INFO", "WARN", "ERROR"]
@@ -44,6 +45,8 @@ cfParameters =
         & description ?~ "Id for Restyled.io GitHub App"
     , parameter "GitHubAppKeyBase64" "String"
         & description ?~ "PEM key for Restyled.io GitHub App, base64-encoded"
+    , parameter "GitHubAppOAuthClientId" "String"
+    , parameter "GitHubAppOAuthClientSecret" "String"
     , parameter "DBPassword" "String"
         & description ?~ "Password for root user of the RDS instance"
         & minLength ?~ 10

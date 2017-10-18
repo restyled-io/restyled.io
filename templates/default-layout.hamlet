@@ -6,6 +6,13 @@
     <ul>
       <li>
         <a href=@{DocsR}>Documentation
+      $maybe Entity _ user <- muser
+        <li>
+          <abbr title="Log out">
+            <a href=@{AuthR LogoutR}>#{userEmail user}
+      $nothing
+        <li .button--github>
+          <a href=@{AuthR $ oauth2Url "github"}>Login
 
 $maybe msg <- mmsg
   <aside #message .info>

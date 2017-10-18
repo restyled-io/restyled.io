@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -12,6 +13,10 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
+import Yesod.Auth
+import Yesod.Auth.Dummy
+import Yesod.Auth.Message (AuthMessage(..))
+import Yesod.Auth.OAuth2.GithubApp
 import Yesod.Core.Types (Logger)
 import Yesod.Default.Util (addStaticContentExternal)
 import qualified Data.CaseInsensitive as CI
@@ -72,6 +77,7 @@ instance Yesod App where
 
     defaultLayout widget = do
         master <- getYesod
+        muser <- maybeAuth
         mmsg <- getMessage
 
         -- We break up the default layout into two components:
@@ -87,9 +93,12 @@ instance Yesod App where
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
-    authRoute _ = Nothing
+    authRoute _ = Just $ AuthR $ oauth2Url "github"
 
-    -- Routes not requiring authentication.
+    isAuthorized (AdminP _) _ = do
+        admins <- appAdmins <$> getsYesod appSettings
+        authorizeAdmin <$> maybeAuth <*> pure admins
+
     isAuthorized _ _ = return Authorized
 
     -- This function creates static content files in the static folder
@@ -113,6 +122,55 @@ instance Yesod App where
     -- Provide proper Bootstrap styling for default displays, like
     -- error pages
     defaultMessageWidget title body = $(widgetFile "default-message-widget")
+
+authorizeAdmin :: Maybe (Entity User) -> [Text] -> AuthResult
+authorizeAdmin (Just (Entity _ u)) admins
+    | userEmail u `elem` admins = Authorized
+authorizeAdmin _ _ = Unauthorized "Unauthorized"
+
+instance YesodAuth App where
+    type AuthId App = UserId
+
+    authenticate creds@Creds{..} = runDB $ do
+        $(logDebug) $ "Running authenticate: " <> tshow creds
+        muser <- getBy (UniqueUser credsPlugin credsIdent)
+        $(logDebug) $ "Existing user: " <> tshow muser
+
+        case (entityKey <$> muser, lookup "email" credsExtra) of
+            -- Probably testing via auth/dummy, just authenticate
+            (Just uid, Nothing) -> pure $ Authenticated uid
+
+            -- New user, create an account
+            (Nothing, Just email) -> Authenticated <$> insert User
+                { userEmail = email
+                , userCredsIdent = credsIdent
+                , userCredsPlugin = credsPlugin
+                }
+
+            -- Existing user, synchronize email
+            (Just uid, Just email) -> do
+                update uid [UserEmail =. email]
+                pure $ Authenticated uid
+
+            -- Unexpected, no email in GH response
+            (Nothing, Nothing) -> pure $ UserError $ IdentifierNotFound "email"
+
+    loginDest _ = HomeR
+    logoutDest _ = HomeR
+
+    authPlugins App{..} = addAuthBackDoor appSettings
+        [ oauth2GithubApp
+            (oauthKeysClientId $ appGitHubOAuthKeys appSettings)
+            (oauthKeysClientSecret $ appGitHubOAuthKeys appSettings)
+        ]
+
+    authHttpManager = appHttpManager
+
+addAuthBackDoor :: AppSettings -> [AuthPlugin App] -> [AuthPlugin App]
+addAuthBackDoor AppSettings{..} =
+    if appAllowDummyAuth then (authDummy :) else id
+
+instance YesodAuthPersist App
 
 -- How to run database actions.
 instance YesodPersist App where
