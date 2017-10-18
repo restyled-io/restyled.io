@@ -3,30 +3,27 @@
 module Main (main) where
 
 import Data.Semigroup ((<>))
-import Ops.Commands.Stack
+import Ops.Commands.Deploy
 import Ops.Commands.Template
 import Options.Applicative
+import Options.Generic
 
 data Options
     = Template
-    | CreateStack StackOptions
-    | UpdateStack StackOptions
+    | Deploy DeployOptions
 
 options :: Parser Options
 options = subparser
     (  command "template" (pure Template
-        `withInfo` "Generate the Cloud Formation template to stdout")
-    <> command "create-stack" (CreateStack <$> stackOptions
-        `withInfo` "Create a Restyled Cloud Formation Stack")
-    <> command "update-stack" (UpdateStack <$> stackOptions
-        `withInfo` "Update a Restyled Cloud Formation Stack")
+        `withInfo` "Output the Cloud Formation template")
+    <> command "deploy" (Deploy <$> parseRecord
+        `withInfo` "Deploy an image to an existing Stack")
     )
 
 main :: IO ()
-main = execParser (options `withInfo` "Deploy and Operate Restyled") >>= \case
+main = execParser (options `withInfo` "Operate Restyled.io") >>= \case
     Template -> templateCommand
-    CreateStack opts -> createStack opts
-    UpdateStack opts -> updateStack opts
+    Deploy opts -> deployCommand opts
 
 withInfo :: Parser a -> String -> ParserInfo a
 cmd `withInfo` desc = info (cmd <**> helper) $ fullDesc <> progDesc desc

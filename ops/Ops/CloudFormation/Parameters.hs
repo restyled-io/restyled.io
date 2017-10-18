@@ -7,7 +7,6 @@ module Ops.CloudFormation.Parameters
     , prefixJSON
     , defaultTags
     , toObject
-    , toText
     ) where
 
 import Data.Aeson (Value(..), Object, toJSON)
@@ -79,11 +78,3 @@ defaultTags =
 toObject :: Value -> Object
 toObject (Object o) = o
 toObject _ = error "Non-Object value"
-
--- | De-construct an @'String'@ @'Value'@ to just the @'Text'@
---
--- Useful for making @'Parameter'@ defaults display-friendly.
---
-toText :: Value -> Text
-toText (String t) = t
-toText _ = error "Non-String value"
