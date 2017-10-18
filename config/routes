@@ -1,3 +1,4 @@
+/auth AuthR Auth getAuth
 /favicon.ico FaviconR GET
 /revision RevisionR GET
 /robots.txt RobotsR GET
@@ -7,3 +8,6 @@
 /docs DocsR GET
 /signups SignupR POST
 /webhooks WebhooksR POST
+
+/admin AdminP:
+  /signups      AdminSignupsR GET

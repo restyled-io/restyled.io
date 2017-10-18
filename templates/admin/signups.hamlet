@@ -1,0 +1,7 @@
+<main>
+  <h1>Admin/Signups
+
+<section>
+  <ul>
+    $forall Entity _ s <- signups
+      <li>#{signupEmail s}

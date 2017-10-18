@@ -44,6 +44,8 @@ library:
   - wai-logger
   - warp
   - yesod
+  - yesod-auth
+  - yesod-auth-oauth2
   - yesod-core
   - yesod-form
   - yesod-static

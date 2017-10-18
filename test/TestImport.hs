@@ -4,6 +4,7 @@
 module TestImport
     ( runDB
     , withApp
+    , authenticateAs
     , module X
     ) where
 
@@ -14,7 +15,7 @@ import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool, rawEx
 import Foundation            as X
 import LoadEnv               (loadEnvFrom)
 import Model                 as X
-import Settings              (loadEnvSettings)
+import Settings              (AppSettings(..), loadEnvSettings)
 import Test.Hspec.Lifted     as X
 import Text.Shakespeare.Text (st)
 import Yesod.Test            as X
@@ -57,3 +58,12 @@ getTables = do
     |] []
 
     return $ map unSingle tables
+
+authenticateAs :: Entity User -> YesodExample App ()
+authenticateAs (Entity _ u) = do
+    testRoot <- fmap (appRoot . appSettings) getTestYesod
+
+    request $ do
+        setMethod "POST"
+        addPostParam "ident" $ userCredsIdent u
+        setUrl $ testRoot ++ "/auth/page/dummy"

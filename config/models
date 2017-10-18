@@ -1,2 +1,11 @@
 Signup
   email Text
+
+User
+  email Text
+
+  credsIdent Text
+  credsPlugin Text
+
+  UniqueUser credsPlugin credsIdent
+  deriving Eq Show
