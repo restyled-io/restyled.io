@@ -37,10 +37,6 @@ cfParameters =
         & default' ?~ "INFO"
         & allowedValues ?~ ["DEBUG", "INFO", "WARN", "ERROR"]
 
-    -- TODO: create these in-template
-    , parameter "AppsClusterInstanceRole" "String" & default' ?~ "ecsInstanceRole"
-    , parameter "AppsServiceRole" "String" & default' ?~ "ecsServiceRole"
-
     , parameter "CertificateARN" "String"
         & description ?~ "ARN of an Amazon SSL certificate for the Domain"
         & allowedPattern ?~ "^arn:aws:acm:.*"

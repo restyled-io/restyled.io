@@ -1,9 +1,11 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 module Ops.CloudFormation.Resources.AppsCluster
     ( appsClusterResources
     ) where
 
+import Data.Aeson.QQ (aesonQQ)
 import Ops.CloudFormation.Parameters
 import Stratosphere
 
@@ -20,12 +22,31 @@ appsClusterResources =
                 & ecsgipToPort ?~ Literal 61000
                 & ecsgipSourceSecurityGroupId ?~ Ref "ALBSecurityGroup"
             ]
+    , resource "AppsInstanceRole"
+        $ IAMRoleProperties
+        $ iamRole (toObject [aesonQQ|
+        {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Principal": {"Service": "ec2.amazonaws.com"},
+                "Action": "sts:AssumeRole",
+                "Effect": "Allow"
+            }]
+        }
+        |])
+        & iamrRoleName ?~ prefixRef "InstanceRole"
+        & iamrManagedPolicyArns ?~
+            [ "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+            ]
+    , resource "AppsInstanceProfile"
+        $ IAMInstanceProfileProperties
+        $ iamInstanceProfile [Ref "AppsInstanceRole"]
     , resource "AppsLaunchConfiguration"
         $ AutoScalingLaunchConfigurationProperties
         $ autoScalingLaunchConfiguration
             (FindInMap "RegionAMIs" (Ref "AWS::Region") "Id")
             (Ref "AppsClusterInstanceType")
-        & aslcIamInstanceProfile ?~ Ref "AppsClusterInstanceRole"
+        & aslcIamInstanceProfile ?~ Ref "AppsInstanceProfile"
         & aslcSecurityGroups ?~ [Ref "AppsSecurityGroup"]
         & aslcUserData ?~ Base64 (Join "\n"
             [ "#!/bin/bash"
