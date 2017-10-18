@@ -1,13 +1,13 @@
-{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE OverloadedLists   #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Ops.CloudFormation.Resources.TaskDefinitions
     ( taskDefinitionResources
     ) where
 
-import Data.Aeson (toJSON)
-import Data.Text (Text)
-import Ops.CloudFormation.Parameters
-import Stratosphere
+import           Data.Aeson                    (toJSON)
+import           Data.Text                     (Text)
+import           Ops.CloudFormation.Parameters
+import           Stratosphere
 
 taskDefinitionResources :: Resources
 taskDefinitionResources =

@@ -1,27 +1,27 @@
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE LambdaCase            #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE NoImplicitPrelude     #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE TypeFamilies          #-}
 module Foundation where
 
-import Import.NoFoundation
+import           Import.NoFoundation
 
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Database.Redis (Connection)
-import Text.Hamlet (hamletFile)
-import Text.Jasmine (minifym)
-import Yesod.Auth
-import Yesod.Auth.Dummy
-import Yesod.Auth.Message (AuthMessage(..))
-import Yesod.Auth.OAuth2.GithubApp
-import Yesod.Core.Types (Logger)
-import Yesod.Default.Util (addStaticContentExternal)
-import qualified Data.CaseInsensitive as CI
-import qualified Data.Text.Encoding as TE
-import qualified Yesod.Core.Unsafe as Unsafe
+import qualified Data.CaseInsensitive        as CI
+import qualified Data.Text.Encoding          as TE
+import           Database.Persist.Sql        (ConnectionPool, runSqlPool)
+import           Database.Redis              (Connection)
+import           Text.Hamlet                 (hamletFile)
+import           Text.Jasmine                (minifym)
+import           Yesod.Auth
+import           Yesod.Auth.Dummy
+import           Yesod.Auth.Message          (AuthMessage (..))
+import           Yesod.Auth.OAuth2.GithubApp
+import           Yesod.Core.Types            (Logger)
+import qualified Yesod.Core.Unsafe           as Unsafe
+import           Yesod.Default.Util          (addStaticContentExternal)
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application

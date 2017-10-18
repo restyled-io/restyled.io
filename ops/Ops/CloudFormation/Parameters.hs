@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE OverloadedLists   #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Ops.CloudFormation.Parameters
     ( cfParameters
@@ -9,9 +9,9 @@ module Ops.CloudFormation.Parameters
     , toObject
     ) where
 
-import Data.Aeson (Value(..), Object, toJSON)
-import Data.Text (Text)
-import Stratosphere
+import           Data.Aeson   (Object, Value (..), toJSON)
+import           Data.Text    (Text)
+import           Stratosphere
 
 cfParameters :: Parameters
 cfParameters =
@@ -80,4 +80,4 @@ defaultTags =
 --
 toObject :: Value -> Object
 toObject (Object o) = o
-toObject _ = error "Non-Object value"
+toObject _          = error "Non-Object value"
