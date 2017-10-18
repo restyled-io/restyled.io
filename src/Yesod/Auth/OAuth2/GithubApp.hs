@@ -18,14 +18,13 @@ oauth2GithubApp
     -> AuthPlugin m
 oauth2GithubApp clientId clientSecret = authOAuth2
     "github"
-    ( OAuth2
+    OAuth2
         { oauthClientId = clientId
         , oauthClientSecret = clientSecret
         , oauthOAuthorizeEndpoint = "https://github.com/login/oauth/authorize"
         , oauthAccessTokenEndpoint = "https://github.com/login/oauth/access_token"
         , oauthCallback = Nothing
         }
-    )
     (\m t -> do
         euser <- authGetJSON m (accessToken t) "https://api.github.com/user"
 
