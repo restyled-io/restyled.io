@@ -27,12 +27,6 @@ appsClusterResources =
             (Ref "AppsClusterInstanceType")
         & aslcIamInstanceProfile ?~ Ref "AppsClusterInstanceRole"
         & aslcSecurityGroups ?~ [Ref "AppsSecurityGroup"]
-        & aslcBlockDeviceMappings ?~
-            [ autoScalingLaunchConfigurationBlockDeviceMapping "/dev/xvdcz"
-                & aslcbdmEbs ?~ (autoScalingLaunchConfigurationBlockDevice
-                    & aslcbdVolumeSize ?~ Ref "AppsClusterStorageSize"
-                    & aslcbdVolumeType ?~ "gp2")
-            ]
         & aslcUserData ?~ Base64 (Join "\n"
             [ "#!/bin/bash"
             , "# Join the apps cluser"

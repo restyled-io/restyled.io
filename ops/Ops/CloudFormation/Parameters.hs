@@ -29,7 +29,6 @@ cfParameters =
 
     , parameter "AppsClusterInstanceType" "String" & default' ?~ "t2.nano"
     , parameter "AppsClusterSize" "Number" & default' ?~ "1"
-    , parameter "AppsClusterStorageSize" "Number" & default' ?~ "22"
     , parameter "AppsImageName" "String" & default' ?~ "restyled/restyled"
     , parameter "AppsImageTag" "String" & default' ?~ "latest"
     , parameter "AppsAppServiceCount" "Number" & default' ?~ "1"
