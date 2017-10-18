@@ -1,15 +1,33 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 module Ops.CloudFormation.Resources.AppsServices
     ( appsServicesResources
     ) where
 
+import Data.Aeson.QQ (aesonQQ)
 import Ops.CloudFormation.Parameters
 import Stratosphere
 
 appsServicesResources :: Resources
 appsServicesResources =
-    [ resource "AppService"
+    [ resource "AppsServiceRole"
+        $ IAMRoleProperties
+        $ iamRole (toObject [aesonQQ|
+        {
+            "Version": "2008-10-17",
+            "Statement": [{
+                "Effect":"Allow",
+                "Principal":{"Service":["ecs.amazonaws.com"]},
+                "Action":["sts:AssumeRole"]
+            }]
+        }
+        |])
+        & iamrRoleName ?~ prefixRef "ServiceRole"
+        & iamrManagedPolicyArns ?~
+            [ "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
+            ]
+    , resource "AppService"
         ( ECSServiceProperties
         $ ecsService (Ref "AppTaskDefinition")
         & ecssCluster ?~ Ref "AppsCluster"
