@@ -1,9 +1,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE NoImplicitPrelude     #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE TypeFamilies          #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Application
     ( getApplicationDev
@@ -19,47 +19,40 @@ module Application
     , db
     ) where
 
-import Import
+import           Import
 
-import Control.Monad.Logger (liftLoc, runLoggingT)
-import Database.Persist.Postgresql
-    ( createPostgresqlPool
-    , pgConnStr
-    , pgPoolSize
-    , runSqlPool
-    )
-import Database.Redis (checkedConnect)
-import Language.Haskell.TH.Syntax (qLocation)
-import LoadEnv (loadEnv)
-import Network.Wai (Middleware)
-import Network.Wai.Handler.Warp
-    ( Settings
-    , defaultSettings
-    , defaultShouldDisplayException
-    , getPort
-    , runSettings
-    , setHost
-    , setOnException
-    , setPort
-    )
-import Network.Wai.Middleware.RequestLogger
-    ( Destination(Callback, Logger)
-    , IPAddrSource(..)
-    , OutputFormat(..)
-    , destination
-    , mkRequestLogger
-    , outputFormat
-    )
-import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
-import Yesod.Auth
+import           Control.Monad.Logger                 (liftLoc, runLoggingT)
+import           Database.Persist.Postgresql          (createPostgresqlPool,
+                                                       pgConnStr, pgPoolSize,
+                                                       runSqlPool)
+import           Database.Redis                       (checkedConnect)
+import           Language.Haskell.TH.Syntax           (qLocation)
+import           LoadEnv                              (loadEnv)
+import           Network.Wai                          (Middleware)
+import           Network.Wai.Handler.Warp             (Settings,
+                                                       defaultSettings,
+                                                       defaultShouldDisplayException,
+                                                       getPort, runSettings,
+                                                       setHost, setOnException,
+                                                       setPort)
+import           Network.Wai.Middleware.RequestLogger (Destination (Callback, Logger),
+                                                       IPAddrSource (..),
+                                                       OutputFormat (..),
+                                                       destination,
+                                                       mkRequestLogger,
+                                                       outputFormat)
+import           System.Log.FastLogger                (defaultBufSize,
+                                                       newStdoutLoggerSet,
+                                                       toLogStr)
+import           Yesod.Auth
 
-import Handler.Common
-import Handler.Docs
-import Handler.Home
-import Handler.Signup
-import Handler.Webhooks
+import           Handler.Common
+import           Handler.Docs
+import           Handler.Home
+import           Handler.Signup
+import           Handler.Webhooks
 
-import Handler.Admin.Signups
+import           Handler.Admin.Signups
 
 mkYesodDispatch "App" resourcesApp
 

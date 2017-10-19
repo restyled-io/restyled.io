@@ -1,6 +1,6 @@
-{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
 module TestImport
     ( runDB
     , withApp
@@ -8,17 +8,19 @@ module TestImport
     , module X
     ) where
 
-import Application           (makeFoundation, makeLogWare)
-import ClassyPrelude         as X hiding (delete, deleteBy, Handler)
-import Database.Persist      as X hiding (get)
-import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool, rawExecute, rawSql, unSingle, connEscapeName)
-import Foundation            as X
-import LoadEnv               (loadEnvFrom)
-import Model                 as X
-import Settings              (AppSettings(..), loadEnvSettings)
-import Test.Hspec.Lifted     as X
-import Text.Shakespeare.Text (st)
-import Yesod.Test            as X
+import           Application           (makeFoundation, makeLogWare)
+import           ClassyPrelude         as X hiding (Handler, delete, deleteBy)
+import           Database.Persist      as X hiding (get)
+import           Database.Persist.Sql  (SqlBackend, SqlPersistM, connEscapeName,
+                                        rawExecute, rawSql, runSqlPersistMPool,
+                                        unSingle)
+import           Foundation            as X
+import           LoadEnv               (loadEnvFrom)
+import           Model                 as X
+import           Settings              (AppSettings (..), loadEnvSettings)
+import           Test.Hspec.Lifted     as X
+import           Text.Shakespeare.Text (st)
+import           Yesod.Test            as X
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do

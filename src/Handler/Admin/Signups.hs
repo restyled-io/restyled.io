@@ -1,9 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module Handler.Admin.Signups where
 
-import Import
+import           Import
 
 getAdminSignupsR :: Handler Html
 getAdminSignupsR = do

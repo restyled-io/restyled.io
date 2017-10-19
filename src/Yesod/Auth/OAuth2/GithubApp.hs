@@ -4,12 +4,12 @@ module Yesod.Auth.OAuth2.GithubApp
     , module Yesod.Auth.OAuth2
     ) where
 
-import Control.Exception (throwIO)
-import Data.Text (Text)
-import GitHub.Data (User(..), untagId)
-import Yesod.Auth
-import Yesod.Auth.OAuth2
-import qualified Data.Text as T
+import           Control.Exception (throwIO)
+import           Data.Text         (Text)
+import qualified Data.Text         as T
+import           GitHub.Data       (User (..), untagId)
+import           Yesod.Auth
+import           Yesod.Auth.OAuth2
 
 oauth2GithubApp
     :: YesodAuth m

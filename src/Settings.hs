@@ -1,54 +1,55 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RankNTypes        #-}
+{-# LANGUAGE RecordWildCards   #-}
 module Settings where
 
-import ClassyPrelude.Yesod hiding (Builder, throw)
+import           ClassyPrelude.Yesod         hiding (Builder, throw)
 
-import Data.Text.Internal.Builder (Builder, toLazyText)
-import Database.Persist.Postgresql (PostgresConf(..))
-import Database.Redis (ConnectInfo(..))
-import GitHub.Model (GitHubId(..))
-import Language.Haskell.TH.Syntax (Exp, Q)
-import Network.PGDatabaseURL (parsePGConnectionString)
-import Network.RedisURL (parseRedisURL)
-import Network.Wai.Handler.Warp (HostPreference)
-import Text.Shakespeare (RenderUrl)
-import Yesod.Default.Util (widgetFileNoReload, widgetFileReload)
+import           Data.Text.Internal.Builder  (Builder, toLazyText)
+import           Database.Persist.Postgresql (PostgresConf (..))
+import           Database.Redis              (ConnectInfo (..))
+import           GitHub.Model                (GitHubId (..))
+import           Language.Haskell.TH.Syntax  (Exp, Q)
+import           Network.PGDatabaseURL       (parsePGConnectionString)
+import           Network.RedisURL            (parseRedisURL)
+import           Network.Wai.Handler.Warp    (HostPreference)
+import           Text.Shakespeare            (RenderUrl)
+import           Yesod.Default.Util          (widgetFileNoReload,
+                                              widgetFileReload)
 
-import qualified Data.ByteString.Char8 as C8
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as LT
+import qualified Data.ByteString.Char8       as C8
+import qualified Data.Text                   as T
+import qualified Data.Text.Lazy              as LT
 import qualified Env
-import qualified Text.Shakespeare.Text as ST
+import qualified Text.Shakespeare.Text       as ST
 
 data OAuthKeys = OAuthKeys
-    { oauthKeysClientId :: Text
+    { oauthKeysClientId     :: Text
     , oauthKeysClientSecret :: Text
     }
 
 data AppSettings = AppSettings
-    { appDatabaseConf :: PostgresConf
-    , appRedisConf :: ConnectInfo
-    , appRoot :: Text
-    , appHost :: HostPreference
-    , appPort :: Int
-    , appIpFromHeader :: Bool
-    , appLogLevel :: LogLevel
-    , appMutableStatic :: Bool
-    , appCopyright :: Text
-    , appGitHubAppId :: GitHubId
-    , appGitHubAppKey :: Text
-    , appGitHubOAuthKeys :: OAuthKeys
+    { appDatabaseConf       :: PostgresConf
+    , appRedisConf          :: ConnectInfo
+    , appRoot               :: Text
+    , appHost               :: HostPreference
+    , appPort               :: Int
+    , appIpFromHeader       :: Bool
+    , appLogLevel           :: LogLevel
+    , appMutableStatic      :: Bool
+    , appCopyright          :: Text
+    , appGitHubAppId        :: GitHubId
+    , appGitHubAppKey       :: Text
+    , appGitHubOAuthKeys    :: OAuthKeys
     , appRestylerExecutable :: FilePath
-    , appAdmins :: [Text]
+    , appAdmins             :: [Text]
     -- ^ +SECURITY_NOTE+ This relies on the fact that there is no authentication
     -- method available where users can enter an email themselves. Emails are
     -- taken only from GitHub credentials, and will only be present there if
     -- verified with GitHub.
-    , appAllowDummyAuth :: Bool
+    , appAllowDummyAuth     :: Bool
     }
 
 instance Show AppSettings where
@@ -107,10 +108,10 @@ envLogLevel = toLogLevel <$> Env.var Env.str "LOG_LEVEL" (Env.def "info")
     toLogLevel :: Text -> LogLevel
     toLogLevel t = case T.toLower t of
         "debug" -> LevelDebug
-        "info" -> LevelInfo
-        "warn" -> LevelWarn
+        "info"  -> LevelInfo
+        "warn"  -> LevelWarn
         "error" -> LevelError
-        _ -> LevelOther t
+        _       -> LevelOther t
 
 -- This value is needed in a pure context, and so can't read from ENV. It also
 -- doesn't differ between environments, so we might as well harcode it.
