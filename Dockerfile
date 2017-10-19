@@ -54,12 +54,13 @@ RUN \
   tar --strip-components=1 -xvzf "$DOCKER_ARCHIVE" -C /usr/local/bin
 
 RUN useradd app
-USER app
 
 # Make /app/config owned by app. The webapp creates client_session_key.aes. We
 # should move to ENV-based secret; it's better for this, and avoids everyone
 # getting logged-out on deploys.
 RUN chown -R app /app/config
+
+USER app
 
 COPY docker/files /
 ENTRYPOINT ["/entrypoint"]
