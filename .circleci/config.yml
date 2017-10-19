@@ -56,19 +56,19 @@ jobs:
       - deploy:
           name: Docker Hub
           command: |
-              make image.release \
-                DOCKER_USERNAME=$DOCKERHUB_USERNAME \
-                DOCKER_PASSWORD=$DOCKERHUB_PASSWORD \
-                RELEASE_IMAGE=restyled/restyled:b$CIRCLE_BUILD_NUM
+            make image.release \
+              DOCKER_USERNAME=$DOCKERHUB_USERNAME \
+              DOCKER_PASSWORD=$DOCKERHUB_PASSWORD \
+              RELEASE_IMAGE=restyled/restyled:b$CIRCLE_BUILD_NUM
 
-              if [[ "$CIRCLE_BRANCH" == master ]]; then
-                docker run \
-                  --env AWS_ACCESS_KEY_ID \
-                  --env AWS_SECRET_ACCESS_KEY \
-                  restyled/ops deploy \
-                  --stack-name RestyledProd \
-                  --image-tag "b$CIRCLE_BUILD_NUM"
-              fi
+            if [[ "$CIRCLE_BRANCH" == master ]]; then
+              docker run \
+                --env AWS_ACCESS_KEY_ID \
+                --env AWS_SECRET_ACCESS_KEY \
+                restyled/ops deploy \
+                --stack-name RestyledProd \
+                --image-tag "b$CIRCLE_BUILD_NUM"
+            fi
 
 workflows:
   version: 2
