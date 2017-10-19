@@ -52,10 +52,21 @@ jobs:
           command: apk add --update git make
       - run:
           name: Build image
-          command: make image.build
+          command: |
+            if git show | grep -Fq ':nodeploy:'; then
+              echo "HEAD commit included :nodeploy:, skipping..."
+              exit 0
+            fi
+
+            make image.build
       - deploy:
           name: Docker Hub
           command: |
+            if git show | grep -Fq ':nodeploy:'; then
+              echo "HEAD commit included :nodeploy:, skipping..."
+              exit 0
+            fi
+
             make image.release \
               DOCKER_USERNAME=$DOCKERHUB_USERNAME \
               DOCKER_PASSWORD=$DOCKERHUB_PASSWORD \
