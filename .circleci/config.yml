@@ -73,6 +73,8 @@ jobs:
               RELEASE_IMAGE=restyled/restyled:b$CIRCLE_BUILD_NUM
 
             if [[ "$CIRCLE_BRANCH" == master ]]; then
+              # explicit pull to ensure we update
+              docker pull restyled/ops
               docker run \
                 --env AWS_ACCESS_KEY_ID \
                 --env AWS_SECRET_ACCESS_KEY \
