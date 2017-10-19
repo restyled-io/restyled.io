@@ -3,4 +3,3 @@ packages:
   - "."
 extra-deps:
 - load-env-0.1.1
-allow-newer: true
