@@ -1,5 +1,4 @@
-NAME          ?= restyled
-LOCAL_IMAGE   ?= $(NAME)/$(NAME)
+LOCAL_IMAGE   ?= restyled/restyled.io
 RELEASE_IMAGE ?= $(LOCAL_IMAGE)
 
 DOCKER_USERNAME ?= x

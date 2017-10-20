@@ -70,7 +70,7 @@ jobs:
             make image.release \
               DOCKER_USERNAME=$DOCKERHUB_USERNAME \
               DOCKER_PASSWORD=$DOCKERHUB_PASSWORD \
-              RELEASE_IMAGE=restyled/restyled:b$CIRCLE_BUILD_NUM
+              RELEASE_IMAGE=restyled/restyled.io:b$CIRCLE_BUILD_NUM
 
             if [[ "$CIRCLE_BRANCH" == master ]]; then
               # explicit pull to ensure we update
@@ -80,6 +80,7 @@ jobs:
                 --env AWS_SECRET_ACCESS_KEY \
                 restyled/ops deploy \
                 --stack-name RestyledProd \
+                --image-name restyled/restyled.io \
                 --image-tag "b$CIRCLE_BUILD_NUM"
             fi
 
