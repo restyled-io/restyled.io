@@ -1,5 +1,5 @@
 # Build stage
-FROM fpco/stack-build:lts-9.5 as builder
+FROM fpco/stack-build:lts-9.6 as builder
 MAINTAINER Pat Brisbin <pbrisbin@gmail.com>
 
 ENV LANG en_US.UTF-8
