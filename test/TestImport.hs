@@ -4,13 +4,18 @@
 module TestImport
     ( runDB
     , withApp
+    , runBackendTest
     , module X
     ) where
 
 import Application           (makeFoundation, makeLogWare)
+import Backend.Foundation    (Backend, runBackendApp, runRedis)
+import Backend.Job           (queueName)
 import ClassyPrelude         as X hiding (delete, deleteBy, Handler)
+import Control.Monad.Logger  (LoggingT)
 import Database.Persist      as X hiding (get)
 import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool, rawExecute, rawSql, unSingle, connEscapeName)
+import Database.Redis        (del)
 import Foundation            as X
 import LoadEnv               (loadEnvFrom)
 import Model                 as X
@@ -27,12 +32,18 @@ runDB query = do
 runDBWithApp :: App -> SqlPersistM a -> IO a
 runDBWithApp app query = runSqlPersistMPool query (appConnPool app)
 
+runBackendTest :: ReaderT Backend (LoggingT IO) a -> YesodExample App a
+runBackendTest query = do
+    app <- getTestYesod
+    liftIO $ runBackendApp app query
+
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
     loadEnvFrom ".env.test"
     settings <- loadEnvSettings
     foundation <- makeFoundation settings
     wipeDB foundation
+    wipeRedis foundation
     logWare <- liftIO $ makeLogWare foundation
     return (foundation, logWare)
 
@@ -47,6 +58,9 @@ wipeDB app = runDBWithApp app $ do
     let escapedTables = map (connEscapeName sqlBackend . DBName) tables
         query = "TRUNCATE TABLE " ++ intercalate ", " escapedTables
     rawExecute query []
+
+wipeRedis :: App -> IO ()
+wipeRedis app = runBackendApp app $ runRedis $ void $ del [queueName]
 
 getTables :: MonadIO m => ReaderT SqlBackend m [Text]
 getTables = do

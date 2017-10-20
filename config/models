@@ -1,2 +1,18 @@
 Signup
   email Text
+
+Job json
+  installationId InstallationId
+  owner OwnerName
+  repo RepoName
+  pullRequest PullRequestId
+
+  createdAt UTCTime
+  updatedAt UTCTime
+  completedAt UTCTime Maybe
+
+  exitCode Int Maybe
+  stdout Text Maybe
+  stderr Text Maybe
+
+  deriving Eq Show

@@ -6,9 +6,10 @@ module Handler.Webhooks where
 
 import Import
 
+import Backend.Foundation
+import Backend.Job
 import GitHub.Data
 import GitHub.Data.Webhooks.PullRequest
-import Restyler.Job
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
@@ -17,9 +18,8 @@ postWebhooksR = do
 
     if acceptPayload payload
         then do
-            job <- newJob pInstallationId pRepository pPullRequest
-            $(logDebug) $ "Enqueuing Restyler Job: " <> tshow job
-            flip enqueueRestylerJob job =<< getsYesod appRedisConn
+            job <- runDB $ insertJob pInstallationId pRepository pPullRequest
+            runBackendHandler $ enqueueRestylerJob job
             sendResponseStatus status201 ()
         else
             -- It was valid, but we didn't create anything

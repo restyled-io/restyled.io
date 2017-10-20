@@ -92,9 +92,11 @@ tests:
     - restyled
     - bytestring
     - classy-prelude
+    - hedis
     - hspec
     - hspec-expectations-lifted
     - load-env
+    - monad-logger
     - persistent
     - shakespeare
     - text

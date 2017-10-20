@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Backend (backendMain)
+import Backend.Application (backendMain)
 
 main :: IO ()
 main = backendMain
