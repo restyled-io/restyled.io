@@ -62,7 +62,7 @@ import Yesod.Default.Config2
 import Handler.Common
 import Handler.Docs
 import Handler.Home
-import Handler.Signup
+import Handler.Signups
 import Handler.Webhooks
 
 import Handler.Admin.Signups

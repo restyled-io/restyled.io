@@ -1,11 +1,13 @@
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 module TestImport
     ( runDB
     , withApp
     , runBackendTest
     , authenticateAs
+    , postForm
     , module X
     ) where
 
@@ -23,6 +25,7 @@ import Model                 as X
 import Settings              (AppSettings(..), loadEnvSettings)
 import Test.Hspec.Lifted     as X
 import Text.Shakespeare.Text (st)
+import Yesod.Core.Handler    (RedirectUrl(..))
 import Yesod.Test            as X
 
 runDB :: SqlPersistM a -> YesodExample App a
@@ -81,3 +84,19 @@ authenticateAs (Entity _ u) = do
         setMethod "POST"
         addPostParam "ident" $ userCredsIdent u
         setUrl $ testRoot ++ "/auth/page/dummy"
+
+-- | Post a CSRF-protected form
+postForm
+    :: (RedirectUrl App a, RedirectUrl App b)
+    => a                -- ^ Page with the form
+    -> b                -- ^ Page the form posts to
+    -> [(Text, Text)]   -- ^ Field @Name => Value@s
+    -> YesodExample App ()
+postForm a b fs = do
+    get a -- required to get a valid token
+
+    request $ do
+        setUrl b
+        setMethod "POST"
+        addToken
+        for_ fs $ uncurry byLabel
