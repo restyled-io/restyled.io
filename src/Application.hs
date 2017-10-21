@@ -52,6 +52,12 @@ import Network.Wai.Middleware.RequestLogger
     )
 import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
 import Yesod.Auth
+import Yesod.Core.Types (loggerSet)
+import Yesod.Default.Config2
+    ( develMainHelper
+    , getDevSettings
+    , makeYesodLogger
+    )
 
 import Handler.Common
 import Handler.Docs
