@@ -58,6 +58,8 @@ processJob (Entity jid job) = do
 execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)
 execRestyler AppSettings{..} Job{..} = readLoggedProcess "docker"
     [ "run", "--rm"
+    , "--volume", "/tmp:/tmp"
+    , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
     , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
     , "--github-app-id", unpack $ toPathPart appGitHubAppId
     , "--github-app-key", unpack appGitHubAppKey
