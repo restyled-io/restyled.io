@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+host=http://localhost:3000
+file=fixtures/webhooks/github/pull-request-opened.json
+
+curl \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d @"$file" "$host"/webhooks
