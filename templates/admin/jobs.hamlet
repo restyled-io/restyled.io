@@ -1,0 +1,37 @@
+<main>
+  <h1>Admin/Jobs
+
+<section>
+  <table>
+    <thead>
+      <tr>
+        <th>Id
+        <th>Created
+        <th>Repo (Installation)
+        <th>Completed
+        <th>Exit Code
+        <th>
+          <code>stdout
+        <th>
+          <code>stderr
+
+    <tbody>
+      $forall Entity jid job <- jobs
+        <tr>
+          <td>#{toPathPiece jid}
+          <td>#{show $ jobCreatedAt job}
+          <td>
+            #{toPathPart $ jobOwner job}/#{toPathPart $ jobRepo job}
+            (#{toPathPart $ jobInstallationId job})
+          <td>
+            $maybe x <- jobCompletedAt job
+              #{show x}
+          <td>
+            $maybe x <- jobExitCode job
+              #{x}
+          <td>
+            $maybe x <- jobStdout job
+              <pre>#{x}
+          <td>
+            $maybe x <- jobStderr job
+              <pre>#{x}

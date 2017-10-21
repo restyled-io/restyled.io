@@ -9,5 +9,8 @@
 /signups SignupR POST
 /webhooks WebhooksR POST
 
+/admin AdminR GET
 /admin AdminP:
-  /signups      AdminSignupsR GET
+  /dashboard AdminDashboardR GET
+  /jobs AdminJobsR GET
+  /signups AdminSignupsR GET
