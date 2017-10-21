@@ -15,3 +15,8 @@ spec = withApp $ do
         it "gives a 200" $ do
             get FaviconR
             statusIs 200
+
+    describe "/revision" $ do
+        it "gives a 200" $ do
+            get RevisionR
+            statusIs 200
