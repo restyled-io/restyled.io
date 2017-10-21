@@ -50,7 +50,7 @@ awaitAndProcessJob timeout = traverse_ processJob =<< awaitRestylerJob timeout
 processJob :: MonadBackend m => Entity Job -> m ()
 processJob (Entity jid job) = do
     $(logInfo) $ "Processing Restyler Job Id "
-        <> toPathPiece jid <> " :" <> tshow job
+        <> toPathPiece jid <> ": " <> tshow job
     settings <- asks backendSettings
     (ec, out, err) <- execRestyler settings job
     runDB $ completeJob jid ec (pack out) (pack err)

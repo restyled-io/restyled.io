@@ -58,7 +58,7 @@ awaitRestylerJob :: MonadBackend m => Integer -> m (Maybe (Entity Job))
 awaitRestylerJob timeout = do
     $(logDebug) $ "Awaiting Restyler Job..."
     eresult <- runRedis $ brpop [queueName] timeout
-    $(logDebug) $ "Popped value :" <> tshow eresult
+    $(logDebug) $ "Popped value: " <> tshow eresult
     return $ either (const Nothing) (decodePopped =<<) eresult
   where
     decodePopped = decode . fromStrict . snd
@@ -66,7 +66,7 @@ awaitRestylerJob timeout = do
 enqueueRestylerJob :: MonadBackend m => Entity Job -> m ()
 enqueueRestylerJob e@(Entity jid job) = do
     $(logDebug) $ "Enqueuing Restyler Job Id "
-        <> toPathPiece jid <> " :" <> tshow job
+        <> toPathPiece jid <> ": " <> tshow job
     void $ runRedis $ lpush queueName [toStrict $ encode e]
 
 queueName :: ByteString
