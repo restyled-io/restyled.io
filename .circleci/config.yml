@@ -78,6 +78,8 @@ jobs:
               docker run \
                 --env AWS_ACCESS_KEY_ID \
                 --env AWS_SECRET_ACCESS_KEY \
+                --env PUSHOVER_API_KEY \
+                --env PUSHOVER_USER_KEY \
                 restyled/ops deploy \
                 --stack-name RestyledProd \
                 --image-name restyled/restyled.io \
