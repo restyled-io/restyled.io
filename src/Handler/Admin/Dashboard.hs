@@ -9,6 +9,7 @@ data Dashboard = Dashboard
     { dLatestJobAt :: Maybe UTCTime
     , dIncompleteJobs :: Int
     , dCompleteJobs :: Int
+    , dErroredJobs :: Int
     }
 
 getAdminR :: Handler Html
@@ -25,6 +26,7 @@ getAdminDashboardR = do
             <$> pure (jobCompletedAt . entityVal =<< mjob)
             <*> count [JobCompletedAt ==. Nothing]
             <*> count [JobCompletedAt !=. Nothing]
+            <*> count [JobCompletedAt !=. Nothing, JobExitCode !=. Just 0]
 
     defaultLayout $ do
         setTitle "Admin - Dashboard"

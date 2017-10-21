@@ -10,6 +10,8 @@
     <dd>#{show $ dIncompleteJobs dashboard}
     <dt>Complete Jobs
     <dd>#{show $ dCompleteJobs dashboard}
+    <dt>Errored Jobs
+    <dd>#{show $ dErroredJobs dashboard}
 
 <section>
   <h2>Pages
