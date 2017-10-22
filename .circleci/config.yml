@@ -13,10 +13,10 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: stack
+          keys:
             - stack-{{ .Branch }}-{{ checksum "stack.yaml" }}
             - stack-{{ .Branch }}
-            - stack
+            - stack-
       - run:
           name: Dependencies
           command: make setup
