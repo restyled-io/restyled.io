@@ -21,9 +21,6 @@ import Database.Redis hiding (decode, runRedis)
 import qualified Database.Redis as Redis
 
 -- | Like @'App'@ but with no webapp-related bits
---
--- TODO: backendConnPool :: ConnectionPool, to allow DB access.
---
 data Backend = Backend
     { backendSettings :: AppSettings
     , backendConnPool :: ConnectionPool
@@ -56,7 +53,7 @@ runBackendHandler f = do
     app <- getYesod
     runBackendApp app f
 
--- | Extracted from @'runBackendTest'@ so we can use it in tests
+-- | Extracted so @'runBackendTest'@ can use it in tests
 runBackendApp :: App -> ReaderT Backend (LoggingT m) a -> m a
 runBackendApp app@App{..} f = runLoggingT
     (runReaderT f Backend
