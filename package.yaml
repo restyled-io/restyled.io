@@ -16,6 +16,7 @@ library:
   - conduit
   - containers
   - envparse
+  - errors
   - fast-logger
   - file-embed
   - github
@@ -28,6 +29,7 @@ library:
   - load-env
   - monad-control
   - monad-logger
+  - monadplus
   - network-uri
   - persistent
   - persistent-postgresql
