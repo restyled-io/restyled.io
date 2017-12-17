@@ -51,6 +51,8 @@
 <section>
   <h2>Open Source
   <p>
-    Restyled will be built in the open, starting with 
-    <a href=http://github.com/restyled-io/restyled.io>this very landing page</a>.
-    The product, if launched, would be free for open source, forever.
+    Restyled will be built in the open.
+    <strong>All
+    code used to operate Restyled.io can be found in our 
+    <a href=http://github.com/restyled-io>GitHub Org</a>.
+    The product, if launched, would be free to use for open source, forever.
