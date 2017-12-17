@@ -1,3 +1,11 @@
+img {
+  width: 100%;
+
+  -webkit-box-shadow: 2px 12px 20px #888;
+     -moz-box-shadow: 2px 12px 20px #888;
+          box-shadow: 2px 12px 20px #888;
+}
+
 footer {
   text-align: center;
 }
