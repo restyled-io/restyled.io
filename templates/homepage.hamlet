@@ -14,12 +14,12 @@
 
 <section>
   <p>
-    Many automated tools exist to automatically align code to a defined style. A
-    solo developer could wire up their preferred tools with a git pre-commit
-    hook to ensure code is consistent before committing, but doing this across a
-    team can be challenging. Restyled aims to make it easier to transition a
-    team to a consistent coding style automatically through their normal Pull
-    Request flow.
+    Many tools exist to automatically align code to a defined style. A solo
+    developer could wire up their preferred tools with a git pre-commit hook to
+    ensure code is consistent before committing, but doing this across a team
+    can be challenging. Restyled aims to make it easier to transition a team to
+    a consistent coding style automatically through their normal Pull Request
+    flow.
 
 <section>
   <h2>How it works
