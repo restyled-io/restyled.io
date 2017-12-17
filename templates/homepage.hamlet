@@ -23,19 +23,64 @@
 
 <section>
   <h2>How it works
+
   <p>
-    Restyled listens for Pull Requests opened against your projects. It then
-    runs one or more of your preferred automated formatters. If differences are
-    found, it opens a sibling PR and comments with a link to it. Members of your
-    team can clearly see any style violations in the diff, and have the option
-    to incorporate those changes with a simple click of the Merge button.
-  <aside>
-    <small>
-      More details are available in our 
-      <a href=@{DocsR}>documentation</a>.
+    Install the 
+    <a href="https://github.com/apps/restyled-io">Restyled.io
+    GitHub App:
+
+  <p>
+    <img src=@{StaticR img_docs_install_confirm_png}>
+
+  <p>
+    Open a Pull Request that <i>doesn't</i> conform to your preferred style
+    and receive a comment from Restyled.io about it:
+
+  <p>
+    <img src=@{StaticR img_docs_minor_commented_png}>
+
+  <p>
+    Check out the differences in that PR:
+
+  <p>
+    <img src=@{StaticR img_docs_minor_restyled_png}>
+
+  <p>
+    And, if you like, merge them back into yours.
+
+  <p>
+    <img src=@{StaticR img_docs_merge_button_png}>
 
 <section .action>
-  <h2>If I built this, would you try it?
+  <h2>Interested?
+
+  <p>
+    Restyled.io is currently in super-duper early Alpha and as such may not
+    always work or provide you the value you are seeking.
+
+  <p>
+    Here are a few things you need to know before you try it out:
+
+  <p>
+    <strong>It only restyles Haskell or JavaScript code</strong>.
+    If you already use stylish-haskell or prettier.js, you'd be a great
+    candidate to try this out. If you use another auto-formatter, please 
+    <a href="https://github.com/restyled-io/restylers/issues/1">let me know</a>,
+    or even better, consider adding support for it yourself. It's 
+    <a href="https://github.com/restyled-io/restylers/tree/master/prettier">super easy</a>.
+
+  <p>
+    <strong>It only operates on public repositories</strong>.
+    When and if I decide to launch this as a paid product, running on private
+    repositories will require a subscription. If you would like to try this out
+    on private repositories now, please reach out 
+    <a href="mailto:admin@restyled.io">via email</a>.
+
+  <p>
+    If you're still on-board, all you have to do is install the 
+    <a href="https://github.com/apps/restyled-io">App</a>.
+    If you'd rather wait, but be notified when things get more stable, go ahead
+    and sign up here:
 
   <form method=post action=@{SignupR} enctype=#{enctype}>
     <aside>
