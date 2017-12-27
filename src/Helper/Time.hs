@@ -2,6 +2,8 @@ module Helper.Time
     ( prettyDuration
     ) where
 
+import Control.Monad (guard)
+import Data.Maybe (catMaybes)
 import Data.Time
 
 -- | Show the duration between two times
@@ -21,12 +23,14 @@ prettyDuration :: UTCTime -> UTCTime -> String
 prettyDuration from to = showDuration $ round $ diffUTCTime to from
   where
     showDuration :: Integer -> String
-    showDuration seconds
-        | seconds >= 60*60*24 = helper seconds (60*60*24) "d"
-        | seconds >= 60*60 = helper seconds (60*60) "h"
-        | seconds >= 60 = helper seconds 60 "m"
-        | otherwise = show seconds ++ "s"
+    showDuration seconds = head $ catMaybes
+        [ helper "d" seconds $ 60*60*24
+        , helper "h" seconds $ 60*60
+        , helper "m" seconds   60
+        , Just $ show seconds ++ "s" -- head made safe by this
+        ]
 
-    helper x y z =
-        let (x', y') = x `divMod` y
-        in show x' ++ z ++ showDuration y'
+    helper label value threshold = do
+        guard $ value >= threshold
+        let (q, r) = value `divMod` threshold
+        return $ show q ++ label ++ showDuration r
