@@ -5,8 +5,8 @@ module Handler.Admin.Jobs where
 
 import Import
 
-import Data.Time (diffUTCTime)
 import GitHub.Data (toPathPart)
+import Helper.Time
 
 getAdminJobsR :: Handler Html
 getAdminJobsR = do
