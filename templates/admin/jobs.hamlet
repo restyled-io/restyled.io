@@ -17,8 +17,7 @@
           <td>#{toPathPart $ jobOwner job}/#{toPathPart $ jobRepo job}
           <td>
             $maybe x <- jobCompletedAt job
-              #{show $ diffUTCTime (jobCreatedAt job) x }
-              seconds
+              #{prettyDuration (jobCreatedAt job) x}
           <td>
             $if jobExitCode job == Just 0
               ✓

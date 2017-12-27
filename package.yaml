@@ -107,6 +107,11 @@ tests:
     - yesod-core
     - yesod-test
 
+  doctest:
+    main: DocTest.hs
+    dependencies:
+      - doctest
+
 flags:
   library-only:
     description: Unused, but yesod-devel passes it.

@@ -7,7 +7,6 @@
 module Backend.Application
     ( backendMain
     , awaitAndProcessJob
-    -- ^ For testing, some day
     ) where
 
 import Import hiding (runDB)
