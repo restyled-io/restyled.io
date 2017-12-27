@@ -1,4 +1,5 @@
-name:    restyled
+---
+name: restyled
 version: "0.0.0"
 
 # Dependencies shared in *all* targets
@@ -7,85 +8,85 @@ dependencies:
 
 library:
   dependencies:
-  - HTTP
-  - aeson
-  - bytestring
-  - case-insensitive
-  - classy-prelude
-  - classy-prelude-yesod
-  - conduit
-  - containers
-  - envparse
-  - errors
-  - fast-logger
-  - file-embed
-  - github
-  - gitrev
-  - hedis
-  - hjsmin
-  - http-client
-  - http-conduit
-  - http-types
-  - load-env
-  - monad-control
-  - monad-logger
-  - monadplus
-  - network-uri
-  - persistent
-  - persistent-postgresql
-  - persistent-template
-  - process
-  - shakespeare
-  - template-haskell
-  - text
-  - time
-  - unordered-containers
-  - vector
-  - wai
-  - wai-extra
-  - wai-logger
-  - warp
-  - yesod
-  - yesod-auth
-  - yesod-auth-oauth2
-  - yesod-core
-  - yesod-form
-  - yesod-static
+    - HTTP
+    - aeson
+    - bytestring
+    - case-insensitive
+    - classy-prelude
+    - classy-prelude-yesod
+    - conduit
+    - containers
+    - envparse
+    - errors
+    - fast-logger
+    - file-embed
+    - github
+    - gitrev
+    - hedis
+    - hjsmin
+    - http-client
+    - http-conduit
+    - http-types
+    - load-env
+    - monad-control
+    - monad-logger
+    - monadplus
+    - network-uri
+    - persistent
+    - persistent-postgresql
+    - persistent-template
+    - process
+    - shakespeare
+    - template-haskell
+    - text
+    - time
+    - unordered-containers
+    - vector
+    - wai
+    - wai-extra
+    - wai-logger
+    - warp
+    - yesod
+    - yesod-auth
+    - yesod-auth-oauth2
+    - yesod-core
+    - yesod-form
+    - yesod-static
   source-dirs: src
   when:
-  - condition: flag(dev)
-    then:
-      ghc-options:
-      - -Wall
-      - -fwarn-tabs
-      - -O0
-      cpp-options: -DDEVELOPMENT
-    else:
-      ghc-options:
-      - -Wall
-      - -fwarn-tabs
-      - -O2
+    - condition: flag(dev)
+      then:
+        ghc-options:
+          - -Wall
+          - -fwarn-tabs
+          - -O0
+        cpp-options: -DDEVELOPMENT
+      else:
+        ghc-options:
+          - -Wall
+          - -fwarn-tabs
+          - -O2
 
 executables:
   restyled.io:
     main: main.hs
     source-dirs: app
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - restyled
+      - restyled
 
   restyled.io-backend:
     main: main.hs
     source-dirs: backend
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - restyled
+      - restyled
 
 tests:
   test:
@@ -93,19 +94,19 @@ tests:
     source-dirs: test
     ghc-options: -Wall
     dependencies:
-    - restyled
-    - bytestring
-    - classy-prelude
-    - hedis
-    - hspec
-    - hspec-expectations-lifted
-    - load-env
-    - monad-logger
-    - persistent
-    - shakespeare
-    - text
-    - yesod-core
-    - yesod-test
+      - restyled
+      - bytestring
+      - classy-prelude
+      - hedis
+      - hspec
+      - hspec-expectations-lifted
+      - load-env
+      - monad-logger
+      - persistent
+      - shakespeare
+      - text
+      - yesod-core
+      - yesod-test
 
   doctest:
     main: DocTest.hs
