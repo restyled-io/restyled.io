@@ -10,12 +10,15 @@ import Data.Text (Text)
 import GitHub.Data
 import GitHub.Data.Apps
 
--- | We only care about Opened so far
-data Action = Opened | Other Text deriving (Eq, Show)
+data Action
+    = Opened
+    | Synchronize
+    | Other Text deriving (Eq, Show)
 
 instance FromJSON Action where
     parseJSON = withText "PullRequest.Action" $ \case
         "opened" -> pure Opened
+        "synchronize" -> pure Synchronize
         t -> pure $ Other t
 
 data Payload = Payload

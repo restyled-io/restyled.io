@@ -27,17 +27,15 @@ postWebhooksR = do
 
 acceptPayload :: Payload -> Bool
 acceptPayload Payload{..}
-    -- For now, we only operate when first opened
-    | pAction /= Opened = False
+    | pAction `notElem` [Opened, Synchronize] = False
 
     -- Avoid infinite loop (best-effort)
     | "-restyled" `isSuffixOf` branchName = False
 
-    -- Always process Public
-    | not $ repoPrivate pRepository = True
+    -- Private repositories will (some day) require subscription
+    | repoPrivate pRepository = False
 
-    -- TODO: check subscription for private repositories
-    | otherwise = False
+    | otherwise = True
 
   where
     branchName = pullRequestCommitRef $ pullRequestHead pPullRequest

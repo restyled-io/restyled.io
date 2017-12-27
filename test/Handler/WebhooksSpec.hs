@@ -39,6 +39,10 @@ spec = withApp $ do
             postFixture "webhooks/github/pull-request-opened-restyled.json"
             statusIs 200
 
+        it "ignore private repositories" $ do
+            postFixture "webhooks/github/pull-request-opened-private.json"
+            statusIs 200
+
 postFixture :: FilePath -> YesodExample App ()
 postFixture = postBody WebhooksR <=< readFixture
 
