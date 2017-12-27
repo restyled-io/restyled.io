@@ -7,43 +7,39 @@ import TestImport
 spec :: Spec
 spec = withApp $ do
     describe "AdminP" $ do
-        it "turns away un-authenticated users" $ do
+        it "directs un-authenticated users to log in" $ do
+            githubForward <- encodeUtf8 <$> authPage "/github/forward"
+
             get $ AdminP AdminSignupsR
 
-            statusIs 403
+            statusIs 303
+            assertHeader "Location" githubForward
 
         it "turns away un-authorized users" $ do
-            let user = User
-                    { userEmail = "normie@restyled.io"
-                    , userCredsIdent = "1"
-                    , userCredsPlugin = "dummy"
-                    }
-            entity <- runDB $ insertEntity user
-            authenticateAs entity
+            authenticateAsUser User
+                { userEmail = "normie@restyled.io"
+                , userCredsIdent = "1"
+                , userCredsPlugin = "dummy"
+                }
 
             get $ AdminP AdminSignupsR
 
             statusIs 403
 
         -- N.B. .env.test is known to have an admin1 and admin2
-        it "allows authorized users" $ do
-            let user1 = User
-                    { userEmail = "admin1@restyled.io"
-                    , userCredsIdent = "1"
-                    , userCredsPlugin = "dummy"
-                    }
-                user2 = User
-                    { userEmail = "admin2@restyled.io"
-                    , userCredsIdent = "2"
-                    , userCredsPlugin = "dummy"
-                    }
-            entity1 <- runDB $ insertEntity user1
-            entity2 <- runDB $ insertEntity user2
-
-            authenticateAs entity1
+        it "allows only authorized users" $ do
+            authenticateAsUser User
+                { userEmail = "admin1@restyled.io"
+                , userCredsIdent = "1"
+                , userCredsPlugin = "dummy"
+                }
             get $ AdminP AdminSignupsR
             statusIs 200
 
-            authenticateAs entity2
+            authenticateAsUser User
+                { userEmail = "admin2@restyled.io"
+                , userCredsIdent = "2"
+                , userCredsPlugin = "dummy"
+                }
             get $ AdminP AdminSignupsR
             statusIs 200

@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
@@ -7,26 +8,36 @@ module TestImport
     , withApp
     , runBackendTest
     , authenticateAs
+    , authenticateAsUser
     , postForm
+    , authPage
     , module X
     ) where
 
-import Application           (makeFoundation, makeLogWare)
-import Backend.Foundation    (Backend, runBackendApp, runRedis)
-import Backend.Job           (queueName)
-import ClassyPrelude         as X hiding (delete, deleteBy, Handler)
-import Control.Monad.Logger  (LoggingT)
-import Database.Persist      as X hiding (get)
-import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool, rawExecute, rawSql, unSingle, connEscapeName)
-import Database.Redis        (del)
-import Foundation            as X
-import LoadEnv               (loadEnvFrom)
-import Model                 as X
-import Settings              (AppSettings(..), loadEnvSettings)
-import Test.Hspec.Lifted     as X
+import Application (makeFoundation, makeLogWare)
+import Backend.Foundation (Backend, runBackendApp, runRedis)
+import Backend.Job (queueName)
+import ClassyPrelude as X hiding (Handler, delete, deleteBy)
+import Control.Monad.Logger (LoggingT)
+import Database.Persist as X hiding (get)
+import Database.Persist.Sql
+    ( SqlBackend
+    , SqlPersistM
+    , connEscapeName
+    , rawExecute
+    , rawSql
+    , runSqlPersistMPool
+    , unSingle
+    )
+import Database.Redis (del)
+import Foundation as X
+import LoadEnv (loadEnvFrom)
+import Model as X
+import Settings (AppSettings(..), loadEnvSettings)
+import Test.Hspec.Lifted as X
 import Text.Shakespeare.Text (st)
-import Yesod.Core.Handler    (RedirectUrl(..))
-import Yesod.Test            as X
+import Yesod.Core.Handler (RedirectUrl(..))
+import Yesod.Test as X
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -78,12 +89,19 @@ getTables = do
 
 authenticateAs :: Entity User -> YesodExample App ()
 authenticateAs (Entity _ u) = do
-    testRoot <- fmap (appRoot . appSettings) getTestYesod
+    dummyLogin <- authPage "/dummy"
 
     request $ do
         setMethod "POST"
         addPostParam "ident" $ userCredsIdent u
-        setUrl $ testRoot ++ "/auth/page/dummy"
+        setUrl dummyLogin
+
+-- | Insert and authenticate as the given user
+--
+-- N.B. Only use this once (for a given @'User'@) per spec.
+--
+authenticateAsUser :: User -> YesodExample App ()
+authenticateAsUser = authenticateAs <=< runDB . insertEntity
 
 -- | Post a CSRF-protected form
 postForm
@@ -100,3 +118,8 @@ postForm a b fs = do
         setMethod "POST"
         addToken
         for_ fs $ uncurry byLabel
+
+authPage :: Text -> YesodExample App Text
+authPage page = do
+    testRoot <- fmap (appRoot . appSettings) getTestYesod
+    return $ testRoot ++ "/auth/page" ++ page

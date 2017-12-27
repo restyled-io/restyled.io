@@ -9,6 +9,8 @@ module Foundation where
 
 import Import.NoFoundation
 
+import qualified Data.CaseInsensitive as CI
+import qualified Data.Text.Encoding as TE
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import Text.Hamlet (hamletFile)
@@ -18,10 +20,8 @@ import Yesod.Auth.Dummy
 import Yesod.Auth.Message (AuthMessage(..))
 import Yesod.Auth.OAuth2.GithubApp
 import Yesod.Core.Types (Logger)
-import Yesod.Default.Util (addStaticContentExternal)
-import qualified Data.CaseInsensitive as CI
-import qualified Data.Text.Encoding as TE
 import qualified Yesod.Core.Unsafe as Unsafe
+import Yesod.Default.Util (addStaticContentExternal)
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -94,10 +94,8 @@ instance Yesod App where
     -- The page to be redirected to when authentication is required.
     authRoute _ = Just $ AuthR $ oauth2Url "github"
 
-    isAuthorized (AdminP _) _ = do
-        admins <- appAdmins <$> getsYesod appSettings
-        authorizeAdmin <$> maybeAuth <*> pure admins
-
+    isAuthorized AdminR _ = authorizeAdmins
+    isAuthorized (AdminP _) _ = authorizeAdmins
     isAuthorized _ _ = return Authorized
 
     -- This function creates static content files in the static folder
@@ -122,10 +120,16 @@ instance Yesod App where
     -- error pages
     defaultMessageWidget title body = $(widgetFile "default-message-widget")
 
+authorizeAdmins :: Handler AuthResult
+authorizeAdmins = do
+    admins <- appAdmins <$> getsYesod appSettings
+    authorizeAdmin <$> maybeAuth <*> pure admins
+
 authorizeAdmin :: Maybe (Entity User) -> [Text] -> AuthResult
+authorizeAdmin Nothing _ = AuthenticationRequired
 authorizeAdmin (Just (Entity _ u)) admins
     | userEmail u `elem` admins = Authorized
-authorizeAdmin _ _ = Unauthorized "Unauthorized"
+    | otherwise = Unauthorized "Unauthorized"
 
 instance YesodAuth App where
     type AuthId App = UserId
