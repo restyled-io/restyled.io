@@ -19,9 +19,6 @@ jobs:
             - stack-{{ .Branch }}
             - stack-
       - run:
-          name: Upgrade stack
-          command: stack upgrade
-      - run:
           name: Dependencies
           command: make setup
       - run:
