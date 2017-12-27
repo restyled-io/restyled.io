@@ -7,7 +7,6 @@ module TestImport
     ( runDB
     , withApp
     , runBackendTest
-    , authenticateAs
     , authenticateAsUser
     , postForm
     , authPage
@@ -87,6 +86,13 @@ getTables = do
 
     return $ map unSingle tables
 
+-- | Insert and authenticate as the given user
+--
+-- N.B. Only use this once (for a given @'User'@) per spec.
+--
+authenticateAsUser :: User -> YesodExample App ()
+authenticateAsUser = authenticateAs <=< runDB . insertEntity
+
 authenticateAs :: Entity User -> YesodExample App ()
 authenticateAs (Entity _ u) = do
     dummyLogin <- authPage "/dummy"
@@ -95,13 +101,6 @@ authenticateAs (Entity _ u) = do
         setMethod "POST"
         addPostParam "ident" $ userCredsIdent u
         setUrl dummyLogin
-
--- | Insert and authenticate as the given user
---
--- N.B. Only use this once (for a given @'User'@) per spec.
---
-authenticateAsUser :: User -> YesodExample App ()
-authenticateAsUser = authenticateAs <=< runDB . insertEntity
 
 -- | Post a CSRF-protected form
 postForm
