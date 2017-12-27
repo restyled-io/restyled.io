@@ -11,10 +11,10 @@ User
   deriving Eq Show
 
 Job json
-  installationId InstallationId
-  owner OwnerName
-  repo RepoName
-  pullRequest PullRequestId
+  installationId (Id Installation)
+  owner (Name Owner)
+  repo (Name Repo)
+  pullRequest (Id PullRequest)
 
   createdAt UTCTime
   updatedAt UTCTime
