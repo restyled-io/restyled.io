@@ -1,10 +1,8 @@
 ---
 resolver: lts-9.6
 packages:
-- location: .
-- location:
-    git: https://github.com/thoughtbot/yesod-auth-oauth2
-    commit: 937ad572a31dcbb2d5fe75b91f689c7a2f6ecfca
-  extra-dep: true
+  - .
 extra-deps:
-- load-env-0.1.1
+  - load-env-0.1.1
+  - git: https://github.com/thoughtbot/yesod-auth-oauth2
+    commit: 937ad572a31dcbb2d5fe75b91f689c7a2f6ecfca
