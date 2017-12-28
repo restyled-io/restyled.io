@@ -5,22 +5,20 @@
 {-# LANGUAGE RecordWildCards #-}
 module Settings where
 
-import ClassyPrelude.Yesod hiding (Proxy, throw)
+import ClassyPrelude.Yesod hiding (Proxy)
 
+import qualified Data.ByteString.Char8 as C8
 import Data.Proxy
+import qualified Data.Text as T
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..))
+import qualified Env
 import GitHub.Data
 import GitHub.Data.Apps
 import Language.Haskell.TH.Syntax (Exp, Q)
-import Network.PGDatabaseURL (parsePGConnectionString)
 import Network.RedisURL (parseRedisURL)
 import Network.Wai.Handler.Warp (HostPreference)
 import Yesod.Default.Util (widgetFileNoReload, widgetFileReload)
-
-import qualified Data.ByteString.Char8 as C8
-import qualified Data.Text as T
-import qualified Env
 
 data OAuthKeys = OAuthKeys
     { oauthKeysClientId :: Text
@@ -88,17 +86,14 @@ envSettings = AppSettings
 
 envDatabaseConfig :: EnvParser PostgresConf
 envDatabaseConfig = PostgresConf
-    <$> (toConnStr <$> Env.var Env.nonempty "DATABASE_URL"
-            (Env.def "postgres://postgres:password@localhost:5432/restyled"))
+    <$> Env.var Env.nonempty "DATABASE_URL" (Env.def defaultDatabaseURL)
     <*> Env.var Env.auto "PGPOOLSIZE" (Env.def 10)
   where
-    toConnStr = either error id . parsePGConnectionString
+    defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 envRedisConfig :: EnvParser ConnectInfo
-envRedisConfig = toConnectInfo <$> Env.var Env.nonempty "REDIS_URL"
-    (Env.def "redis://localhost:6379")
-  where
-    toConnectInfo = either error id . parseRedisURL
+envRedisConfig = either error id . parseRedisURL
+    <$> Env.var Env.nonempty "REDIS_URL" (Env.def "redis://localhost:6379")
 
 envLogLevel :: EnvParser LogLevel
 envLogLevel = toLogLevel <$> Env.var Env.str "LOG_LEVEL" (Env.def "info")
