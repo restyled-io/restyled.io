@@ -5,9 +5,8 @@ import Test.DocTest
 
 main :: IO ()
 main = doctest $ "-isrc" :
-    [ "src/Backend"
-    , "src/GitHub"
-    , "src/Handler"
-    , "src/Helper"
+    -- doctest has been slow and breaks on some modules, so let's only target
+    -- those that currently have doctest examples.
+    [ "src/Helper"
     , "src/Network"
     ]
