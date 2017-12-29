@@ -55,29 +55,19 @@ processJob (Entity jid job) = do
     runDB $ completeJob jid ec (pack out) (pack err)
 
 execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)
-execRestyler AppSettings{..} Job{..} = do
-    let restylerImage = appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-
-    -- Always make sure we're running the latest restyler. This is wildly
-    -- inefficient but we'll live with it for now until we can justify the
-    -- machinery of properly tagged releases.
-    (ec, out, err) <- readLoggedProcess "docker" ["pull", restylerImage]
-
-    if ec /= ExitSuccess
-        then return (ec, out, err)
-        else readLoggedProcess "docker"
-            [ "run", "--rm"
-            , "--volume", "/tmp:/tmp"
-            , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
-            , restylerImage
-            , "--github-app-id", unpack $ toPathPart appGitHubAppId
-            , "--github-app-key", unpack appGitHubAppKey
-            , "--installation-id", unpack $ toPathPart jobInstallationId
-            , "--owner", unpack $ toPathPart jobOwner
-            , "--repo", unpack $ toPathPart jobRepo
-            , "--pull-request", unpack $ toPathPart jobPullRequest
-            , "--restyled-root", unpack appRoot
-            ]
+execRestyler AppSettings{..} Job{..} = readLoggedProcess "docker"
+    [ "run", "--rm"
+    , "--volume", "/tmp:/tmp"
+    , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
+    , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
+    , "--github-app-id", unpack $ toPathPart appGitHubAppId
+    , "--github-app-key", unpack appGitHubAppKey
+    , "--installation-id", unpack $ toPathPart jobInstallationId
+    , "--owner", unpack $ toPathPart jobOwner
+    , "--repo", unpack $ toPathPart jobRepo
+    , "--pull-request", unpack $ toPathPart jobPullRequest
+    , "--restyled-root", unpack appRoot
+    ]
 
 readLoggedProcess :: (MonadIO m, MonadLogger m)
     => String -> [String] -> m (ExitCode, String, String)
