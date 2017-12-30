@@ -2,7 +2,7 @@
 version: 2.0
 
 jobs:
-  build_and_test:
+  tests:
     docker:
       - image: fpco/stack-build:lts
       - image: circleci/postgres:9.6.5-alpine
@@ -36,7 +36,7 @@ jobs:
           name: Test
           command: make test
 
-  deploy:
+  image:
     docker:
       - image: docker:17.07.0-ce
     steps:
@@ -46,49 +46,41 @@ jobs:
           version: 17.07.0-ce
       - run:
           name: Dependencies
-          command: apk add --update git make
+          command: apk add --update make
       - run:
           name: Build image
           command: |
-            if git show | grep -Fq ':nodeploy:'; then
-              echo "HEAD commit included :nodeploy:, skipping..."
-              exit 0
-            fi
-
             make image.build
-      - deploy:
-          name: Docker Hub
+      - run:
+          name: Push image
           command: |
-            if git show | grep -Fq ':nodeploy:'; then
-              echo "HEAD commit included :nodeploy:, skipping..."
-              exit 0
-            fi
-
             make image.release \
               DOCKER_USERNAME=$DOCKERHUB_USERNAME \
               DOCKER_PASSWORD=$DOCKERHUB_PASSWORD \
               RELEASE_IMAGE=restyled/restyled.io:b$CIRCLE_BUILD_NUM
 
+  deploy:
+    docker:
+      - image: restyled/ops
+    steps:
+      - deploy:
+          name: Deploy
+          command: |
             if [[ "$CIRCLE_BRANCH" == master ]]; then
-              # explicit pull to ensure we update
-              docker pull restyled/ops
-              docker run \
-                --env AWS_ACCESS_KEY_ID \
-                --env AWS_SECRET_ACCESS_KEY \
-                --env PUSHOVER_API_KEY \
-                --env PUSHOVER_USER_KEY \
-                restyled/ops deploy \
-                --stack-name RestyledProd \
-                --image-name restyled/restyled.io \
-                --image-tag "b$CIRCLE_BUILD_NUM"
+              restyled-ops update \
+                --message "[PROD] restyled.io => b$CIRCLE_BUILD_NUM" \
+                "AppsImageTag=b$CIRCLE_BUILD_NUM"
             fi
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build_and_test
+      - tests
+      - image:
+          context: org-global
       - deploy:
           context: org-global
           requires:
-            - build_and_test
+            - tests
+            - image

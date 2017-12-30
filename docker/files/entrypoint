@@ -19,5 +19,6 @@ env | sed '/\(.*\)_BASE64=\(.*\)/!d; s//\1 \2/g' | while read -r k v; do
   printf "export %s=\"%s\"\n" "$k" "$(base64 -d <<< "$v")" >> "$tmp"
 done
 
+# shellcheck disable=SC1090
 source "$tmp"
 exec "$@"
