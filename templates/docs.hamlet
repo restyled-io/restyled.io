@@ -1,3 +1,205 @@
-<main>
+<section>
   <h1>Restyled Documentation
-  <h2>Coming Soon!
+  <ul>
+    <li>
+      <a href="#getting-started">Getting Started
+    <li>
+      <a href="#what-to-expect">What to Expect
+    <li>
+      <a href="#configuration-reference">Configuration Reference
+    <li>
+      <a href="#restylers">Restylers
+    <li>
+      <a href="#disabling">Disabling
+
+<section>
+  <h2 #getting-started>Getting Started
+  <ol>
+    <li>
+      Install the
+      <a href="https://github.com/apps/restyled-io">GitHub App
+    <li>That's it!
+
+<section>
+  <h2 #what-to-expect>What to Expect
+  <p>
+    Whenever you open a Pull Request, Restyled.io will clone your repository,
+    branch from that branch, and run auto-formatters on any files changed in
+    your original Pull Request.
+
+  <p>
+    If differences are found, a new Pull Request is opened and brought to your
+    attention:
+
+  <p>
+    <img src=@{StaticR img_docs_minor_commented_png}>
+
+  <p>
+    If you want to adopt the restyled version, just merge that Pull Request into
+    yours before continuing with your normal flow.
+
+<section>
+  <h2 #configuration-reference>Configuration Reference
+  <p>
+    Restylers can be enabled, disabled, or configured by committing YAML
+    configuration in a file named
+    <code>.restyled.yaml
+    at the root of your repository.
+
+  <p>
+    The top-level YAML document must be either:
+
+  <ul>
+    <li>
+      A <code>Configuration</code> object
+
+      <pre>
+        \---
+        \enabled: true
+        \restylers:
+        \  - stylish-haskell
+        \  - prettier
+
+    <li>
+      Or just a list of <code>Restyler</code> objects
+
+      <pre>
+        \---
+        \- stylish-haskell
+        \- prettier
+
+      In this case, you are accepting the defaults for all other keys.
+
+  <p>
+    A <code>Restyler</code> must be either:
+
+  <ul>
+    <li>
+      A name:
+
+      <pre>
+        \---
+        \- stylish-haskell
+
+      In this case, you are accepting the defaults for this restyler.
+
+    <li>
+      Or a key into a configuration for that Restyler:
+
+      <pre>
+        \---
+        \- stylish-haskell:
+        \    arguments:
+        \      - --verbose
+        \    include:
+        \      - "**/*.lhs"
+        \      - "!test/**/*"
+
+  <p>
+    Valid keys at the <code>Restyler</code> level are:
+
+  <ul>
+    <li>
+      <code>command
+      The command to execute (you'll rarely need to change this)
+    <li>
+      <code>arguments</code>
+      The arguments to pass (in addition to the files to restyle)
+    <li>
+      <code>include</code>
+      Patterns for targeting which files to restyle
+    <li>
+      <code>interpreters</code>
+      If specified, also restyle files with these interpreters as their
+      <a href="https://en.wikipedia.org/wiki/Shebang_(Unix)">shebang
+      .
+
+  <p>
+    All keys are optional.
+
+<section .action>
+  <h2 #restylers>Restylers
+  <table>
+    <thead>
+      <tr>
+        <th>Name
+        <th>Default?
+        <th>Command
+        <th>Arguments
+        <th>Include
+        <th>Interpreters
+        <th>Documentation
+    <tbody>
+      <tr>
+        <td>stylish-haskell
+        <td><strong>Yes</strong>
+        <td>stylish-haskell
+        <td>--inplace
+        <td>**/*.hs
+        <td>None
+        <td>
+          <a href="https://github.com/jaspervdj/stylish-haskell#readme">
+            https://github.com/jaspervdj/stylish-haskell
+      <tr>
+        <td>prettier
+        <td><strong>Yes</strong>
+        <td>prettier
+        <td>--write
+        <td>**/*.js, **/*.jsx
+        <td>None
+        <td>
+          <a href="https://prettier.io/docs/en/">
+            https://prettier.io/docs/en/
+      <tr>
+        <td>hindent
+        <td>No
+        <td>hindent-inplace
+        <td>None
+        <td>**/*.hs
+        <td>None
+        <td>
+          <a href="https://github.com/commercialhaskell/hindent#readme">
+            https://github.com/commercialhaskell/hindent
+      <tr>
+        <td>brittany
+        <td>No
+        <td>brittany-inplace
+        <td>None
+        <td>**/*.hs
+        <td>None
+        <td>
+          <a href="https://github.com/lspitzner/brittany#readme">
+            https://github.com/lspitzner/brittany
+      <tr>
+        <td>shfmt
+        <td><strong>Yes</strong>
+        <td>shfmt
+        <td>-w
+        <td>**/*.sh, **/*.bash
+        <td>sh, bash
+        <td>
+          <a href="https://github.com/mvdan/sh#shfmt">
+            https://github.com/mvdan/sh#shfmt
+
+<section>
+  <h2 #disabling>Disabling
+
+  <p>
+    There are three ways to prevent Restyled.io from operating on a repository:
+
+  <ol>
+    <li>
+      Commit a configuration with
+      <code>enabled: false
+    <li>
+      Configure the GitHub App with a specific repositories list, and omit any
+      repositories that you want disabled
+    <li>
+      Un-install the GitHub App entirely
+
+<section>
+  <h2>Still Having Trouble?
+
+  <p>
+    I'm here to help. Please
+    <a href="mailto:support@restyled.io">reach out</a>!
