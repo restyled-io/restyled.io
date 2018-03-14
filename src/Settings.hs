@@ -73,7 +73,7 @@ envSettings = AppSettings
     <*> Env.switch "IP_FROM_HEADER" mempty
     <*> envLogLevel
     <*> Env.switch "MUTABLE_STATIC" mempty
-    <*> pure "Patrick Brisbin 2017"
+    <*> pure "Patrick Brisbin 2018"
     <*> (mkId Proxy <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
     <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
     <*> (OAuthKeys
