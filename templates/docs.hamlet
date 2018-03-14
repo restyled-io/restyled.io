@@ -100,9 +100,6 @@
 
   <ul>
     <li>
-      <code>command
-      The command to execute (you'll rarely need to change this)
-    <li>
       <code>arguments</code>
       The arguments to pass (in addition to the files to restyle)
     <li>
@@ -124,7 +121,6 @@
       <tr>
         <th>Name
         <th>Default?
-        <th>Command
         <th>Arguments
         <th>Include
         <th>Interpreters
@@ -133,7 +129,6 @@
       <tr>
         <td>stylish-haskell
         <td><strong>Yes</strong>
-        <td>stylish-haskell
         <td>--inplace
         <td>**/*.hs
         <td>None
@@ -143,7 +138,6 @@
       <tr>
         <td>prettier
         <td><strong>Yes</strong>
-        <td>prettier
         <td>--write
         <td>**/*.js, **/*.jsx
         <td>None
@@ -153,7 +147,6 @@
       <tr>
         <td>hindent
         <td>No
-        <td>hindent-inplace
         <td>None
         <td>**/*.hs
         <td>None
@@ -163,8 +156,7 @@
       <tr>
         <td>brittany
         <td>No
-        <td>brittany-inplace
-        <td>None
+        <td>--write-mode inplace
         <td>**/*.hs
         <td>None
         <td>
@@ -173,7 +165,6 @@
       <tr>
         <td>shfmt
         <td><strong>Yes</strong>
-        <td>shfmt
         <td>-w
         <td>**/*.sh, **/*.bash
         <td>sh, bash
