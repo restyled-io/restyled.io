@@ -6,6 +6,10 @@ img {
           box-shadow: 2px 12px 20px #888;
 }
 
+table {
+  margin-bottom: 12px;
+}
+
 footer {
   text-align: center;
 }

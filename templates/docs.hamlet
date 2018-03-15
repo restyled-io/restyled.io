@@ -116,61 +116,62 @@
 
 <section .action>
   <h2 #restylers>Restylers
+
   <table>
     <thead>
       <tr>
-        <th>Name
         <th>Default?
-        <th>Arguments
-        <th>Include
-        <th>Interpreters
+        <th>Name
+        <th>Languages
         <th>Documentation
     <tbody>
       <tr>
-        <td>stylish-haskell
         <td><strong>Yes</strong>
-        <td>--inplace
-        <td>**/*.hs
-        <td>None
+        <td>stylish-haskell
+        <td>Haskell
         <td>
           <a href="https://github.com/jaspervdj/stylish-haskell#readme">
             https://github.com/jaspervdj/stylish-haskell
       <tr>
-        <td>prettier
         <td><strong>Yes</strong>
-        <td>--write
-        <td>**/*.js, **/*.jsx
-        <td>None
+        <td>prettier
+        <td>JavaScript
         <td>
           <a href="https://prettier.io/docs/en/">
             https://prettier.io/docs/en/
       <tr>
+        <td>
         <td>hindent
-        <td>No
-        <td>None
-        <td>**/*.hs
-        <td>None
+        <td>Haskell
         <td>
           <a href="https://github.com/commercialhaskell/hindent#readme">
             https://github.com/commercialhaskell/hindent
       <tr>
+        <td>
         <td>brittany
-        <td>No
-        <td>--write-mode inplace
-        <td>**/*.hs
-        <td>None
+        <td>Haskell
         <td>
           <a href="https://github.com/lspitzner/brittany#readme">
             https://github.com/lspitzner/brittany
       <tr>
-        <td>shfmt
         <td><strong>Yes</strong>
-        <td>-w
-        <td>**/*.sh, **/*.bash
-        <td>sh, bash
+        <td>shfmt
+        <td>POSIX sh, Bash
         <td>
           <a href="https://github.com/mvdan/sh#shfmt">
             https://github.com/mvdan/sh#shfmt
+      <tr>
+        <td>
+        <td>astyle
+        <td>C, C++, C#, Java, Objective-C
+        <td>
+          <a href="http://astyle.sourceforge.net/astyle.html">
+            http://astyle.sourceforge.net/astyle.html
+
+  <aside>
+    <p>
+      Want something added? Please comment on the
+      <a href="https://github.com/restyled-io/restylers/issues/1">Issue</a>.
 
 <section>
   <h2 #disabling>Disabling

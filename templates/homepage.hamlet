@@ -62,12 +62,12 @@
     Here are a few things you need to know before you try it out:
 
   <p>
-    <strong>It only restyles Haskell or JavaScript code</strong>.
+    <strong>It only restyles Haskell or JavaScript code by default</strong>.
     If you already use stylish-haskell or prettier.js, you'd be a great
-    candidate to try this out. If you use another auto-formatter, please 
-    <a href="https://github.com/restyled-io/restylers/issues/1">let me know</a>,
-    or even better, consider adding support for it yourself. It's 
-    <a href="https://github.com/restyled-io/restylers/tree/master/prettier">super easy</a>.
+    candidate to try this out.
+    <a href=@{DocsR}#restylers>Other tools
+    are available, but must be enabled, and if you want something added, please 
+    <a href="https://github.com/restyled-io/restylers/issues/1">let me know</a>.
 
   <p>
     <strong>It only operates on public repositories</strong>.
@@ -75,6 +75,11 @@
     repositories will require a subscription. If you would like to try this out
     on private repositories now, please reach out 
     <a href="mailto:admin@restyled.io">via email</a>.
+
+  <p>
+    <strong>It won't restyle Pull Requests from forks</strong>.
+    This is probably the very next thing to be implemented, but for now its
+    omission makes this less useful for contribution management at this time.
 
   <p>
     If you're still on-board, all you have to do is install the 
