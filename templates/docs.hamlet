@@ -161,24 +161,48 @@
           <a href="https://github.com/mvdan/sh#shfmt">
             https://github.com/mvdan/sh#shfmt
       <tr>
-        <td>
+        <td><strong>Yes</strong>
         <td>astyle
         <td>C, C++, C#, Java, Objective-C
         <td>
           <a href="http://astyle.sourceforge.net/astyle.html">
             http://astyle.sourceforge.net/astyle.html
       <tr>
-        <td>
+        <td><strong>Yes</strong>
         <td>autopep8
         <td>Python
         <td>
           <a href="https://github.com/hhatto/autopep8#readme">
             https://github.com/hhatto/autopep8
+      <tr>
+        <td><strong>Yes</strong>
+        <td>php-cs-fixer
+        <td>PHP
+        <td>
+          <a href="https://github.com/FriendsOfPHP/PHP-CS-Fixer#readme">
+            https://github.com/FriendsOfPHP/PHP-CS-Fixer
+      <tr>
+        <td><strong>Yes</strong>
+        <td>elm-format
+        <td>Elm
+        <td>
+          <a href="https://github.com/avh4/elm-format#readme">
+            https://github.com/avh4/elm-format
+      <tr>
+        <td><strong>Yes</strong>
+        <td>rubocop
+        <td>Ruby
+        <td>
+          <a href="https://rubocop.readthedocs.io/en/latest/">
+            https://rubocop.readthedocs.io/en/latest/
 
   <aside>
     <p>
       Want something added? Please comment on the
       <a href="https://github.com/restyled-io/restylers/issues/1">Issue</a>.
+    <p>
+      Think something's out of date? Check the
+      <a href="https://github.com/restyled-io/restyler/blob/master/src/Restyler/Config.hs">source</a>.
 
 <section>
   <h2 #disabling>Disabling
