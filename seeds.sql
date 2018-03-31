@@ -22,26 +22,14 @@ INSERT INTO job (
   stdout, -- Text Maybe
   stderr -- Text Maybe
 ) VALUES (
-  -- Successful
-  58920,
-  'restyled-io',
-  'demo',
-  1,
-  NOW(),
-  NOW() + ('42 seconds' :: interval),
-  NOW() + ('42 seconds' :: interval),
-  0,
-  NULL,
-  NULL
-), (
   -- Errored
   58920,
   'restyled-io',
   'demo',
-  2,
-  NOW(),
-  NOW() + ('37 seconds' :: interval),
-  NOW() + ('37 seconds' :: interval),
+  1,
+  NOW() - ('600 seconds' :: interval),
+  NOW() - ('37 seconds' :: interval),
+  NOW() - ('37 seconds' :: interval),
   2,
   '',
   $$Process unsuccessful (ExitFailure 127)
@@ -53,6 +41,18 @@ stderr:
     1:some/stack
     75:trace/there
 $$
+), (
+  -- Successful
+  58920,
+  'restyled-io',
+  'demo',
+  1,
+  NOW() - ('300 seconds' :: interval),
+  NOW() - ('42 seconds' :: interval),
+  NOW() - ('42 seconds' :: interval),
+  0,
+  NULL,
+  NULL
 );
 
 COMMIT;
