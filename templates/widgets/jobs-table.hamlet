@@ -4,6 +4,7 @@
       <th>Pull Request
       <th>Duration
       <th>Result
+      <th>
 
   <tbody>
     $forall job <- jobs
