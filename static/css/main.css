@@ -14,6 +14,11 @@ footer {
   text-align: center;
 }
 
+form .errors {
+  color: #cd5c5c;
+  font-weight: bold;
+}
+
 /* Strapless styling for textual inputs. Why not number too? */
 form input[type="number"] {
   width: 100%;
