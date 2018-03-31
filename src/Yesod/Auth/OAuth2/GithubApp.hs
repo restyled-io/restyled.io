@@ -1,15 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
+-- | TODO: upstream's new version may Just Work
 module Yesod.Auth.OAuth2.GithubApp
     ( oauth2GithubApp
     , module Yesod.Auth.OAuth2
     ) where
 
+import Prelude
+
 import Control.Exception (throwIO)
 import Data.Text (Text)
+import qualified Data.Text as T
 import GitHub.Data (User(..), untagId)
 import Yesod.Auth
 import Yesod.Auth.OAuth2
-import qualified Data.Text as T
 
 oauth2GithubApp
     :: YesodAuth m

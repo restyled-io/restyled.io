@@ -6,6 +6,12 @@ version: "0.0.0"
 dependencies:
   - base
 
+default-extensions:
+  # TODO: move away from ClassyPrelude
+  - NoImplicitPrelude
+
+ghc-options: -Wall
+
 library:
   dependencies:
     - HTTP
@@ -57,14 +63,10 @@ library:
     - condition: flag(dev)
       then:
         ghc-options:
-          - -Wall
-          - -fwarn-tabs
           - -O0
         cpp-options: -DDEVELOPMENT
       else:
         ghc-options:
-          - -Wall
-          - -fwarn-tabs
           - -O2
 
 executables:
@@ -92,7 +94,6 @@ tests:
   test:
     main: Spec.hs
     source-dirs: test
-    ghc-options: -Wall
     dependencies:
       - restyled
       - bytestring

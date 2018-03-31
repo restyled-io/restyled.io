@@ -1,9 +1,9 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Handler.Home where
 
 import Import
+
 import Forms
 
 getHomeR :: Handler Html

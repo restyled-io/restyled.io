@@ -2,6 +2,8 @@ module Helper.Time
     ( prettyDuration
     ) where
 
+import Prelude
+
 import Control.Monad (guard)
 import Data.Maybe (catMaybes)
 import Data.Time

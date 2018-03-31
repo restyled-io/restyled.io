@@ -1,6 +1,9 @@
+-- | TODO: this has been accepted upstream
 module Network.RedisURL
     ( parseRedisURL
     ) where
+
+import Prelude
 
 import Control.Error.Util (note)
 import Control.Monad (guard)

@@ -1,7 +1,9 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
-module Handler.Admin.Dashboard where
+module Handler.Admin.Dashboard
+    ( getAdminR
+    , getAdminDashboardR
+    ) where
 
 import Import
 

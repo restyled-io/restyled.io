@@ -1,9 +1,8 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Settings.StaticFiles where
 
-import Settings     (appStaticDir)
+import Settings (appStaticDir)
 import Yesod.Static (staticFiles)
 
 -- This generates easy references to files in the static directory at compile time,
