@@ -1,0 +1,17 @@
+$with Entity jid job <- job
+  <tr>
+    <td>#{toPathPiece jid}
+    <td>#{toPathPart $ jobOwner job}/#{toPathPart $ jobRepo job}
+    <td>
+      $maybe x <- jobCompletedAt job
+        #{prettyDuration (jobCreatedAt job) x}
+    <td>
+      $if jobExitCode job == Just 0
+        ✓
+      $else
+        $maybe x <- jobExitCode job
+          <pre>Exit code: #{show x}
+        $maybe x <- jobStdout job
+          <pre>#{x}
+        $maybe x <- jobStderr job
+          <pre>#{x}

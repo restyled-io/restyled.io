@@ -1,0 +1,11 @@
+<table>
+  <thead>
+    <tr>
+      <th>Id
+      <th>Repo
+      <th>Duration
+      <th>Result
+
+  <tbody>
+    $forall job <- jobs
+      ^{jobsTableRow job}

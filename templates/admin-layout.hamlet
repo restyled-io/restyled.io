@@ -1,0 +1,19 @@
+<nav>
+  <section>
+    <h1>
+      <a href=@{AdminP AdminDashboardR}>restyled admin
+    <ul>
+      <li>
+        <a href=@{AdminP AdminSignupsR}>Signups
+      <li>
+        <a href=@{AdminP AdminJobsR}>Jobs
+
+$maybe msg <- mmsg
+  <aside #message .info>
+    <p>#{msg}
+
+^{widget}
+
+<footer>
+  <section>
+    <small>#{appCopyright $ appSettings master}

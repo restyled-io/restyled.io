@@ -119,6 +119,18 @@ instance Yesod App where
     -- error pages
     defaultMessageWidget title body = $(widgetFile "default-message-widget")
 
+-- | Just like default-layout, but admin-specific nav and CSS
+adminLayout :: Widget -> Handler Html
+adminLayout widget = do
+    master <- getYesod
+    mmsg <- getMessage
+    pc <- widgetToPageContent $ do
+        addStylesheet $ StaticR css_strapless_css
+        addStylesheet $ StaticR css_main_css
+        addStylesheet $ StaticR css_admin_css
+        $(widgetFile "admin-layout")
+    withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+
 authorizeAdmins :: Handler AuthResult
 authorizeAdmins = do
     admins <- appAdmins <$> getsYesod appSettings
