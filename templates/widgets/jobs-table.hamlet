@@ -1,8 +1,7 @@
-<table>
+<table .jobs>
   <thead>
     <tr>
-      <th>Id
-      <th>Repo
+      <th>Pull Request
       <th>Duration
       <th>Result
 
