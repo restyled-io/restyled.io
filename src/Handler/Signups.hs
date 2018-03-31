@@ -1,8 +1,8 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Handler.Signups where
 
 import Import
+
 import Forms
 
 postSignupR :: Handler Html

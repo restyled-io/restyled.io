@@ -1,6 +1,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module GitHub.Instances where
 
+import Prelude
+
 import Data.Proxy
 import Data.Text (Text)
 import Database.Persist.Sql

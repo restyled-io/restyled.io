@@ -5,6 +5,8 @@ module GitHub.Data.Webhooks.PullRequest
     , Payload(..)
     ) where
 
+import Prelude
+
 import Data.Aeson
 import Data.Text (Text)
 import GitHub.Data

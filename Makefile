@@ -7,17 +7,28 @@ DOCKER_PASSWORD ?= x
 # https://stackoverflow.com/questions/19232784/how-to-correctly-escape-sign-when-using-pattern-rules-and-patsubst-in-gnu-ma
 PERCENT = %
 
-all: resetdb setup build lint test
+all: build lint test
 
-.PHONY: resetdb
-resetdb:
-	PGPASSWORD=password dropdb --user postgres --host localhost restyled || true
-	PGPASSWORD=password dropdb --user postgres --host localhost restyled_test || true
+.PHONY: db.drop
+db.drop:
+	PGPASSWORD=password dropdb --user postgres --host localhost restyled
+	PGPASSWORD=password dropdb --user postgres --host localhost restyled_test
+
+.PHONY: db.create
+db.create:
 	PGPASSWORD=password createdb --user postgres --host localhost restyled
 	PGPASSWORD=password createdb --user postgres --host localhost restyled_test
 
+# N.B. db.seed clears seeded tables
+.PHONY: db.seed
+db.seed:
+	PGPASSWORD=password psql --user postgres --host localhost restyled < seeds.sql
+
+.PHONY: db.reset
+db.reset: db.drop db.create db.seed
+
 .PHONY: setup
-setup:
+setup: db.create
 	stack setup
 	stack build --dependencies-only --test --no-run-tests
 	stack install hlint weeder

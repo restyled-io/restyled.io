@@ -1,5 +1,4 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -98,7 +97,7 @@ makeApplication foundation = do
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation = mkRequestLogger def
     { outputFormat = if appSettings foundation `allowsLevel` LevelDebug
-        then Detailed development
+        then Detailed True
         else Apache apacheIpSource
     , destination = if appSettings foundation `allowsLevel` LevelInfo
         then Logger $ loggerSet $ appLogger foundation

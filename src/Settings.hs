@@ -1,9 +1,15 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
-module Settings where
+module Settings
+    ( OAuthKeys(..)
+    , AppSettings(..)
+    , loadEnvSettings
+    , allowsLevel
+    , widgetFile
+    , appStaticDir
+    ) where
 
 import ClassyPrelude.Yesod hiding (Proxy)
 
@@ -115,12 +121,10 @@ allowsLevel :: AppSettings -> LogLevel -> Bool
 allowsLevel AppSettings{..} = (>= appLogLevel)
 
 widgetFile :: String -> Q Exp
-widgetFile = (if development then widgetFileReload else widgetFileNoReload) def
-
-development :: Bool
-development =
+widgetFile =
 #if DEVELOPMENT
-    True
+    widgetFileReload
 #else
-    False
+    widgetFileNoReload
 #endif
+    def
