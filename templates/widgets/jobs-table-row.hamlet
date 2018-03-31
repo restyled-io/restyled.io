@@ -1,17 +1,25 @@
-$with Entity jid job <- job
+$with Entity _ job <- job
   <tr>
-    <td>#{toPathPiece jid}
-    <td>#{toPathPart $ jobOwner job}/#{toPathPart $ jobRepo job}
+
+    <td>
+      #{toPathPart $ jobOwner job}/#{toPathPart $ jobRepo job}
+      ##{toPathPiece $ jobPullRequest job}
+      (#{prettyDuration (jobCreatedAt job) now} ago)
+
     <td>
       $maybe x <- jobCompletedAt job
         #{prettyDuration (jobCreatedAt job) x}
+
     <td>
-      $if jobExitCode job == Just 0
-        ✓
-      $else
-        $maybe x <- jobExitCode job
-          <pre>Exit code: #{show x}
-        $maybe x <- jobStdout job
-          <pre>#{x}
-        $maybe x <- jobStderr job
-          <pre>#{x}
+      $maybe exitCode <- jobExitCode job
+        $if exitCode == 0
+          ✓
+        $else
+          Exit code: #{show exitCode}
+
+          $maybe x <- jobStdout job
+            $if not (null x)
+              <pre>#{x}
+          $maybe x <- jobStderr job
+            $if not (null x)
+              <pre>#{x}
