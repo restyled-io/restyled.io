@@ -4,7 +4,7 @@ Homepage for Restyled, https://restyled.io.
 
 ## Development & Testing
 
-Development requires the following pre-requisites:
+Basic development requires the following pre-requisites:
 
 1. [Stack](https://docs.haskellstack.org/en/stable/README/)
 1. A PostgreSQL instance available on `localhost:5432`, with a `postgres` user
@@ -13,26 +13,35 @@ Development requires the following pre-requisites:
 
 *NOTE*: A `docker-compose.yml` exists for help with the latter 2.
 
-Reset/create the database, install dependencies, build, lint, and test the app:
+Create and seed the database, install dependencies:
+
+```console
+make db.create db.seed setup
+```
+
+Build, test, and lint the application:
 
 ```console
 make
 ```
 
-From here, follow general Stack/Yesod development practices.
-
-
-```console
-stack build --pedantic --test --file-watch
-```
+Run the website:
 
 ```console
+stack install yesod-bin
 stack exec yesod devel
 ```
 
+To run the backend:
+
 ```console
-stack repl --ghci-options="-DDEVELOPMENT -O0 -fobject-code"
+stack exec restyled.io-backend
 ```
+
+**NOTE**: actually processing Jobs would require a valid `.env` file and a
+restyler Docker image. To make use of such functionality would *also* require
+some way to get GitHub events to your local instance, which is beyond the scope
+of this README.
 
 ## Deployment & Self-Hosting
 
