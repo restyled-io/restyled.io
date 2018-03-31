@@ -28,7 +28,7 @@ db.seed:
 db.reset: db.drop db.create db.seed
 
 .PHONY: setup
-setup: db.create
+setup:
 	stack setup
 	stack build --dependencies-only --test --no-run-tests
 	stack install hlint weeder
