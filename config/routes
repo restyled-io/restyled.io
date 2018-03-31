@@ -12,5 +12,5 @@
 /admin AdminR GET
 /admin AdminP:
   /dashboard AdminDashboardR GET
-  /jobs AdminJobsR GET
+  /jobs AdminJobsR GET POST
   /signups AdminSignupsR GET
