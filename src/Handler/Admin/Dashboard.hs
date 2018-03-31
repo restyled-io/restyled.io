@@ -7,29 +7,16 @@ module Handler.Admin.Dashboard
 
 import Import
 
-data Dashboard = Dashboard
-    { dLatestJobAt :: Maybe UTCTime
-    , dIncompleteJobs :: Int
-    , dCompleteJobs :: Int
-    , dErroredJobs :: Int
-    }
+import Widgets.Job
 
 getAdminR :: Handler Html
 getAdminR = redirect $ AdminP AdminDashboardR
 
 getAdminDashboardR :: Handler Html
 getAdminDashboardR = do
-    dashboard <- runDB $ do
-        mjob <- selectFirst
-            [JobCompletedAt !=. Nothing]
-            [Desc JobCompletedAt]
+    recentJobs <- runDB $
+        selectList [] [Desc JobCompletedAt, LimitTo 5]
 
-        Dashboard
-            <$> pure (jobCompletedAt . entityVal =<< mjob)
-            <*> count [JobCompletedAt ==. Nothing]
-            <*> count [JobCompletedAt !=. Nothing]
-            <*> count [JobCompletedAt !=. Nothing, JobExitCode !=. Just 0]
-
-    defaultLayout $ do
-        setTitle "Admin - Dashboard"
+    adminLayout $ do
+        setTitle "Restyled Admin"
         $(widgetFile "admin/dashboard")
