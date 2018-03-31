@@ -6,7 +6,9 @@
       <li>
         <a href=@{AdminP AdminSignupsR}>Signups
       <li>
-        <a href=@{AdminP AdminJobsR}>Jobs
+        <a href=@{AdminP $ AdminJobsP AdminJobsR}>Jobs
+      <li>
+        <a href=@{AdminP $ AdminJobsP AdminJobsNewR}>New Job
 
 $maybe msg <- mmsg
   <aside #message .info>

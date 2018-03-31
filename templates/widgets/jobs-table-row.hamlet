@@ -27,6 +27,6 @@ $with Entity _ job <- job
     <td .actions>
       $# Only render action if complete
       $maybe _ <- jobCompletedAt job
-        <form method=post action=@{AdminP AdminJobsR} enctype=#{enctype}>
+        <form method=post action=@{AdminP $ AdminJobsP AdminJobsR} enctype=#{enctype}>
           ^{widget}
           <button .warning>Rerun job

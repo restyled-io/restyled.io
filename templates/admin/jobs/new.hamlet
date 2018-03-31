@@ -1,0 +1,5 @@
+<section>
+  <form method=post action=@{AdminP $ AdminJobsP AdminJobsR} enctype=#{enctype}>
+    ^{widget}
+    <footer .action>
+      <button>Create

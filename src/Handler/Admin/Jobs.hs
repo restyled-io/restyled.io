@@ -3,6 +3,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Handler.Admin.Jobs
     ( getAdminJobsR
+    , getAdminJobsNewR
     , postAdminJobsR
     ) where
 
@@ -19,6 +20,14 @@ getAdminJobsR = do
     adminLayout $ do
         setTitle "Restyled Admin / Jobs"
         $(widgetFile "admin/jobs")
+
+getAdminJobsNewR :: Handler Html
+getAdminJobsNewR = do
+    (widget, enctype) <- generateFormPost createJobForm
+
+    adminLayout $ do
+        setTitle "Restyled Admin / New Job"
+        $(widgetFile "admin/jobs/new")
 
 postAdminJobsR :: Handler ()
 postAdminJobsR = do
@@ -52,4 +61,4 @@ postAdminJobsR = do
             runBackendHandler $ enqueueRestylerJob job
             setMessage "Job created"
 
-    redirect $ AdminP AdminJobsR
+    redirect $ AdminP $ AdminJobsP AdminJobsR
