@@ -45,6 +45,7 @@ jobsTable jobs = $(widgetFile "widgets/jobs-table")
 
 jobsTableRow :: Entity Job -> Widget
 jobsTableRow job = do
+    now <- liftIO getCurrentTime
     (widget, enctype) <- handlerToWidget
         $ generateFormPost
         $ createJobFormFrom
