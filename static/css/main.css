@@ -13,3 +13,17 @@ table {
 footer {
   text-align: center;
 }
+
+/* Strapless styling for textual inputs. Why not number too? */
+form input[type="number"] {
+  width: 100%;
+  min-width: 18ch;
+  padding: 1ch;
+  margin-bottom: 1em;
+  border: 1px solid #6c6c6c;
+}
+
+form aside input[type="number"],
+form footer input[type="number"] {
+  margin-bottom: 6px;
+}
