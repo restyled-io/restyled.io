@@ -29,20 +29,11 @@ getAdminJobsNewR = do
         setTitle "Restyled Admin / New Job"
         $(widgetFile "admin/jobs/new")
 
-postAdminJobsR :: Handler ()
+postAdminJobsR :: Handler Html
 postAdminJobsR = do
-    ((result, _widget), _enctype) <- runFormPost createJobForm
+    ((result, widget), enctype) <- runFormPost createJobForm
 
     case result of
-        -- N.B. because we're not really rendering a form, the error messaging
-        -- leaves a lot to be desired. But the reason we can skip the form
-        -- (hard-coding default values from an existing Job) also means form
-        -- validation errors are really only possible with programmer error
-        FormMissing -> setMessage "Form data missing"
-        FormFailure errs -> setMessage
-            $ "Failure creating job: "
-            <> toHtml (tshow errs)
-
         FormSuccess CreateJob{..} -> do
             now <- liftIO getCurrentTime
             job <- runDB
@@ -60,5 +51,10 @@ postAdminJobsR = do
                     }
             runBackendHandler $ enqueueRestylerJob job
             setMessage "Job created"
+            redirect $ AdminP $ AdminJobsP AdminJobsR
 
-    redirect $ AdminP $ AdminJobsP AdminJobsR
+        _ -> do
+            setMessage "Error creating Job"
+            adminLayout $ do
+                setTitle "Restyled Admin / New Job"
+                $(widgetFile "admin/jobs/new")
