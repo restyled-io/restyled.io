@@ -24,7 +24,11 @@ import GitHub.Data.Apps
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.RedisURL (parseRedisURL)
 import Network.Wai.Handler.Warp (HostPreference)
-import Yesod.Default.Util (widgetFileNoReload, widgetFileReload)
+#if DEVELOPMENT
+import Yesod.Default.Util (widgetFileReload)
+#else
+import Yesod.Default.Util (widgetFileNoReload)
+#endif
 
 data OAuthKeys = OAuthKeys
     { oauthKeysClientId :: Text
