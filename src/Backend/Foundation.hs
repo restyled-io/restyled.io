@@ -28,8 +28,8 @@ data Backend = Backend
 
 -- | Constraint synonym for backend actions' requirements
 type MonadBackend m =
-    ( MonadBaseControl IO m
-    , MonadIO m
+    -- ( MonadBaseControl IO m
+    ( MonadIO m
     , MonadLogger m
     , MonadReader Backend m
     )

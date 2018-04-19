@@ -20,6 +20,7 @@ import Database.Persist.Postgresql
 import Database.Redis (checkedConnect)
 import Language.Haskell.TH.Syntax (qLocation)
 import LoadEnv (loadEnv)
+import Network.HTTP.Client.TLS (getGlobalManager)
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
     ( Settings
@@ -57,7 +58,7 @@ mkYesodDispatch "App" resourcesApp
 
 makeFoundation :: AppSettings -> IO App
 makeFoundation appSettings = do
-    appHttpManager <- newManager
+    appHttpManager <- getGlobalManager
     appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
     appStatic <- (if appMutableStatic appSettings
         then staticDevel

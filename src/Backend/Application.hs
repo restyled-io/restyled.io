@@ -13,13 +13,14 @@ import Import hiding (runDB)
 import Backend.DB
 import Backend.Foundation
 import Backend.Job
+import Control.Monad ((<=<))
 import Control.Monad.Logger (runStdoutLoggingT)
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
 import GitHub.Data (toPathPart)
 import LoadEnv (loadEnv)
 import System.Exit (ExitCode(..))
-import System.IO (BufferMode(..), hSetBuffering)
+import System.IO (BufferMode(..))
 import System.Process (readProcessWithExitCode)
 
 backendMain :: IO ()
@@ -43,7 +44,7 @@ backendMain = do
     runBackend Backend{..} $ forever $ awaitAndProcessJob 120
 
 awaitAndProcessJob :: MonadBackend m => Integer -> m ()
-awaitAndProcessJob timeout = traverse_ processJob =<< awaitRestylerJob timeout
+awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 
 processJob :: MonadBackend m => Entity Job -> m ()
 processJob (Entity jid job) = do

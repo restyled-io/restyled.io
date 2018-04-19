@@ -8,6 +8,7 @@ module Foundation where
 
 import Import.NoFoundation
 
+import Data.Aeson
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
@@ -17,10 +18,18 @@ import Text.Jasmine (minifym)
 import Yesod.Auth
 import Yesod.Auth.Dummy
 import Yesod.Auth.Message (AuthMessage(..))
-import Yesod.Auth.OAuth2.GithubApp
+import Yesod.Auth.OAuth2
+import Yesod.Auth.OAuth2.Github
 import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
+
+-- | Just for reading email out of credsExtra
+newtype GitHubUser = GitHubUser Text
+
+instance FromJSON GitHubUser where
+    parseJSON = withObject "GitHubUser" $ \o -> GitHubUser
+        <$> o .: "email"
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -35,22 +44,10 @@ data App = App
     , appLogger      :: Logger
     }
 
--- This is where we define all of the routes in our application. For a full
--- explanation of the syntax, please see:
--- http://www.yesodweb.com/book/routing-and-handlers
---
--- Note that this is really half the story; in Application.hs, mkYesodDispatch
--- generates the rest of the code. Please see the following documentation
--- for an explanation for this split:
--- http://www.yesodweb.com/book/scaffolding-and-the-site-template#scaffolding-and-the-site-template_foundation_and_application_modules
---
--- This function also generates the following type synonyms:
--- type Handler = HandlerT App IO
--- type Widget = WidgetT App IO ()
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
 -- | A convenient synonym for creating forms.
-type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
+type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
@@ -111,9 +108,8 @@ instance Yesod App where
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
     -- What messages should be logged.
-    shouldLog app _source level = appSettings app `allowsLevel` level
-
-    makeLogger = return . appLogger
+    shouldLogIO app _source level = return
+        $ appSettings app `allowsLevel` level
 
     -- Provide proper Bootstrap styling for default displays, like
     -- error pages
@@ -145,40 +141,42 @@ authorizeAdmin (Just (Entity _ u)) admins
 instance YesodAuth App where
     type AuthId App = UserId
 
-    authenticate creds@Creds{..} = runDB $ do
+    authenticate creds@Creds{..} = liftHandler $ runDB $ do
         $(logDebug) $ "Running authenticate: " <> tshow creds
         muser <- getBy (UniqueUser credsPlugin credsIdent)
         $(logDebug) $ "Existing user: " <> tshow muser
+        let eemail = getUserResponseJSON creds
+        $(logDebug) $ "GitHub email: " <> tshow eemail
 
-        case (entityKey <$> muser, lookup "email" credsExtra) of
+        case (entityKey <$> muser, eemail) of
             -- Probably testing via auth/dummy, just authenticate
-            (Just uid, Nothing) -> pure $ Authenticated uid
+            (Just uid, Left _) -> pure $ Authenticated uid
 
             -- New user, create an account
-            (Nothing, Just email) -> Authenticated <$> insert User
+            (Nothing, Right email) -> Authenticated <$> insert User
                 { userEmail = email
                 , userCredsIdent = credsIdent
                 , userCredsPlugin = credsPlugin
                 }
 
             -- Existing user, synchronize email
-            (Just uid, Just email) -> do
+            (Just uid, Right email) -> do
                 update uid [UserEmail =. email]
                 pure $ Authenticated uid
 
             -- Unexpected, no email in GH response
-            (Nothing, Nothing) -> pure $ UserError $ IdentifierNotFound "email"
+            (Nothing, Left err) -> do
+                $(logWarn) $ "Error parsing user response: " <> pack err
+                pure $ UserError $ IdentifierNotFound "email"
 
     loginDest _ = HomeR
     logoutDest _ = HomeR
 
     authPlugins App{..} = addAuthBackDoor appSettings
-        [ oauth2GithubApp
+        [ oauth2Github
             (oauthKeysClientId $ appGitHubOAuthKeys appSettings)
             (oauthKeysClientSecret $ appGitHubOAuthKeys appSettings)
         ]
-
-    authHttpManager = appHttpManager
 
 addAuthBackDoor :: AppSettings -> [AuthPlugin App] -> [AuthPlugin App]
 addAuthBackDoor AppSettings{..} =
