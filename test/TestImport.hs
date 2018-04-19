@@ -76,14 +76,12 @@ wipeRedis :: App -> IO ()
 wipeRedis app = runBackendApp app $ runRedis $ void $ del [queueName]
 
 getTables :: MonadIO m => ReaderT SqlBackend m [Text]
-getTables = do
-    tables <- rawSql [st|
+getTables = map unSingle <$> rawSql
+    [st|
         SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'public';
     |] []
-
-    return $ map unSingle tables
 
 -- | Insert and authenticate as the given user
 --
@@ -115,7 +113,7 @@ postForm a b fs = do
         setUrl b
         setMethod "POST"
         addToken
-        for_ fs $ uncurry byLabel
+        for_ fs $ uncurry byLabelExact
 
 authPage :: Text -> YesodExample App Text
 authPage page = do

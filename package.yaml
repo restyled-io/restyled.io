@@ -31,10 +31,9 @@ library:
     - hedis
     - hjsmin
     - http-client
-    - http-conduit
+    - http-client-tls
     - http-types
     - load-env
-    - monad-control
     - monad-logger
     - monadplus
     - network-uri

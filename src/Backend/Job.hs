@@ -9,7 +9,7 @@ module Backend.Job
     , queueName
     ) where
 
-import Import
+import Import hiding (timeout)
 
 import Backend.Foundation
 import Data.Aeson
