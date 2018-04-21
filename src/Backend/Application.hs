@@ -57,6 +57,7 @@ processJob (Entity jid job) = do
 execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)
 execRestyler AppSettings{..} Job{..} = readLoggedProcess "docker"
     [ "run", "--rm"
+    , "--env", "DEBUG=1" -- Temporary, eventually base this on our log-level
     , "--volume", "/tmp:/tmp"
     , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
     , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
