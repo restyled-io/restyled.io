@@ -14,7 +14,6 @@ ghc-options: -Wall
 
 library:
   dependencies:
-    - HTTP
     - aeson
     - bytestring
     - case-insensitive
@@ -23,7 +22,6 @@ library:
     - conduit
     - containers
     - envparse
-    - errors
     - fast-logger
     - file-embed
     - formatting
@@ -38,8 +36,6 @@ library:
     - jwt
     - load-env
     - monad-logger
-    - monadplus
-    - network-uri
     - persistent
     - persistent-postgresql
     - persistent-template
