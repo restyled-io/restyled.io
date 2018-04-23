@@ -51,8 +51,13 @@ $$
   NOW() - ('42 seconds' :: interval),
   NOW() - ('42 seconds' :: interval),
   0,
-  NULL,
-  NULL
+  $$checking out the thing...
+[INFO ] restyle this
+[INFO ] restyle that
+[WARN ] no style differences
+[DEBUG] abort
+$$,
+  'git: commit: nothing to commit'
 );
 
 COMMIT;
