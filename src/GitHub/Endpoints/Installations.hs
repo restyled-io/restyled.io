@@ -33,7 +33,7 @@ createAccessToken githubAppId pem installationId = do
     jwt <- encodeJWT githubAppId (T.unpack pem)
     request <- parseRequest
         $ "POST https://api.github.com/installations/"
-        <> show (untagId installationId)
+        <> T.unpack (toPathPart installationId)
         <> "/access_tokens"
 
     getResponseBody <$> httpJSON
