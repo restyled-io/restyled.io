@@ -51,3 +51,6 @@ jobsTableRow job = do
         $ createJobFormFrom
         $ entityVal job
     $(widgetFile "widgets/jobs-table-row")
+
+prefixLines :: Text -> Text -> Text
+prefixLines prefix = unlines . map (prefix <>) . lines
