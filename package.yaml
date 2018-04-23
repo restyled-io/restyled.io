@@ -45,6 +45,7 @@ library:
     - template-haskell
     - text
     - time
+    - unix
     - unordered-containers
     - vector
     - wai

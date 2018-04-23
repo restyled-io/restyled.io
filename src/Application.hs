@@ -40,6 +40,8 @@ import Network.Wai.Middleware.RequestLogger
     , outputFormat
     )
 import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
+import System.Posix.IO (stdOutput)
+import System.Posix.Terminal (queryTerminal)
 import Yesod.Auth
 import Yesod.Core.Types (loggerSet)
 import Yesod.Default.Config2 (develMainHelper, getDevSettings, makeYesodLogger)
@@ -96,14 +98,16 @@ makeApplication foundation = do
     return $ logWare $ defaultMiddlewaresNoLogging appPlain
 
 makeLogWare :: App -> IO Middleware
-makeLogWare foundation = mkRequestLogger def
-    { outputFormat = if appSettings foundation `allowsLevel` LevelDebug
-        then Detailed True
-        else Apache apacheIpSource
-    , destination = if appSettings foundation `allowsLevel` LevelInfo
-        then Logger $ loggerSet $ appLogger foundation
-        else Callback $ \_ -> return ()
-    }
+makeLogWare foundation = do
+    isTTY <- queryTerminal stdOutput
+    mkRequestLogger def
+        { outputFormat = if appSettings foundation `allowsLevel` LevelDebug
+            then Detailed isTTY
+            else Apache apacheIpSource
+        , destination = if appSettings foundation `allowsLevel` LevelInfo
+            then Logger $ loggerSet $ appLogger foundation
+            else Callback $ \_ -> return ()
+        }
   where
     apacheIpSource = if appIpFromHeader $ appSettings foundation
         then FromFallback
