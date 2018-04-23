@@ -25,7 +25,7 @@ import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
 
 -- | Just for reading email out of credsExtra
-newtype GitHubUser = GitHubUser Text
+newtype GitHubUser = GitHubUser { ghuEmail :: Text }
 
 instance FromJSON GitHubUser where
     parseJSON = withObject "GitHubUser" $ \o -> GitHubUser
@@ -145,7 +145,7 @@ instance YesodAuth App where
         $(logDebug) $ "Running authenticate: " <> tshow creds
         muser <- getBy (UniqueUser credsPlugin credsIdent)
         $(logDebug) $ "Existing user: " <> tshow muser
-        let eemail = getUserResponseJSON creds
+        let eemail = ghuEmail <$> getUserResponseJSON creds
         $(logDebug) $ "GitHub email: " <> tshow eemail
 
         case (entityKey <$> muser, eemail) of
