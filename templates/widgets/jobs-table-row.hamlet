@@ -4,11 +4,11 @@ $with Entity _ job <- job
     <td>
       #{toPathPart $ jobOwner job}/#{toPathPart $ jobRepo job}
       ##{toPathPiece $ jobPullRequest job}
-      (#{prettyDuration (jobCreatedAt job) now} ago)
+      (#{format (diff True) $ diffUTCTime (jobCreatedAt job) now})
 
     <td>
       $maybe x <- jobCompletedAt job
-        #{prettyDuration (jobCreatedAt job) x}
+        #{format (diff False) $ diffUTCTime (jobCreatedAt job) x}
 
     <td>
       $maybe exitCode <- jobExitCode job

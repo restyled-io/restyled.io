@@ -13,9 +13,11 @@ module Widgets.Job
 
 import Import
 
+import Data.Time
+import Formatting (format)
+import Formatting.Time (diff)
 import GitHub.Data
 import GitHub.Data.Apps
-import Helper.Time
 
 data CreateJob = CreateJob
     { cjInstallationId :: Id Installation
