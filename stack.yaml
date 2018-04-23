@@ -2,6 +2,7 @@
 resolver: lts-11.5
 extra-deps:
   - hoauth2-1.7.1
+  - jwt-0.8.0
   - yesod-auth-oauth2-0.5.0.0
 ghc-options:
   "$locals": -fhide-source-paths
