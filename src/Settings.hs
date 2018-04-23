@@ -17,12 +17,11 @@ import qualified Data.ByteString.Char8 as C8
 import Data.Proxy
 import qualified Data.Text as T
 import Database.Persist.Postgresql (PostgresConf(..))
-import Database.Redis (ConnectInfo(..))
+import Database.Redis (ConnectInfo(..), parseConnectInfo)
 import qualified Env
 import GitHub.Data
 import GitHub.Data.Apps
 import Language.Haskell.TH.Syntax (Exp, Q)
-import Network.RedisURL (parseRedisURL)
 import Network.Wai.Handler.Warp (HostPreference)
 #if DEVELOPMENT
 import Yesod.Default.Util (widgetFileReload)
@@ -102,7 +101,7 @@ envDatabaseConfig = PostgresConf
     defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 envRedisConfig :: EnvParser ConnectInfo
-envRedisConfig = either error id . parseRedisURL
+envRedisConfig = either error id . parseConnectInfo
     <$> Env.var Env.nonempty "REDIS_URL" (Env.def "redis://localhost:6379")
 
 envLogLevel :: EnvParser LogLevel
