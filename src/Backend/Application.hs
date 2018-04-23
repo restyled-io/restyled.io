@@ -55,7 +55,7 @@ processJob (Entity jid job) = do
     runDB $ completeJob jid ec (pack out) (pack err)
 
 execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)
-execRestyler AppSettings{..} Job{..} = do
+execRestyler appSettings@AppSettings{..} Job{..} = do
     AccessToken{..} <- liftIO $ createAccessToken
         appGitHubAppId
         appGitHubAppKey
@@ -63,7 +63,7 @@ execRestyler AppSettings{..} Job{..} = do
 
     readLoggedProcess "docker"
         [ "run", "--rm"
-        , "--env", "DEBUG=1" -- Temporary, eventually base this on our log-level
+        , "--env", debugEnv
         , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack atToken
         , "--volume", "/tmp:/tmp"
         , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
@@ -73,6 +73,10 @@ execRestyler AppSettings{..} Job{..} = do
             <> "/" <> toPathPiece jobRepo
             <> "#" <> toPathPiece jobPullRequest
         ]
+  where
+    debugEnv
+        | appSettings `allowsLevel` LevelDebug = "DEBUG=1"
+        | otherwise = "DEBUG="
 
 readLoggedProcess :: (MonadIO m, MonadLogger m)
     => String -> [String] -> m (ExitCode, String, String)
