@@ -13,7 +13,7 @@ import GitHub.Data.Webhooks.PullRequest
 postWebhooksR :: Handler ()
 postWebhooksR = do
     payload@Payload{..} <- requireJsonBody
-    $(logDebug) $ "Webhook payload received: " <> tshow payload
+    logDebugN $ "Webhook payload received: " <> tshow payload
 
     if acceptPayload payload
         then do

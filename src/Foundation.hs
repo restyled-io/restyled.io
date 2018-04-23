@@ -142,11 +142,11 @@ instance YesodAuth App where
     type AuthId App = UserId
 
     authenticate creds@Creds{..} = liftHandler $ runDB $ do
-        $(logDebug) $ "Running authenticate: " <> tshow creds
+        logDebugN $ "Running authenticate: " <> tshow creds
         muser <- getBy (UniqueUser credsPlugin credsIdent)
-        $(logDebug) $ "Existing user: " <> tshow muser
+        logDebugN $ "Existing user: " <> tshow muser
         let eemail = ghuEmail <$> getUserResponseJSON creds
-        $(logDebug) $ "GitHub email: " <> tshow eemail
+        logDebugN $ "GitHub email: " <> tshow eemail
 
         case (entityKey <$> muser, eemail) of
             -- Probably testing via auth/dummy, just authenticate
@@ -166,7 +166,7 @@ instance YesodAuth App where
 
             -- Unexpected, no email in GH response
             (Nothing, Left err) -> do
-                $(logWarn) $ "Error parsing user response: " <> pack err
+                logWarnN $ "Error parsing user response: " <> pack err
                 pure $ UserError $ IdentifierNotFound "email"
 
     loginDest _ = HomeR

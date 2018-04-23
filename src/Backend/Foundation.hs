@@ -9,6 +9,7 @@ module Backend.Foundation
     , runBackendHandler
     , runBackendApp
     , runRedis
+    , module Control.Monad.Logger
     , module Database.Redis
     ) where
 

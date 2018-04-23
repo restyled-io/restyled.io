@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+
 module Backend.Job
     ( insertJob
     , completeJob
@@ -55,16 +55,16 @@ completeJob jid ec out err = do
 
 awaitRestylerJob :: MonadBackend m => Integer -> m (Maybe (Entity Job))
 awaitRestylerJob timeout = do
-    $(logDebug) $ "Awaiting Restyler Job..."
+    logDebugN "Awaiting Restyler Job..."
     eresult <- runRedis $ brpop [queueName] timeout
-    $(logDebug) $ "Popped value: " <> tshow eresult
+    logDebugN $ "Popped value: " <> tshow eresult
     return $ either (const Nothing) (decodePopped =<<) eresult
   where
     decodePopped = decode . fromStrict . snd
 
 enqueueRestylerJob :: MonadBackend m => Entity Job -> m ()
 enqueueRestylerJob e@(Entity jid job) = do
-    $(logDebug) $ "Enqueuing Restyler Job Id "
+    logDebugN $ "Enqueuing Restyler Job Id "
         <> toPathPiece jid <> ": " <> tshow job
     void $ runRedis $ lpush queueName [toStrict $ encode e]
 

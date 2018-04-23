@@ -85,7 +85,7 @@ makeFoundation appSettings = do
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
     -- Output settings at startup
-    runLoggingT ($(logInfo) $ "settings " <> tshow appSettings) logFunc
+    runLoggingT (logInfoN $ "settings " <> tshow appSettings) logFunc
 
     return $ mkFoundation pool
 

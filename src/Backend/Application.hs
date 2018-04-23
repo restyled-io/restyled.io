@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
+
 module Backend.Application
     ( backendMain
     , awaitAndProcessJob
@@ -48,7 +48,7 @@ awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 
 processJob :: MonadBackend m => Entity Job -> m ()
 processJob (Entity jid job) = do
-    $(logInfo) $ "Processing Restyler Job Id "
+    logInfoN $ "Processing Restyler Job Id "
         <> toPathPiece jid <> ": " <> tshow job
     settings <- asks backendSettings
     (ec, out, err) <- execRestyler settings job
@@ -73,7 +73,7 @@ execRestyler AppSettings{..} Job{..} = readLoggedProcess "docker"
 readLoggedProcess :: (MonadIO m, MonadLogger m)
     => String -> [String] -> m (ExitCode, String, String)
 readLoggedProcess cmd args = do
-    $(logDebug) $ "process: " <> tshow (cmd:args)
+    logDebugN $ "process: " <> tshow (cmd:args)
     result <- liftIO $ readProcessWithExitCode cmd args ""
-    $(logDebug) $ "process result: " <> tshow result
+    logDebugN $ "process result: " <> tshow result
     pure result
