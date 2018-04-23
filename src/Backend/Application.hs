@@ -17,7 +17,7 @@ import Control.Monad ((<=<))
 import Control.Monad.Logger (runStdoutLoggingT)
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
-import GitHub.Data (toPathPart)
+import GitHub.Endpoints.Installations
 import LoadEnv (loadEnv)
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
@@ -55,20 +55,24 @@ processJob (Entity jid job) = do
     runDB $ completeJob jid ec (pack out) (pack err)
 
 execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)
-execRestyler AppSettings{..} Job{..} = readLoggedProcess "docker"
-    [ "run", "--rm"
-    , "--env", "DEBUG=1" -- Temporary, eventually base this on our log-level
-    , "--volume", "/tmp:/tmp"
-    , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
-    , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-    , "--github-app-id", unpack $ toPathPart appGitHubAppId
-    , "--github-app-key", unpack appGitHubAppKey
-    , "--installation-id", unpack $ toPathPart jobInstallationId
-    , "--owner", unpack $ toPathPart jobOwner
-    , "--repo", unpack $ toPathPart jobRepo
-    , "--pull-request", unpack $ toPathPart jobPullRequest
-    , "--restyled-root", unpack appRoot
-    ]
+execRestyler AppSettings{..} Job{..} = do
+    AccessToken{..} <- liftIO $ createAccessToken
+        appGitHubAppId
+        appGitHubAppKey
+        jobInstallationId
+
+    readLoggedProcess "docker"
+        [ "run", "--rm"
+        , "--env", "DEBUG=1" -- Temporary, eventually base this on our log-level
+        , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack atToken
+        , "--volume", "/tmp:/tmp"
+        , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
+        , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
+        , unpack
+            $ toPathPiece jobOwner
+            <> "/" <> toPathPiece jobRepo
+            <> "#" <> toPathPiece jobPullRequest
+        ]
 
 readLoggedProcess :: (MonadIO m, MonadLogger m)
     => String -> [String] -> m (ExitCode, String, String)

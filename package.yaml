@@ -32,7 +32,9 @@ library:
     - hjsmin
     - http-client
     - http-client-tls
+    - http-conduit
     - http-types
+    - jwt
     - load-env
     - monad-logger
     - monadplus
@@ -41,6 +43,7 @@ library:
     - persistent-postgresql
     - persistent-template
     - process
+    - safe-exceptions
     - shakespeare
     - template-haskell
     - text
