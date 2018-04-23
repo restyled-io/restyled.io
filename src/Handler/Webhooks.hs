@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-module Handler.Webhooks where
+
+module Handler.Webhooks
+    ( postWebhooksR
+    ) where
 
 import Import
 
