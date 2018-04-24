@@ -32,6 +32,7 @@ type MonadBackend m =
     ( MonadIO m
     , MonadLogger m
     , MonadReader Backend m
+    , MonadUnliftIO m
     )
 
 -- | Run a backend action

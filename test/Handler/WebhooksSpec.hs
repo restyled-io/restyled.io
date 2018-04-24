@@ -1,11 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Handler.WebhooksSpec (spec) where
+{-# LANGUAGE RecordWildCards #-}
+
+module Handler.WebhooksSpec
+    ( spec
+    ) where
 
 import TestImport
 
 import Backend.Job
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.Lazy.Char8 as L8
+import qualified Prelude as Unsafe
 
 spec :: Spec
 spec = withApp $ do
@@ -26,6 +31,21 @@ spec = withApp $ do
             jobOwner (entityVal jobD) `shouldBe` "restyled-io"
             jobRepo (entityVal jobD) `shouldBe` "demo"
             jobPullRequest (entityVal jobD) `shouldBe` 1
+
+        it "finds or creates the repository" $ do
+            replicateM_ 3 $ do
+                postFixture "webhooks/github/pull-request-opened.json"
+                statusIs 201
+
+            repos <- runDB $ selectList [] []
+            length repos `shouldBe` 1
+            let Repo{..} = entityVal $ Unsafe.head repos
+            repoOwner `shouldBe` "restyled-io"
+            repoName `shouldBe` "demo"
+            repoIsPrivate `shouldBe` False
+            jobs <- runDB $ selectList [] []
+            map (jobOwner . entityVal) jobs `shouldBe` replicate 3 repoOwner
+            map (jobRepo . entityVal) jobs `shouldBe` replicate 3 repoName
 
         -- it "responds 200 for valid but ignored payloads" $ do
         --     need fixtures for some other payloads

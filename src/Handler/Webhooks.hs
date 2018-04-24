@@ -19,7 +19,9 @@ postWebhooksR = do
 
     if acceptPayload payload
         then do
-            job <- runDB $ insertJob pInstallationId pRepository pPullRequest
+            job <- runDB $ do
+                repo <- findOrCreateRepo pRepository pInstallationId
+                insertJob repo $ mkId Proxy $ pullRequestNumber pPullRequest
             runBackendHandler $ enqueueRestylerJob job
             sendResponseStatus status201 ()
         else

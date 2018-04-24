@@ -10,7 +10,8 @@ module Handler.Admin.Jobs
 import Import
 
 import Backend.Foundation (runBackendHandler)
-import Backend.Job (enqueueRestylerJob)
+import Backend.Job
+import GitHub.Data (toPathPart)
 import Widgets.Job
 
 getAdminJobsR :: Handler Html
@@ -35,26 +36,22 @@ postAdminJobsR = do
 
     case result of
         FormSuccess CreateJob{..} -> do
-            now <- liftIO getCurrentTime
-            job <- runDB
-                $ insertEntity Job
-                    { jobInstallationId = cjInstallationId
-                    , jobOwner = cjOwner
-                    , jobRepo = cjRepo
-                    , jobPullRequest = cjPullRequest
-                    , jobCreatedAt = now
-                    , jobUpdatedAt = now
-                    , jobCompletedAt = Nothing
-                    , jobExitCode = Nothing
-                    , jobStdout = Nothing
-                    , jobStderr = Nothing
-                    }
-            runBackendHandler $ enqueueRestylerJob job
-            setMessage "Job created"
-            redirect $ AdminP $ AdminJobsP AdminJobsR
+            mRepo <- runDB $ getBy $ UniqueRepo cjOwner cjRepo
 
-        _ -> do
-            setMessage "Error creating Job"
-            adminLayout $ do
-                setTitle "Restyled Admin / New Job"
-                $(widgetFile "admin/jobs/new")
+            for_ mRepo $ \repo -> do
+                job <- runDB $ insertJob repo cjPullRequest
+                runBackendHandler $ enqueueRestylerJob job
+                setMessage "Job created"
+                redirect $ AdminP $ AdminJobsP AdminJobsR
+
+            setMessage $ toHtml
+                $ "Unknown Repo: "
+                <> toPathPart cjOwner <> "/"
+                <> toPathPart cjRepo
+
+        _ -> setMessage "Error creating Job"
+
+    -- If we get here, we're rendering with an error
+    adminLayout $ do
+        setTitle "Restyled Admin / New Job"
+        $(widgetFile "admin/jobs/new")

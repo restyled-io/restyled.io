@@ -17,7 +17,7 @@ import Control.Monad ((<=<))
 import Control.Monad.Logger (runStdoutLoggingT)
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
-import GitHub.Endpoints.Installations
+import GitHub.Endpoints.Installations hiding (Repo(..))
 import LoadEnv (loadEnv)
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
@@ -51,23 +51,29 @@ processJob (Entity jid job) = do
     logInfoN $ "Processing Restyler Job Id "
         <> toPathPiece jid <> ": " <> tshow job
     settings <- asks backendSettings
-    (ec, out, err) <- execRestyler settings job
+    (ec, out, err) <-
+        execRestyler settings job `catchAny` \ex -> do
+            -- Log and act like a failed process
+            logErrorN $ tshow ex
+            pure (ExitFailure 1, "", show ex)
+
     runDB $ completeJob jid ec (pack out) (pack err)
 
 execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)
 execRestyler appSettings@AppSettings{..} Job{..} = do
+    repo <- fromMaybeM (throwString "Repo not found")
+        =<< runDB (getBy $ UniqueRepo jobOwner jobRepo)
+
     eAccessToken <- liftIO $ createAccessToken
         appGitHubAppId
         appGitHubAppKey
         jobInstallationId
 
-    either
-        -- Make it look like a failed process, why not
-        (\ex -> pure (ExitFailure 1, "", show ex))
+    either throwString
         (\AccessToken{..} ->
             readLoggedProcess "docker"
                 [ "run", "--rm"
-                , "--env", debugEnv
+                , "--env", debugEnv repo
                 , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack atToken
                 , "--volume", "/tmp:/tmp"
                 , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
@@ -80,8 +86,9 @@ execRestyler appSettings@AppSettings{..} Job{..} = do
         )
         eAccessToken
   where
-    debugEnv
+    debugEnv (Entity _ Repo{..})
         | appSettings `allowsLevel` LevelDebug = "DEBUG=1"
+        | repoDebugEnabled = "DEBUG=1"
         | otherwise = "DEBUG="
 
 readLoggedProcess :: (MonadIO m, MonadLogger m)
