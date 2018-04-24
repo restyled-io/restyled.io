@@ -9,7 +9,9 @@ module GitHub.Endpoints.Installations
 
 import Prelude
 
+import Control.Applicative
 import Control.Exception.Safe
+import Data.Aeson
 import qualified Data.Map as Map
 import Data.Monoid ((<>))
 import Data.Text (Text)
@@ -24,26 +26,51 @@ import Network.HTTP.Simple
 import Network.HTTP.Types
 import qualified Web.JWT as JWT
 
+newtype ErrorMessage = ErrorMessage Text
+
+instance FromJSON ErrorMessage where
+    parseJSON = withObject "TokenResponse" $ \o -> do
+        msg <- o .: "message"
+        url <- o .: "documentation_url"
+        pure $ ErrorMessage $ msg <> " (see " <> url <> ")"
+
+data TokenResponse
+    = Token AccessToken
+    | ErrorResponse ErrorMessage
+
+instance FromJSON TokenResponse where
+    parseJSON o = (Token <$> parseJSON o) <|> (ErrorResponse <$> parseJSON o)
+
+tokenResponseToEither :: TokenResponse -> Either String AccessToken
+tokenResponseToEither (Token x) = Right x
+tokenResponseToEither (ErrorResponse (ErrorMessage x)) = Left $ T.unpack x
+
 -- | 10 minutes
 maxExpiration :: NominalDiffTime
 maxExpiration = 10 * 60
 
-createAccessToken :: Id App -> Text -> Id Installation -> IO AccessToken
-createAccessToken githubAppId pem installationId = do
-    jwt <- encodeJWT githubAppId (T.unpack pem)
-    request <- parseRequest
-        $ "POST https://api.github.com/installations/"
-        <> T.unpack (toPathPart installationId)
-        <> "/access_tokens"
+-- | Create an Access Token for an installation of the given App
+createAccessToken
+    :: Id App
+    -> Text
+    -> Id Installation
+    -> IO (Either String AccessToken)
+createAccessToken githubAppId pem installationId =
+    handleAny (pure . Left . show) $ do
+        jwt <- encodeJWT githubAppId (T.unpack pem)
+        request <- parseRequest
+            $ "POST https://api.github.com/installations/"
+            <> T.unpack (toPathPart installationId)
+            <> "/access_tokens"
 
-    getResponseBody <$> httpJSON
-        ( setRequestHeaders
-            [ (hAccept, "application/vnd.github.machine-man-preview+json")
-            , (hAuthorization, "Bearer " <> encodeUtf8 jwt)
-            , (hUserAgent, "restyled-io")
-            ]
-            request
-        )
+        tokenResponseToEither . getResponseBody <$> httpJSON
+            ( setRequestHeaders
+                [ (hAccept, "application/vnd.github.machine-man-preview+json")
+                , (hAuthorization, "Bearer " <> encodeUtf8 jwt)
+                , (hUserAgent, "restyled-io")
+                ]
+                request
+            )
 
 encodeJWT :: Id App -> String -> IO JWT.JSON
 encodeJWT githubAppId pem = do

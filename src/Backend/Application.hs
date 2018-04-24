@@ -56,23 +56,29 @@ processJob (Entity jid job) = do
 
 execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)
 execRestyler appSettings@AppSettings{..} Job{..} = do
-    AccessToken{..} <- liftIO $ createAccessToken
+    eAccessToken <- liftIO $ createAccessToken
         appGitHubAppId
         appGitHubAppKey
         jobInstallationId
 
-    readLoggedProcess "docker"
-        [ "run", "--rm"
-        , "--env", debugEnv
-        , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack atToken
-        , "--volume", "/tmp:/tmp"
-        , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
-        , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-        , unpack
-            $ toPathPiece jobOwner
-            <> "/" <> toPathPiece jobRepo
-            <> "#" <> toPathPiece jobPullRequest
-        ]
+    either
+        -- Make it look like a failed process, why not
+        (\ex -> pure (ExitFailure 1, "", show ex))
+        (\AccessToken{..} ->
+            readLoggedProcess "docker"
+                [ "run", "--rm"
+                , "--env", debugEnv
+                , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack atToken
+                , "--volume", "/tmp:/tmp"
+                , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
+                , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
+                , unpack
+                    $ toPathPiece jobOwner
+                    <> "/" <> toPathPiece jobRepo
+                    <> "#" <> toPathPiece jobPullRequest
+                ]
+        )
+        eAccessToken
   where
     debugEnv
         | appSettings `allowsLevel` LevelDebug = "DEBUG=1"
