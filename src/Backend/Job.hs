@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Backend.Job
     ( insertJob
@@ -14,18 +15,17 @@ import Import hiding (timeout)
 import Backend.Foundation
 import Data.Aeson
 import Database.Persist.Sql (SqlPersistM)
-import GitHub.Data
-import GitHub.Data.Apps (Installation)
+import GitHub.Data hiding (Repo(..))
 import System.Exit (ExitCode(..))
 
-insertJob :: Id Installation -> Repo -> PullRequest -> YesodDB App (Entity Job)
-insertJob installationId repo pullRequest = do
+insertJob :: Entity Repo -> Id PullRequest -> YesodDB App (Entity Job)
+insertJob (Entity _ Repo{..}) pullRequestNumber = do
     now <- liftIO getCurrentTime
     insertEntity Job
-        { jobInstallationId = installationId
-        , jobOwner = simpleOwnerLogin $ repoOwner repo
-        , jobRepo = repoName repo
-        , jobPullRequest = mkId Proxy $ pullRequestNumber pullRequest
+        { jobInstallationId = repoInstallationId
+        , jobOwner = repoOwner
+        , jobRepo = repoName
+        , jobPullRequest = pullRequestNumber
         , jobCreatedAt = now
         , jobUpdatedAt = now
         , jobCompletedAt = Nothing
@@ -60,7 +60,7 @@ awaitRestylerJob timeout = do
     logDebugN $ "Popped value: " <> tshow eresult
     return $ either (const Nothing) (decodePopped =<<) eresult
   where
-    decodePopped = decode . fromStrict . snd
+    decodePopped = decodeStrict . snd
 
 enqueueRestylerJob :: MonadBackend m => Entity Job -> m ()
 enqueueRestylerJob e@(Entity jid job) = do

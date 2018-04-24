@@ -10,10 +10,20 @@ User
   UniqueUser credsPlugin credsIdent
   deriving Eq Show
 
+Repo
+  owner (Name Owner)
+  name (Name GH.Repo)
+  installationId (Id Installation)
+  isPrivate Bool
+  debugEnabled Bool
+
+  UniqueRepo owner name
+  deriving Eq Show
+
 Job json
   installationId (Id Installation)
   owner (Name Owner)
-  repo (Name Repo)
+  repo (Name GH.Repo)
   pullRequest (Id PullRequest)
 
   createdAt UTCTime

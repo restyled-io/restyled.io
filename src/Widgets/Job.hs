@@ -16,29 +16,26 @@ import Import
 import Data.Time
 import Formatting (format)
 import Formatting.Time (diff)
-import GitHub.Data
-import GitHub.Data.Apps
+import GitHub.Data hiding (Repo)
+import qualified GitHub.Data as GH
 
 data CreateJob = CreateJob
-    { cjInstallationId :: Id Installation
-    , cjOwner :: Name Owner
-    , cjRepo :: Name Repo
+    { cjOwner :: Name Owner
+    , cjRepo :: Name GH.Repo
     , cjPullRequest :: Id PullRequest
     }
 
 -- | Form to use when rendering for real input, or processing
 createJobForm :: Form CreateJob
 createJobForm = renderDivs $ CreateJob
-    <$> (mkId Proxy <$> areq intField "Installation Id" Nothing)
-    <*> (mkName Proxy <$> areq textField "Owner" Nothing)
+    <$> (mkName Proxy <$> areq textField "Owner" Nothing)
     <*> (mkName Proxy <$> areq textField "Repo" Nothing)
     <*> (mkId Proxy <$> areq intField "Pull Request" Nothing)
 
 -- | Form to use when re-submitting an existing @'Job'@
 createJobFormFrom :: Job -> Form CreateJob
 createJobFormFrom Job{..} = renderDivs $ CreateJob
-    <$> areq hiddenField "" (Just jobInstallationId)
-    <*> areq hiddenField "" (Just jobOwner)
+    <$> areq hiddenField "" (Just jobOwner)
     <*> areq hiddenField "" (Just jobRepo)
     <*> areq hiddenField "" (Just jobPullRequest)
 

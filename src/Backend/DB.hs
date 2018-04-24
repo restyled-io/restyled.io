@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 -- |
 --
--- This should ideally be in @"Database.Foundation"@, but we put it here to
--- avoid constant clashes with @'Yesod.Persist.runDB'@. Modules which need this
--- will have to qualify or hide.
+-- This should ideally be in @"Backend.Foundation"@, but we put it here to avoid
+-- constant clashes with @'Yesod.Persist.runDB'@. Modules which need this will
+-- have to qualify or hide.
 --
 module Backend.DB
     ( runDB
