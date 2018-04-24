@@ -45,9 +45,14 @@ tokenResponseToEither :: TokenResponse -> Either String AccessToken
 tokenResponseToEither (Token x) = Right x
 tokenResponseToEither (ErrorResponse (ErrorMessage x)) = Left $ T.unpack x
 
--- | 10 minutes
+-- | Maximum expiration
+--
+-- 10 minutes is the documented maximum, but I can reliably trigger a "too far
+-- in the future" error, which I assume is due to different clocks, so we do 5
+-- minutes instead.
+--
 maxExpiration :: NominalDiffTime
-maxExpiration = 10 * 60
+maxExpiration = 5 * 60
 
 -- | Create an Access Token for an installation of the given App
 createAccessToken
