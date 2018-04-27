@@ -15,7 +15,7 @@ getAdminR = redirect $ AdminP AdminDashboardR
 getAdminDashboardR :: Handler Html
 getAdminDashboardR = do
     recentJobs <- runDB $
-        selectList [] [Desc JobCompletedAt, LimitTo 5]
+        selectList [] [Desc JobCreatedAt, LimitTo 5]
 
     adminLayout $ do
         setTitle "Restyled Admin"
