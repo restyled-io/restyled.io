@@ -55,12 +55,16 @@
   <h2>Interested?
 
   <p>
-    Restyled.io is currently in Alpha and so may not always work or provide
-    you the value you are seeking.
+    Restyled.io is currently in Beta, so there may be some bumps along the way.
+    If you're OK with that, all you have to do is 
+    <a href="https://github.com/apps/restyled-io">install the App</a>. And maybe
+    check out our 
+    <a href=@{DocsR}#restylers>list of Restylers
+    and 
+    <a href=@{DocsR}#configuration-reference>configuration reference
+    to see what might run by default and what could be turned on.
 
   <p>
-    If you're still on-board, all you have to do is install the 
-    <a href="https://github.com/apps/restyled-io">App</a>.
     If you'd rather wait, but be notified when things get more stable, go ahead
     and sign up here:
 
