@@ -56,7 +56,6 @@ processJob (Entity jid job) = do
             -- Log and act like a failed process
             logErrorN $ tshow ex
             pure (ExitFailure 1, "", show ex)
-
     runDB $ completeJob jid ec (pack out) (pack err)
 
 execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)

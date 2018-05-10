@@ -4,11 +4,11 @@
       <a href=@{AdminP AdminDashboardR}>restyled admin
     <ul>
       <li>
-        <a href=@{AdminP AdminSignupsR}>Signups
+        <a href=@{AdminP $ AdminReposP AdminReposR}>Repos
       <li>
         <a href=@{AdminP $ AdminJobsP AdminJobsR}>Jobs
       <li>
-        <a href=@{AdminP $ AdminJobsP AdminJobsNewR}>New Job
+        <a href=@{AdminP AdminSignupsR}>Signups
 
 $maybe msg <- mmsg
   <aside #message .info>

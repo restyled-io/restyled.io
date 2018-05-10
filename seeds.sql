@@ -9,6 +9,21 @@ INSERT INTO signup (
   'you@example.com'
 );
 
+DELETE from repo;
+INSERT INTO repo (
+  owner, -- (Name Owner)
+  name, -- (Name Repo)
+  installation_id, -- (Id Installation)
+  is_private, -- (Bool)
+  debug_enabled -- (Bool)
+) VALUES (
+  'restyled-io',
+  'demo',
+  58920,
+  FALSE,
+  TRUE
+);
+
 DELETE FROM job;
 INSERT INTO job (
   installation_id, -- (Id Installation)

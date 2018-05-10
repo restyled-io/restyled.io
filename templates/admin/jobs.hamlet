@@ -1,2 +1,2 @@
 <section>
-  ^{jobsTable jobs}
+  ^{jobsTable jobs Nothing}

@@ -1,3 +1,4 @@
+---
 steps:
   - simple_align:
       cases: false
@@ -15,7 +16,8 @@ steps:
   - language_pragmas:
       style: vertical
       align: false
-      remove_redundant: true
+      # https://github.com/jaspervdj/stylish-haskell/issues/75
+      remove_redundant: false
   - trailing_whitespace: {}
 columns: 80
 newline: native

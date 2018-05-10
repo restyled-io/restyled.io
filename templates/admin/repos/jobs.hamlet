@@ -1,0 +1,5 @@
+<section>
+  <h2>
+    #{repoOwner repo}/#{repoName repo}
+
+  ^{jobsTable jobs $ Just repo}

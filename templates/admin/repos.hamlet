@@ -1,0 +1,19 @@
+<section>
+  <table .repos>
+    <thead>
+      <tr>
+        <th>Owner
+        <th>Name
+        <th>Debug?
+        <th>Actions
+    <tbody>
+      $forall Entity repoId repo <- repos
+        <tr>
+          <td>#{repoOwner repo}
+          <td>#{repoName repo}
+          <td>
+            $if repoDebugEnabled repo
+              *
+          <td>
+            <a href=@{AdminP $ AdminReposP $ AdminRepoP repoId AdminRepoJobsR}>
+              View Jobs

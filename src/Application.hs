@@ -3,6 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Application
     ( getApplicationDev
@@ -54,6 +55,7 @@ import Handler.Webhooks
 
 import Handler.Admin.Dashboard
 import Handler.Admin.Jobs
+import Handler.Admin.Repos
 import Handler.Admin.Signups
 
 mkYesodDispatch "App" resourcesApp

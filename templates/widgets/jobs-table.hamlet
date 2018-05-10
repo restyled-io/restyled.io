@@ -9,3 +9,13 @@
   <tbody>
     $forall job <- jobs
       ^{jobsTableRow job}
+
+    <tr>
+      <td .action colspan=4>
+        $maybe (widget, enctype) <- mForm
+          <form method=post action=@{AdminP $ AdminJobsP AdminJobsR} enctype=#{enctype}>
+            <aside>
+              ^{widget}
+              <button type=submit>Restyle PR
+        $nothing
+          <a .button href=@{AdminP $ AdminJobsP AdminJobsNewR}>New Job

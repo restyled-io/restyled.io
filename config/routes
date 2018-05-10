@@ -15,4 +15,8 @@
   /jobs AdminJobsP:
     / AdminJobsR GET POST
     /new AdminJobsNewR GET
+  /repos AdminReposP:
+    / AdminReposR GET
+    /#RepoId AdminRepoP:
+      /jobs AdminRepoJobsR GET
   /signups AdminSignupsR GET

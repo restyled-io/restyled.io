@@ -7,6 +7,7 @@ import Data.Proxy
 import Data.Text (Text)
 import Database.Persist.Sql
 import GitHub.Data (Id, Name, mkId, mkName, untagId, untagName)
+import Text.Blaze (ToMarkup(..))
 import Yesod.Core (PathPiece(..))
 
 instance PathPiece (Id a) where
@@ -20,6 +21,9 @@ instance PersistField (Id a) where
 instance PersistFieldSql (Id a) where
     sqlType _ = sqlType (Proxy :: Proxy Int)
 
+instance ToMarkup (Id a) where
+    toMarkup = toMarkup . untagId
+
 instance PathPiece (Name  a) where
     toPathPiece = toPathPiece . untagName
     fromPathPiece = (mkName Proxy <$>) . fromPathPiece
@@ -30,6 +34,9 @@ instance PersistField (Name a) where
 
 instance PersistFieldSql (Name a) where
     sqlType _ = sqlType (Proxy :: Proxy Text)
+
+instance ToMarkup (Name a) where
+    toMarkup = toMarkup . untagName
 
 instance Num (Id a) where
     fromInteger = mkId Proxy . fromInteger

@@ -39,8 +39,21 @@ createJobFormFrom Job{..} = renderDivs $ CreateJob
     <*> areq hiddenField "" (Just jobRepo)
     <*> areq hiddenField "" (Just jobPullRequest)
 
-jobsTable :: [Entity Job] -> Widget
-jobsTable jobs = $(widgetFile "widgets/jobs-table")
+-- | Form to use when submitting a @'Job'@ for a known @'Repo'@
+createJobFormFromRepo :: Repo -> Form CreateJob
+createJobFormFromRepo Repo{..} = renderDivs $ CreateJob
+    <$> areq hiddenField "" (Just repoOwner)
+    <*> areq hiddenField "" (Just repoName)
+    <*> (mkId Proxy <$> areq intField "" Nothing)
+
+jobsTable :: [Entity Job] -> Maybe Repo -> Widget
+jobsTable jobs mRepo = do
+    mForm <- for mRepo $ \repo ->
+        handlerToWidget
+            $ generateFormPost
+            $ createJobFormFromRepo repo
+
+    $(widgetFile "widgets/jobs-table")
 
 jobsTableRow :: Entity Job -> Widget
 jobsTableRow job = do

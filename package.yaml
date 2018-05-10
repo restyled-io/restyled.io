@@ -15,6 +15,7 @@ ghc-options: -Wall
 library:
   dependencies:
     - aeson
+    - blaze-markup
     - bytestring
     - case-insensitive
     - classy-prelude
