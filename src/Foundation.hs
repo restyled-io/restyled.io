@@ -49,7 +49,8 @@ instance Yesod App where
     approot = ApprootMaster $ appRoot . appSettings
 
     makeSessionBackend _ = Just
-        <$> envClientSessionBackend 120 "SESSION_KEY"
+        -- 2 week session timeout
+        <$> envClientSessionBackend (60 * 24 * 14) "SESSION_KEY"
 
     yesodMiddleware = defaultYesodMiddleware
 
