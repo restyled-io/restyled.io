@@ -46,7 +46,7 @@ jobs:
           version: 17.07.0-ce
       - run:
           name: Dependencies
-          command: apk add --update make
+          command: apk add --update git make
       - run:
           name: Build image
           command: |
