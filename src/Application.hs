@@ -48,7 +48,6 @@ import Yesod.Core.Types (loggerSet)
 import Yesod.Default.Config2 (develMainHelper, getDevSettings, makeYesodLogger)
 
 import Handler.Common
-import Handler.Docs
 import Handler.Home
 import Handler.Signups
 import Handler.Webhooks

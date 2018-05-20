@@ -5,7 +5,7 @@
 
     <ul>
       <li>
-        <a href=@{DocsR}>Documentation
+        <a href=https://github.com/restyled-io/restyled.io/wiki>Documentation
 
 $maybe msg <- mmsg
   <aside #message .info>
