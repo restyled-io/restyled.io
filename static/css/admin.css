@@ -2,3 +2,29 @@ nav {
   /* Red so you know where you are */
   background-color: #cd5c5c
 }
+
+.admin-repo {
+  border-radius: 3px;
+  border: 1px solid #999;
+  padding: 0 !important; /* sorry */
+}
+
+.admin-repo header {
+  background-color: #999;
+  border-bottom: 1px solid #999;
+  color: white;
+  font-weight: bold;
+  padding: 5px 20px;
+}
+
+.admin-repo p {
+  padding: 10px 0;
+  margin-bottom: 10px;
+}
+
+.admin-repo pre {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+

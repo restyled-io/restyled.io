@@ -17,5 +17,6 @@
   /repos AdminReposP:
     / AdminReposR GET
     /#RepoId AdminRepoP:
+      / AdminRepoR PATCH
       /jobs AdminRepoJobsR GET
   /signups AdminSignupsR GET

@@ -32,6 +32,7 @@ import Network.Wai.Handler.Warp
     , setOnException
     , setPort
     )
+import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.RequestLogger
     ( Destination(Callback, Logger)
     , IPAddrSource(..)
@@ -96,7 +97,10 @@ makeApplication :: App -> IO Application
 makeApplication foundation = do
     logWare <- makeLogWare foundation
     appPlain <- toWaiAppPlain foundation
-    return $ logWare $ defaultMiddlewaresNoLogging appPlain
+    return $ logWare $ waiMiddleware appPlain
+
+waiMiddleware :: Middleware
+waiMiddleware = methodOverridePost . defaultMiddlewaresNoLogging
 
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation = do

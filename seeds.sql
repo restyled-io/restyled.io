@@ -22,6 +22,18 @@ INSERT INTO repo (
   58920,
   FALSE,
   TRUE
+), (
+  'restyled-io',
+  'restyler',
+  58920,
+  FALSE,
+  TRUE
+), (
+  'pbrisbin',
+  'some-great-repo-but-a-long-name',
+  58920,
+  FALSE,
+  TRUE
 );
 
 DELETE FROM job;

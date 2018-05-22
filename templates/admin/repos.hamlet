@@ -1,19 +1,36 @@
-<section>
-  <table .repos>
-    <thead>
-      <tr>
-        <th>Owner
-        <th>Name
-        <th>Debug?
-        <th>Actions
-    <tbody>
-      $forall Entity repoId repo <- repos
-        <tr>
-          <td>#{repoOwner repo}
-          <td>#{repoName repo}
-          <td>
-            $if repoDebugEnabled repo
-              *
-          <td>
-            <a href=@{AdminP $ AdminReposP $ AdminRepoP repoId AdminRepoJobsR}>
-              View Jobs
+$forall repoWithStats <- reposWithStats
+  $with Entity repoId repo <- rwsRepo repoWithStats
+    <section>
+      <div .admin-repo>
+        <header>
+          #{repoOwner repo}
+          /
+          #{repoName repo}
+
+        <p>
+          #{show $ rwsJobCount repoWithStats}
+          <a href=@{AdminP $ AdminReposP $ AdminRepoP repoId AdminRepoJobsR}>
+            Jobs
+          (#{show $ rwsErrorCount repoWithStats} errors).
+
+        $maybe Entity _ job <- rwsLastJob repoWithStats
+          <p>
+            Last Job #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}:
+
+            $maybe out <- jobStdout job
+              <pre>#{out}
+
+            $maybe err <- jobStderr job
+              <pre>#{err}
+
+
+        <aside>
+          <p>
+            <form method=post action=@{AdminP $ AdminReposP $ AdminRepoP repoId AdminRepoR}>
+              <input type=hidden name=_method value=PATCH />
+                $if repoDebugEnabled repo
+                  <input type=hidden name=debugEnabled value=no />
+                  <input type=submit value="Disable debug" />
+                $else
+                  <input type=hidden name=debugEnabled value=yes />
+                  <input .action type=submit value="Enable debug" />
