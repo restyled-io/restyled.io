@@ -32,23 +32,23 @@ getAdminReposR = do
         repos <- selectList [] [Desc RepoId, LimitTo 50]
         when (length repos == 50) $ lift $ setMessage "Results limited to 50."
 
-        for repos $ \repo -> RepoWithStats repo
-            <$> count
-                [ JobOwner ==. repoOwner (entityVal repo)
-                , JobRepo ==. repoName (entityVal repo)
-                ]
-            <*> count
-                [ JobOwner ==. repoOwner (entityVal repo)
-                , JobRepo ==. repoName (entityVal repo)
-                , JobExitCode !=. Just 0
-                , JobExitCode !=. Nothing
-                ]
-            <*> selectFirst
-                [ JobOwner ==. repoOwner (entityVal repo)
-                , JobRepo ==. repoName (entityVal repo)
-                ]
-                [ Desc JobCreatedAt
-                ]
+        for repos $ \repo ->
+            RepoWithStats repo
+                <$> count
+                        [ JobOwner ==. repoOwner (entityVal repo)
+                        , JobRepo ==. repoName (entityVal repo)
+                        ]
+                <*> count
+                        [ JobOwner ==. repoOwner (entityVal repo)
+                        , JobRepo ==. repoName (entityVal repo)
+                        , JobExitCode !=. Just 0
+                        , JobExitCode !=. Nothing
+                        ]
+                <*> selectFirst
+                        [ JobOwner ==. repoOwner (entityVal repo)
+                        , JobRepo ==. repoName (entityVal repo)
+                        ]
+                        [Desc JobCreatedAt]
 
     now <- liftIO getCurrentTime
     adminLayout $ do
