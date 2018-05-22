@@ -25,9 +25,12 @@ data RepoWithStats = RepoWithStats
 
 getAdminReposR :: Handler Html
 getAdminReposR = do
-    -- Naive. A. F.
     reposWithStats <- runDB $ do
-        repos <- selectList [] [Desc RepoId]
+        -- This approach is Naive-A-F, so let's just limit it to a tiny number
+        -- and toss up a notice if we ever grow to the point where I can justify
+        -- the time to optimize this query.
+        repos <- selectList [] [Desc RepoId, LimitTo 50]
+        when (length repos == 50) $ lift $ setMessage "Results limited to 50."
 
         for repos $ \repo -> RepoWithStats repo
             <$> count
