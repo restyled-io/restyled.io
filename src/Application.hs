@@ -50,6 +50,7 @@ import Yesod.Default.Config2 (develMainHelper, getDevSettings, makeYesodLogger)
 
 import Handler.Common
 import Handler.Home
+import Handler.Repos
 import Handler.Signups
 import Handler.Webhooks
 

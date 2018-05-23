@@ -72,6 +72,13 @@ form footer input[type="number"] {
   padding: 5px 20px;
 }
 
+.card .permalink {
+  float: right;
+  font-size: 85%;
+  font-style: italic;
+  font-weight: normal;
+}
+
 .card p {
   padding: 10px 0;
   margin-bottom: 10px;
