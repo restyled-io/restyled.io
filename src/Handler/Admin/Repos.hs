@@ -16,40 +16,12 @@ import Formatting (format)
 import Formatting.Time (diff)
 import Widgets.Job
 
-data RepoWithStats = RepoWithStats
-    { rwsRepo :: Entity Repo
-    , rwsJobCount :: Int
-    , rwsErrorCount :: Int
-    , rwsLastJob :: Maybe (Entity Job)
-    }
-
 getAdminReposR :: Handler Html
 getAdminReposR = do
     reposWithStats <- runDB $ do
-        -- This approach is Naive-A-F, so let's just limit it to a tiny number
-        -- and toss up a notice if we ever grow to the point where I can justify
-        -- the time to optimize this query.
-        repos <- selectList [] [Desc RepoId, LimitTo 50]
-        when (length repos == 50) $ lift $ setMessage "Results limited to 50."
-
-        for repos $ \repo ->
-            RepoWithStats repo
-                <$> count
-                        [ JobOwner ==. repoOwner (entityVal repo)
-                        , JobRepo ==. repoName (entityVal repo)
-                        ]
-                <*> count
-                        [ JobOwner ==. repoOwner (entityVal repo)
-                        , JobRepo ==. repoName (entityVal repo)
-                        , JobExitCode !=. Just 0
-                        , JobExitCode !=. Nothing
-                        ]
-                <*> selectFirst
-                        [ JobOwner ==. repoOwner (entityVal repo)
-                        , JobRepo ==. repoName (entityVal repo)
-                        , JobCompletedAt !=. Nothing
-                        ]
-                        [Desc JobCreatedAt]
+        -- N.B. This will be problematic some day ;)
+        repos <- selectList [] [Desc RepoId]
+        traverse repoWithStats repos
 
     now <- liftIO getCurrentTime
     adminLayout $ do
