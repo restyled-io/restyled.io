@@ -2,8 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Handler.Admin.Jobs
-    ( getAdminJobsR
-    , getAdminJobsNewR
+    ( getAdminJobsNewR
     , postAdminJobsR
     ) where
 
@@ -13,14 +12,6 @@ import Backend.Foundation (runBackendHandler)
 import Backend.Job
 import GitHub.Data (toPathPart)
 import Widgets.Job
-
-getAdminJobsR :: Handler Html
-getAdminJobsR = do
-    jobs <- runDB $ selectList [] [Desc JobCreatedAt]
-
-    adminLayout $ do
-        setTitle "Restyled Admin / Jobs"
-        $(widgetFile "admin/jobs")
 
 getAdminJobsNewR :: Handler Html
 getAdminJobsNewR = do
