@@ -6,9 +6,14 @@ import Prelude
 import Data.Proxy
 import Data.Text (Text)
 import Database.Persist.Sql
-import GitHub.Data (Id, Name, mkId, mkName, untagId, untagName)
+import GitHub.Data hiding (Repo(..))
+import qualified GitHub.Data as GH
 import Text.Blaze (ToMarkup(..))
 import Yesod.Core (PathPiece(..))
+
+-- Types necessary to use Names in config/routes
+type OwnerName = Name Owner
+type RepoName = Name GH.Repo
 
 instance PathPiece (Id a) where
     toPathPiece = toPathPiece . untagId
@@ -23,6 +28,9 @@ instance PersistFieldSql (Id a) where
 
 instance ToMarkup (Id a) where
     toMarkup = toMarkup . untagId
+
+instance Read (Name a) where
+    readsPrec n = map (\(x, s) -> (mkName Proxy x, s)) . readsPrec n
 
 instance PathPiece (Name  a) where
     toPathPiece = toPathPiece . untagName

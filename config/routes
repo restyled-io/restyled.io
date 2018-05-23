@@ -8,6 +8,14 @@
 /signups SignupR POST
 /webhooks WebhooksR POST
 
+/gh/#OwnerName OwnerP:
+  /repos ReposP:
+    / ReposR GET
+    /#RepoName RepoP:
+      /jobs RepoJobsP:
+        / RepoJobsR GET
+        /#JobId RepoJobR GET
+
 /admin AdminR GET
 /admin AdminP:
   /jobs AdminJobsP:
