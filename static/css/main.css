@@ -32,3 +32,27 @@ form aside input[type="number"],
 form footer input[type="number"] {
   margin-bottom: 6px;
 }
+
+.card {
+  border-radius: 3px;
+  border: 1px solid #999;
+  padding: 0 !important; /* sorry */
+}
+
+.card header {
+  background-color: #999;
+  border-bottom: 1px solid #999;
+  color: white;
+  font-weight: bold;
+  padding: 5px 20px;
+}
+
+.card p {
+  padding: 10px 0;
+  margin-bottom: 10px;
+}
+
+.card pre {
+  margin-left: auto;
+  margin-right: auto;
+}
