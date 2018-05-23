@@ -8,7 +8,6 @@ module Widgets.Job
     -- * Creating Jobs
     , CreateJob(..)
     , createJobForm
-    , createJobFormFrom
     , createJobFormFromRepo
     ) where
 
@@ -32,13 +31,6 @@ createJobForm = renderDivs $ CreateJob
     <$> (mkName Proxy <$> areq textField "Owner" Nothing)
     <*> (mkName Proxy <$> areq textField "Repo" Nothing)
     <*> (mkId Proxy <$> areq intField "Pull Request" Nothing)
-
--- | Form to use when re-submitting an existing @'Job'@
-createJobFormFrom :: Job -> Form CreateJob
-createJobFormFrom Job{..} = renderDivs $ CreateJob
-    <$> areq hiddenField "" (Just jobOwner)
-    <*> areq hiddenField "" (Just jobRepo)
-    <*> areq hiddenField "" (Just jobPullRequest)
 
 -- | Form to use when submitting a @'Job'@ for a known @'Repo'@
 createJobFormFromRepo :: Repo -> Form CreateJob
@@ -67,10 +59,6 @@ jobCompletion job =
 jobCard :: Entity Job -> Widget
 jobCard job = do
     now <- liftIO getCurrentTime
-    (widget, enctype) <- handlerToWidget
-        $ generateFormPost
-        $ createJobFormFrom
-        $ entityVal job
     $(widgetFile "widgets/job-card")
 
 jobOutput :: Job -> Widget
