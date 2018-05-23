@@ -4,8 +4,6 @@
       <a href=@{AdminR}>restyled admin
     <ul>
       <li>
-        <a href=@{AdminP $ AdminReposP AdminReposR}>Repos
-      <li>
         <a href=@{AdminP $ AdminJobsP AdminJobsNewR}>New Job
       <li>
         <a href=@{AdminP AdminSignupsR}>Signups
