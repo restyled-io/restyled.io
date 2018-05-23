@@ -53,7 +53,7 @@ import Handler.Home
 import Handler.Signups
 import Handler.Webhooks
 
-import Handler.Admin.Dashboard
+import Handler.Admin
 import Handler.Admin.Jobs
 import Handler.Admin.Repos
 import Handler.Admin.Signups

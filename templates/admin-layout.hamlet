@@ -1,7 +1,7 @@
 <nav>
   <section>
     <h1>
-      <a href=@{AdminP AdminDashboardR}>restyled admin
+      <a href=@{AdminR}>restyled admin
     <ul>
       <li>
         <a href=@{AdminP $ AdminReposP AdminReposR}>Repos

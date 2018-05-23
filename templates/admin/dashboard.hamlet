@@ -1,4 +1,0 @@
-<section>
-  <h2>Recent Jobs
-  $forall job <- recentJobs
-    ^{jobCard job}

@@ -10,7 +10,6 @@
 
 /admin AdminR GET
 /admin AdminP:
-  /dashboard AdminDashboardR GET
   /jobs AdminJobsP:
     / AdminJobsR GET POST
     /new AdminJobsNewR GET
