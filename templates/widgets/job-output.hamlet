@@ -1,7 +1,11 @@
 $maybe x <- jobStdout job
   $if not (null x)
-    <pre>#{prefixLines "stdout | " x}
+    <pre .stdout>
+      $forall ln <- lines x
+        <span .prefix>stdout</span><span .content>#{ln}</span>
 
 $maybe x <- jobStderr job
   $if not (null x)
-    <pre>#{prefixLines "stderr | " x}
+    <pre .stderr>
+      $forall ln <- lines x
+        <span .prefix>stderr</span><span .content>#{ln}</span>

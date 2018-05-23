@@ -1,8 +1,9 @@
 $with Entity _ job <- job
   <div .card>
     <header>
-      #{toPathPart $ jobOwner job}/#{toPathPart $ jobRepo job}
-      ##{toPathPiece $ jobPullRequest job}
+      #{toPathPart $ jobOwner job}
+      / #{toPathPart $ jobRepo job}
+      # #{toPathPiece $ jobPullRequest job}
 
     <p>
       Created #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}

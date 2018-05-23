@@ -76,6 +76,3 @@ jobCard job = do
 jobOutput :: Job -> Widget
 jobOutput job =
     $(widgetFile "widgets/job-output")
-
-prefixLines :: Text -> Text -> Text
-prefixLines prefix = unlines . map (prefix <>) . lines

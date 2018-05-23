@@ -33,6 +33,31 @@ form footer input[type="number"] {
   margin-bottom: 6px;
 }
 
+.stdout .prefix {
+  color: #2A0;
+}
+
+.stderr .prefix {
+  color: #E50;
+}
+
+.stdout .prefix,
+.stderr .prefix {
+  padding-right: 10px;
+}
+
+.stdout .prefix:after,
+.stderr .prefix:after {
+  color: gray;
+  content: "]";
+}
+
+.stdout .prefix:before,
+.stderr .prefix:before {
+  color: gray;
+  content: "[";
+}
+
 .card {
   border-radius: 3px;
   border: 1px solid #999;
