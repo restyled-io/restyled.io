@@ -6,7 +6,7 @@
       <li>
         <a href=@{AdminP $ AdminReposP AdminReposR}>Repos
       <li>
-        <a href=@{AdminP $ AdminJobsP AdminJobsR}>Jobs
+        <a href=@{AdminP $ AdminJobsP AdminJobsNewR}>New Job
       <li>
         <a href=@{AdminP AdminSignupsR}>Signups
 
