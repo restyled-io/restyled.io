@@ -47,6 +47,7 @@ getAdminReposR = do
                 <*> selectFirst
                         [ JobOwner ==. repoOwner (entityVal repo)
                         , JobRepo ==. repoName (entityVal repo)
+                        , JobCompletedAt !=. Nothing
                         ]
                         [Desc JobCreatedAt]
 
@@ -71,6 +72,8 @@ getAdminRepoJobsR repoId = do
         (repo, ) <$> selectList
             [JobOwner ==. repoOwner, JobRepo ==. repoName]
             [Desc JobCreatedAt]
+
+    (widget, enctype) <- generateFormPost $ createJobFormFromRepo repo
 
     adminLayout $ do
         setTitle "Restyled Admin / Repo Jobs"

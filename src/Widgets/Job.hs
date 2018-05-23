@@ -2,13 +2,14 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Widgets.Job
-    ( jobsTable
-    , jobsTableRow
+    ( jobCard
+    , jobOutput
 
     -- * Creating Jobs
     , CreateJob(..)
     , createJobForm
     , createJobFormFrom
+    , createJobFormFromRepo
     ) where
 
 import Import
@@ -44,25 +45,37 @@ createJobFormFromRepo :: Repo -> Form CreateJob
 createJobFormFromRepo Repo{..} = renderDivs $ CreateJob
     <$> areq hiddenField "" (Just repoOwner)
     <*> areq hiddenField "" (Just repoName)
-    <*> (mkId Proxy <$> areq intField "" Nothing)
+    <*> (mkId Proxy <$> areq intField ("" { fsAttrs = attrs })Nothing)
+  where
+    attrs =
+        [ ("placeholder", "PR Number")
+        ]
 
-jobsTable :: [Entity Job] -> Maybe Repo -> Widget
-jobsTable jobs mRepo = do
-    mForm <- for mRepo $ \repo ->
-        handlerToWidget
-            $ generateFormPost
-            $ createJobFormFromRepo repo
+-- | Internal helper for rendering completion state
+data Completion
+    = Success UTCTime
+    | Failure UTCTime Int
+    | InProgress
 
-    $(widgetFile "widgets/jobs-table")
+jobCompletion :: Job -> Completion
+jobCompletion job =
+    case (jobCompletedAt job, jobExitCode job) of
+        (Just completedAt, Just 0) -> Success completedAt
+        (Just completedAt, Just n) -> Failure completedAt n
+        _ -> InProgress
 
-jobsTableRow :: Entity Job -> Widget
-jobsTableRow job = do
+jobCard :: Entity Job -> Widget
+jobCard job = do
     now <- liftIO getCurrentTime
     (widget, enctype) <- handlerToWidget
         $ generateFormPost
         $ createJobFormFrom
         $ entityVal job
-    $(widgetFile "widgets/jobs-table-row")
+    $(widgetFile "widgets/job-card")
+
+jobOutput :: Job -> Widget
+jobOutput job =
+    $(widgetFile "widgets/job-output")
 
 prefixLines :: Text -> Text -> Text
 prefixLines prefix = unlines . map (prefix <>) . lines

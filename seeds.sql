@@ -85,6 +85,18 @@ $$
 [DEBUG] abort
 $$,
   'git: commit: nothing to commit'
+), (
+  -- In progress
+  58920,
+  'restyled-io',
+  'demo',
+  2,
+  NOW(),
+  NOW(),
+  NULL,
+  NULL,
+  NULL,
+  NULL
 );
 
 COMMIT;

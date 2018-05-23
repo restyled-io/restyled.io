@@ -1,7 +1,7 @@
 $forall repoWithStats <- reposWithStats
   $with Entity repoId repo <- rwsRepo repoWithStats
     <section>
-      <div .admin-repo>
+      <div .card>
         <header>
           #{repoOwner repo}
           /
@@ -17,12 +17,7 @@ $forall repoWithStats <- reposWithStats
           <p>
             Last Job #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}:
 
-            $maybe out <- jobStdout job
-              <pre>#{out}
-
-            $maybe err <- jobStderr job
-              <pre>#{err}
-
+            ^{jobOutput job}
 
         <aside>
           <p>

@@ -1,0 +1,28 @@
+$with Entity _ job <- job
+  <div .card>
+    <header>
+      #{toPathPart $ jobOwner job}/#{toPathPart $ jobRepo job}
+      ##{toPathPiece $ jobPullRequest job}
+
+    <p>
+      Created #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
+
+      $case jobCompletion job
+        $of Success completedAt
+          , succeeded in
+          #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt}
+        $of Failure completedAt exitCode
+          , failed in
+          #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt}
+          (exit code #{show exitCode})
+        $of InProgress
+          , in progress
+
+    ^{jobOutput job}
+
+    <aside>
+      $# Only render action if complete
+      $maybe _ <- jobCompletedAt job
+        <form method=post action=@{AdminP $ AdminJobsP AdminJobsR} enctype=#{enctype}>
+          ^{widget}
+          <button .warning>Rerun job

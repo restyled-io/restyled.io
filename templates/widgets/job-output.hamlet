@@ -1,0 +1,7 @@
+$maybe x <- jobStdout job
+  $if not (null x)
+    <pre>#{prefixLines "stdout | " x}
+
+$maybe x <- jobStderr job
+  $if not (null x)
+    <pre>#{prefixLines "stderr | " x}

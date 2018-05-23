@@ -1,2 +1,10 @@
 <section>
-  ^{jobsTable jobs Nothing}
+  <header .with-button>
+    <form>
+      <a .button href=@{AdminP $ AdminJobsP AdminJobsNewR}>
+        New Job
+    <h2>All Jobs
+
+<section>
+  $forall job <- jobs
+    ^{jobCard job}
