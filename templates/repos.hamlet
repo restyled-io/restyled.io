@@ -3,7 +3,8 @@
     $with Entity repoId repo <- rwsRepo repoWithStats
       <div .card>
         <header>
-          #{repoOwner repo}/#{repoName repo}
+          #{repoOwner repo}
+          / #{repoName repo}
 
         <p>
           #{show $ rwsJobCount repoWithStats}
