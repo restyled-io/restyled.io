@@ -11,7 +11,6 @@ module Handler.Admin.Repos
 
 import Import
 
-import Data.Time
 import Formatting (format)
 import Formatting.Time (diff)
 import Widgets.Job

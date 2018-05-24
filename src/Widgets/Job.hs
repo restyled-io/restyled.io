@@ -13,7 +13,6 @@ module Widgets.Job
 
 import Import
 
-import Data.Time
 import Formatting (format)
 import Formatting.Time (diff)
 import GitHub.Data hiding (Repo)
