@@ -1,9 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+
 module Widgets.Job
     ( jobCard
     , jobOutput
+
+    -- * Admin widget
+    , adminJobCard
 
     -- * Creating Jobs
     , CreateJob(..)
@@ -30,6 +35,13 @@ createJobForm = renderDivs $ CreateJob
     <$> (mkName Proxy <$> areq textField "Owner" Nothing)
     <*> (mkName Proxy <$> areq textField "Repo" Nothing)
     <*> (mkId Proxy <$> areq intField "Pull Request" Nothing)
+
+--- | Form to use when re-submitting an existing @'Job'@
+createJobFormFrom :: Job -> Form CreateJob
+createJobFormFrom Job{..} = renderDivs $ CreateJob
+    <$> areq hiddenField "" (Just jobOwner)
+    <*> areq hiddenField "" (Just jobRepo)
+    <*> areq hiddenField "" (Just jobPullRequest)
 
 -- | Form to use when submitting a @'Job'@ for a known @'Repo'@
 createJobFormFromRepo :: Repo -> Form CreateJob
@@ -58,8 +70,42 @@ jobCompletion job =
 jobCard :: Entity Job -> Widget
 jobCard job = do
     now <- liftIO getCurrentTime
+
+    let
+        mActions :: Maybe Widget
+        mActions = Nothing
+
     $(widgetFile "widgets/job-card")
 
 jobOutput :: Job -> Widget
 jobOutput job =
     $(widgetFile "widgets/job-output")
+
+-- | @'adminJobCard'@ just adds administrative actions to @'jobCard'@
+adminJobCard :: Entity Job -> Widget
+adminJobCard job = do
+    now <- liftIO getCurrentTime
+
+    let
+        mActions :: Maybe Widget
+        mActions = Just $ adminJobActions job
+
+    $(widgetFile "widgets/job-card")
+
+adminJobActions :: Entity Job -> Widget
+adminJobActions job = do
+    (widget, enctype) <- handlerToWidget
+         $ generateFormPost
+         $ createJobFormFrom
+         $ entityVal job
+
+    [whamlet|
+        $maybe _ <- jobCompletedAt $ entityVal job
+            <form method=post action=@{adminJobsRoute} enctype=#{enctype}>
+                ^{widget}
+                <button .action>Rerun job
+
+        <form method=post action=@{adminJobRoute job}>
+            <input type=hidden name=_method value=DELETE />
+            <button .warning>Delete job
+    |]

@@ -14,3 +14,10 @@ repoJobsRoute (Entity _ Repo {..}) =
 repoJobRoute :: Entity Job -> Route App
 repoJobRoute (Entity jobId Job {..}) =
     OwnerP jobOwner $ ReposP $ RepoP jobRepo $ RepoJobsP $ RepoJobR jobId
+
+adminJobsRoute :: Route App
+adminJobsRoute = AdminP $ AdminJobsP AdminJobsR
+
+adminJobRoute :: Entity Job -> Route App
+adminJobRoute (Entity jobId _) =
+    AdminP $ AdminJobsP $ AdminJobR jobId

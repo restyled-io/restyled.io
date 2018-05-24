@@ -9,4 +9,4 @@
 
 <section>
   $forall job <- jobs
-    ^{jobCard job}
+    ^{adminJobCard job}

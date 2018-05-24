@@ -4,6 +4,7 @@
 module Handler.Admin.Jobs
     ( getAdminJobsNewR
     , postAdminJobsR
+    , deleteAdminJobR
     ) where
 
 import Import
@@ -33,7 +34,7 @@ postAdminJobsR = do
                 job <- runDB $ insertJob repo cjPullRequest
                 runBackendHandler $ enqueueRestylerJob job
                 setMessage "Job created"
-                redirect $ AdminP $ AdminJobsP AdminJobsR
+                redirect AdminR
 
             setMessage $ toHtml
                 $ "Unknown Repo: "
@@ -46,3 +47,12 @@ postAdminJobsR = do
     adminLayout $ do
         setTitle "Restyled Admin / New Job"
         $(widgetFile "admin/jobs/new")
+
+deleteAdminJobR :: JobId -> Handler Html
+deleteAdminJobR jobId = do
+    runDB $ do
+        void $ get404 jobId
+        delete jobId
+
+    setMessage "Job deleted"
+    redirect AdminR

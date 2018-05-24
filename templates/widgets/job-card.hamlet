@@ -22,3 +22,7 @@ $with Entity jobId job <- job
           , in progress
 
     ^{jobOutput job}
+
+    $maybe actions <- mActions
+      <aside>
+        ^{actions}

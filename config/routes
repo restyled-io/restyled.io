@@ -21,6 +21,7 @@
   /jobs AdminJobsP:
     / AdminJobsR POST
     /new AdminJobsNewR GET
+    !/#JobId AdminJobR DELETE
   /repos AdminReposP:
     / AdminReposR GET
     /#RepoId AdminRepoP:
