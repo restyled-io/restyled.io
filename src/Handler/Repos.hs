@@ -11,7 +11,6 @@ module Handler.Repos
 import Import
 
 import Authorization
-import Data.Time
 import Formatting (format)
 import Formatting.Time (diff)
 import GitHub.Data hiding (Repo(..))
