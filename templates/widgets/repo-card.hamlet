@@ -1,0 +1,23 @@
+<div .card>
+  <header>
+    #{repoOwner $ entityVal rwsRepo}
+    / #{repoName $ entityVal rwsRepo}
+
+  <p>
+    #{show rwsJobCount}
+    <a href=@{jobsRoute rwsRepo}>
+      Jobs
+    (#{show $ rwsErrorCount} errors).
+
+  $maybe Entity jobId job <- rwsLastJob
+    <p>
+      Last
+      <a href=@{repoJobRoute $ Entity jobId job}>
+        Job
+      #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}:
+
+      ^{jobOutput job}
+
+  $maybe action <- mAction
+    <aside>
+      ^{action}

@@ -11,9 +11,8 @@ module Handler.Admin.Repos
 
 import Import
 
-import Formatting (format)
-import Formatting.Time (diff)
 import Widgets.Job
+import Widgets.Repo
 
 getAdminReposR :: Handler Html
 getAdminReposR = do
@@ -22,7 +21,6 @@ getAdminReposR = do
         repos <- selectList [] [Desc RepoId]
         traverse repoWithStats repos
 
-    now <- liftIO getCurrentTime
     adminLayout $ do
         setTitle "Restyled Admin / Repos"
         $(widgetFile "admin/repos")

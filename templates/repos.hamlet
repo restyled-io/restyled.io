@@ -1,25 +1,6 @@
 <section>
   $forall repoWithStats <- reposWithStats
-    $with Entity repoId repo <- rwsRepo repoWithStats
-      <div .card>
-        <header>
-          #{repoOwner repo}
-          / #{repoName repo}
-
-        <p>
-          #{show $ rwsJobCount repoWithStats}
-          <a href=@{repoJobsRoute $ Entity repoId repo}>
-            Jobs
-          (#{show $ rwsErrorCount repoWithStats} errors).
-
-        $maybe Entity jobId job <- rwsLastJob repoWithStats
-          <p>
-            Last
-            <a href=@{repoJobRoute $ Entity jobId job}>
-              Job
-            #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}:
-
-            ^{jobOutput job}
+      ^{repoCard repoWithStats}
 
   <aside>
     <em>Results limited to #{repositoriesListLimit} repositories.

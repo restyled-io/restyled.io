@@ -11,11 +11,10 @@ module Handler.Repos
 import Import
 
 import Authorization
-import Formatting (format)
-import Formatting.Time (diff)
 import GitHub.Data hiding (Repo(..))
 import qualified GitHub.Data as GH
 import Widgets.Job
+import Widgets.Repo
 
 getReposR :: Name Owner -> Handler Html
 getReposR owner = do
@@ -27,7 +26,6 @@ getReposR owner = do
         requireRepositoriesAccess repos
         traverse repoWithStats repos
 
-    now <- liftIO getCurrentTime
     defaultLayout $ do
         setTitle $ toHtml $ toPathPart owner <> " repositories"
         $(widgetFile "repos")

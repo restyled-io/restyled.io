@@ -1,31 +1,3 @@
-$forall repoWithStats <- reposWithStats
-  $with Entity repoId repo <- rwsRepo repoWithStats
-    <section>
-      <div .card>
-        <header>
-          #{repoOwner repo}
-          /
-          #{repoName repo}
-
-        <p>
-          #{show $ rwsJobCount repoWithStats}
-          <a href=@{AdminP $ AdminReposP $ AdminRepoP repoId AdminRepoJobsR}>
-            Jobs
-          (#{show $ rwsErrorCount repoWithStats} errors).
-
-        $maybe Entity _ job <- rwsLastJob repoWithStats
-          <p>
-            Last Job #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}:
-
-            ^{jobOutput job}
-
-        <aside>
-          <p>
-            <form method=post action=@{AdminP $ AdminReposP $ AdminRepoP repoId AdminRepoR}>
-              <input type=hidden name=_method value=PATCH />
-                $if repoDebugEnabled repo
-                  <input type=hidden name=debugEnabled value=no />
-                  <input type=submit value="Disable debug" />
-                $else
-                  <input type=hidden name=debugEnabled value=yes />
-                  <input .action type=submit value="Enable debug" />
+<section>
+  $forall repoWithStats <- reposWithStats
+    ^{adminRepoCard repoWithStats}
