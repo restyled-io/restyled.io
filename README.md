@@ -1,47 +1,74 @@
 # restyled.io
 
-Homepage for Restyled, https://restyled.io.
+Website and backend for Restyled, https://restyled.io.
 
 ## Development & Testing
 
-Basic development requires the following pre-requisites:
+1. Start persistence services
 
-1. [Stack](https://docs.haskellstack.org/en/stable/README/)
-1. A PostgreSQL instance available on `localhost:5432`, with a `postgres` user
-   with the password `"password"`
-1. A Redis instance available on `localhost:6379`
+   ```console
+   docker-compose up -d
+   ```
 
-*NOTE*: A `docker-compose.yml` exists for help with the latter 2.
+1. Create and seed the database, install dependencies:
 
-Create and seed the database, install dependencies:
+   ```console
+   make db.create db.seed setup
+   ```
 
-```console
-make db.create db.seed setup
-```
+1. Build, test, and lint the application:
 
-Build, test, and lint the application:
+   ```console
+   make
+   ```
 
-```console
-make
-```
+   From here, you can use any `stack`-based development work-flow.
 
-Run the website:
+1. Run (just) the website:
 
-```console
-stack install yesod-bin
-stack exec yesod devel
-```
+   ```console
+   stack install yesod-bin
+   stack exec yesod devel
+   ```
 
-To run the backend:
+   Visit `http://localhost:3000`.
 
-```console
-stack exec restyled.io-backend
-```
+## End-to-end Processing
 
-**NOTE**: actually processing Jobs would require a valid `.env` file and a
-restyler Docker image. To make use of such functionality would *also* require
-some way to get GitHub events to your local instance, which is beyond the scope
-of this README.
+To process real `restyled-io/demo` Pull Requests:
+
+1. Ensure you have the latest restyler Docker image
+
+   ```console
+   (cd ../restyler && make image.build)
+   ```
+
+   Individual Restylers will be pulled as needed.
+
+1. Run the website and backend
+
+   ```console
+   stack exec yesod devel
+   ```
+
+   ```console
+   stack exec restyled.io-backend
+   ```
+
+1. Run ngrok
+
+   ```console
+   ngrok http -subdomain restyled 3000
+   ```
+
+   Visit `https://restyled.ngrok.io`.
+
+1. Open a PR on `restyled-io/demo`, or re-deliver an existing Webhook.
+
+This process assumes the following:
+
+1. You have access to the development GitHub App and have configured your `.env`
+1. You have authenticated `ngrok` to use the `restyled` subdomain
 
 ## Deployment & Self-Hosting
 
