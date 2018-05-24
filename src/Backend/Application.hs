@@ -47,19 +47,20 @@ awaitAndProcessJob :: MonadBackend m => Integer -> m ()
 awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 
 processJob :: MonadBackend m => Entity Job -> m ()
-processJob (Entity jid job) = do
+processJob job = do
     logInfoN $ "Processing Restyler Job Id "
-        <> toPathPiece jid <> ": " <> tshow job
+        <> toPathPiece (entityKey job)
+        <> ": " <> tshow (entityVal job)
     settings <- asks backendSettings
     (ec, out, err) <-
         execRestyler settings job `catchAny` \ex -> do
             -- Log and act like a failed process
             logErrorN $ tshow ex
             pure (ExitFailure 1, "", show ex)
-    runDB $ completeJob jid ec (pack out) (pack err)
+    runDB $ completeJob (entityKey job) ec (pack out) (pack err)
 
-execRestyler :: MonadBackend m => AppSettings -> Job -> m (ExitCode, String, String)
-execRestyler appSettings@AppSettings{..} Job{..} = do
+execRestyler :: MonadBackend m => AppSettings -> Entity Job -> m (ExitCode, String, String)
+execRestyler appSettings@AppSettings{..} (Entity jobId Job{..}) = do
     repo <- fromMaybeM (throwString "Repo not found")
         =<< runDB (getBy $ UniqueRepo jobOwner jobRepo)
 
@@ -77,6 +78,12 @@ execRestyler appSettings@AppSettings{..} Job{..} = do
                 , "--volume", "/tmp:/tmp"
                 , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
                 , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
+                , "--job-url"
+                , unpack
+                    $ appRoot
+                    <> "/gh/" <> toPathPiece jobOwner
+                    <> "/repos/" <> toPathPiece jobRepo
+                    <> "/jobs/" <> toPathPiece jobId
                 , unpack
                     $ toPathPiece jobOwner
                     <> "/" <> toPathPiece jobRepo
