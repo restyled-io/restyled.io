@@ -2,10 +2,13 @@ $with Entity jobId job <- job
   <div .card>
     <header>
       <a .permalink href=@{repoJobRoute $ Entity jobId job}>permalink
-      <a href=@{OwnerP (jobOwner job) $ ReposP ReposR}>
+      <a href=@{jobOwnerReposRoute job}>
         #{toPathPart $ jobOwner job}
-      / #{toPathPart $ jobRepo job}
-      # #{toPathPiece $ jobPullRequest job}
+      /
+      <a href=@{jobRepoJobsRoute job}>
+        #{toPathPart $ jobRepo job}
+      <a href=@{jobRepoPullJobsRoute job}>
+        ##{toPathPiece $ jobPullRequest job}
 
     <p>
       Created #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}

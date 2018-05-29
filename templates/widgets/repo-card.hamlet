@@ -1,13 +1,12 @@
 <div .card>
   <header>
     #{repoOwner $ entityVal rwsRepo}
-    / #{repoName $ entityVal rwsRepo}
+    /
+    <a href=@{jobsRoute rwsRepo}>
+      #{repoName $ entityVal rwsRepo}
 
   <p>
-    #{show rwsJobCount}
-    <a href=@{jobsRoute rwsRepo}>
-      Jobs
-    (#{show $ rwsErrorCount} errors).
+    #{show rwsJobCount} Jobs (#{show $ rwsErrorCount} errors).
 
   $maybe Entity jobId job <- rwsLastJob
     <p>
