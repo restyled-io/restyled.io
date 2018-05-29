@@ -12,6 +12,10 @@
   /repos ReposP:
     / ReposR GET
     /#RepoName RepoP:
+      /pulls RepoPullsP:
+        /#Int RepoPullP:
+          /jobs RepoPullJobsP:
+            / RepoPullJobsR GET
       /jobs RepoJobsP:
         / RepoJobsR GET
         /#JobId RepoJobR GET

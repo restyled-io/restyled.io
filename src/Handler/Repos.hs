@@ -4,9 +4,11 @@
 
 module Handler.Repos
     ( getReposR
+    , getRepoPullJobsR
     , getRepoJobsR
     , getRepoJobR
-    ) where
+    )
+where
 
 import Import
 
@@ -29,6 +31,30 @@ getReposR owner = do
     defaultLayout $ do
         setTitle $ toHtml $ toPathPart owner <> " repositories"
         $(widgetFile "repos")
+
+getRepoPullJobsR :: Name Owner -> Name GH.Repo -> Int -> Handler Html
+getRepoPullJobsR owner name num = do
+    jobs <- runDB $ do
+        Entity _ repo <- getBy404 $ UniqueRepo owner name
+        requireRepositoryAccess repo
+
+        selectList
+            [ JobOwner ==. repoOwner repo
+            , JobRepo ==. repoName repo
+            , JobPullRequest ==. mkId Proxy num
+            ]
+            [Desc JobCompletedAt, Desc JobCreatedAt]
+
+    defaultLayout $ do
+        setTitle
+            $ toHtml
+            $ toPathPart owner
+            <> "/"
+            <> toPathPart name
+            <> "#"
+            <> toPathPiece num
+            <> " jobs"
+        $(widgetFile "jobs")
 
 getRepoJobsR :: Name Owner -> Name GH.Repo -> Handler Html
 getRepoJobsR owner name = do
