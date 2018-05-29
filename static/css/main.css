@@ -33,29 +33,43 @@ form footer input[type="number"] {
   margin-bottom: 6px;
 }
 
-.stdout .prefix {
-  color: #2A0;
-}
+.logs.stdout .prefix { color: #7f9f7f; }
+.logs.stderr .prefix { color: #cc9393; }
 
-.stderr .prefix {
-  color: #E50;
-}
-
-.stdout .prefix,
-.stderr .prefix {
+.logs .prefix {
   padding-right: 10px;
 }
 
-.stdout .prefix:after,
-.stderr .prefix:after {
+.logs .prefix:after {
   color: gray;
   content: "]";
 }
-
-.stdout .prefix:before,
-.stderr .prefix:before {
+.logs .prefix:before {
   color: gray;
   content: "[";
+}
+
+.logs .level-debug:before {
+  content: "DEBUG ";
+}
+
+.logs .level-debug {
+  color: gray;
+}
+
+.logs .level-info:before {
+  color: #2a77ac; /* N.B. matches strapless .info */
+  content: "INFO  ";
+}
+
+.logs .level-warn:before {
+  color: #efefaf;
+  content: "WARN  ";
+}
+
+.logs .level-error:before {
+  color: #cc9393;
+  content: "ERROR ";
 }
 
 .card {

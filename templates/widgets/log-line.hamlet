@@ -1,0 +1,2 @@
+$newline never
+<span .level-#{level}>#{message}

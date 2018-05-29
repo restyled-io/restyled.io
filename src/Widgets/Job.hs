@@ -18,6 +18,7 @@ module Widgets.Job
 
 import Import
 
+import qualified Data.Text as T
 import Formatting (format)
 import Formatting.Time (diff)
 import GitHub.Data hiding (Repo)
@@ -80,6 +81,17 @@ jobCard job = do
 jobOutput :: Job -> Widget
 jobOutput job =
     $(widgetFile "widgets/job-output")
+
+colorizedLogLine :: Text -> Widget
+colorizedLogLine ln
+    | Just message <- T.stripPrefix "[Debug] " ln = logLine "debug" message
+    | Just message <- T.stripPrefix "[Info] " ln = logLine "info" message
+    | Just message <- T.stripPrefix "[Warn] " ln = logLine "warn" message
+    | Just message <- T.stripPrefix "[Error] " ln = logLine "error" message
+    | otherwise = [whamlet|#{ln}|]
+  where
+    logLine :: Text -> Text -> Widget
+    logLine level message = $(widgetFile "widgets/log-line")
 
 -- | @'adminJobCard'@ just adds administrative actions to @'jobCard'@
 adminJobCard :: Entity Job -> Widget
