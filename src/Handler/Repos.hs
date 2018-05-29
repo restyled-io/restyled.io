@@ -47,7 +47,7 @@ getRepoJobsR owner name = do
             <> "/"
             <> toPathPart name
             <> " jobs"
-        $(widgetFile "repos/repo/jobs")
+        $(widgetFile "jobs")
 
 getRepoJobR :: Name Owner -> Name GH.Repo -> JobId -> Handler Html
 getRepoJobR owner name jobId = do
@@ -64,7 +64,7 @@ getRepoJobR owner name jobId = do
             <> toPathPart name
             <> " #"
             <> toPathPiece jobId
-        $(widgetFile "repos/repo/job")
+        $(widgetFile "job")
 
 repositoriesListLimit :: Int
 repositoriesListLimit = 50
