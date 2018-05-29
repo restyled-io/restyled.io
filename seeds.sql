@@ -79,10 +79,12 @@ $$
   NOW() - ('42 seconds' :: interval),
   0,
   $$checking out the thing...
-[INFO ] restyle this
-[INFO ] restyle that
-[WARN ] no style differences
-[DEBUG] abort
+[Error] restyle this
+[Info] restyle that
+[Debug] some debug stuff
+[Warn] no style differences
+[Debug] some debug stuff
+[Info] No style differences
 $$,
   'git: commit: nothing to commit'
 ), (
