@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -9,7 +10,9 @@ module Widgets.Repo
 
 import Import
 
-import Formatting (format)
+import qualified Data.Text.Lazy as TL
+import Formatting (format, (%))
+import Formatting.Formatters (int, plural)
 import Formatting.Time (diff)
 import Widgets.Job
 
@@ -50,3 +53,6 @@ adminRepoActions repo = [whamlet|
           <input type=hidden name=debugEnabled value=yes />
           <input .action type=submit value="Enable debug" />
 |]
+
+pluralize :: TL.Text -> TL.Text -> Int -> TL.Text
+pluralize s p n = format (int % " " % plural s p) n n
