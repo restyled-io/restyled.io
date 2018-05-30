@@ -7,6 +7,14 @@ module Widgets.Job
     ( jobCard
     , jobOutput
 
+    -- * Job completion
+    -- |
+    --
+    -- Needed in @"Widgets.Repo"@
+    --
+    , Completion(..)
+    , jobCompletion
+
     -- * Admin widget
     , adminJobCard
 
