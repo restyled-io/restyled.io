@@ -6,32 +6,25 @@ module Import
 where
 
 import Foundation as Import
-import GitHub.Data (untagId)
+import qualified GitHub.Data as GH
 import Import.NoFoundation as Import
 
+ownerRepoP :: GH.Name GH.Owner -> GH.Name GH.Repo -> RepoP -> Route App
+ownerRepoP owner name = OwnerP owner . ReposP . RepoP name
+
+jobsR :: RepoP
+jobsR = RepoJobsP RepoJobsR
+
+jobR :: JobId -> RepoP
+jobR = RepoJobsP . RepoJobR
+
+pullJobsR :: GH.Id GH.PullRequest -> RepoP
+pullJobsR num = RepoPullsP
+    $ RepoPullP (GH.untagId num)
+    $ RepoPullJobsP RepoPullJobsR
+
 repoJobsRoute :: Entity Repo -> Route App
-repoJobsRoute (Entity _ Repo {..}) =
-    OwnerP repoOwner $ ReposP $ RepoP repoName $ RepoJobsP RepoJobsR
-
-repoJobRoute :: Entity Job -> Route App
-repoJobRoute (Entity jobId Job {..}) =
-    OwnerP jobOwner $ ReposP $ RepoP jobRepo $ RepoJobsP $ RepoJobR jobId
-
-jobOwnerReposRoute :: Job -> Route App
-jobOwnerReposRoute Job {..} = OwnerP jobOwner $ ReposP ReposR
-
-jobRepoJobsRoute :: Job -> Route App
-jobRepoJobsRoute Job {..} =
-    OwnerP jobOwner $ ReposP $ RepoP jobRepo $ RepoJobsP RepoJobsR
-
-jobRepoPullJobsRoute :: Job -> Route App
-jobRepoPullJobsRoute Job {..} =
-    OwnerP jobOwner
-        $ ReposP
-        $ RepoP jobRepo
-        $ RepoPullsP
-        $ RepoPullP (untagId jobPullRequest)
-        $ RepoPullJobsP RepoPullJobsR
+repoJobsRoute (Entity _ Repo {..}) = ownerRepoP repoOwner repoName jobsR
 
 -- | N.B. Supports only @PATCH@
 adminRepoRoute :: Entity Repo -> Route App

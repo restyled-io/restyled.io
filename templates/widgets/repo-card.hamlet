@@ -11,7 +11,7 @@
   $maybe Entity jobId job <- rwsLastJob
     <p>
       Last
-      <a href=@{repoJobRoute $ Entity jobId job}>
+      <a href=@{ownerRepoP (jobOwner job) (jobRepo job) $ jobR jobId}>
         Job
       #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}:
 
