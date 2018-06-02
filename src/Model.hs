@@ -10,7 +10,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Model where
+
+module Model
+    ( module Model
+    )
+where
 
 import ClassyPrelude.Yesod
 

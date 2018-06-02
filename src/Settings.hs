@@ -14,7 +14,8 @@ module Settings
     , appStaticDir
     , appFavicon
     , appRevision
-    ) where
+    )
+where
 
 import ClassyPrelude.Yesod hiding (Proxy)
 

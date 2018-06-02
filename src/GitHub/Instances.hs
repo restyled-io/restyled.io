@@ -1,5 +1,12 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module GitHub.Instances where
+
+module GitHub.Instances
+    (
+    -- * Route pieces
+      OwnerName
+    , RepoName
+    )
+where
 
 import Prelude
 

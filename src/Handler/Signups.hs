@@ -1,5 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Handler.Signups where
+
+module Handler.Signups
+    ( postSignupR
+    )
+where
 
 import Import
 

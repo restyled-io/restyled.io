@@ -5,7 +5,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
-module Foundation where
+
+module Foundation
+    ( module Foundation
+    )
+where
 
 import Import.NoFoundation
 

@@ -7,7 +7,8 @@ module Handler.Admin.Repos
     ( getAdminReposR
     , patchAdminRepoR
     , getAdminRepoJobsR
-    ) where
+    )
+where
 
 import Import
 

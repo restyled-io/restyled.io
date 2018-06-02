@@ -1,11 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+
 module Handler.Admin.Jobs
     ( getAdminJobsNewR
     , postAdminJobsR
     , deleteAdminJobR
-    ) where
+    )
+where
 
 import Import
 

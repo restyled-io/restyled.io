@@ -1,5 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Forms where
+
+module Forms
+    ( signupForm
+    )
+where
 
 import Import
 

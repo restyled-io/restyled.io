@@ -6,8 +6,9 @@ module Import
 where
 
 import Foundation as Import
-import qualified GitHub.Data as GH
 import Import.NoFoundation as Import
+
+import qualified GitHub.Data as GH
 
 ownerRepoP :: GH.Name GH.Owner -> GH.Name GH.Repo -> RepoP -> Route App
 ownerRepoP owner name = OwnerP owner . ReposP . RepoP name

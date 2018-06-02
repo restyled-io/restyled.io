@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module GitHub.Data.AccessTokens
     ( AccessToken(..)
     ) where

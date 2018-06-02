@@ -6,7 +6,8 @@
 module Widgets.Repo
     ( repoCard
     , adminRepoCard
-    ) where
+    )
+where
 
 import Import
 

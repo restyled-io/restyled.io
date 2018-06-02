@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
+
 module Handler.Admin.Signups
     ( getAdminSignupsR
-    ) where
+    )
+where
 
 import Import
 
