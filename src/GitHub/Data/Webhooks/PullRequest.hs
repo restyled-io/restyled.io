@@ -1,30 +1,23 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+
+-- |
+--
+-- TODO: upstream installation.id parsing to @"GitHub.Data.PullRequestEvent"@
+--
 module GitHub.Data.Webhooks.PullRequest
-    ( Action(..)
-    , Payload(..)
-    ) where
+    ( Payload(..)
+    )
+where
 
 import Prelude
 
 import Data.Aeson
-import Data.Text (Text)
+import Data.Aeson.Types (typeMismatch)
 import GitHub.Data
 import GitHub.Data.Apps
 
-data Action
-    = Opened
-    | Synchronize
-    | Other Text deriving (Eq, Show)
-
-instance FromJSON Action where
-    parseJSON = withText "PullRequest.Action" $ \case
-        "opened" -> pure Opened
-        "synchronize" -> pure Synchronize
-        t -> pure $ Other t
-
 data Payload = Payload
-    { pAction :: Action
+    { pAction :: PullRequestEventType
     , pPullRequest :: PullRequest
     , pRepository :: Repo
     , pInstallationId :: Id Installation
@@ -32,8 +25,15 @@ data Payload = Payload
     deriving Show
 
 instance FromJSON Payload where
-    parseJSON = withObject "PullRequest.Payload" $ \o -> Payload
-        <$> o .: "action"
-        <*> o .: "pull_request"
-        <*> o .: "repository"
-        <*> (o .: "installation" >>= (.: "id"))
+    parseJSON v@(Object o) = do
+        event <- parseJSON v
+        installation <- o .: "installation"
+
+        pure Payload
+            { pAction = pullRequestEventAction event
+            , pPullRequest = pullRequestEventPullRequest event
+            , pRepository = pullRequestRepository event
+            , pInstallationId = installationId installation
+            }
+
+    parseJSON v = typeMismatch "PullRequestEvent" v

@@ -6,14 +6,15 @@ module Model.Repo
     ( findOrCreateRepo
     , RepoWithStats(..)
     , repoWithStats
-    ) where
+    )
+where
 
 import ClassyPrelude
 
 import Database.Persist.Sql
 import GitHub.Data hiding (Repo(..), User(..))
 import qualified GitHub.Data as GH
-import GitHub.Data.Apps
+import GitHub.Data.Apps hiding (installationId)
 import Model
 
 findOrCreateRepo :: GH.Repo -> Id Installation -> DB (Entity Repo)

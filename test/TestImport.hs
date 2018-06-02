@@ -8,6 +8,7 @@ module TestImport
     , runBackendTest
     , authenticateAsUser
     , postForm
+    , postGitHubEvent
     , authPage
     , module X
     ) where
@@ -17,6 +18,7 @@ import Backend.Foundation (Backend, runBackendApp, runRedis)
 import Backend.Job (queueName)
 import ClassyPrelude as X hiding (Handler, delete, deleteBy)
 import Control.Monad.Logger (LoggingT)
+import qualified Data.ByteString.Lazy as LBS
 import Database.Persist as X hiding (get)
 import Database.Persist.Sql
     ( SqlBackend
@@ -114,6 +116,14 @@ postForm a b fs = do
         setMethod "POST"
         addToken
         for_ fs $ uncurry byLabelExact
+
+-- | Post to @\/webhooks@ as a GitHub event
+postGitHubEvent :: ByteString -> LBS.ByteString -> YesodExample App ()
+postGitHubEvent event body = request $ do
+    setUrl WebhooksR
+    setMethod "POST"
+    setRequestBody body
+    addRequestHeader ("X-GitHub-Event", event)
 
 authPage :: Text -> YesodExample App Text
 authPage page = do

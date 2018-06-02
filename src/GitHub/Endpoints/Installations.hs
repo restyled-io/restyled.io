@@ -5,7 +5,8 @@ module GitHub.Endpoints.Installations
     , module GitHub.Data
     , module GitHub.Data.Apps
     , module GitHub.Data.AccessTokens
-    ) where
+    )
+where
 
 import Prelude
 
@@ -21,7 +22,7 @@ import Data.Time
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
 import GitHub.Data
 import GitHub.Data.AccessTokens
-import GitHub.Data.Apps
+import GitHub.Data.Apps hiding (installationId)
 import Network.HTTP.Simple
 import Network.HTTP.Types
 import qualified Web.JWT as JWT
@@ -56,20 +57,18 @@ maxExpiration = 5 * 60
 
 -- | Create an Access Token for an installation of the given App
 createAccessToken
-    :: Id App
-    -> Text
-    -> Id Installation
-    -> IO (Either String AccessToken)
+    :: Id App -> Text -> Id Installation -> IO (Either String AccessToken)
 createAccessToken githubAppId pem installationId =
     handleAny (pure . Left . show) $ do
         jwt <- encodeJWT githubAppId (T.unpack pem)
-        request <- parseRequest
+        request <-
+            parseRequest
             $ "POST https://api.github.com/installations/"
             <> T.unpack (toPathPart installationId)
             <> "/access_tokens"
 
         tokenResponseToEither . getResponseBody <$> httpJSON
-            ( setRequestHeaders
+            (setRequestHeaders
                 [ (hAccept, "application/vnd.github.machine-man-preview+json")
                 , (hAuthorization, "Bearer " <> encodeUtf8 jwt)
                 , (hUserAgent, "restyled-io")
@@ -83,13 +82,14 @@ encodeJWT githubAppId pem = do
     signer <- maybe (throwString "Invalid RSA data") pure
         =<< JWT.rsaKeySecret pem
 
-    pure $ JWT.encodeSigned signer defaultClaimsSet
-        { JWT.iat = numericDate now
-        , JWT.exp = numericDate $ addUTCTime maxExpiration now
-        , JWT.iss = JWT.stringOrURI $ T.pack $ show $ untagId githubAppId
-        }
-  where
-    numericDate = JWT.numericDate . utcTimeToPOSIXSeconds
+    pure $ JWT.encodeSigned
+        signer
+        defaultClaimsSet
+            { JWT.iat = numericDate now
+            , JWT.exp = numericDate $ addUTCTime maxExpiration now
+            , JWT.iss = JWT.stringOrURI $ T.pack $ show $ untagId githubAppId
+            }
+    where numericDate = JWT.numericDate . utcTimeToPOSIXSeconds
 
 -- | Where'd the @'Default'@ instance go?
 defaultClaimsSet :: JWT.JWTClaimsSet

@@ -3,7 +3,8 @@
 
 module Handler.WebhooksSpec
     ( spec
-    ) where
+    )
+where
 
 import TestImport
 
@@ -39,7 +40,7 @@ spec = withApp $ do
 
             repos <- runDB $ selectList [] []
             length repos `shouldBe` 1
-            let Repo{..} = entityVal $ Unsafe.head repos
+            let Repo {..} = entityVal $ Unsafe.head repos
             repoOwner `shouldBe` "restyled-io"
             repoName `shouldBe` "demo"
             repoIsPrivate `shouldBe` False
@@ -47,10 +48,20 @@ spec = withApp $ do
             map (jobOwner . entityVal) jobs `shouldBe` replicate 3 repoOwner
             map (jobRepo . entityVal) jobs `shouldBe` replicate 3 repoName
 
-        -- it "responds 200 for valid but ignored payloads" $ do
-        --     need fixtures for some other payloads
+        it "responds 200 for valid but ignored payloads" $ do
+            postFixtureAs "ping" "webhooks/ping.json"
+            statusIs 200
+
+            -- Unknown event type
+            postGitHubEvent "push" "{}"
+            statusIs 200
 
         it "responds 4XX for invalid payloads" $ do
+            -- Invalid body
+            postGitHubEvent "pull_request" "{}"
+            statusIs 400
+
+            -- No X-GitHub-Event header
             postBody WebhooksR "{}"
             statusIs 400
 
@@ -63,7 +74,10 @@ spec = withApp $ do
             statusIs 200
 
 postFixture :: FilePath -> YesodExample App ()
-postFixture = postBody WebhooksR <=< readFixture
+postFixture = postFixtureAs "pull_request"
+
+postFixtureAs :: ByteString -> FilePath -> YesodExample App ()
+postFixtureAs event = postGitHubEvent event <=< readFixture
 
 readFixture :: MonadIO m => FilePath -> m LB.ByteString
 readFixture = liftIO . L8.readFile . ("fixtures" </>)

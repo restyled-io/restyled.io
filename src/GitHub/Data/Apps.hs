@@ -1,7 +1,22 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module GitHub.Data.Apps
     ( App
-    , Installation
-    ) where
+    , Installation(..)
+    )
+where
+
+import Prelude
+
+import Data.Aeson
+import GitHub.Data
 
 data App
-data Installation
+
+newtype Installation = Installation
+    { installationId :: Id Installation
+    }
+
+instance FromJSON Installation where
+    parseJSON = withObject "Installation" $ \o ->
+        Installation <$> o .: "id"
