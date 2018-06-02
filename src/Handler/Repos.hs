@@ -4,6 +4,8 @@
 
 module Handler.Repos
     ( getReposR
+    , getRepoR
+    , getRepoPullR
     , getRepoPullJobsR
     , getRepoJobsR
     , getRepoJobR
@@ -31,6 +33,12 @@ getReposR owner = do
     defaultLayout $ do
         setTitle $ toHtml $ toPathPart owner <> " repositories"
         $(widgetFile "repos")
+
+getRepoR :: Name Owner -> Name GH.Repo -> Handler Html
+getRepoR = getRepoJobsR
+
+getRepoPullR :: Name Owner -> Name GH.Repo -> Int -> Handler Html
+getRepoPullR = getRepoPullJobsR
 
 getRepoPullJobsR :: Name Owner -> Name GH.Repo -> Int -> Handler Html
 getRepoPullJobsR owner name num = do
