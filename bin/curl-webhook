@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+if [ -z "$1" ]; then
+  echo "usage: curl-webhook <event> [path|-]" >&2
+  exit 64
+fi
+
+event=$1
+payload=${2:--}
+host=http://localhost:3000
+
+curl \
+  --header "Accept: application/json" \
+  --header "Content-Type: application/json" \
+  --header "X-GitHub-Event: $event" \
+  --data @"$payload" "$host/webhooks"
