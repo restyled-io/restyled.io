@@ -155,7 +155,7 @@ instance YesodAuth App where
         ]
 
 addAuthBackDoor :: AppSettings -> [AuthPlugin App] -> [AuthPlugin App]
-addAuthBackDoor AppSettings{..} =
+addAuthBackDoor AppSettings {..} =
     if appAllowDummyAuth then (authDummy :) else id
 
 instance YesodAuthPersist App

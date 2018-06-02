@@ -1,9 +1,17 @@
+body {
+  text-align: justify;
+}
+
 img {
   width: 100%;
 
   -webkit-box-shadow: 2px 12px 20px #888;
      -moz-box-shadow: 2px 12px 20px #888;
           box-shadow: 2px 12px 20px #888;
+
+  /* Sometimes my screenshot tool leaves artifacts, this papers over it */
+  outline: 3px solid white;
+  outline-offset: -3px;
 }
 
 table {
@@ -17,6 +25,19 @@ footer {
 form .errors {
   color: #cd5c5c;
   font-weight: bold;
+}
+
+.how-it-works-highlight {
+  background: #f0ebee;
+  border-radius: 3px;
+  margin-bottom: 3em;
+  margin-top: 3em;
+}
+
+.install-button {
+  font-size: 140%;
+  margin-top: 3em;
+  text-align: center;
 }
 
 /* Strapless styling for textual inputs. Why not number too? */
