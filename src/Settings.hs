@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Settings
     ( OAuthKeys(..)
     , AppSettings(..)
@@ -9,11 +10,13 @@ module Settings
     , allowsLevel
     , widgetFile
     , appStaticDir
+    , appFavicon
     ) where
 
 import ClassyPrelude.Yesod hiding (Proxy)
 
 import qualified Data.ByteString.Char8 as C8
+import Data.FileEmbed (embedFile)
 import Data.Proxy
 import qualified Data.Text as T
 import Database.Persist.Postgresql (PostgresConf(..))
@@ -120,6 +123,14 @@ envLogLevel = toLogLevel <$> Env.var Env.str "LOG_LEVEL" (Env.def "info")
 appStaticDir :: FilePath
 appStaticDir = "static"
 
+appFavicon :: ByteString
+appFavicon =
+# if DEVELOPMENT
+    $(embedFile "config/favicon-dev.ico")
+# else
+    $(embedFile "config/favicon.ico")
+#endif
+
 allowsLevel :: AppSettings -> LogLevel -> Bool
 allowsLevel AppSettings{..} = (>= appLogLevel)
 
@@ -131,3 +142,4 @@ widgetFile =
     widgetFileNoReload
 #endif
     def
+
