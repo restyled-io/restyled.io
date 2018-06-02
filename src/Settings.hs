@@ -3,6 +3,8 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Settings
     ( OAuthKeys(..)
     , AppSettings(..)
@@ -21,7 +23,7 @@ import Data.FileEmbed (embedFile)
 import Data.Proxy
 import qualified Data.Text as T
 import Database.Persist.Postgresql (PostgresConf(..))
-import Database.Redis (ConnectInfo(..), parseConnectInfo)
+import Database.Redis (ConnectInfo(..), PortID(..), parseConnectInfo)
 import Development.GitRev (gitCommitDate, gitHash)
 import qualified Env
 import GitHub.Data
@@ -68,8 +70,30 @@ instance Show AppSettings where
         , " host=", show appHost
         , " port=", show appPort
         , " root=", show appRoot
-        , " db=[", C8.unpack $ pgConnStr appDatabaseConf, "]"
+        , " db=[", redact $ C8.unpack $ pgConnStr appDatabaseConf, "]"
+        , " redis=[", toURL appRedisConf, "]"
         ]
+      where
+        redact :: String -> String
+        redact s =
+            let x = drop 2 $ dropWhile (/= '/') s
+                user = takeWhile (/= ':') x
+                rest = dropWhile (/= '@') x
+            in "postgres://" <> user <> ":<redacted>" <> rest
+
+        toURL :: ConnectInfo -> String
+        toURL ConnInfo{..} = concat
+            [ "redis://"
+            , connectHost
+            , maybe "" (const "<redacted>@") connectAuth
+            , ":", showPortID connectPort
+            , "/", show connectDatabase
+            ]
+
+        showPortID :: PortID -> String
+        showPortID (Service s) = s
+        showPortID (PortNumber p) = show p
+        showPortID (UnixSocket s) = s
 
 type EnvParser a = forall e.
     (Env.AsUnset e, Env.AsUnread e, Env.AsEmpty e) => Env.Parser e a
