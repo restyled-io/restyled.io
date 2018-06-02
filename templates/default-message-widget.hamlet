@@ -1,3 +1,14 @@
-<section>
+<main>
   <h1>#{title}
+
+<section>
+  <p>
+    Uh-oh, you're in our default error page. This is all we know:
+
+<section .action>
   ^{body}
+
+<section>
+  <p>
+    If you continue to have trouble,
+    <a href=mailto:support@restyled.io>please reach out</a>.
