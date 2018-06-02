@@ -70,10 +70,6 @@ instance Yesod App where
     isAuthorized (AdminP _) _ = authorizeAdmins
     isAuthorized _ _ = return Authorized
 
-    -- This function creates static content files in the static folder
-    -- and names them based on a hash of their content. This allows
-    -- expiration dates to be set far in the future without worry of
-    -- users receiving stale content.
     addStaticContent = addStaticContentExternal
         minifym
         genFileName
@@ -83,12 +79,9 @@ instance Yesod App where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
-    -- What messages should be logged.
     shouldLogIO app _source level = return
         $ appSettings app `allowsLevel` level
 
-    -- Provide proper Bootstrap styling for default displays, like
-    -- error pages
     defaultMessageWidget title body = $(widgetFile "default-message-widget")
 
 -- | Just like default-layout, but admin-specific nav and CSS
@@ -160,7 +153,6 @@ addAuthBackDoor AppSettings {..} =
 
 instance YesodAuthPersist App
 
--- How to run database actions.
 instance YesodPersist App where
     type YesodPersistBackend App = SqlBackend
     runDB action = do
@@ -169,24 +161,11 @@ instance YesodPersist App where
 instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner appConnPool
 
--- This instance is required to use forms. You can modify renderMessage to
--- achieve customized and internationalized form validation messages.
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage
 
--- Useful when writing code that is re-usable outside of the Handler context.
--- An example is background jobs that send email.
--- This can also be useful for writing code that works across multiple Yesod applications.
 instance HasHttpManager App where
     getHttpManager = appHttpManager
 
 unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
-
--- Note: Some functionality previously present in the scaffolding has been
--- moved to documentation in the Wiki. Following are some hopefully helpful
--- links:
---
--- https://github.com/yesodweb/yesod/wiki/Sending-email
--- https://github.com/yesodweb/yesod/wiki/Serve-static-files-from-a-separate-domain
--- https://github.com/yesodweb/yesod/wiki/i18n-messages-in-the-scaffolding
