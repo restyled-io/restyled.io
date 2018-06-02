@@ -1,6 +1,6 @@
 ---
 name: restyled
-version: 0.1.0.0
+version: 0.1.1.0
 
 # Dependencies shared in *all* targets
 dependencies:
