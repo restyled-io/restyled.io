@@ -11,6 +11,7 @@ module Settings
     , widgetFile
     , appStaticDir
     , appFavicon
+    , appRevision
     ) where
 
 import ClassyPrelude.Yesod hiding (Proxy)
@@ -21,6 +22,7 @@ import Data.Proxy
 import qualified Data.Text as T
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..), parseConnectInfo)
+import Development.GitRev (gitCommitDate, gitHash)
 import qualified Env
 import GitHub.Data
 import GitHub.Data.Apps
@@ -125,10 +127,23 @@ appStaticDir = "static"
 
 appFavicon :: ByteString
 appFavicon =
-# if DEVELOPMENT
+#if DEVELOPMENT
     $(embedFile "config/favicon-dev.ico")
-# else
+#else
     $(embedFile "config/favicon.ico")
+#endif
+
+-- | Application revision
+--
+-- We add a static @config\/revision@ file in Docker builds, but we want to use
+-- dynamic git operations in develompent.
+--
+appRevision :: ByteString
+appRevision =
+#if DEVELOPMENT
+    $(gitHash) <> " - " <> $(gitCommitDate)
+#else
+    $(embedFile "config/revision")
 #endif
 
 allowsLevel :: AppSettings -> LogLevel -> Bool
@@ -142,4 +157,3 @@ widgetFile =
     widgetFileNoReload
 #endif
     def
-
