@@ -46,6 +46,10 @@ lint:
 test:
 	stack test
 
+.PHONY: clean
+clean:
+	stack clean
+
 .PHONY: config/revision
 config/revision:
 	printf "$(PERCENT)s - $(PERCENT)s\n" \
