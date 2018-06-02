@@ -165,10 +165,10 @@ appFavicon =
 --
 appRevision :: ByteString
 appRevision =
-#if DEVELOPMENT
-    $(gitHash) <> " - " <> $(gitCommitDate)
-#else
+#if DOCKERIZED
     $(embedFile "config/revision")
+#else
+    $(gitHash) <> " - " <> $(gitCommitDate)
 #endif
 
 allowsLevel :: AppSettings -> LogLevel -> Bool

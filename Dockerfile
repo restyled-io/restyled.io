@@ -24,7 +24,7 @@ COPY static /src/static
 
 COPY LICENSE /src/
 
-RUN stack install
+RUN stack install --ghc-options -DDOCKERIZED
 
 # Runtime
 FROM fpco/stack-run:lts
