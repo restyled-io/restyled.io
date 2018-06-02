@@ -1,13 +1,13 @@
 $with Entity jobId job <- job
   <div .card>
     <header>
-      <a .permalink href=@{ownerRepoP (jobOwner job) (jobRepo job) $ jobR jobId}>permalink
-      <a href=@{OwnerP (jobOwner job) $ ReposP ReposR}>
+      <a .permalink href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>permalink
+      <a href=@{reposR $ jobOwner job}>
         #{toPathPart $ jobOwner job}
       /
-      <a href=@{ownerRepoP (jobOwner job) (jobRepo job) $ jobsR}>
+      <a href=@{repoP (jobOwner job) (jobRepo job) $ jobsR}>
         #{toPathPart $ jobRepo job}
-      <a href=@{ownerRepoP (jobOwner job) (jobRepo job) $ pullJobsR $ jobPullRequest job}>
+      <a href=@{repoP (jobOwner job) (jobRepo job) $ pullJobsR $ jobPullRequest job}>
         ##{toPathPiece $ jobPullRequest job}
 
     <p>

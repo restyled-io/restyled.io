@@ -2,8 +2,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -fno-warn-deprecations #-}
+
 module TestImport
-    ( runDB
+    ( YesodSpec
+    , runDB
     , withApp
     , runBackendTest
     , authenticateAsUser
@@ -33,11 +36,15 @@ import Database.Redis (del)
 import Foundation as X
 import LoadEnv (loadEnvFrom)
 import Model as X
+import Routes as X
 import Settings (AppSettings(..), loadEnvSettings)
+import Test.Hspec.Core (SpecM)
 import Test.Hspec.Lifted as X
 import Text.Shakespeare.Text (st)
 import Yesod.Core.Handler (RedirectUrl(..))
-import Yesod.Test as X
+import Yesod.Test as X hiding (YesodSpec)
+
+type YesodSpec site = SpecM (TestApp site)
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do

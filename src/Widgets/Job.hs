@@ -121,11 +121,11 @@ adminJobActions job = do
 
     [whamlet|
         $maybe _ <- jobCompletedAt $ entityVal job
-            <form method=post action=@{adminJobsRoute} enctype=#{enctype}>
+            <form method=post action=@{adminJobsP AdminJobsR} enctype=#{enctype}>
                 ^{widget}
                 <button .action>Rerun job
 
-        <form method=post action=@{adminJobRoute job}>
+        <form method=post action=@{adminJobsP $ AdminJobR $ entityKey job}>
             <input type=hidden name=_method value=DELETE />
             <button .warning>Delete job
     |]

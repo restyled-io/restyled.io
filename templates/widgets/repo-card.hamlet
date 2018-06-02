@@ -23,7 +23,7 @@
           in progress since 
 
       $# apologize for line-length, required to get "</a>:" whitespace
-      <a href=@{ownerRepoP (jobOwner job) (jobRepo job) $ jobR jobId}>#{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}</a>:
+      <a href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>#{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}</a>:
 
       ^{jobOutput job}
 

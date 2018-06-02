@@ -23,7 +23,7 @@ repoCard RepoWithStats{..} = do
 
     let
         jobsRoute :: Entity Repo -> Route App
-        jobsRoute = repoJobsRoute
+        jobsRoute (Entity _ Repo {..}) = repoP repoOwner repoName jobsR
 
         mAction :: Maybe Widget
         mAction = Nothing
@@ -36,7 +36,7 @@ adminRepoCard RepoWithStats{..} = do
 
     let
         jobsRoute :: Entity Repo -> Route App
-        jobsRoute = adminRepoJobsRoute
+        jobsRoute (Entity repoId _) = adminRepoP repoId AdminRepoJobsR
 
         mAction :: Maybe Widget
         mAction = Just $ adminRepoActions rwsRepo
@@ -45,7 +45,7 @@ adminRepoCard RepoWithStats{..} = do
 
 adminRepoActions :: Entity Repo -> Widget
 adminRepoActions repo = [whamlet|
-    <form method=post action=@{adminRepoRoute repo}>
+    <form method=post action=@{adminRepoR $ entityKey repo}>
         <input type=hidden name=_method value=PATCH />
         $if repoDebugEnabled $ entityVal repo
           <input type=hidden name=debugEnabled value=no />

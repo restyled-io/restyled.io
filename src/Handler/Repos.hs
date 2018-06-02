@@ -30,6 +30,8 @@ getReposR owner = do
         requireRepositoriesAccess repos
         traverse repoWithStats repos
 
+    when (null reposWithStats) notFound
+
     defaultLayout $ do
         setTitle $ toHtml $ toPathPart owner <> " repositories"
         $(widgetFile "repos")
