@@ -27,8 +27,7 @@ Website and backend for Restyled, https://restyled.io.
 1. Run (just) the website:
 
    ```console
-   stack install yesod-bin
-   stack exec yesod devel
+   make watch
    ```
 
    Visit `http://localhost:3000`.
@@ -48,7 +47,7 @@ To process real `restyled-io/demo` Pull Requests:
 1. Run the website and backend
 
    ```console
-   stack exec yesod devel
+   make watch
    ```
 
    ```console

@@ -7,9 +7,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Application
-    ( getApplicationDev
-    , appMain
-    , develMain
+    ( appMain
     , makeFoundation
     , makeLogWare
     ) where
@@ -47,7 +45,7 @@ import System.Posix.IO (stdOutput)
 import System.Posix.Terminal (queryTerminal)
 import Yesod.Auth
 import Yesod.Core.Types (loggerSet)
-import Yesod.Default.Config2 (develMainHelper, getDevSettings, makeYesodLogger)
+import Yesod.Default.Config2 (makeYesodLogger)
 
 import Handler.Common
 import Handler.Home
@@ -70,37 +68,26 @@ makeFoundation appSettings = do
     appStatic <- (if appMutableStatic appSettings
         then staticDevel
         else static) appStaticDir
-
-    -- Persistent Redis connection
     appRedisConn <- checkedConnect $ appRedisConf appSettings
 
-    -- We need a log function to create a connection pool. We need a connection
-    -- pool to create our foundation. And we need our foundation to get a
-    -- logging function. To get out of this loop, we initially create a
-    -- temporary foundation without a real connection pool, get a log function
-    -- from there, and then create the real foundation.
     let mkFoundation appConnPool = App{..}
         tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
         logFunc = messageLoggerSource tempFoundation appLogger
 
-    -- Create the database connection pool
     pool <- flip runLoggingT logFunc $ createPostgresqlPool
         (pgConnStr  $ appDatabaseConf appSettings)
         (pgPoolSize $ appDatabaseConf appSettings)
 
-    -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
-
-    -- Output settings at startup
     runLoggingT (logInfoN $ "settings " <> tshow appSettings) logFunc
 
-    return $ mkFoundation pool
+    pure $ mkFoundation pool
 
 makeApplication :: App -> IO Application
 makeApplication foundation = do
     logWare <- makeLogWare foundation
     appPlain <- toWaiAppPlain foundation
-    return $ logWare $ waiMiddleware appPlain
+    pure $ logWare $ waiMiddleware appPlain
 
 waiMiddleware :: Middleware
 waiMiddleware = methodOverridePost . defaultMiddlewaresNoLogging
@@ -114,7 +101,7 @@ makeLogWare foundation = do
             else Apache apacheIpSource
         , destination = if appSettings foundation `allowsLevel` LevelInfo
             then Logger $ loggerSet $ appLogger foundation
-            else Callback $ \_ -> return ()
+            else Callback $ \_ -> pure ()
         }
   where
     apacheIpSource = if appIpFromHeader $ appSettings foundation
@@ -136,35 +123,10 @@ warpSettings foundation =
             (toLogStr $ "Exception from Warp: " ++ show e))
       defaultSettings
 
--- | For yesod devel, return the Warp settings and WAI Application.
-getApplicationDev :: IO (Settings, Application)
-getApplicationDev = do
-    settings <- getAppSettings
-    foundation <- makeFoundation settings
-    wsettings <- getDevSettings $ warpSettings foundation
-    app <- makeApplication foundation
-    return (wsettings, app)
-
-getAppSettings :: IO AppSettings
-getAppSettings = do
-    loadEnv
-    loadEnvSettings
-
--- | main function for use by yesod devel
-develMain :: IO ()
-develMain = develMainHelper getApplicationDev
-
--- | The @main@ function for an executable running this site.
 appMain :: IO ()
 appMain = do
-    -- Get the settings from ENV
-    settings <- getAppSettings
-
-    -- Generate the foundation from the settings
+    loadEnv
+    settings <- loadEnvSettings
     foundation <- makeFoundation settings
-
-    -- Generate a WAI Application from the foundation
     app <- makeApplication foundation
-
-    -- Run the application with Warp
     runSettings (warpSettings foundation) app
