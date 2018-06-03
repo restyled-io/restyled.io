@@ -1,0 +1,81 @@
+<main>
+  <h1>Privacy Policy
+
+<section>
+  <p>
+    This privacy policy documents what data Restyled has access to about its
+    users and what Restyled does with it. This policy covers the use of this
+    website and the Restyled.io GitHub App.
+
+<section>
+  <h2>Overview
+
+  <p>
+    Installing the Restyled.io GitHub App explicitly grants us access to some of
+    the data you've shared with GitHub. This can include personal data, source
+    code repository content, and repository metadata.
+
+  <p>
+    We avoid mirroring any of this data on our own systems as much as we can. In
+    order to provide the service that we do, we do need to store the following
+    pieces of data ourselves:
+
+  <ul>
+    <li>Repository and organization names
+    <li>Pull Request numbers and ids
+    <li>Email addresses (only if you explicitly log into restyled.io)
+
+  <p>
+    At any point, you have the option to:
+
+  <ul>
+    <li>Un-install the Restyled.io GitHub App, removing our access
+    <li>
+      Request
+      <a href=mailto:support@restyled.io>
+        by email
+      that we delete any data we currently have
+
+<section>
+  <h2>Hosting Provider
+  <p>
+    Restyled's infrastructure is hosted by Amazon Web Services, therefore they
+    have full access to any data we store.
+
+<section>
+  <h2>Request & Process Logs
+  <p>
+    Restyled logs requests made to the restyled.io website and information about
+    restyling processes stopping and starting. Request logs include internet
+    protocol (IP) addresses, date and time stamp, and referring/exit pages.
+    Process logs include repository names and pull request numbers.
+
+  <p>
+    These logs expire after 14 days.
+
+<section>
+  <h2>Restyler Job Logs
+  <p>
+    Logs of an individual restyling of a given Pull Request are preserved
+    forever in the record of that Job having occurred. These logs include
+    repository and organization names, pull request numbers, file paths within
+    the repository being restyled, and any error messages emitted by any part of
+    the process.
+
+<section>
+  <h2>Cookies
+  <p>
+    User sessions on restyled.io are stored in 'cookies'. These cookies are used
+    to store information including authorization state for logged-in users (a
+    seldom-used feature).
+
+<section>
+  <h2>Contact
+  <p>
+    If you have any questions about this policy, please email
+    <a href=mailto:support@restyled.io>support@restyled.io</a>.
+
+<section>
+  <p>
+    <small>
+      Last update: 3 Jun 2018
