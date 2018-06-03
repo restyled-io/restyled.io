@@ -157,7 +157,7 @@ develMain = develMainHelper getApplicationDev
 appMain :: IO ()
 appMain = do
     -- Get the settings from ENV
-    settings <- loadEnvSettings
+    settings <- getAppSettings
 
     -- Generate the foundation from the settings
     foundation <- makeFoundation settings
