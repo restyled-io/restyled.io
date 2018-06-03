@@ -2,6 +2,7 @@
 *.md
 .circleci/
 .dockerignore
+.env*
 .git
 .stack-work
 Dockerfile
