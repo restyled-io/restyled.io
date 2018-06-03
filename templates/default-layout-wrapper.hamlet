@@ -7,30 +7,8 @@ $newline always
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-
-    ^{pageHead pc}
-
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js">
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.0.3/js.cookie.min.js">
-
-    <script>
-      /* The `defaultCsrfMiddleware` Middleware added in Foundation.hs adds a CSRF token the request cookies. */
-      /* AJAX requests should add that token to a header to be validated by the server. */
-      /* See the CSRF documentation in the Yesod.Core.Handler module of the yesod-core package for details. */
-      var csrfHeaderName = "#{TE.decodeUtf8 $ CI.foldedCase defaultCsrfHeaderName}";
-
-      var csrfCookieName = "#{TE.decodeUtf8 defaultCsrfCookieName}";
-      var csrfToken = Cookies.get(csrfCookieName);
-
-
-      if (csrfToken) {
-      \  $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
-      \      if (!options.crossDomain) {
-      \          jqXHR.setRequestHeader(csrfHeaderName, csrfToken);
-      \      }
-      \  });
-      }
+    ^{pageHead pc}
   <body>
     ^{pageBody pc}

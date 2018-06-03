@@ -14,8 +14,6 @@ where
 import Import.NoFoundation
 
 import Data.Aeson
-import qualified Data.CaseInsensitive as CI
-import qualified Data.Text.Encoding as TE
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import GitHub.Instances (OwnerName, RepoName)
