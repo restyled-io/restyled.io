@@ -35,7 +35,15 @@ setup:
 
 .PHONY: build
 build:
-	stack build --pedantic --test --no-run-tests
+	stack build \
+	  --fast --pedantic --test --no-run-tests
+
+.PHONY: watch
+watch:
+	stack build \
+	  --fast --pedantic --test --file-watch \
+	  --exec 'sh -c "pkill restyled.io; stack exec restyled.io &"' \
+	  --ghc-options -DDEVELOPMENT
 
 .PHONY: lint
 lint:
@@ -44,7 +52,8 @@ lint:
 
 .PHONY: test
 test:
-	stack test
+	stack build \
+	  --fast --pedantic --test
 
 .PHONY: clean
 clean:
