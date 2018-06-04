@@ -25,7 +25,7 @@ db.seed:
 	PGPASSWORD=password psql --user postgres --host localhost restyled < seeds.sql
 
 .PHONY: db.reset
-db.reset: db.drop db.create db.seed
+db.reset: db.drop db.create
 
 .PHONY: setup
 setup:
