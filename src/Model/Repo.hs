@@ -14,6 +14,7 @@ where
 
 import ClassyPrelude
 
+import Control.Error.Util (note)
 import Database.Persist
 import GitHub.Data hiding (Repo(..), User(..))
 import qualified GitHub.Data as GH
@@ -64,16 +65,15 @@ initializeFromWebhook Payload {..}
     = Right <$> findOrCreateRepo pRepository pInstallationId
     | otherwise
     = do
-        now <- liftIO getCurrentTime
         repo <- findOrCreateRepo pRepository pInstallationId
-        mPlan <- selectActivePlan now $ entityVal repo
-        pure $ maybe
-            (Left $ PrivateNoPlan
+
+        let
+            reason = PrivateNoPlan
                 (repoOwner $ entityVal repo)
                 (repoName $ entityVal repo)
-            )
-            (const $ Right repo)
-            mPlan
+
+        now <- liftIO getCurrentTime
+        note reason . (repo <$) <$> selectActivePlan now (entityVal repo)
 
 selectActivePlan :: UTCTime -> Repo -> DB (Maybe (Entity Plan))
 selectActivePlan now repo = selectFirst filters [Desc PlanId]
