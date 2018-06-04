@@ -14,34 +14,20 @@ where
 
 import Import.NoFoundation
 
+import Authentication
 import Authorization
-import Data.Aeson
-import Data.Aeson.Casing
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
-import GitHub.Data (Id, Name)
 import GitHub.Instances (OwnerName, RepoName)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Auth
 import Yesod.Auth.Dummy
-import Yesod.Auth.Message (AuthMessage(..))
 import Yesod.Auth.OAuth2
 import Yesod.Auth.OAuth2.Github
 import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
-
--- | For reading profile out of credsExtra
-data GitHubUser = GitHubUser
-    { ghuEmail :: Text
-    , ghuId :: Id User
-    , ghuLogin :: Name User
-    }
-    deriving (Eq, Show, Generic)
-
-instance FromJSON GitHubUser where
-    parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
 data App = App
     { appSettings :: AppSettings
@@ -127,39 +113,7 @@ adminLayout widget = do
 instance YesodAuth App where
     type AuthId App = UserId
 
-    authenticate creds@Creds{..} = liftHandler $ runDB $ do
-        logDebugN $ "Running authenticate: " <> tshow creds
-        muser <- getBy (UniqueUser credsPlugin credsIdent)
-        logDebugN $ "Existing user: " <> tshow muser
-        let euser = getUserResponseJSON creds
-        logDebugN $ "GitHub user: " <> tshow euser
-
-        case (entityKey <$> muser, euser) of
-            -- Probably testing via auth/dummy, just authenticate
-            (Just uid, Left _) -> pure $ Authenticated uid
-
-            -- New user, create an account
-            (Nothing, Right GitHubUser{..}) -> Authenticated <$> insert User
-                { userEmail = ghuEmail
-                , userGithubUserId = Just ghuId
-                , userGithubUsername = Just ghuLogin
-                , userCredsIdent = credsIdent
-                , userCredsPlugin = credsPlugin
-                }
-
-            -- Existing user, synchronize email
-            (Just uid, Right GitHubUser{..}) -> do
-                update uid
-                    [ UserEmail =. ghuEmail
-                    , UserGithubUserId =. Just ghuId
-                    , UserGithubUsername =. Just ghuLogin
-                    ]
-                pure $ Authenticated uid
-
-            -- Unexpected, no email in GH response
-            (Nothing, Left err) -> do
-                logWarnN $ "Error parsing user response: " <> pack err
-                pure $ UserError $ IdentifierNotFound "email"
+    authenticate = liftHandler . runDB . authenticateUser
 
     loginDest _ = HomeR
     logoutDest _ = HomeR
