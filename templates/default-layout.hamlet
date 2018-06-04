@@ -6,6 +6,9 @@
     <ul>
       <li>
         <a href=https://github.com/restyled-io/restyled.io/wiki>Documentation
+      $maybe _ <- mUserId
+        <li>
+          <a href=@{AuthR $ LogoutR}>Log out
 
 $maybe msg <- mmsg
   <aside #message .info>
