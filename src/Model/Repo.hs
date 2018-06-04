@@ -67,12 +67,12 @@ initializeFromWebhook Payload {..}
         now <- liftIO getCurrentTime
         repo <- findOrCreateRepo pRepository pInstallationId
         mPlan <- selectActivePlan now $ entityVal repo
-        maybe
-            (pure $ Left $ PrivateNoPlan
+        pure $ maybe
+            (Left $ PrivateNoPlan
                 (repoOwner $ entityVal repo)
                 (repoName $ entityVal repo)
             )
-            (const $ pure $ Right repo)
+            (const $ Right repo)
             mPlan
 
 selectActivePlan :: UTCTime -> Repo -> DB (Maybe (Entity Plan))
