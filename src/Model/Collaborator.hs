@@ -46,6 +46,22 @@ newtype CollaboratorPermissions = CollaboratorPermissions
 instance FromJSON CollaboratorPermissions where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
+data ApiErrorDetails = ApiErrorDetails
+    { _aedMessage :: Text
+    , _aedDocumentationUrl :: Text
+    }
+    deriving (Show, Generic)
+
+instance FromJSON ApiErrorDetails where
+    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+
+data ApiResponse
+    = OK CollaboratorPermissions
+    | ErrorDetails ApiErrorDetails
+
+instance FromJSON ApiResponse where
+    parseJSON v = (OK <$> parseJSON v) <|> (ErrorDetails <$> parseJSON v)
+
 collaboratorCanRead
     :: (MonadIO m, MonadLogger m) => Id App -> Text -> Repo -> User -> m Bool
 collaboratorCanRead appId pem Repo {..} User {..} = do
@@ -64,11 +80,16 @@ collaboratorCanRead appId pem Repo {..} User {..} = do
             <> "/permission"
 
         response <- withExceptT show $ exceptIO $ tryIO $ httpLbs request
-        permission <- decodeResponse response
-        pure $ canRead $ cpPermission permission
+        apiResponse <- decodeResponse response
+
+        case apiResponse of
+            OK permission -> pure $ canRead $ cpPermission permission
+            ErrorDetails details -> errDetails details
+
     either err pure result
   where
     err e = logWarnN ("Error authorizing repository:\n" <> pack e) $> False
+    errDetails d = logDebugN ("Collaborators response: " <> tshow d) $> False
 
 githubRequest :: Monad m => AccessToken -> String -> ExceptT String m Request
 githubRequest token requestPath = do
