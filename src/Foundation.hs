@@ -14,14 +14,13 @@ where
 
 import Import.NoFoundation
 
+import Authorization
 import Data.Aeson
 import Data.Aeson.Casing
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import GitHub.Data (Id, Name)
-import qualified GitHub.Data as GH
 import GitHub.Instances (OwnerName, RepoName)
-import Model.Collaborator
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Auth
@@ -77,9 +76,18 @@ instance Yesod App where
 
     authRoute _ = Just $ AuthR $ oauth2Url "github"
 
-    isAuthorized AdminR _ = authorizeAdmins
-    isAuthorized (AdminP _) _ = authorizeAdmins
-    isAuthorized (OwnerP owner (ReposP (RepoP repo _))) _ = authorizeRepo owner repo
+    isAuthorized AdminR _ = do
+        settings <- getsYesod appSettings
+        runDB $ authorizeAdmin settings =<< maybeAuthId
+
+    isAuthorized (AdminP _) _ = do
+        settings <- getsYesod appSettings
+        runDB $ authorizeAdmin settings =<< maybeAuthId
+
+    isAuthorized (OwnerP owner (ReposP (RepoP repo _))) _ = do
+        settings <- getsYesod appSettings
+        runDB $ authorizeRepo settings owner repo =<< maybeAuthId
+
     isAuthorized _ _ = return Authorized
 
     addStaticContent = addStaticContentExternal
@@ -107,46 +115,6 @@ adminLayout widget = do
         addStylesheet $ StaticR css_admin_css
         $(widgetFile "admin-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
-
-authorizeAdmins :: Handler AuthResult
-authorizeAdmins = do
-    admins <- appAdmins <$> getsYesod appSettings
-    authorizeAdmin <$> maybeAuth <*> pure admins
-
-authorizeAdmin :: Maybe (Entity User) -> [Text] -> AuthResult
-authorizeAdmin Nothing _ = AuthenticationRequired
-authorizeAdmin (Just (Entity _ u)) admins
-    | userEmail u `elem` admins = Authorized
-    | otherwise = Unauthorized "Unauthorized"
-
--- brittany-disable-next-binding
-authorizeRepo :: GH.Name GH.Owner -> GH.Name GH.Repo -> Handler AuthResult
-authorizeRepo owner name = do
-    mUserId <- maybeAuthId
-
-    logDebugN "Authorizing repo"
-    logDebugN $ "UserId: " <> tshow mUserId
-
-    (mUser, Entity _ repo) <- runDB $ (,)
-        <$> (join <$> traverse get mUserId)
-        <*> getBy404 (UniqueRepo owner name)
-
-    if repoIsPrivate repo
-        then authorizePrivateRepo mUser repo
-        else logDebugN "Public repo authorized" $> Authorized
-
--- TODO: cache
-authorizePrivateRepo :: Maybe User -> Repo -> Handler AuthResult
-authorizePrivateRepo mUser repo = do
-    user <- fromMaybeM notFound mUser
-    (appId, appKey) <-
-        getsYesod $ (appGitHubAppId &&& appGitHubAppKey) . appSettings
-    canRead <- collaboratorCanRead appId appKey repo user
-
-    logDebugN $ "User: " <> tshow user
-    logDebugN $ "Can-Read: " <> tshow canRead
-
-    if canRead then pure Authorized else notFound
 
 instance YesodAuth App where
     type AuthId App = UserId
