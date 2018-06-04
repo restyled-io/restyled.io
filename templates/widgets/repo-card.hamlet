@@ -1,5 +1,8 @@
 <div .card>
   <header>
+    $if repoIsPrivate $ entityVal rwsRepo
+      <i .fa .fa-lock>
+
     #{repoOwner $ entityVal rwsRepo}
     /
     <a href=@{jobsRoute rwsRepo}>
