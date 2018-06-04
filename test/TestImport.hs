@@ -21,6 +21,7 @@ import Backend.Job (queueName)
 import ClassyPrelude as X hiding (Handler, delete, deleteBy)
 import Control.Monad.Logger (LoggingT)
 import qualified Data.ByteString.Lazy as LBS
+import Data.Time as X
 import Database.Persist as X hiding (get)
 import Database.Persist.Sql
     ( SqlBackend
@@ -35,6 +36,7 @@ import Database.Redis (del)
 import Foundation as X
 import LoadEnv (loadEnvFrom)
 import Model as X
+import Model.PlanType as X
 import Routes as X
 import Settings (AppSettings(..), loadEnvSettings)
 import Test.Hspec.Core (SpecM)

@@ -101,5 +101,6 @@ tests:
       - persistent
       - shakespeare
       - text
+      - time
       - yesod-core
       - yesod-test

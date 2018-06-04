@@ -23,6 +23,7 @@ import GitHub.Data (Id, Name, Owner, PullRequest)
 import qualified GitHub.Data as GH
 import GitHub.Data.Apps (Installation)
 import GitHub.Instances ()
+import Model.PlanType
 
 type DB a = forall backend m.
     (backend ~ SqlBackend, MonadHandler m) => ReaderT backend m a

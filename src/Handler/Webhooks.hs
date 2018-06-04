@@ -1,7 +1,8 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Handler.Webhooks
     ( postWebhooksR
@@ -12,7 +13,7 @@ import Import
 
 import Backend.Foundation
 import Backend.Job
-import GitHub.Data
+import GitHub.Data hiding (Repo(..))
 import GitHub.Data.Webhooks.PullRequest
 
 postWebhooksR :: Handler ()
@@ -34,31 +35,24 @@ handleGitHubEvent = \case
         payload <- requireJsonBody
         logDebugN $ "PullRequestEvent received: " <> tshow payload
 
-        if acceptPayload payload
-            then do
-                restylePullRequest payload
-                sendResponseStatus status201 ()
-            else sendResponseStatus status200 ()
+        mJob <- runDB $ do
+            mRepo <- initializeFromWebhook payload
+
+            for mRepo
+                $ \repo ->
+                      insertJob repo
+                          $ mkId Proxy
+                          $ pullRequestNumber
+                          $ pPullRequest payload
+
+        enqueueJobAndSendStatus mJob
 
     event -> do
         logWarnN $ "Ignored unknown GitHub event: " <> event
         sendResponseStatus status200 ()
 
-restylePullRequest :: Payload -> Handler ()
-restylePullRequest Payload {..} = do
-    job <- runDB $ do
-        repo <- findOrCreateRepo pRepository pInstallationId
-        insertJob repo $ mkId Proxy $ pullRequestNumber pPullRequest
+enqueueJobAndSendStatus :: Maybe (Entity Job) -> Handler a
+enqueueJobAndSendStatus (Just job) = do
     runBackendHandler $ enqueueRestylerJob job
-
--- brittany-disable-next-binding
-acceptPayload :: Payload -> Bool
-acceptPayload Payload {..}
-    | pAction `notElem` [PullRequestOpened, PullRequestSynchronized] = False
-    -- Avoid infinite loop (best-effort)
-    | "-restyled" `isSuffixOf` branchName = False
-    -- Private repositories will (some day) require subscription
-    | repoPrivate pRepository = False
-    | otherwise = True
-  where
-    branchName = pullRequestCommitRef $ pullRequestHead pPullRequest
+    sendResponseStatus status201 ()
+enqueueJobAndSendStatus Nothing = sendResponseStatus status200 ()

@@ -40,3 +40,15 @@ Job json
   stderr Text Maybe
 
   deriving Eq Show
+
+Plan
+  type PlanType
+  owner (Name Owner)
+  repo (Name GH.Repo)
+
+  activeAt UTCTime Maybe
+  expiresAt UTCTime Maybe
+
+  message Text
+
+  deriving Eq Show

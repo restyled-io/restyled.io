@@ -42,6 +42,44 @@ INSERT INTO repo (
   TRUE
 );
 
+DELETE FROM plan;
+INSERT INTO plan (
+  type, -- (PlanType)
+  owner, -- (Name Owner)
+  repo, -- (Name Repo)
+  active_at, -- Maybe UTCTime
+  expires_at, -- Maybe UTCTime
+  message -- TEXT
+) VALUES (
+  'trial',
+  'restyled-io',
+  'restyled.io',
+  NULL,
+  NULL,
+  'Example plan'
+), (
+  'trial',
+  'restyled-io',
+  'demo',
+  NOW() - ('600 seconds' :: interval),
+  NULL,
+  'Never expires'
+), (
+  'trial',
+  'restyled-io',
+  'restyler',
+  NULL,
+  NOW() + ('1500 seconds' :: interval),
+  'Expires soon'
+), (
+  'trial',
+  'pbrisbin',
+  'load-env',
+  NULL,
+  NOW() - ('300 seconds' :: interval),
+  'Expired'
+);
+
 DELETE FROM job;
 INSERT INTO job (
   installation_id, -- (Id Installation)
