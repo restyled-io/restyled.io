@@ -52,8 +52,8 @@
     "comments_url": "https://api.github.com/repos/restyled-io/restyled.io/issues/6/comments",
     "statuses_url": "https://api.github.com/repos/restyled-io/restyled.io/statuses/f798c7df40b6b5ef432935b0ed9d8fea22b1d24f",
     "head": {
-      "label": "restyled-io:pb/template-restyled",
-      "ref": "pb/template-restyled",
+      "label": "restyled-io:pb/template",
+      "ref": "pb/template",
       "sha": "f798c7df40b6b5ef432935b0ed9d8fea22b1d24f",
       "user": {
         "login": "restyled-io",
@@ -165,8 +165,8 @@
       }
     },
     "base": {
-      "label": "restyled-io:pb/template",
-      "ref": "pb/template",
+      "label": "restyled-io:master",
+      "ref": "master",
       "sha": "db881ddb82a63c6c9513222b938a41a11b46a125",
       "user": {
         "login": "restyled-io",
