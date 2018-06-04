@@ -4,6 +4,11 @@ Signup
 User
   email Text
 
+  -- For some reason persistent wanted to migrate this as var char, which it
+  -- didn't do for any of the other `Id a` fields... :shrug:
+  githubUserId (Id User) Maybe sqltype=integer
+  githubUsername (Name User) Maybe
+
   credsIdent Text
   credsPlugin Text
 
