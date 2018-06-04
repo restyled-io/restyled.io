@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -14,8 +15,11 @@ where
 import Import.NoFoundation
 
 import Data.Aeson
+import Data.Aeson.Casing
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
+import GitHub.Data (Id, Name)
+import qualified GitHub.Data as GH
 import GitHub.Instances (OwnerName, RepoName)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
@@ -28,12 +32,16 @@ import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
 
--- | Just for reading email out of credsExtra
-newtype GitHubUser = GitHubUser { ghuEmail :: Text }
+-- | For reading profile out of credsExtra
+data GitHubUser = GitHubUser
+    { ghuEmail :: Text
+    , ghuId :: Id User
+    , ghuLogin :: Name User
+    }
+    deriving (Eq, Show, Generic)
 
 instance FromJSON GitHubUser where
-    parseJSON = withObject "GitHubUser" $ \o -> GitHubUser
-        <$> o .: "email"
+    parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
 data App = App
     { appSettings :: AppSettings
@@ -116,23 +124,29 @@ instance YesodAuth App where
         logDebugN $ "Running authenticate: " <> tshow creds
         muser <- getBy (UniqueUser credsPlugin credsIdent)
         logDebugN $ "Existing user: " <> tshow muser
-        let eemail = ghuEmail <$> getUserResponseJSON creds
-        logDebugN $ "GitHub email: " <> tshow eemail
+        let euser = getUserResponseJSON creds
+        logDebugN $ "GitHub user: " <> tshow euser
 
-        case (entityKey <$> muser, eemail) of
+        case (entityKey <$> muser, euser) of
             -- Probably testing via auth/dummy, just authenticate
             (Just uid, Left _) -> pure $ Authenticated uid
 
             -- New user, create an account
-            (Nothing, Right email) -> Authenticated <$> insert User
-                { userEmail = email
+            (Nothing, Right GitHubUser{..}) -> Authenticated <$> insert User
+                { userEmail = ghuEmail
+                , userGithubUserId = Just ghuId
+                , userGithubUsername = Just ghuLogin
                 , userCredsIdent = credsIdent
                 , userCredsPlugin = credsPlugin
                 }
 
             -- Existing user, synchronize email
-            (Just uid, Right email) -> do
-                update uid [UserEmail =. email]
+            (Just uid, Right GitHubUser{..}) -> do
+                update uid
+                    [ UserEmail =. ghuEmail
+                    , UserGithubUserId =. Just ghuId
+                    , UserGithubUsername =. Just ghuLogin
+                    ]
                 pure $ Authenticated uid
 
             -- Unexpected, no email in GH response

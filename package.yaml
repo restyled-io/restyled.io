@@ -15,6 +15,7 @@ ghc-options: -Wall
 library:
   dependencies:
     - aeson
+    - aeson-casing
     - blaze-markup
     - bytestring
     - case-insensitive
