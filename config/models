@@ -4,6 +4,9 @@ Signup
 User
   email Text
 
+  githubUserId (Id User) Maybe sqltype=integer
+  githubUsername (Name User) Maybe
+
   credsIdent Text
   credsPlugin Text
 

@@ -17,6 +17,8 @@ spec = withApp $ do
         it "turns away un-authorized users" $ do
             authenticateAsUser User
                 { userEmail = "normie@restyled.io"
+                , userGithubUserId = Nothing
+                , userGithubUsername = Nothing
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
                 }
@@ -29,6 +31,8 @@ spec = withApp $ do
         it "allows only authorized users" $ do
             authenticateAsUser User
                 { userEmail = "admin1@restyled.io"
+                , userGithubUserId = Nothing
+                , userGithubUsername = Nothing
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
                 }
@@ -37,6 +41,8 @@ spec = withApp $ do
 
             authenticateAsUser User
                 { userEmail = "admin2@restyled.io"
+                , userGithubUserId = Nothing
+                , userGithubUsername = Nothing
                 , userCredsIdent = "2"
                 , userCredsPlugin = "dummy"
                 }
