@@ -4,8 +4,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Widgets.Repo
-    ( repoCard
-    , adminRepoCard
+    ( adminRepoCard
     )
 where
 
@@ -16,19 +15,6 @@ import Formatting (format, (%))
 import Formatting.Formatters (int, plural)
 import Formatting.Time (diff)
 import Widgets.Job
-
-repoCard :: RepoWithStats -> Widget
-repoCard RepoWithStats{..} = do
-    now <- liftIO getCurrentTime
-
-    let
-        jobsRoute :: Entity Repo -> Route App
-        jobsRoute (Entity _ Repo {..}) = repoP repoOwner repoName jobsR
-
-        mAction :: Maybe Widget
-        mAction = Nothing
-
-    $(widgetFile "widgets/repo-card")
 
 adminRepoCard :: RepoWithStats -> Widget
 adminRepoCard RepoWithStats{..} = do

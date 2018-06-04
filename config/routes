@@ -9,19 +9,15 @@
 /webhooks WebhooksR POST
 /privacy-policy PrivacyPolicyR GET
 
-/gh/#OwnerName OwnerP:
-  /repos ReposP:
-    / ReposR GET
-    /#RepoName RepoP:
-      / RepoR GET
-      /pulls RepoPullsP:
-        /#Int RepoPullP:
-          / RepoPullR GET
-          /jobs RepoPullJobsP:
-            / RepoPullJobsR GET
-      /jobs RepoJobsP:
-        / RepoJobsR GET
-        /#JobId RepoJobR GET
+/gh/#OwnerName/repos/#RepoName RepoP:
+  / RepoR GET
+  /pulls/#Int RepoPullP:
+    / RepoPullR GET
+    /jobs RepoPullJobsP:
+      / RepoPullJobsR GET
+  /jobs RepoJobsP:
+    / RepoJobsR GET
+    /#JobId RepoJobR GET
 
 /admin AdminR GET
 /admin AdminP:

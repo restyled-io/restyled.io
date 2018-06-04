@@ -94,14 +94,9 @@ instance Yesod App where
         settings <- getsYesod appSettings
         runDB $ authorizeAdmin settings =<< maybeAuthId
 
-    -- TODO: remove this route or implement authorization here. It currently
-    -- uses the old "is-public" logic within the Handler itself.
-    isAuthorized (OwnerP _ (ReposP ReposR)) _ = pure Authorized
-
-    isAuthorized (OwnerP owner (ReposP (RepoP repo _))) _ = do
+    isAuthorized (RepoP owner repo _) _ = do
         settings <- getsYesod appSettings
         runDB $ authorizeRepo settings owner repo =<< maybeAuthId
-
 
     addStaticContent = addStaticContentExternal
         minifym
