@@ -5,31 +5,18 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Authorization
-    ( requireRepositoryAccess
-    , requireRepositoriesAccess
-    , authorizeAdmin
+    ( authorizeAdmin
     , authorizeRepo
+
+    -- * Deprecated
+    , requireRepositoriesAccess
     ) where
 
 import Import.NoFoundation
 
-import Database.Persist.Sql (SqlReadT)
 import GitHub.Data (Name, toPathPart)
 import qualified GitHub.Data as GH
 import Model.Collaborator
-
--- | Require the current user has access to the given @'Repo'@
---
--- Right now this simply asserts it's public. Some day we may support mirroring
--- GitHub permissions, granting read to admins, etc.
---
-requireRepositoryAccess :: MonadHandler m => Repo -> SqlReadT m ()
-requireRepositoryAccess Repo {..} | not repoIsPrivate = pure ()
-requireRepositoryAccess _ = notFound -- Don't leak existence
-
--- | Run @'requireRepositoryAccess'@ on all @'Repo'@s in the list
-requireRepositoriesAccess :: MonadHandler m => [Entity Repo] -> SqlReadT m ()
-requireRepositoriesAccess = traverse_ $ requireRepositoryAccess . entityVal
 
 authorizeAdmin :: AppSettings -> Maybe UserId -> DB AuthResult
 authorizeAdmin _ Nothing = notFound
@@ -82,3 +69,10 @@ authorizeRepo settings owner name (Just userId) = do
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized
 authorizeWhen False = notFound
+
+-- | Run @'requirePublic'@ on all @'Repo'@s in the list
+requireRepositoriesAccess :: [Entity Repo] -> DB ()
+requireRepositoriesAccess = traverse_ $ requirePublic . entityVal
+  where
+    requirePublic Repo {..} | repoIsPrivate = notFound
+    requirePublic _ = pure ()
