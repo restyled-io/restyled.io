@@ -3,6 +3,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+-- |
+--
+-- <https://developer.github.com/v3/repos/collaborators/#review-a-users-permission-level>
+--
 module Model.Collaborator
     ( collaboratorCanRead
     ) where
@@ -14,8 +18,8 @@ import Control.Monad.Except
 import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.ByteString.Lazy as BL
-import GitHub.Data (Id, toPathPart)
-import GitHub.Endpoints.Installations (AccessToken(..), App, createAccessToken)
+import GitHub.Data (toPathPart)
+import GitHub.Endpoints.Installations (AccessToken(..), createAccessToken)
 import Network.HTTP.Simple
 
 data RepoPermission
@@ -46,12 +50,31 @@ newtype CollaboratorPermissions = CollaboratorPermissions
 instance FromJSON CollaboratorPermissions where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
+data ApiErrorDetails = ApiErrorDetails
+    { _aedMessage :: Text
+    , _aedDocumentationUrl :: Text
+    }
+    deriving (Show, Generic)
+
+instance FromJSON ApiErrorDetails where
+    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+
+data ApiResponse
+    = OK CollaboratorPermissions
+    | ErrorDetails ApiErrorDetails
+
+instance FromJSON ApiResponse where
+    parseJSON v = (OK <$> parseJSON v) <|> (ErrorDetails <$> parseJSON v)
+
 collaboratorCanRead
-    :: (MonadIO m, MonadLogger m) => Id App -> Text -> Repo -> User -> m Bool
-collaboratorCanRead appId pem Repo {..} User {..} = do
+    :: (MonadIO m, MonadLogger m) => AppSettings -> Repo -> User -> m Bool
+collaboratorCanRead settings Repo {..} User {..} = do
     result <- runExceptT $ do
         username <- liftEither $ note "No GitHub username" userGithubUsername
-        token <- exceptIO $ createAccessToken appId pem repoInstallationId
+        token <- exceptIO $ createAccessToken
+            (appGitHubAppId settings)
+            (appGitHubAppKey settings)
+            repoInstallationId
 
         request <-
             githubRequest token
@@ -64,23 +87,26 @@ collaboratorCanRead appId pem Repo {..} User {..} = do
             <> "/permission"
 
         response <- withExceptT show $ exceptIO $ tryIO $ httpLbs request
-        permission <- decodeResponse response
-        pure $ canRead $ cpPermission permission
+        apiResponse <- decodeResponse response
+
+        case apiResponse of
+            OK permission -> pure $ canRead $ cpPermission permission
+            ErrorDetails details -> warn details
+
     either err pure result
   where
-    err e = logWarnN ("Error authorizing repository:\n" <> pack e) $> False
+    err e = logErrorN ("Error authorizing repository:\n" <> pack e) $> False
+    warn d = logWarnN ("Collaborators response: " <> tshow d) $> False
 
 githubRequest :: Monad m => AccessToken -> String -> ExceptT String m Request
 githubRequest token requestPath = do
-    request <-
-        withExceptT show
-        $ liftEither
-        $ parseRequest
-        $ "http://api.github.com"
-        <> requestPath
+    let url = "https://api.github.com" <> requestPath
+    request <- withExceptT show $ liftEither $ parseRequest url
 
     pure $ setRequestHeaders
-        [ ("Accept", "application/vnd.github.hellcat-preview+json")
+        [ ( "Accept"
+          , "application/vnd.github.machine-man-preview+json,application/vnd.github.hellcat-preview+json"
+          )
         , ("Authorization", "token " <> encodeUtf8 (atToken token))
         , ("User-Agent", "Restyled.io")
         ]
