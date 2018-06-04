@@ -27,6 +27,10 @@ form .errors {
   font-weight: bold;
 }
 
+.centered {
+  text-align: center;
+}
+
 .how-it-works-highlight {
   background: #f0ebee;
   border-radius: 3px;
