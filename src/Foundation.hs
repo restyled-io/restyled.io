@@ -76,6 +76,16 @@ instance Yesod App where
 
     authRoute _ = Just $ AuthR $ oauth2Url "github"
 
+    isAuthorized (AuthR _) _ = pure Authorized
+    isAuthorized (StaticR _) _ = pure Authorized
+    isAuthorized FaviconR _ = pure Authorized
+    isAuthorized WebhooksR _ = pure Authorized
+    isAuthorized PrivacyPolicyR _ = pure Authorized
+    isAuthorized HomeR _ = pure Authorized
+    isAuthorized RevisionR _ = pure Authorized
+    isAuthorized RobotsR _ = pure Authorized
+    isAuthorized SignupR _ = pure Authorized
+
     isAuthorized AdminR _ = do
         settings <- getsYesod appSettings
         runDB $ authorizeAdmin settings =<< maybeAuthId
@@ -84,11 +94,14 @@ instance Yesod App where
         settings <- getsYesod appSettings
         runDB $ authorizeAdmin settings =<< maybeAuthId
 
+    -- TODO: remove this route or implement authorization here. It currently
+    -- uses the old "is-public" logic within the Handler itself.
+    isAuthorized (OwnerP _ (ReposP ReposR)) _ = pure Authorized
+
     isAuthorized (OwnerP owner (ReposP (RepoP repo _))) _ = do
         settings <- getsYesod appSettings
         runDB $ authorizeRepo settings owner repo =<< maybeAuthId
 
-    isAuthorized _ _ = return Authorized
 
     addStaticContent = addStaticContentExternal
         minifym
