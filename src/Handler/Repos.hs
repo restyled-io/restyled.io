@@ -44,16 +44,12 @@ getRepoPullR = getRepoPullJobsR
 
 getRepoPullJobsR :: Name Owner -> Name GH.Repo -> Int -> Handler Html
 getRepoPullJobsR owner name num = do
-    jobs <- runDB $ do
-        Entity _ repo <- getBy404 $ UniqueRepo owner name
-        requireRepositoryAccess repo
-
-        selectList
-            [ JobOwner ==. repoOwner repo
-            , JobRepo ==. repoName repo
-            , JobPullRequest ==. mkId Proxy num
-            ]
-            [Desc JobCompletedAt, Desc JobCreatedAt]
+    jobs <- runDB $ selectList
+        [ JobOwner ==. owner
+        , JobRepo ==. name
+        , JobPullRequest ==. mkId Proxy num
+        ]
+        [Desc JobCompletedAt, Desc JobCreatedAt]
 
     defaultLayout $ do
         setTitle
@@ -68,13 +64,9 @@ getRepoPullJobsR owner name num = do
 
 getRepoJobsR :: Name Owner -> Name GH.Repo -> Handler Html
 getRepoJobsR owner name = do
-    jobs <- runDB $ do
-        Entity _ repo <- getBy404 $ UniqueRepo owner name
-        requireRepositoryAccess repo
-
-        selectList
-            [JobOwner ==. repoOwner repo, JobRepo ==. repoName repo]
-            [Desc JobCompletedAt, Desc JobCreatedAt]
+    jobs <- runDB $ selectList
+        [JobOwner ==. owner, JobRepo ==. name]
+        [Desc JobCompletedAt, Desc JobCreatedAt]
 
     defaultLayout $ do
         setTitle
@@ -87,10 +79,7 @@ getRepoJobsR owner name = do
 
 getRepoJobR :: Name Owner -> Name GH.Repo -> JobId -> Handler Html
 getRepoJobR owner name jobId = do
-    job <- runDB $ do
-        Entity _ repo <- getBy404 $ UniqueRepo owner name
-        requireRepositoryAccess repo
-        fromMaybeM notFound =<< getEntity jobId
+    job <- runDB $ fromMaybeM notFound =<< getEntity jobId
 
     defaultLayout $ do
         setTitle
