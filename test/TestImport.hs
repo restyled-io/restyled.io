@@ -12,7 +12,6 @@ module TestImport
     , authenticateAsUser
     , postForm
     , postGitHubEvent
-    , authPage
     , module X
     ) where
 

@@ -18,7 +18,6 @@ library:
     - aeson-casing
     - blaze-markup
     - bytestring
-    - case-insensitive
     - classy-prelude
     - classy-prelude-yesod
     - conduit
