@@ -8,4 +8,13 @@ remote_files:
     path: .stylish-haskell.yaml
 restylers:
   - stylish-haskell
-  - brittany
+  - brittany:
+      include:
+        - "**/*.hs"
+
+        # CPP, HsSpliceE, etc
+        - "!src/Application.hs"
+        - "!src/Settings.hs"
+        - "!src/Widgets/Job.hs"
+        - "!src/Widgets/Repo.hs"
+        - "!test/TestImport.hs"
