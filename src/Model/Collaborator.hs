@@ -84,12 +84,12 @@ collaboratorCanRead appId pem Repo {..} User {..} = do
 
         case apiResponse of
             OK permission -> pure $ canRead $ cpPermission permission
-            ErrorDetails details -> errDetails details
+            ErrorDetails details -> warn details
 
     either err pure result
   where
-    err e = logWarnN ("Error authorizing repository:\n" <> pack e) $> False
-    errDetails d = logDebugN ("Collaborators response: " <> tshow d) $> False
+    err e = logErrorN ("Error authorizing repository:\n" <> pack e) $> False
+    warn d = logWarnN ("Collaborators response: " <> tshow d) $> False
 
 githubRequest :: Monad m => AccessToken -> String -> ExceptT String m Request
 githubRequest token requestPath = do
