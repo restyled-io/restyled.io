@@ -49,8 +49,6 @@ instance Yesod App where
         -- 2 week session timeout
         <$> envClientSessionBackend (60 * 24 * 14) "SESSION_KEY"
 
-    yesodMiddleware = defaultYesodMiddleware
-
     defaultLayout widget = do
         master <- getYesod
         mmsg <- getMessage
