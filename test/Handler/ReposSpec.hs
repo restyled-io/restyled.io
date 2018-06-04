@@ -12,31 +12,6 @@ import qualified GitHub.Data as GH
 
 spec :: Spec
 spec = withApp $ do
-    describe "GET gh/:owner/repos" $ do
-        it "404s if we have no repos for that owner" $ do
-            get $ reposR "foo"
-            statusIs 404
-
-        it "200s if all repos are accessible" $ do
-            runDB $ insertMany_
-                [ publicRepo "foo" "bar"
-                , publicRepo "foo" "bat"
-                , makeInaccessible $ publicRepo "baz" "quix"
-                ]
-
-            get $ reposR "foo"
-            statusIs 200
-
-        it "404s if any repository is not accessible" $ do
-            runDB $ insertMany_
-                [ publicRepo "foo" "bar"
-                , makeInaccessible $ publicRepo "foo" "bat"
-                , makeInaccessible $ publicRepo "baz" "quix"
-                ]
-
-            get $ OwnerP "foo" $ ReposP ReposR
-            statusIs 404
-
     describe "GET gh/:owner/repos/:repo" $ do
         itRequiresRepositoryAccess RepoR
 

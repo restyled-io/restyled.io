@@ -1,15 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Authorization
     ( authorizeAdmin
     , authorizeRepo
-
-    -- * Deprecated
-    , requireRepositoriesAccess
     ) where
 
 import Import.NoFoundation
@@ -69,10 +65,3 @@ authorizeRepo settings owner name (Just userId) = do
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized
 authorizeWhen False = notFound
-
--- | Run @'requirePublic'@ on all @'Repo'@s in the list
-requireRepositoriesAccess :: [Entity Repo] -> DB ()
-requireRepositoriesAccess = traverse_ $ requirePublic . entityVal
-  where
-    requirePublic Repo {..} | repoIsPrivate = notFound
-    requirePublic _ = pure ()

@@ -2,9 +2,7 @@
 module Routes
     (
     -- * Repos
-      reposP
-    , reposR
-    , repoP
+      repoP
     , repoR
 
     -- * Repos' Pulls
@@ -31,20 +29,14 @@ import Import.NoFoundation
 import Foundation
 import qualified GitHub.Data as GH
 
-reposP :: GH.Name GH.Owner -> ReposP -> Route App
-reposP owner = OwnerP owner . ReposP
-
-reposR :: GH.Name GH.Owner -> Route App
-reposR owner = reposP owner ReposR
-
 repoP :: GH.Name GH.Owner -> GH.Name GH.Repo -> RepoP -> Route App
-repoP owner name = reposP owner . RepoP name
+repoP = RepoP
 
 repoR :: GH.Name GH.Owner -> GH.Name GH.Repo -> Route App
 repoR owner name = repoP owner name RepoR
 
 pullP :: GH.Id GH.PullRequest -> RepoPullP -> RepoP
-pullP num = RepoPullsP . RepoPullP (GH.untagId num)
+pullP = RepoPullP . GH.untagId
 
 pullR :: GH.Id GH.PullRequest -> RepoP
 pullR num = pullP num RepoPullR
