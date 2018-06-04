@@ -18,8 +18,8 @@ import Control.Monad.Except
 import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.ByteString.Lazy as BL
-import GitHub.Data (Id, toPathPart)
-import GitHub.Endpoints.Installations (AccessToken(..), App, createAccessToken)
+import GitHub.Data (toPathPart)
+import GitHub.Endpoints.Installations (AccessToken(..), createAccessToken)
 import Network.HTTP.Simple
 
 data RepoPermission
@@ -67,11 +67,14 @@ instance FromJSON ApiResponse where
     parseJSON v = (OK <$> parseJSON v) <|> (ErrorDetails <$> parseJSON v)
 
 collaboratorCanRead
-    :: (MonadIO m, MonadLogger m) => Id App -> Text -> Repo -> User -> m Bool
-collaboratorCanRead appId pem Repo {..} User {..} = do
+    :: (MonadIO m, MonadLogger m) => AppSettings -> Repo -> User -> m Bool
+collaboratorCanRead settings Repo {..} User {..} = do
     result <- runExceptT $ do
         username <- liftEither $ note "No GitHub username" userGithubUsername
-        token <- exceptIO $ createAccessToken appId pem repoInstallationId
+        token <- exceptIO $ createAccessToken
+            (appGitHubAppId settings)
+            (appGitHubAppKey settings)
+            repoInstallationId
 
         request <-
             githubRequest token

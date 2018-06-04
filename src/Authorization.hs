@@ -52,11 +52,7 @@ authorizeRepo settings owner name (Just userId) = do
     if repoIsPrivate repo
         then do
             user <- get404 userId
-            canRead <- collaboratorCanRead
-                (appGitHubAppId settings)
-                (appGitHubAppKey settings)
-                repo
-                user
+            canRead <- collaboratorCanRead settings repo user
             logDebugN $ "User: " <> tshow user
             logDebugN $ "Can-Read: " <> tshow canRead
             authorizeWhen canRead
