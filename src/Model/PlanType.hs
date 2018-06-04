@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Model.PlanType
     ( PlanType(..)
@@ -9,10 +10,14 @@ import ClassyPrelude
 import Data.Proxy
 import Database.Persist
 import Database.Persist.Sql
+import Text.Blaze
 
 data PlanType
     = Trial
     deriving (Bounded, Eq, Enum, Show)
+
+instance ToMarkup PlanType where
+    toMarkup Trial = toMarkup @Text "Trial"
 
 instance PersistField PlanType where
     toPersistValue Trial = PersistText "trial"

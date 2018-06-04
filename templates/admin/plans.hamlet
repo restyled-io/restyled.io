@@ -1,0 +1,36 @@
+<section>
+  <table>
+    <thead>
+      <th>Owner
+      <th>Repo
+      <th>Type
+      <th>Active
+      <th>Expires
+      <th>Messsage
+      <th>
+
+    <tbody>
+      $forall Entity planId plan <- plans
+        <tr>
+          <td>#{planType plan}
+          <td>#{planOwner plan}
+          <td>#{planRepo plan}
+          <td>
+            $maybe activeAt <- planActiveAt plan
+              #{format (diff True) $ diffUTCTime activeAt now}
+            $nothing
+              N/A
+          <td>
+            $maybe expiresAt <- planExpiresAt plan
+              #{format (diff True) $ diffUTCTime expiresAt now}
+            $nothing
+              N/A
+          <td>#{planMessage plan}
+          <td>
+            <form method=post action=@{AdminP $ AdminPlansP $ AdminPlanR planId}>
+              <input type=hidden name=_method value=DELETE />
+              <button .warning>Delete Plan
+
+<section>
+  <aside>
+    <a .button href=@{AdminP $ AdminPlansP AdminPlansNewR}>New Plan

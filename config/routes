@@ -30,4 +30,8 @@
     /#RepoId AdminRepoP:
       / AdminRepoR PATCH
       /jobs AdminRepoJobsR GET
+  /plans AdminPlansP:
+    / AdminPlansR GET POST
+    /new AdminPlansNewR GET
+    !/#PlanId AdminPlanR DELETE
   /signups AdminSignupsR GET
