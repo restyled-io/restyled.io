@@ -34,6 +34,12 @@ INSERT INTO repo (
   58920,
   FALSE,
   TRUE
+), (
+  'pbrisbin',
+  'load-env',
+  58920,
+  TRUE,
+  TRUE
 );
 
 DELETE FROM job;
