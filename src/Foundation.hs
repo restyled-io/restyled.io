@@ -97,6 +97,16 @@ instance Yesod App where
 
     defaultMessageWidget title body = $(widgetFile "default-message-widget")
 
+    errorHandler NotFound = do
+        mUserId <- maybeAuthId
+        html <- defaultLayout $ do
+            setTitle "Not Found"
+            $(widgetFile "not-found")
+
+        pure $ TypedContent typeHtml $ toContent html
+
+    errorHandler x = defaultErrorHandler x
+
 -- | Just like default-layout, but admin-specific nav and CSS
 adminLayout :: Widget -> Handler Html
 adminLayout widget = do
