@@ -1,20 +1,20 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Handler.AdminSpec (spec) where
+
+module Handler.AdminSpec
+    ( spec
+    ) where
 
 import TestImport
 
 spec :: Spec
 spec = withApp $ do
     describe "AdminP" $ do
-        it "directs un-authenticated users to log in" $ do
-            githubForward <- encodeUtf8 <$> authPage "/github/forward"
-
+        it "404s for un-authenticated users" $ do
             get $ AdminP AdminSignupsR
 
-            statusIs 303
-            assertHeader "Location" githubForward
+            statusIs 404
 
-        it "turns away un-authorized users" $ do
+        it "404s for un-authorized users" $ do
             authenticateAsUser User
                 { userEmail = "normie@restyled.io"
                 , userGithubUserId = Nothing
@@ -25,7 +25,7 @@ spec = withApp $ do
 
             get $ AdminP AdminSignupsR
 
-            statusIs 403
+            statusIs 404
 
         -- N.B. .env.test is known to have an admin1 and admin2
         it "allows only authorized users" $ do

@@ -24,6 +24,7 @@ library:
     - conduit
     - containers
     - envparse
+    - errors
     - fast-logger
     - file-embed
     - formatting
@@ -38,6 +39,7 @@ library:
     - jwt
     - load-env
     - monad-logger
+    - mtl
     - persistent
     - persistent-postgresql
     - persistent-template
