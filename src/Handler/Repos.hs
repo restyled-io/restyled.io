@@ -3,8 +3,7 @@
 {-# LANGUAGE TupleSections #-}
 
 module Handler.Repos
-    ( getReposR
-    , getRepoR
+    ( getRepoR
     , getRepoPullR
     , getRepoPullJobsR
     , getRepoJobsR
@@ -14,27 +13,9 @@ where
 
 import Import
 
-import Authorization
 import GitHub.Data hiding (Repo(..))
 import qualified GitHub.Data as GH
 import Widgets.Job
-import Widgets.Repo
-
-getReposR :: Name Owner -> Handler Html
-getReposR owner = do
-    reposWithStats <- runDB $ do
-        repos <- selectList
-            [RepoOwner ==. owner]
-            [Asc RepoName, LimitTo repositoriesListLimit]
-
-        requireRepositoriesAccess repos
-        traverse repoWithStats repos
-
-    when (null reposWithStats) notFound
-
-    defaultLayout $ do
-        setTitle $ toHtml $ toPathPart owner <> " repositories"
-        $(widgetFile "repos")
 
 getRepoR :: Name Owner -> Name GH.Repo -> Handler Html
 getRepoR = getRepoJobsR
@@ -90,6 +71,3 @@ getRepoJobR owner name jobId = do
             <> " #"
             <> toPathPiece jobId
         $(widgetFile "job")
-
-repositoriesListLimit :: Int
-repositoriesListLimit = 50

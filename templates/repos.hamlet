@@ -1,6 +1,0 @@
-<section>
-  $forall repoWithStats <- reposWithStats
-      ^{repoCard repoWithStats}
-
-  <aside>
-    <em>Results limited to #{repositoriesListLimit} repositories.
