@@ -121,7 +121,14 @@ envSettings = AppSettings
     <*> Env.var Env.str "RESTYLER_IMAGE" (Env.def "restyled/restyler")
     <*> optional (Env.var Env.str "RESTYLER_TAG" mempty)
     <*> (map T.strip . T.splitOn "," <$> Env.var Env.str "ADMIN_EMAILS" (Env.def ""))
+#if DOCKERIZED
+    -- Don't even look for this setting if building the deployment image. We
+    -- would need to both forget the compilation flag and accidentally set the
+    -- ENV switch on production. Defense in depth.
+    <*> pure False
+#else
     <*> Env.switch "AUTH_DUMMY_LOGIN" mempty
+#endif
 
 envDatabaseConfig :: EnvParser PostgresConf
 envDatabaseConfig = PostgresConf
