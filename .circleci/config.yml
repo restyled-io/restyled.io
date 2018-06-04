@@ -20,7 +20,12 @@ jobs:
             - stack-
       - run:
           name: Dependencies
-          command: make setup
+          command: |
+            make setup
+            curl "$HLINT_YAML_SRC" > .hlint.yaml
+          environment:
+            # yamllint disable-line rule:line-length
+            HLINT_YAML_SRC: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
       - run:
           name: Build
           command: make build

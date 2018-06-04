@@ -1,0 +1,17 @@
+---
+remote_files:
+  # yamllint disable-line rule:line-length
+  - url: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/config/brittany/config.yaml
+    path: brittany.yaml
+restylers:
+  - stylish-haskell
+  - brittany:
+      include:
+        - "**/*.hs"
+
+        # CPP, HsSpliceE, etc
+        - "!src/Application.hs"
+        - "!src/Settings.hs"
+        - "!src/Widgets/Job.hs"
+        - "!src/Widgets/Repo.hs"
+        - "!test/TestImport.hs"
