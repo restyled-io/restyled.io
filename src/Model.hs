@@ -25,7 +25,7 @@ import GitHub.Data.Apps (Installation)
 import GitHub.Instances ()
 
 type DB a = forall backend m.
-    (backend ~ SqlBackend, MonadIO m) => ReaderT backend m a
+    (backend ~ SqlBackend, MonadHandler m) => ReaderT backend m a
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
