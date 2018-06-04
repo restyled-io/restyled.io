@@ -35,24 +35,35 @@ handleGitHubEvent = \case
         payload <- requireJsonBody
         logDebugN $ "PullRequestEvent received: " <> tshow payload
 
-        mJob <- runDB $ do
-            mRepo <- initializeFromWebhook payload
+        result <- runDB $ initializeFromWebhook payload
+        either
+            (\reason -> do
+                logWarnN $ "Webhook discarded: " <> reasonToLogMessage reason
+                sendResponseStatus status200 ()
+            )
+            (\repo -> do
+                job <-
+                    runDB
+                    $ insertJob repo
+                    $ mkId Proxy
+                    $ pullRequestNumber
+                    $ pPullRequest payload
 
-            for mRepo
-                $ \repo ->
-                      insertJob repo
-                          $ mkId Proxy
-                          $ pullRequestNumber
-                          $ pPullRequest payload
-
-        enqueueJobAndSendStatus mJob
+                runBackendHandler $ enqueueRestylerJob job
+                sendResponseStatus status201 ()
+            )
+            result
 
     event -> do
         logWarnN $ "Ignored unknown GitHub event: " <> event
         sendResponseStatus status200 ()
 
-enqueueJobAndSendStatus :: Maybe (Entity Job) -> Handler a
-enqueueJobAndSendStatus (Just job) = do
-    runBackendHandler $ enqueueRestylerJob job
-    sendResponseStatus status201 ()
-enqueueJobAndSendStatus Nothing = sendResponseStatus status200 ()
+reasonToLogMessage :: IgnoredWebhookReason -> Text
+reasonToLogMessage = \case
+    IgnoredAction event -> "ignored webhook event: " <> tshow event
+    OwnPullRequest branch -> "branch appears to be our own: " <> branch
+    PrivateNoPlan owner repo ->
+        "private repository with no plan: "
+            <> toPathPart owner
+            <> "/"
+            <> toPathPart repo

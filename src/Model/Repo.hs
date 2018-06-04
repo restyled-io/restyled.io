@@ -7,13 +7,13 @@
 module Model.Repo
     ( RepoWithStats(..)
     , repoWithStats
+    , IgnoredWebhookReason(..)
     , initializeFromWebhook
     )
 where
 
 import ClassyPrelude
 
-import Control.Monad.Logger
 import Database.Persist
 import GitHub.Data hiding (Repo(..), User(..))
 import qualified GitHub.Data as GH
@@ -48,26 +48,32 @@ repoWithStats repo =
                 ]
                 [Desc JobCreatedAt]
 
--- brittany-disable-next-binding
-initializeFromWebhook :: Payload -> DB (Maybe (Entity Repo))
+data IgnoredWebhookReason
+    = IgnoredAction PullRequestEventType
+    | OwnPullRequest Text
+    | PrivateNoPlan (Name Owner) (Name GH.Repo)
+
+initializeFromWebhook
+    :: Payload -> DB (Either IgnoredWebhookReason (Entity Repo))
 initializeFromWebhook Payload {..}
-    | pAction `notElem` enqueueEvents = pure Nothing
-    | "-restyled" `isSuffixOf` headBranch pPullRequest = pure Nothing
-    | repoPublic pRepository =
-        Just <$> findOrCreateRepo pRepository pInstallationId
-    | otherwise = do
+    | pAction `notElem` enqueueEvents
+    = pure $ Left $ IgnoredAction pAction
+    | "-restyled" `isSuffixOf` headBranch pPullRequest
+    = pure $ Left $ OwnPullRequest $ headBranch pPullRequest
+    | repoPublic pRepository
+    = Right <$> findOrCreateRepo pRepository pInstallationId
+    | otherwise
+    = do
         now <- liftIO getCurrentTime
         repo <- findOrCreateRepo pRepository pInstallationId
         mPlan <- selectActivePlan now $ entityVal repo
-
-        for mPlan $ \(Entity _ plan) -> do
-            lift
-                $ logInfoN
-                $ "Private repository with "
-                <> tshow (planType plan)
-                <> " plan"
-
-            pure repo
+        maybe
+            (pure $ Left $ PrivateNoPlan
+                (repoOwner $ entityVal repo)
+                (repoName $ entityVal repo)
+            )
+            (const $ pure $ Right repo)
+            mPlan
 
 selectActivePlan :: UTCTime -> Repo -> DB (Maybe (Entity Plan))
 selectActivePlan now repo = selectFirst filters [Desc PlanId]
