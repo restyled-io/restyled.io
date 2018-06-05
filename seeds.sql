@@ -21,7 +21,7 @@ INSERT INTO repo (
   'demo',
   58920,
   FALSE,
-  TRUE
+  FALSE
 ), (
   'restyled-io',
   'restyler',
@@ -29,17 +29,11 @@ INSERT INTO repo (
   FALSE,
   TRUE
 ), (
-  'pbrisbin',
-  'some-great-repo-but-a-long-name',
+  'restyled-io',
+  'ops',
   58920,
-  FALSE,
-  TRUE
-), (
-  'pbrisbin',
-  'load-env',
-  58920,
-  TRUE,
-  TRUE
+  TRUE, -- private
+  FALSE
 );
 
 DELETE FROM plan;
@@ -60,21 +54,21 @@ INSERT INTO plan (
 ), (
   'trial',
   'restyled-io',
-  'demo',
+  'restyled.io',
   NOW() - ('600 seconds' :: interval),
   NULL,
   'Never expires'
 ), (
   'trial',
   'restyled-io',
-  'restyler',
+  'ops',
   NULL,
   NOW() + ('1500 seconds' :: interval),
   'Expires soon'
 ), (
   'trial',
-  'pbrisbin',
-  'load-env',
+  'restyled-io',
+  'ops',
   NULL,
   NOW() - ('300 seconds' :: interval),
   'Expired'
