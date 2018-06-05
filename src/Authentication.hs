@@ -31,7 +31,7 @@ authenticateUser
     :: AuthId site ~ UserId => Creds site -> DB (AuthenticationResult site)
 authenticateUser creds@Creds {..} = do
     mUserId <- entityKey <$$> getBy (UniqueUser credsPlugin credsIdent)
-    logDebugN $ "Existing User Id: " <> tshow mUserId
+    logDebugN $ "Existing User Id: " <> tshow (toPathPiece <$> mUserId)
 
     let eGhUser = getUserResponseJSON creds
     logDebugN $ "GitHub user: " <> tshow eGhUser

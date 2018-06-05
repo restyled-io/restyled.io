@@ -47,7 +47,7 @@ authorizeRepo settings owner name (Just userId) = do
         <> "/"
         <> toPathPart name
         <> " for authenticated UserId: "
-        <> tshow userId
+        <> toPathPiece userId
 
     if repoIsPrivate repo
         then do
