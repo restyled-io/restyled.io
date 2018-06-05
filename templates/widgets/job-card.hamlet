@@ -10,18 +10,22 @@ $with Entity jobId job <- job
         ##{toPathPiece $ jobPullRequest job}
 
     <p>
-      Created #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
-
       $case jobCompletion job
         $of Success completedAt
-          , succeeded in
-          #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt}
-        $of Failure completedAt exitCode
-          , failed in
-          #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt}
-          (exit code #{show exitCode})
+          <span .green>
+            <i .fas .fa-check-circle>
+          Succeeded
+          #{format (diff True) $ diffUTCTime completedAt now}
+          (took #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt})
+        $of Failure completedAt _exitCode
+          <span .red>
+            <i .fas .fa-times-circle>
+          Failed
+          #{format (diff True) $ diffUTCTime completedAt now}
+          (took #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt})
         $of InProgress
-          , in progress
+          In progress since
+          #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
 
     ^{jobOutput job}
 

@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Handler.Admin.Plans
@@ -10,8 +11,6 @@ module Handler.Admin.Plans
 
 import Import
 
-import Formatting (format)
-import Formatting.Time (diff)
 import GitHub.Data (mkName)
 
 planForm :: Form Plan
@@ -67,3 +66,12 @@ deleteAdminPlanR planId = do
         delete planId
     setMessage "Plan deleted"
     redirect $ AdminP $ AdminPlansP AdminPlansR
+
+planDate :: Maybe UTCTime -> String
+planDate = maybe "" $ formatTime defaultTimeLocale "%F"
+
+planIsActive :: Plan -> UTCTime -> Bool
+planIsActive Plan {..} now
+    | maybe False (> now) planActiveAt = False
+    | maybe False (< now) planExpiresAt = False
+    | otherwise = True

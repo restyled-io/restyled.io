@@ -31,6 +31,9 @@ form .errors {
   text-align: center;
 }
 
+.green { color: #7f9f7f; }
+.red { color: #cc9393; }
+
 .how-it-works-highlight {
   background: #f0ebee;
   border-radius: 3px;

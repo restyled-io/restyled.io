@@ -1,30 +1,27 @@
 <section>
   <table>
     <thead>
-      <th>Owner
-      <th>Repo
+      <th>
       <th>Type
+      <th>Repo
       <th>Active
       <th>Expires
-      <th>Messsage
+      <th>Message
       <th>
 
     <tbody>
       $forall Entity planId plan <- plans
         <tr>
+          $if planIsActive plan now
+            <td .green>
+              <i .fas .fa-check-circle>
+          $else
+            <td .red>
+              <i .fas .fa-times-circle>
           <td>#{planType plan}
-          <td>#{planOwner plan}
-          <td>#{planRepo plan}
-          <td>
-            $maybe activeAt <- planActiveAt plan
-              #{format (diff True) $ diffUTCTime activeAt now}
-            $nothing
-              N/A
-          <td>
-            $maybe expiresAt <- planExpiresAt plan
-              #{format (diff True) $ diffUTCTime expiresAt now}
-            $nothing
-              N/A
+          <td>#{planOwner plan}/#{planRepo plan}
+          <td>#{planDate $ planActiveAt plan}
+          <td>#{planDate $ planExpiresAt plan}
           <td>#{planMessage plan}
           <td>
             <form method=post action=@{AdminP $ AdminPlansP $ AdminPlanR planId}>
