@@ -1,7 +1,7 @@
 <div .card>
   <header>
     $if repoIsPrivate $ entityVal rwsRepo
-      <i .fa .fa-lock>
+      <i .fas .fa-lock>
 
     #{repoOwner $ entityVal rwsRepo}
     /
