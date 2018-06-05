@@ -1,3 +1,6 @@
 <section>
-  $forall job <- jobs
-    ^{jobCard job}
+  $if null jobs
+    <p>Hmm, no Jobs yet...
+  $else
+    $forall job <- jobs
+      ^{jobCard job}
