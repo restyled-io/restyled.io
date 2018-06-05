@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Hit the GitHub API, using an installation token.
+#
+# Assumes ../restyler/bin/get-access-token exists.
+#
+###
+set -e
+
+if [ -z "$1" ]; then
+  echo "usage: gh-api <path>" >&2
+  exit 61
+fi
+
+token=$(cd ../restyler && ./bin/get-access-token)
+
+curl \
+  --header "Accept: application/vnd.github.machine-man-preview+json" \
+  --header "Authorization: token $token" \
+  --header "User-Agent: Restyled.io" \
+  "https://api.github.com$1"
