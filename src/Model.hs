@@ -18,6 +18,7 @@ where
 
 import ClassyPrelude.Yesod
 
+import Cache
 import Database.Persist.Quasi
 import GitHub.Data (Id, Name, Owner, PullRequest)
 import qualified GitHub.Data as GH
@@ -26,7 +27,7 @@ import GitHub.Instances ()
 import Model.PlanType
 
 type DB a = forall backend m.
-    (backend ~ SqlBackend, MonadHandler m) => ReaderT backend m a
+    (backend ~ SqlBackend, MonadCache m, MonadHandler m) => ReaderT backend m a
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")

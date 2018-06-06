@@ -10,6 +10,8 @@ module Authorization
 
 import Import.NoFoundation
 
+import Cache
+import qualified Data.Text as T
 import GitHub.Data (Name, toPathPart)
 import qualified GitHub.Data as GH
 import Model.Collaborator
@@ -52,11 +54,23 @@ authorizeRepo settings owner name (Just userId) = do
     if repoIsPrivate repo
         then do
             user <- get404 userId
-            canRead <- collaboratorCanRead settings repo user
+            canRead <- lift $ withCache cacheKey $ collaboratorCanRead
+                settings
+                repo
+                user
             logDebugN $ "User: " <> tshow user
             logDebugN $ "Can-Read: " <> tshow canRead
             authorizeWhen canRead
         else pure Authorized
+  where
+    cacheKey = CacheKey $ T.intercalate
+        "."
+        [ "authorization"
+        , "repository"
+        , toPathPart owner
+        , toPathPart name
+        , toPathPiece userId
+        ]
 
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized

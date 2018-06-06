@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -16,8 +17,11 @@ import Import.NoFoundation
 
 import Authentication
 import Authorization
+import Cache
+import Data.Aeson (decode, encode)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
+import qualified Database.Redis as Redis
 import GitHub.Instances (OwnerName, RepoName)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
@@ -26,7 +30,6 @@ import Yesod.Auth.Dummy
 import Yesod.Auth.OAuth2
 import Yesod.Auth.OAuth2.Github
 import Yesod.Core.Types (Logger)
-import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
 
 data App = App
@@ -154,5 +157,14 @@ instance RenderMessage App FormMessage where
 instance HasHttpManager App where
     getHttpManager = appHttpManager
 
-unsafeHandler :: App -> Handler a -> IO a
-unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
+instance MonadCache (HandlerFor App) where
+    getCache (CacheKey key) = do
+        conn <- getsYesod appRedisConn
+        eVal <- liftIO $ Redis.runRedis conn $ Redis.get $ encodeUtf8 key
+        pure $ decode . fromStrict =<< join (hush eVal)
+
+    setCache (CacheKey key) obj = do
+        conn <- getsYesod appRedisConn
+        void $ liftIO $ Redis.runRedis conn $ do
+            void $ Redis.set (encodeUtf8 key) $ toStrict $ encode obj
+            void $ Redis.expire (encodeUtf8 key) 300

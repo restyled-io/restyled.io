@@ -4,6 +4,7 @@ module Import.NoFoundation
     ) where
 
 import ClassyPrelude.Yesod as Import hiding (Proxy)
+import Control.Error.Util as Import (hush, note)
 import Control.Monad.Logger as Import
 import Data.Proxy as Import
 import Data.Time as Import
