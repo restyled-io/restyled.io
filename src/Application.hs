@@ -51,7 +51,6 @@ import Handler.Common
 import Handler.Home
 import Handler.PrivacyPolicy
 import Handler.Repos
-import Handler.Signups
 import Handler.Webhooks
 
 import Handler.Admin

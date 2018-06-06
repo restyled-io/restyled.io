@@ -94,20 +94,12 @@
       <i .fas .fa-external-link-alt>
 
   <p>
-    Restyled is free for public repositories. Paid plans, with support for
-    private repositories, are coming soon through the GitHub Marketplace. To get
-    notified when private repository support is available, please sign up here:
-
-  <form method=post action=@{SignupR} enctype=#{enctype}>
-    <aside>
-      ^{widget}
-      <button type=submit>Notify Me
-
-  <aside>
-    <small>
-      Your email will be used for 
-      <strong>nothing
-      other than product announcements.
+    <strong>NOTE</strong>:
+    Restyled operates on public repositories only. If you would like to try
+    Restyled on a private repository, please
+    <a href=mailto:support@restyled.io>email support</a>.
+    Paid plans are coming soon through the GitHub Marketplace. Until then,
+    private repositories can only be enabled by support.
 
 <section>
   <h2>Open Source

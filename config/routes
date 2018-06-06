@@ -5,7 +5,6 @@
 /static StaticR Static appStatic
 
 / HomeR GET
-/signups SignupR POST
 /webhooks WebhooksR POST
 /privacy-policy PrivacyPolicyR GET
 
