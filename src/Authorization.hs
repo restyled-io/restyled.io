@@ -48,29 +48,33 @@ authorizeRepo settings owner name (Just userId) = do
         <> toPathPart owner
         <> "/"
         <> toPathPart name
-        <> " for authenticated UserId: "
+        <> " for authenticated user id="
         <> toPathPiece userId
 
     if repoIsPrivate repo
         then do
             user <- get404 userId
-            canRead <- lift $ withCache cacheKey $ collaboratorCanRead
-                settings
-                repo
-                user
-            logDebugN $ "User: " <> tshow user
-            logDebugN $ "Can-Read: " <> tshow canRead
+            canRead <- caching $ collaboratorCanRead settings repo user
+            logPrivateRepoResult user canRead
             authorizeWhen canRead
         else pure Authorized
   where
-    cacheKey = CacheKey $ T.intercalate
+    caching = lift . withCache cacheKey
+    cacheKey = CacheKey $ "auth.repo." <> T.intercalate
         "."
-        [ "authorization"
-        , "repository"
-        , toPathPart owner
-        , toPathPart name
-        , toPathPiece userId
-        ]
+        [toPathPart owner, toPathPart name, toPathPiece userId]
+
+    -- Log this at INFO temporarily since it's important and new
+    logPrivateRepoResult user canRead =
+        logInfoN
+            $ "GitHub user name="
+            <> maybe "<none>" toPathPart (userGithubUsername user)
+            <> " repo="
+            <> toPathPart owner
+            <> "/"
+            <> toPathPart name
+            <> " can_read="
+            <> tshow canRead
 
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized
