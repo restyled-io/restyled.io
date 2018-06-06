@@ -100,13 +100,15 @@ collaboratorCanRead settings Repo {..} User {..} = do
 
 githubRequest :: Monad m => AccessToken -> String -> ExceptT String m Request
 githubRequest token requestPath = do
-    let url = "https://api.github.com" <> requestPath
-    request <- withExceptT show $ liftEither $ parseRequest url
+    request <-
+        withExceptT show
+        $ liftEither
+        $ parseRequest
+        $ "https://api.github.com"
+        <> requestPath
 
     pure $ setRequestHeaders
-        [ ( "Accept"
-          , "application/vnd.github.machine-man-preview+json,application/vnd.github.hellcat-preview+json"
-          )
+        [ ("Accept", "application/vnd.github.machine-man-preview+json")
         , ("Authorization", "token " <> encodeUtf8 (atToken token))
         , ("User-Agent", "Restyled.io")
         ]
