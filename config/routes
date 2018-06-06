@@ -34,4 +34,3 @@
     / AdminPlansR GET POST
     /new AdminPlansNewR GET
     !/#PlanId AdminPlanR DELETE
-  /signups AdminSignupsR GET

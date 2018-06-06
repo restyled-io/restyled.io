@@ -10,7 +10,7 @@ spec :: Spec
 spec = withApp $ do
     describe "AdminP" $ do
         it "404s for un-authenticated users" $ do
-            get $ AdminP AdminSignupsR
+            get $ AdminP $ AdminPlansP AdminPlansR
 
             statusIs 404
 
@@ -23,7 +23,7 @@ spec = withApp $ do
                 , userCredsPlugin = "dummy"
                 }
 
-            get $ AdminP AdminSignupsR
+            get $ AdminP $ AdminPlansP AdminPlansR
 
             statusIs 404
 
@@ -36,7 +36,7 @@ spec = withApp $ do
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
                 }
-            get $ AdminP AdminSignupsR
+            get $ AdminP $ AdminPlansP AdminPlansR
             statusIs 200
 
             authenticateAsUser User
@@ -46,5 +46,5 @@ spec = withApp $ do
                 , userCredsIdent = "2"
                 , userCredsPlugin = "dummy"
                 }
-            get $ AdminP AdminSignupsR
+            get $ AdminP $ AdminPlansP AdminPlansR
             statusIs 200
