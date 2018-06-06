@@ -1,8 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-deprecations #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module TestImport
     ( YesodSpec
@@ -18,8 +22,10 @@ module TestImport
 import Application (makeFoundation, makeLogWare)
 import Backend.Foundation (Backend, runBackendApp, runRedis)
 import Backend.Job (queueName)
+import Cache
 import ClassyPrelude as X hiding (Handler, delete, deleteBy)
-import Control.Monad.Logger (LoggingT)
+import Control.Monad.Logger (LoggingT, NoLoggingT)
+import Control.Monad.Trans.Resource (ResourceT)
 import qualified Data.ByteString.Lazy as LBS
 import Data.Time as X
 import Database.Persist as X hiding (get)
@@ -42,10 +48,22 @@ import Settings (AppSettings(..), loadEnvSettings)
 import Test.Hspec.Core (SpecM)
 import Test.Hspec.Lifted as X
 import Text.Shakespeare.Text (st)
+import Yesod.Core (MonadHandler(..))
 import Yesod.Core.Handler (RedirectUrl(..))
 import Yesod.Test as X hiding (YesodSpec)
 
 type YesodSpec site = SpecM (TestApp site)
+
+instance MonadCache (NoLoggingT (ResourceT IO)) where
+    getCache _ = pure Nothing
+    setCache _ _ = pure ()
+
+instance MonadHandler (NoLoggingT (ResourceT IO)) where
+    type HandlerSite (NoLoggingT (ResourceT IO)) = ()
+    type SubHandlerSite (NoLoggingT (ResourceT IO)) = ()
+
+    liftHandler = error "liftHandler used in test"
+    liftSubHandler = error "liftSubHandler used in test"
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do

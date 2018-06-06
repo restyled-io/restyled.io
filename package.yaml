@@ -99,8 +99,10 @@ tests:
       - load-env
       - monad-logger
       - persistent
+      - resourcet
       - shakespeare
       - text
       - time
+      - yesod-auth
       - yesod-core
       - yesod-test
