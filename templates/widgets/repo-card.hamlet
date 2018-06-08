@@ -9,26 +9,27 @@
       #{repoName $ entityVal rwsRepo}
 
   <p>
-    #{pluralize "Job" "Jobs" rwsJobCount}
-    (#{pluralize "error" "errors" rwsErrorCount}).
+    #{pluralize "Job" "Jobs" rwsJobCount},
+    #{pluralize "error" "errors" rwsErrorCount}
 
   $maybe Entity jobId job <- rwsLastJob
     <p>
-      Last Job 
-
       $case jobCompletion job
         $of Success _
-          succeeded 
+          <span .green>
+            <i .fas .fa-check-circle>
+          Last job succeeded 
         $of Failure _ _
-          failed 
+          <span .red>
+            <i .fas .fa-times-circle>
+          Last job failed 
         $of InProgress
           $# impossible because we only select the last completed job
-          in progress since 
+          Last job in progress since 
 
       $# apologize for line-length, required to get "</a>:" whitespace
-      <a href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>#{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}</a>:
-
-      ^{jobOutput job}
+      <a href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>
+        #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}
 
   $maybe action <- mAction
     <aside>
