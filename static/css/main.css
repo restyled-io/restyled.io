@@ -130,3 +130,32 @@ form footer input[type="number"] {
   margin-left: auto;
   margin-right: auto;
 }
+
+ul.pagination {
+  margin: 2em auto;
+}
+
+.pagination li {
+  border: 1px solid #999;
+  display: inline;
+  padding: 0.5em 1em;
+}
+
+.pagination li:first-child {
+  border-right: none;
+}
+
+.pagination li:last-child {
+  border-left: none;
+}
+
+.pagination .disabled a {
+  text-decoration: none;
+}
+
+.pagination li.active,
+.pagination li:hover:not(.disabled) {
+  background-color: #999;
+  color: white;
+  font-weight: bold;
+}

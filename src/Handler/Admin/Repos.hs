@@ -14,13 +14,14 @@ import Import
 
 import Widgets.Job
 import Widgets.Repo
+import Yesod.Paginator
+import Yesod.Paginator.Instances ()
 
 getAdminReposR :: Handler Html
 getAdminReposR = do
-    reposWithStats <- runDB $ do
-        -- N.B. This will be problematic some day ;)
-        repos <- selectList [] [Desc RepoId]
-        traverse repoWithStats repos
+    pages <- runDB $ do
+        pages <- selectPaginated 5 [] [Desc RepoId]
+        traverse repoWithStats pages
 
     adminLayout $ do
         setTitle "Restyled Admin / Repos"

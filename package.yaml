@@ -61,6 +61,7 @@ library:
     - yesod-core
     - yesod-form
     - yesod-static
+    - yesod-paginator
   source-dirs: src
 
 executables:

@@ -1,3 +1,6 @@
 <section>
-  $forall repoWithStats <- reposWithStats
+  $forall repoWithStats <- pageItems $ pagesCurrent pages
     ^{adminRepoCard repoWithStats}
+
+  <aside>
+    ^{simple 3 pages}
