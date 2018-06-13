@@ -31,6 +31,10 @@ form .errors {
   text-align: center;
 }
 
+.right {
+  float: right;
+}
+
 .green { color: #7f9f7f; }
 .red { color: #cc9393; }
 

@@ -1,16 +1,21 @@
 <div .card>
   <header>
-    $if repoIsPrivate $ entityVal rwsRepo
-      <i .fas .fa-lock>
+    $with repo <- entityVal rwsRepo
+      <div .right>
+        $if repoIsPrivate repo
+          <i .fas .fa-lock>
+        $else
+          <a href=https://github.com/#{repoOwner repo}/#{repoName repo}>
+            View on GitHub
 
-    #{repoOwner $ entityVal rwsRepo}
-    /
-    <a href=@{jobsRoute rwsRepo}>
-      #{repoName $ entityVal rwsRepo}
+      #{repoOwner repo}/#{repoName repo}
 
   <p>
-    #{pluralize "Job" "Jobs" rwsJobCount},
-    #{pluralize "error" "errors" rwsErrorCount}
+    $if rwsJobCount == 0
+      No Jobs yet
+    $else
+      <a href=@{jobsRoute rwsRepo}>#{pluralize "Job" "Jobs" rwsJobCount}</a>,
+      #{pluralize "error" "errors" rwsErrorCount}
 
   $maybe Entity jobId job <- rwsLastJob
     <p>
@@ -24,10 +29,8 @@
             <i .fas .fa-times-circle>
           Last job failed 
         $of InProgress
-          $# impossible because we only select the last completed job
           Last job in progress since 
 
-      $# apologize for line-length, required to get "</a>:" whitespace
       <a href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>
         #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}
 
