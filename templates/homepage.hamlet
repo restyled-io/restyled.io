@@ -36,8 +36,10 @@
     <img src=@{StaticR img_docs_install_confirm_png}>
 
   <p>
-    Open a Pull Request that <i>doesn't</i> conform to your preferred style
-    and receive a comment from Restyled.io about it:
+    Open a Pull Request that changes files in one of our
+    <a href=https://github.com/restyled-io/restyled.io/wiki/Available-Restylers>supported languages</a>.
+    If it doesn't conform to your preferred style, you'll receive a comment that
+    it's been <i>restyled</i>:
 
   <p>
     <img src=@{StaticR img_docs_minor_commented_png}>
