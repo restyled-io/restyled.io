@@ -54,10 +54,7 @@ getAdminReposSearchR = do
                 then count $ searchFilters q
                 else pure $ length repos
 
-            pure SearchResults
-                { srRepos = repos
-                , srTotal = total
-                }
+            pure SearchResults {srRepos = repos, srTotal = total}
 
     selectRep $ do
         provideRep $ pure $ toJSON results
@@ -66,16 +63,15 @@ getAdminReposSearchR = do
             $(widgetFile "admin/repos/search")
 
 searchFilters :: Text -> [Filter Repo]
-searchFilters q = (||.)
-    [ RepoOwner `ilike` q ]
-    [ RepoName `ilike` q ]
- where
+searchFilters q = (||.) [RepoOwner `ilike` q] [RepoName `ilike` q]
+  where
     ilike
         :: (IsString a, PersistField a)
         => EntityField record a
         -> Text
         -> Filter record
-    ilike field value = Filter field
+    ilike field value = Filter
+        field
         (Left $ fromString $ unpack $ "%" <> value <> "%")
         (BackendSpecificFilter "ILIKE")
 
