@@ -1,14 +1,5 @@
 BEGIN;
 
-DELETE FROM signup;
-INSERT INTO signup (
-  email
-) VALUES (
-  'me@example.com'
-), (
-  'you@example.com'
-);
-
 DELETE from repo;
 INSERT INTO repo (
   owner, -- (Name Owner)
