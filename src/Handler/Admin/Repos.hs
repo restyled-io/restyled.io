@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -5,6 +6,7 @@
 
 module Handler.Admin.Repos
     ( getAdminReposR
+    , getAdminReposSearchR
     , patchAdminRepoR
     , getAdminRepoJobsR
     )
@@ -12,6 +14,8 @@ where
 
 import Import
 
+import Data.Aeson
+import Data.Aeson.Casing
 import Widgets.Job
 import Widgets.Repo
 import Yesod.Paginator
@@ -26,6 +30,47 @@ getAdminReposR = do
     adminLayout $ do
         setTitle "Restyled Admin / Repos"
         $(widgetFile "admin/repos")
+
+data SearchResults
+    = SearchResults
+    { srRepos :: [Entity Repo]
+    , srTotal :: Int
+    }
+    deriving Generic
+
+instance ToJSON SearchResults where
+    toJSON = genericToJSON $ aesonPrefix id
+    toEncoding = genericToEncoding $ aesonPrefix id
+
+getAdminReposSearchR :: Handler TypedContent
+getAdminReposSearchR = do
+    mQuery <- runInputGet $ iopt textField "q"
+
+    results <- case mQuery of
+        Nothing -> pure $ SearchResults [] 0
+        Just q -> runDB $ do
+            repos <- selectList (searchFilters q) [LimitTo 10]
+            total <- if length repos == 10
+                then count $ searchFilters q
+                else pure $ length repos
+
+            pure SearchResults
+                { srRepos = repos
+                , srTotal = total
+                }
+
+    selectRep $ do
+        provideRep $ pure $ toJSON results
+        provideRep $ adminLayout $ do
+            setTitle "Restyled Admin / Search"
+            $(widgetFile "admin/repos/search")
+
+searchFilters :: Text -> [Filter Repo]
+searchFilters q =
+    [ Filter RepoOwner
+        (Left $ fromString $ unpack $ "%" <> q <> "%")
+        (BackendSpecificFilter "ILIKE")
+    ]
 
 patchAdminRepoR :: RepoId -> Handler ()
 patchAdminRepoR repoId = do
