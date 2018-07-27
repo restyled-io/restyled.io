@@ -12,7 +12,7 @@ $(function() {
               ${repo.owner} / ${repo.name}
             </a>
           </li>
-        `)
+        `);
 
         results.append(result);
       });
@@ -20,7 +20,7 @@ $(function() {
       $("#count").html(data.repos.length);
       $("#total").html(data.total);
     });
-  };
+  }
 
   const handler = _.debounce(handleSearch, 500);
 
