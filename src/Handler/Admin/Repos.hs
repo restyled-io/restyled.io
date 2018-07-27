@@ -39,8 +39,8 @@ data SearchResults
     deriving Generic
 
 instance ToJSON SearchResults where
-    toJSON = genericToJSON $ aesonPrefix id
-    toEncoding = genericToEncoding $ aesonPrefix id
+    toJSON = genericToJSON $ aesonPrefix camelCase
+    toEncoding = genericToEncoding $ aesonPrefix camelCase
 
 getAdminReposSearchR :: Handler TypedContent
 getAdminReposSearchR = do
@@ -66,11 +66,18 @@ getAdminReposSearchR = do
             $(widgetFile "admin/repos/search")
 
 searchFilters :: Text -> [Filter Repo]
-searchFilters q =
-    [ Filter RepoOwner
-        (Left $ fromString $ unpack $ "%" <> q <> "%")
+searchFilters q = (||.)
+    [ RepoOwner `ilike` q ]
+    [ RepoName `ilike` q ]
+ where
+    ilike
+        :: (IsString a, PersistField a)
+        => EntityField record a
+        -> Text
+        -> Filter record
+    ilike field value = Filter field
+        (Left $ fromString $ unpack $ "%" <> value <> "%")
         (BackendSpecificFilter "ILIKE")
-    ]
 
 patchAdminRepoR :: RepoId -> Handler ()
 patchAdminRepoR repoId = do
