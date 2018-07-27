@@ -12,7 +12,7 @@ User
   UniqueUser credsPlugin credsIdent
   deriving Eq Show
 
-Repo
+Repo json
   owner (Name Owner)
   name (Name GH.Repo)
   installationId (Id Installation)

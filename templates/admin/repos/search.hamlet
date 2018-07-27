@@ -1,0 +1,23 @@
+<section>
+  <form  action=@{AdminP $ AdminReposP AdminReposSearchR}>
+    <aside>
+      $maybe q <- mQuery
+        <input type=text name=q value=#{q} />
+      $nothing
+        <input type=text name=q />
+      <button type=submit>
+        <i .fas .fa-search>
+<section>
+  <ul #results>
+    $forall Entity repoId repo <- srRepos results
+      <li>
+        <a href=@{adminRepoP repoId AdminRepoJobsR}>
+          #{repoOwner repo} / #{repoName repo}
+
+  <p>
+    <i>
+      Showing
+      <span #count>#{length $ srRepos results}
+      /
+      <span #total>#{srTotal results}
+      results

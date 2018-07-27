@@ -5,6 +5,7 @@
 
 module Handler.Admin.Repos
     ( getAdminReposR
+    , getAdminReposSearchR
     , patchAdminRepoR
     , getAdminRepoJobsR
     )
@@ -12,6 +13,7 @@ where
 
 import Import
 
+import Admin.RepoSearch
 import Widgets.Job
 import Widgets.Repo
 import Yesod.Paginator
@@ -26,6 +28,17 @@ getAdminReposR = do
     adminLayout $ do
         setTitle "Restyled Admin / Repos"
         $(widgetFile "admin/repos")
+
+getAdminReposSearchR :: Handler TypedContent
+getAdminReposSearchR = do
+    mQuery <- runInputGet $ iopt textField "q"
+    results <- maybe (pure noResults) (searchRepos 10) mQuery
+
+    selectRep $ do
+        provideRep $ pure $ toJSON results
+        provideRep $ adminLayout $ do
+            setTitle "Restyled Admin / Search"
+            $(widgetFile "admin/repos/search")
 
 patchAdminRepoR :: RepoId -> Handler ()
 patchAdminRepoR repoId = do

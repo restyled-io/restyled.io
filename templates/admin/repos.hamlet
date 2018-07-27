@@ -1,4 +1,9 @@
 <section>
+  <p>
+    <a href=@{AdminP $ AdminReposP AdminReposSearchR}>
+      Search repos
+
+<section>
   $forall repoWithStats <- pageItems $ pagesCurrent pages
     ^{adminRepoCard repoWithStats}
 
