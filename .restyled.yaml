@@ -15,3 +15,7 @@ restylers:
         - "!src/Widgets/Job.hs"
         - "!src/Widgets/Repo.hs"
         - "!test/TestImport.hs"
+  - prettier:
+      include:
+        - "**/*.js"
+        - "**/*.julius"

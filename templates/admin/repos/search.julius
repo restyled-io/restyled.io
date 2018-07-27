@@ -1,0 +1,30 @@
+$(function() {
+  function handleSearch(q) {
+    $.getJSON(`/admin/repos/search?q=${q}`, function(data) {
+      const results = $("ul#results");
+
+      results.empty();
+
+      _.each(data.repos, function(repo) {
+        const result = $(`
+          <li>
+            <a href="/admin/repos/${repo.id}/jobs">
+              ${repo.owner} / ${repo.name}
+            </a>
+          </li>
+        `)
+
+        results.append(result);
+      });
+
+      $("#count").html(data.repos.length);
+      $("#total").html(data.total);
+    });
+  };
+
+  const handler = _.debounce(handleSearch, 500);
+
+  $("form input[name='q']").keyup(function() {
+    handler($(this).val());
+  });
+});
