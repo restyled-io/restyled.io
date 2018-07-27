@@ -63,7 +63,7 @@ getAdminReposSearchR = do
             $(widgetFile "admin/repos/search")
 
 searchFilters :: Text -> [Filter Repo]
-searchFilters q = (||.) [RepoOwner `ilike` q] [RepoName `ilike` q]
+searchFilters q = [RepoOwner `ilike` q] ||. [RepoName `ilike` q]
   where
     ilike
         :: (IsString a, PersistField a)
