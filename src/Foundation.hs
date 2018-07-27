@@ -119,6 +119,8 @@ adminLayout widget = do
         addStylesheet $ StaticR css_strapless_css
         addStylesheet $ StaticR css_main_css
         addStylesheet $ StaticR css_admin_css
+        addScriptRemote "https://code.jquery.com/jquery-3.3.1.min.js"
+        addScriptRemote "https://underscorejs.org/underscore-min.js"
         $(widgetFile "admin-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
