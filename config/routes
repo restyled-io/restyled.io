@@ -26,7 +26,8 @@
     !/#JobId AdminJobR DELETE
   /repos AdminReposP:
     / AdminReposR GET
-    /#RepoId AdminRepoP:
+    /search AdminReposSearchR GET
+    !/#RepoId AdminRepoP:
       / AdminRepoR PATCH
       /jobs AdminRepoJobsR GET
   /plans AdminPlansP:
