@@ -12,11 +12,16 @@
       <p>
         <i>No results
     $else
-      <ul>
+      <ul #results>
         $forall Entity repoId repo <- srRepos results
           <li>
             <a href=@{adminRepoP repoId AdminRepoJobsR}>
               #{repoOwner repo} / #{repoName repo}
 
       <p>
-        <i>Showing #{length $ srRepos results}/#{srTotal results} results
+        <i>
+          Showing
+          <span #count>#{length $ srRepos results}
+          /
+          <span #total>#{srTotal results}
+          results
