@@ -8,20 +8,16 @@
       <button type=submit>
         <i .fas .fa-search>
 <section>
-    $if null $ srRepos results
-      <p>
-        <i>No results
-    $else
-      <ul #results>
-        $forall Entity repoId repo <- srRepos results
-          <li>
-            <a href=@{adminRepoP repoId AdminRepoJobsR}>
-              #{repoOwner repo} / #{repoName repo}
+  <ul #results>
+    $forall Entity repoId repo <- srRepos results
+      <li>
+        <a href=@{adminRepoP repoId AdminRepoJobsR}>
+          #{repoOwner repo} / #{repoName repo}
 
-      <p>
-        <i>
-          Showing
-          <span #count>#{length $ srRepos results}
-          /
-          <span #total>#{srTotal results}
-          results
+  <p>
+    <i>
+      Showing
+      <span #count>#{length $ srRepos results}
+      /
+      <span #total>#{srTotal results}
+      results
