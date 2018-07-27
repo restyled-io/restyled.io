@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -14,8 +13,7 @@ where
 
 import Import
 
-import Data.Aeson
-import Data.Aeson.Casing
+import Admin.RepoSearch
 import Widgets.Job
 import Widgets.Repo
 import Yesod.Paginator
@@ -31,49 +29,16 @@ getAdminReposR = do
         setTitle "Restyled Admin / Repos"
         $(widgetFile "admin/repos")
 
-data SearchResults
-    = SearchResults
-    { srRepos :: [Entity Repo]
-    , srTotal :: Int
-    }
-    deriving Generic
-
-instance ToJSON SearchResults where
-    toJSON = genericToJSON $ aesonPrefix camelCase
-    toEncoding = genericToEncoding $ aesonPrefix camelCase
-
 getAdminReposSearchR :: Handler TypedContent
 getAdminReposSearchR = do
     mQuery <- runInputGet $ iopt textField "q"
-
-    results <- case mQuery of
-        Nothing -> pure $ SearchResults [] 0
-        Just q -> runDB $ do
-            repos <- selectList (searchFilters q) [LimitTo 10]
-            total <- if length repos == 10
-                then count $ searchFilters q
-                else pure $ length repos
-
-            pure SearchResults {srRepos = repos, srTotal = total}
+    results <- maybe (pure noResults) (searchRepos 10) mQuery
 
     selectRep $ do
         provideRep $ pure $ toJSON results
         provideRep $ adminLayout $ do
             setTitle "Restyled Admin / Search"
             $(widgetFile "admin/repos/search")
-
-searchFilters :: Text -> [Filter Repo]
-searchFilters q = [RepoOwner `ilike` q] ||. [RepoName `ilike` q]
-  where
-    ilike
-        :: (IsString a, PersistField a)
-        => EntityField record a
-        -> Text
-        -> Filter record
-    ilike field value = Filter
-        field
-        (Left $ fromString $ unpack $ "%" <> value <> "%")
-        (BackendSpecificFilter "ILIKE")
 
 patchAdminRepoR :: RepoId -> Handler ()
 patchAdminRepoR repoId = do
