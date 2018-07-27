@@ -1,10 +1,8 @@
 $(function() {
   function handleSearch(q) {
-    const results = $("ul#results");
-    const count =$("#count")
-    const total =$("#total")
-
     $.getJSON(`/admin/repos/search?q=${q}`, function(data) {
+      const results = $("ul#results");
+
       results.empty();
 
       _.each(data.repos, function(repo) {
@@ -19,8 +17,8 @@ $(function() {
         results.append(result);
       });
 
-      count.html(data.repos.length);
-      total.html(data.total);
+      $("#count").html(data.repos.length);
+      $("#total").html(data.total);
     });
   };
 
