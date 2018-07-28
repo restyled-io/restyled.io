@@ -51,6 +51,7 @@ repoWithStats repo =
 
 data IgnoredWebhookReason
     = IgnoredAction PullRequestEventType
+    | IgnoredEventType Text
     | OwnPullRequest Text
     | PrivateNoPlan (Name Owner) (Name GH.Repo)
 

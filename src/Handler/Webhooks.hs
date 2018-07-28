@@ -51,9 +51,7 @@ handleGitHubEvent = \case
             )
             result
 
-    event -> do
-        logWarnN $ "Ignored unknown GitHub event: " <> event
-        sendResponseStatus status200 ()
+    event -> handleDiscarded $ IgnoredEventType event
 
 handleDiscarded :: MonadHandler m => IgnoredWebhookReason -> m a
 handleDiscarded reason = do
@@ -62,7 +60,8 @@ handleDiscarded reason = do
 
 reasonToLogMessage :: IgnoredWebhookReason -> Text
 reasonToLogMessage = \case
-    IgnoredAction event -> "ignored webhook event: " <> tshow event
+    IgnoredAction action -> "ignored action: " <> tshow action
+    IgnoredEventType event -> "ignored event: " <> tshow event
     OwnPullRequest branch -> "branch appears to be our own: " <> branch
     PrivateNoPlan owner repo ->
         "private repository with no plan: "
