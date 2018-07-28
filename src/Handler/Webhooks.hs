@@ -37,10 +37,7 @@ handleGitHubEvent = \case
 
         result <- runDB $ initializeFromWebhook payload
         either
-            (\reason -> do
-                logWarnN $ "Webhook discarded: " <> reasonToLogMessage reason
-                sendResponseStatus status200 ()
-            )
+            handleDiscarded
             (\repo -> do
                 job <-
                     runDB
@@ -57,6 +54,11 @@ handleGitHubEvent = \case
     event -> do
         logWarnN $ "Ignored unknown GitHub event: " <> event
         sendResponseStatus status200 ()
+
+handleDiscarded :: MonadHandler m => IgnoredWebhookReason -> m a
+handleDiscarded reason = do
+    logWarnN $ "Webhook discarded: " <> reasonToLogMessage reason
+    sendResponseStatus status200 ()
 
 reasonToLogMessage :: IgnoredWebhookReason -> Text
 reasonToLogMessage = \case
