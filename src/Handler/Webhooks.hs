@@ -17,20 +17,10 @@ import GitHub.Data hiding (Repo(..))
 import GitHub.Data.Webhooks.PullRequest
 
 postWebhooksR :: Handler ()
-postWebhooksR =
-    maybe (sendResponseStatus status400 ()) handleGitHubEvent
-        =<< githubEventHeader
-
-githubEventHeader :: Handler (Maybe Text)
-githubEventHeader = decodeUtf8 <$$> lookupHeader "X-GitHub-Event"
+postWebhooksR = maybe rejectRequest handleGitHubEvent =<< githubEventHeader
 
 handleGitHubEvent :: Text -> Handler a
 handleGitHubEvent = \case
-    "ping" -> do
-        event <- requireJsonBody
-        logDebugN $ "PingEvent received: " <> tshow @Value event
-        sendResponseStatus status200 ()
-
     "pull_request" -> do
         payload <- requireJsonBody
         logDebugN $ "PullRequestEvent received: " <> tshow payload
@@ -38,20 +28,24 @@ handleGitHubEvent = \case
         result <- runDB $ initializeFromWebhook payload
         either handleDiscarded (handleInitialized payload) result
 
-    event -> handleDiscarded $ IgnoredEventType event
+    "ping" -> do
+        event <- requireJsonBody
+        logDebugN $ "PingEvent received: " <> tshow @Value event
+        handleDiscarded $ IgnoredEventType "ping"
 
-handleDiscarded :: MonadHandler m => IgnoredWebhookReason -> m a
-handleDiscarded reason = do
-    logWarnN $ "Webhook discarded: " <> reasonToLogMessage reason
-    sendResponseStatus status200 ()
+    event -> handleDiscarded $ IgnoredEventType event
 
 handleInitialized :: Payload -> Entity Repo -> Handler a
 handleInitialized payload repo = do
     let prNumber = mkId Proxy $ pullRequestNumber $ pPullRequest payload
     job <- runDB $ insertJob repo prNumber
-
     runBackendHandler $ enqueueRestylerJob job
     sendResponseStatus status201 ()
+
+handleDiscarded :: MonadHandler m => IgnoredWebhookReason -> m a
+handleDiscarded reason = do
+    logWarnN $ "Webhook discarded: " <> reasonToLogMessage reason
+    sendResponseStatus status200 ()
 
 reasonToLogMessage :: IgnoredWebhookReason -> Text
 reasonToLogMessage = \case
@@ -63,3 +57,11 @@ reasonToLogMessage = \case
             <> toPathPart owner
             <> "/"
             <> toPathPart repo
+
+githubEventHeader :: Handler (Maybe Text)
+githubEventHeader = decodeUtf8 <$$> lookupHeader "X-GitHub-Event"
+
+rejectRequest :: MonadHandler m => m a
+rejectRequest = do
+    logDebugN "Rejecting webhook request"
+    sendResponseStatus status400 ()
