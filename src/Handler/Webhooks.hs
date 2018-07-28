@@ -36,20 +36,7 @@ handleGitHubEvent = \case
         logDebugN $ "PullRequestEvent received: " <> tshow payload
 
         result <- runDB $ initializeFromWebhook payload
-        either
-            handleDiscarded
-            (\repo -> do
-                job <-
-                    runDB
-                    $ insertJob repo
-                    $ mkId Proxy
-                    $ pullRequestNumber
-                    $ pPullRequest payload
-
-                runBackendHandler $ enqueueRestylerJob job
-                sendResponseStatus status201 ()
-            )
-            result
+        either handleDiscarded (handleInitialized payload) result
 
     event -> handleDiscarded $ IgnoredEventType event
 
@@ -57,6 +44,14 @@ handleDiscarded :: MonadHandler m => IgnoredWebhookReason -> m a
 handleDiscarded reason = do
     logWarnN $ "Webhook discarded: " <> reasonToLogMessage reason
     sendResponseStatus status200 ()
+
+handleInitialized :: Payload -> Entity Repo -> Handler a
+handleInitialized payload repo = do
+    let prNumber = mkId Proxy $ pullRequestNumber $ pPullRequest payload
+    job <- runDB $ insertJob repo prNumber
+
+    runBackendHandler $ enqueueRestylerJob job
+    sendResponseStatus status201 ()
 
 reasonToLogMessage :: IgnoredWebhookReason -> Text
 reasonToLogMessage = \case
