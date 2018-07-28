@@ -54,6 +54,11 @@ RUN useradd app
 # getting logged-out on deploys.
 RUN chown -R app /app/config
 
+# Make static/tmp and change its ownership. Static assets can lazily generated
+# so app needs to be able to write here.
+RUN mkdir -p /app/static/tmp
+RUN chown -R app /app/static/tmp
+
 USER app
 
 COPY docker/files /
