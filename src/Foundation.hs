@@ -5,6 +5,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
@@ -15,6 +16,7 @@ where
 
 import Import.NoFoundation
 
+import Api.Error
 import Authentication
 import Authorization
 import Cache
@@ -101,11 +103,12 @@ instance Yesod App where
 
     errorHandler NotFound = do
         mUserId <- maybeAuthId
-        html <- defaultLayout $ do
-            setTitle "Not Found"
-            $(widgetFile "not-found")
 
-        pure $ TypedContent typeHtml $ toContent html
+        selectRep $ do
+            provideRep $ defaultLayout $ do
+                setTitle "Not Found"
+                $(widgetFile "not-found")
+            provideRep $ sendApiError $ ApiErrorNotFound $ isJust mUserId
 
     errorHandler x = defaultErrorHandler x
 
