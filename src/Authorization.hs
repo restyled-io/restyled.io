@@ -1,7 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TypeFamilies #-}
 
 module Authorization
     ( authorizeAdmin
@@ -16,18 +14,20 @@ import GitHub.Data (Name, toPathPart)
 import qualified GitHub.Data as GH
 import Model.Collaborator
 
-authorizeAdmin :: AppSettings -> Maybe UserId -> DB AuthResult
+authorizeAdmin
+    :: MonadHandler m => AppSettings -> Maybe UserId -> SqlPersistT m AuthResult
 authorizeAdmin _ Nothing = notFound
 authorizeAdmin settings (Just userId) = do
     user <- fromMaybeM notFound =<< get userId
     authorizeWhen $ userEmail user `elem` appAdmins settings
 
 authorizeRepo
-    :: AppSettings
+    :: (MonadCache m, MonadHandler m)
+    => AppSettings
     -> Name GH.Owner
     -> Name GH.Repo
     -> Maybe UserId
-    -> DB AuthResult
+    -> SqlPersistT m AuthResult
 authorizeRepo _ owner name Nothing = do
     Entity _ repo <- getBy404 $ UniqueRepo owner name
 

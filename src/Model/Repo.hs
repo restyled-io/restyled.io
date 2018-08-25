@@ -1,8 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeFamilies #-}
 
 module Model.Repo
     ( RepoWithStats(..)
@@ -15,6 +13,7 @@ where
 import ClassyPrelude
 
 import Database.Persist
+import Database.Persist.Sql (SqlPersistT)
 import GitHub.Data hiding (Repo(..), User(..))
 import qualified GitHub.Data as GH
 import GitHub.Data.Apps hiding (installationId)
@@ -28,7 +27,7 @@ data RepoWithStats = RepoWithStats
     , rwsLastJob :: Maybe (Entity Job)
     }
 
-repoWithStats :: Entity Repo -> DB RepoWithStats
+repoWithStats :: MonadIO m => Entity Repo -> SqlPersistT m RepoWithStats
 repoWithStats repo =
     RepoWithStats repo
         <$> count
@@ -55,7 +54,9 @@ data IgnoredWebhookReason
     | PrivateNoPlan (Name Owner) (Name GH.Repo)
 
 initializeFromWebhook
-    :: Payload -> DB (Either IgnoredWebhookReason (Entity Repo))
+    :: MonadIO m
+    => Payload
+    -> SqlPersistT m (Either IgnoredWebhookReason (Entity Repo))
 initializeFromWebhook Payload {..}
     | pAction `notElem` enqueueEvents
     = pure $ Left $ IgnoredAction pAction
@@ -64,7 +65,8 @@ initializeFromWebhook Payload {..}
     | otherwise
     = Right <$> findOrCreateRepo pRepository pInstallationId
 
-findOrCreateRepo :: GH.Repo -> Id Installation -> DB (Entity Repo)
+findOrCreateRepo
+    :: MonadIO m => GH.Repo -> Id Installation -> SqlPersistT m (Entity Repo)
 findOrCreateRepo ghRepo installationId = do
     let
         repo = Repo

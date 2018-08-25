@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -10,6 +9,7 @@ module Authentication
 
 import Import.NoFoundation
 
+import Cache
 import Data.Aeson
 import Data.Aeson.Casing
 import GitHub.Data (Id, Name)
@@ -28,7 +28,9 @@ instance FromJSON GitHubUser where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
 authenticateUser
-    :: AuthId site ~ UserId => Creds site -> DB (AuthenticationResult site)
+    :: (AuthId site ~ UserId, MonadCache m, MonadHandler m)
+    => Creds site
+    -> SqlPersistT m (AuthenticationResult site)
 authenticateUser creds@Creds {..} = do
     mUserId <- entityKey <$$> getBy (UniqueUser credsPlugin credsIdent)
     logDebugN $ "Existing User Id: " <> tshow (toPathPiece <$> mUserId)
@@ -48,10 +50,10 @@ authenticateUser creds@Creds {..} = do
         (Just userId, Left _) -> pure $ Authenticated userId
 
 createFromGitHub
-    :: AuthId site ~ UserId
+    :: (AuthId site ~ UserId, MonadIO m)
     => Creds site
     -> GitHubUser
-    -> DB (AuthenticationResult site)
+    -> SqlPersistT m (AuthenticationResult site)
 createFromGitHub Creds {..} GitHubUser {..} = Authenticated <$> insert User
     { userEmail = ghuEmail
     , userGithubUserId = Just ghuId
@@ -61,11 +63,11 @@ createFromGitHub Creds {..} GitHubUser {..} = Authenticated <$> insert User
     }
 
 updateFromGitHub
-    :: AuthId site ~ UserId
+    :: (AuthId site ~ UserId, MonadIO m)
     => Creds site
     -> UserId
     -> GitHubUser
-    -> DB (AuthenticationResult site)
+    -> SqlPersistT m (AuthenticationResult site)
 updateFromGitHub Creds {..} userId GitHubUser {..} =
     Authenticated userId <$ updateWhere
         [ UserId ==. userId
