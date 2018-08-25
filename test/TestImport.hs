@@ -100,17 +100,15 @@ wipeDB app = runDBWithApp app $ do
 wipeRedis :: App -> IO ()
 wipeRedis app = runBackendApp app $ runRedis $ void $ del [queueName]
 
+-- brittany-disable-next-binding
+
 getTables :: MonadIO m => ReaderT SqlBackend m [Text]
-getTables =
-    map unSingle
-        <$> rawSql
-                
-                    [st|
-                        SELECT table_name
-                        FROM information_schema.tables
-                        WHERE table_schema = 'public';
-                    |]
-                []
+getTables = map unSingle <$> rawSql
+    [st|
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public';
+    |] []
 
 -- | Insert and authenticate as the given user
 --
