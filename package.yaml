@@ -93,7 +93,6 @@ tests:
       - restyled
       - bytestring
       - classy-prelude
-      - github
       - hedis
       - hspec
       - hspec-expectations-lifted

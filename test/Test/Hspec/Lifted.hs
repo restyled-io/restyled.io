@@ -38,8 +38,5 @@ import Test.Hspec.Expectations.Lifted as X
     , shouldStartWith
     )
 
-pending :: MonadIO m => m ()
-pending = liftIO Hspec.pending
-
 pendingWith :: MonadIO m => String -> m ()
 pendingWith = liftIO . Hspec.pendingWith
