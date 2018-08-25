@@ -18,7 +18,7 @@ import Import
 
 import Control.Monad.Logger
 import Database.Persist.Sql (ConnectionPool)
-import Database.Redis hiding (decode, runRedis)
+import Database.Redis hiding (Desc, decode, runRedis)
 import qualified Database.Redis as Redis
 
 -- | Like @'App'@ but with no webapp-related bits
@@ -41,9 +41,10 @@ type MonadBackend m =
 -- Uses supplied settings and connections, logs to stdout
 --
 runBackend :: MonadIO m => Backend -> ReaderT Backend (LoggingT m) a -> m a
-runBackend b@Backend{..} f = runStdoutLoggingT
-    $ filterLogger (const (backendSettings `allowsLevel`))
-    $ runReaderT f b
+runBackend b@Backend {..} f =
+    runStdoutLoggingT
+        $ filterLogger (const (backendSettings `allowsLevel`))
+        $ runReaderT f b
 
 -- | Run a backend action from a Handler (e.g. enqueuing a job)
 --
@@ -56,12 +57,14 @@ runBackendHandler f = do
 
 -- | Extracted so @'runBackendTest'@ can use it in tests
 runBackendApp :: App -> ReaderT Backend (LoggingT m) a -> m a
-runBackendApp app@App{..} f = runLoggingT
-    (runReaderT f Backend
-        { backendSettings = appSettings
-        , backendConnPool = appConnPool
-        , backendRedisConn = appRedisConn
-        }
+runBackendApp app@App {..} f = runLoggingT
+    (runReaderT
+        f
+        Backend
+            { backendSettings = appSettings
+            , backendConnPool = appConnPool
+            , backendRedisConn = appRedisConn
+            }
     )
     (messageLoggerSource app appLogger)
 
