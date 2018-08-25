@@ -26,7 +26,7 @@ Job json
   installationId InstallationId
   owner OwnerName
   repo RepoName
-  pullRequest PullRequestId
+  pullRequest PullRequestNum
 
   createdAt UTCTime
   updatedAt UTCTime

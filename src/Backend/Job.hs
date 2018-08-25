@@ -17,7 +17,7 @@ import Data.Aeson
 import Database.Persist.Sql (SqlPersistM)
 import System.Exit (ExitCode(..))
 
-insertJob :: Entity Repo -> PullRequestId -> YesodDB App (Entity Job)
+insertJob :: Entity Repo -> PullRequestNum -> YesodDB App (Entity Job)
 insertJob (Entity _ Repo {..}) pullRequestNumber = do
     now <- liftIO getCurrentTime
     insertEntity Job

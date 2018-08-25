@@ -33,7 +33,7 @@ import Formatting.Time (diff)
 data CreateJob = CreateJob
     { cjOwner :: OwnerName
     , cjRepo :: RepoName
-    , cjPullRequest :: PullRequestId
+    , cjPullRequest :: PullRequestNum
     }
 
 -- | Form to use when rendering for real input, or processing
@@ -43,7 +43,7 @@ createJobForm =
         $ CreateJob
         <$> (mkOwnerName <$> areq textField "Owner" Nothing)
         <*> (mkRepoName <$> areq textField "Repo" Nothing)
-        <*> (mkPullRequestId <$> areq intField "Pull Request" Nothing)
+        <*> (mkPullRequestNum <$> areq intField "Pull Request" Nothing)
 
 --- | Form to use when re-submitting an existing @'Job'@
 createJobFormFrom :: Job -> Form CreateJob
@@ -61,7 +61,7 @@ createJobFormFromRepo Repo {..} =
         $ CreateJob
         <$> areq hiddenField "" (Just repoOwner)
         <*> areq hiddenField "" (Just repoName)
-        <*> (mkPullRequestId <$> areq intField ("" { fsAttrs = attrs }) Nothing)
+        <*> (mkPullRequestNum <$> areq intField ("" { fsAttrs = attrs }) Nothing)
     where attrs = [("placeholder", "PR Number")]
 
 -- | Internal helper for rendering completion state

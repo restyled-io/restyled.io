@@ -18,10 +18,10 @@ import Widgets.Job
 getRepoR :: OwnerName -> RepoName -> Handler Html
 getRepoR = getRepoJobsR
 
-getRepoPullR :: OwnerName -> RepoName -> PullRequestId -> Handler Html
+getRepoPullR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html
 getRepoPullR = getRepoPullJobsR
 
-getRepoPullJobsR :: OwnerName -> RepoName -> PullRequestId -> Handler Html
+getRepoPullJobsR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html
 getRepoPullJobsR owner name num = do
     jobs <- runDB $ selectList
         [JobOwner ==. owner, JobRepo ==. name, JobPullRequest ==. num]
