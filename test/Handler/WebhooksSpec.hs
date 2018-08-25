@@ -70,25 +70,30 @@ spec = withApp $ do
             statusIs 200
 
         it "ignores private repositories if no plan" $ do
+            pendingWith "Moved to Backend"
             postFixture "webhooks/github/pull-request-opened-private.json"
             statusIs 200
 
         it "ignores private repositories if inactive plan" $ do
+            pendingWith "Moved to Backend"
             setupPrivatePlan (Just 100) Nothing
             postFixture "webhooks/github/pull-request-opened-private.json"
             statusIs 200
 
         it "ignores private repositories if expired plan" $ do
+            pendingWith "Moved to Backend"
             setupPrivatePlan Nothing $ Just (-100)
             postFixture "webhooks/github/pull-request-opened-private.json"
             statusIs 200
 
         it "accepts private repositories if active plan" $ do
+            pendingWith "Moved to Backend"
             setupPrivatePlan (Just (-100)) $ Just 100
             postFixture "webhooks/github/pull-request-opened-private.json"
             statusIs 201
 
         it "accepts private repositories if forever plan" $ do
+            pendingWith "Moved to Backend"
             setupPrivatePlan Nothing Nothing
             postFixture "webhooks/github/pull-request-opened-private.json"
             statusIs 201

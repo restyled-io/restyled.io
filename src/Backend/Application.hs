@@ -41,66 +41,107 @@ backendMain = do
 
     backendRedisConn <- checkedConnect (appRedisConf backendSettings)
 
-    runBackend Backend{..} $ forever $ awaitAndProcessJob 120
+    runBackend Backend {..} $ forever $ awaitAndProcessJob 120
 
 awaitAndProcessJob :: MonadBackend m => Integer -> m ()
 awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 
 processJob :: MonadBackend m => Entity Job -> m ()
 processJob job = do
-    logInfoN $ "Processing Restyler Job Id "
+    logInfoN
+        $ "Processing Restyler Job Id "
         <> toPathPiece (entityKey job)
-        <> ": " <> tshow (entityVal job)
+        <> ": "
+        <> tshow (entityVal job)
     settings <- asks backendSettings
-    (ec, out, err) <-
-        execRestyler settings job `catchAny` \ex -> do
+    (ec, out, err) <- execRestyler settings job `catchAny` \ex -> do
             -- Log and act like a failed process
-            logErrorN $ tshow ex
-            pure (ExitFailure 1, "", show ex)
+        logErrorN $ tshow ex
+        pure (ExitFailure 1, "", show ex)
     runDB $ completeJob (entityKey job) ec (pack out) (pack err)
 
-execRestyler :: MonadBackend m => AppSettings -> Entity Job -> m (ExitCode, String, String)
-execRestyler appSettings@AppSettings{..} (Entity jobId Job{..}) = do
+execRestyler
+    :: MonadBackend m
+    => AppSettings
+    -> Entity Job
+    -> m (ExitCode, String, String)
+execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
     repo <- fromMaybeM (throwString "Repo not found")
         =<< runDB (getBy $ UniqueRepo jobOwner jobRepo)
 
-    eAccessToken <- liftIO $ createAccessToken
-        appGitHubAppId
-        appGitHubAppKey
-        jobInstallationId
-
-    either throwString
-        (\AccessToken{..} ->
-            readLoggedProcess "docker"
-                [ "run", "--rm"
-                , "--env", debugEnv repo
-                , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack atToken
-                , "--volume", "/tmp:/tmp"
-                , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
-                , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-                , "--job-url"
-                , unpack
-                    $ appRoot
-                    <> "/gh/" <> toPathPiece jobOwner
-                    <> "/repos/" <> toPathPiece jobRepo
-                    <> "/jobs/" <> toPathPiece jobId
-                , unpack
-                    $ toPathPiece jobOwner
-                    <> "/" <> toPathPiece jobRepo
-                    <> "#" <> toPathPiece jobPullRequest
+    when (repoIsPrivate $ entityVal repo) $ runDB $ do
+        let
+            err = throwString $ unpack $ unlines
+                [ "No active plan for private repository: "
+                <> toPathPart (repoOwner $ entityVal repo)
+                <> "/"
+                <> toPathPart (repoName $ entityVal repo)
+                , ""
+                , "Contact support@restyled.io if you would like to discuss a Trial"
                 ]
+
+        now <- liftIO getCurrentTime
+        void . fromMaybeM err =<< selectActivePlan now (entityVal repo)
+
+    eAccessToken <- liftIO
+        $ createAccessToken appGitHubAppId appGitHubAppKey jobInstallationId
+
+    either
+        throwString
+        (\AccessToken {..} -> readLoggedProcess
+            "docker"
+            [ "run"
+            , "--rm"
+            , "--env"
+            , debugEnv repo
+            , "--env"
+            , "GITHUB_ACCESS_TOKEN=" <> unpack atToken
+            , "--volume"
+            , "/tmp:/tmp"
+            , "--volume"
+            , "/var/run/docker.sock:/var/run/docker.sock"
+            , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
+            , "--job-url"
+            , unpack
+            $ appRoot
+            <> "/gh/"
+            <> toPathPiece jobOwner
+            <> "/repos/"
+            <> toPathPiece jobRepo
+            <> "/jobs/"
+            <> toPathPiece jobId
+            , unpack
+            $ toPathPiece jobOwner
+            <> "/"
+            <> toPathPiece jobRepo
+            <> "#"
+            <> toPathPiece jobPullRequest
+            ]
         )
         eAccessToken
   where
-    debugEnv (Entity _ Repo{..})
+    debugEnv (Entity _ Repo {..})
         | appSettings `allowsLevel` LevelDebug = "DEBUG=1"
         | repoDebugEnabled = "DEBUG=1"
         | otherwise = "DEBUG="
 
-readLoggedProcess :: (MonadIO m, MonadLogger m)
-    => String -> [String] -> m (ExitCode, String, String)
+readLoggedProcess
+    :: (MonadIO m, MonadLogger m)
+    => String
+    -> [String]
+    -> m (ExitCode, String, String)
 readLoggedProcess cmd args = do
-    logDebugN $ "process: " <> tshow (cmd:args)
+    logDebugN $ "process: " <> tshow (cmd : args)
     result <- liftIO $ readProcessWithExitCode cmd args ""
     logDebugN $ "process result: " <> tshow result
     pure result
+
+selectActivePlan
+    :: MonadIO m => UTCTime -> Repo -> SqlPersistT m (Maybe (Entity Plan))
+selectActivePlan now repo = selectFirst filters [Desc PlanId]
+  where
+    filters = repoFilters <> activeFilters <> expiredFilters
+    repoFilters = [PlanOwner ==. repoOwner repo, PlanRepo ==. repoName repo]
+    activeFilters = [PlanActiveAt ==. Nothing] ||. [PlanActiveAt <=. Just now]
+    expiredFilters =
+        [PlanExpiresAt ==. Nothing] ||. [PlanExpiresAt >=. Just now]

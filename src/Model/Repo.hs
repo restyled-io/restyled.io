@@ -14,7 +14,6 @@ where
 
 import ClassyPrelude
 
-import Control.Error.Util (note)
 import Database.Persist
 import GitHub.Data hiding (Repo(..), User(..))
 import qualified GitHub.Data as GH
@@ -62,28 +61,8 @@ initializeFromWebhook Payload {..}
     = pure $ Left $ IgnoredAction pAction
     | "-restyled" `isSuffixOf` headBranch pPullRequest
     = pure $ Left $ OwnPullRequest $ headBranch pPullRequest
-    | repoPublic pRepository
-    = Right <$> findOrCreateRepo pRepository pInstallationId
     | otherwise
-    = do
-        repo <- findOrCreateRepo pRepository pInstallationId
-
-        let
-            reason = PrivateNoPlan
-                (repoOwner $ entityVal repo)
-                (repoName $ entityVal repo)
-
-        now <- liftIO getCurrentTime
-        note reason . (repo <$) <$> selectActivePlan now (entityVal repo)
-
-selectActivePlan :: UTCTime -> Repo -> DB (Maybe (Entity Plan))
-selectActivePlan now repo = selectFirst filters [Desc PlanId]
-  where
-    filters = repoFilters <> activeFilters <> expiredFilters
-    repoFilters = [PlanOwner ==. repoOwner repo, PlanRepo ==. repoName repo]
-    activeFilters = [PlanActiveAt ==. Nothing] ||. [PlanActiveAt <=. Just now]
-    expiredFilters =
-        [PlanExpiresAt ==. Nothing] ||. [PlanExpiresAt >=. Just now]
+    = Right <$> findOrCreateRepo pRepository pInstallationId
 
 findOrCreateRepo :: GH.Repo -> Id Installation -> DB (Entity Repo)
 findOrCreateRepo ghRepo installationId = do
@@ -104,9 +83,6 @@ findOrCreateRepo ghRepo installationId = do
 
 enqueueEvents :: [PullRequestEventType]
 enqueueEvents = [PullRequestOpened, PullRequestSynchronized]
-
-repoPublic :: GH.Repo -> Bool
-repoPublic = not . GH.repoPrivate
 
 headBranch :: PullRequest -> Text
 headBranch = pullRequestCommitRef . pullRequestHead
