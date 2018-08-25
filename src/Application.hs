@@ -64,17 +64,17 @@ makeFoundation :: AppSettings -> IO App
 makeFoundation appSettings = do
     appHttpManager <- getGlobalManager
     appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
-    appStatic <- (if appMutableStatic appSettings
-        then staticDevel
-        else static) appStaticDir
+    appStatic <- (if appMutableStatic appSettings then staticDevel else static)
+        appStaticDir
     appRedisConn <- checkedConnect $ appRedisConf appSettings
 
-    let mkFoundation appConnPool = App{..}
-        tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
+    let mkFoundation appConnPool = App {..}
+        tempFoundation =
+            mkFoundation $ error "connPool forced in tempFoundation"
         logFunc = messageLoggerSource tempFoundation appLogger
 
     pool <- flip runLoggingT logFunc $ createPostgresqlPool
-        (pgConnStr  $ appDatabaseConf appSettings)
+        (pgConnStr $ appDatabaseConf appSettings)
         (pgPoolSize $ appDatabaseConf appSettings)
 
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
@@ -106,6 +106,8 @@ makeLogWare foundation = do
     apacheIpSource = if appIpFromHeader $ appSettings foundation
         then FromFallback
         else FromSocket
+
+-- brittany-disable-next-binding
 
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings
