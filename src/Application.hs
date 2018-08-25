@@ -20,6 +20,7 @@ import Database.Persist.Postgresql
 import Database.Redis (checkedConnect)
 import Language.Haskell.TH.Syntax (qLocation)
 import LoadEnv (loadEnv)
+import Model.AppMetrics
 import Network.HTTP.Client.TLS (getGlobalManager)
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
@@ -67,6 +68,7 @@ makeFoundation appSettings = do
     appStatic <- (if appMutableStatic appSettings then staticDevel else static)
         appStaticDir
     appRedisConn <- checkedConnect $ appRedisConf appSettings
+    appMetrics <- buildAppMetrics
 
     let mkFoundation appConnPool = App {..}
         tempFoundation =
@@ -130,4 +132,11 @@ appMain = do
     settings <- loadEnvSettings
     foundation <- makeFoundation settings
     app <- makeApplication foundation
+
+    let store = amStore $ appMetrics foundation
+
+    if appCloudWatchEKG settings
+        then forkCloudWatchServer store
+        else forkLocalhostServer store 8000
+
     runSettings (warpSettings foundation) app
