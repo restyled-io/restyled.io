@@ -104,7 +104,7 @@ getTables :: MonadIO m => ReaderT SqlBackend m [Text]
 getTables =
     map unSingle
         <$> rawSql
-                
+
                     [st|
                         SELECT table_name
                         FROM information_schema.tables
