@@ -6,8 +6,8 @@ module Model.Names
     , RepoName
     , mkRepoName
     , InstallationId
-    , PullRequestId
-    , mkPullRequestId
+    , PullRequestNum
+    , mkPullRequestNum
     , GitHubUserId
     , GitHubUserName
     ) where
@@ -27,10 +27,10 @@ type OwnerName = Name Owner
 type RepoName = Name Repo
 type InstallationId = Id Installation
 
-type PullRequestId = Id PullRequest
+type PullRequestNum = Id PullRequest
 
-mkPullRequestId :: Int -> PullRequestId
-mkPullRequestId = mkId Proxy
+mkPullRequestNum :: Int -> PullRequestNum
+mkPullRequestNum = mkId Proxy
 
 type GitHubUserId = Id User
 type GitHubUserName = Name User

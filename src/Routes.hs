@@ -34,10 +34,10 @@ repoP = RepoP
 repoR :: OwnerName -> RepoName -> Route App
 repoR owner name = repoP owner name RepoR
 
-pullP :: PullRequestId -> RepoPullP -> RepoP
+pullP :: PullRequestNum -> RepoPullP -> RepoP
 pullP = RepoPullP
 
-pullR :: PullRequestId -> RepoP
+pullR :: PullRequestNum -> RepoP
 pullR num = pullP num RepoPullR
 
 jobsR :: RepoP
@@ -46,7 +46,7 @@ jobsR = RepoJobsP RepoJobsR
 jobR :: JobId -> RepoP
 jobR = RepoJobsP . RepoJobR
 
-pullJobsR :: PullRequestId -> RepoP
+pullJobsR :: PullRequestNum -> RepoP
 pullJobsR num = pullP num $ RepoPullJobsP RepoPullJobsR
 
 adminReposP :: AdminReposP -> Route App

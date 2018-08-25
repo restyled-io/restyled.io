@@ -35,7 +35,7 @@ handleGitHubEvent = \case
 
 handleInitialized :: Payload -> Entity Repo -> Handler a
 handleInitialized payload repo = do
-    let prNumber = mkPullRequestId $ pullRequestNumber $ pPullRequest payload
+    let prNumber = mkPullRequestNum $ pullRequestNumber $ pPullRequest payload
     job <- runDB $ insertJob repo prNumber
     runBackendHandler $ enqueueRestylerJob job
     sendResponseStatus status201 ()
