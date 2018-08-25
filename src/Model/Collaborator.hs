@@ -18,8 +18,8 @@ import Control.Monad.Except
 import Data.Aeson
 import Data.Aeson.Casing
 import qualified Data.ByteString.Lazy as BL
-import GitHub.Data (toPathPart)
-import GitHub.Endpoints.Installations (AccessToken(..), createAccessToken)
+import GitHub.Data.AccessTokens
+import GitHub.Endpoints.Installations
 import Network.HTTP.Simple
 
 data RepoPermission
@@ -79,11 +79,11 @@ collaboratorCanRead settings Repo {..} User {..} = do
         request <-
             githubRequest token
             $ "/repos/"
-            <> unpack (toPathPart repoOwner)
+            <> unpack (toPathPiece repoOwner)
             <> "/"
-            <> unpack (toPathPart repoName)
+            <> unpack (toPathPiece repoName)
             <> "/collaborators/"
-            <> unpack (toPathPart username)
+            <> unpack (toPathPiece username)
             <> "/permission"
 
         response <- withExceptT show $ exceptIO $ tryIO $ httpLbs request

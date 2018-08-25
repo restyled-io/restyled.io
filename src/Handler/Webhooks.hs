@@ -11,7 +11,7 @@ import Import
 
 import Backend.Foundation
 import Backend.Job
-import GitHub.Data hiding (Repo(..))
+import GitHub.Data.PullRequests
 import GitHub.Data.Webhooks.PullRequest
 
 postWebhooksR :: Handler ()
@@ -35,7 +35,7 @@ handleGitHubEvent = \case
 
 handleInitialized :: Payload -> Entity Repo -> Handler a
 handleInitialized payload repo = do
-    let prNumber = mkId Proxy $ pullRequestNumber $ pPullRequest payload
+    let prNumber = mkPullRequestId $ pullRequestNumber $ pPullRequest payload
     job <- runDB $ insertJob repo prNumber
     runBackendHandler $ enqueueRestylerJob job
     sendResponseStatus status201 ()
@@ -52,9 +52,9 @@ reasonToLogMessage = \case
     OwnPullRequest branch -> "branch appears to be our own: " <> branch
     PrivateNoPlan owner repo ->
         "private repository with no plan: "
-            <> toPathPart owner
+            <> toPathPiece owner
             <> "/"
-            <> toPathPart repo
+            <> toPathPiece repo
 
 githubEventHeader :: Handler (Maybe Text)
 githubEventHeader = decodeUtf8 <$$> lookupHeader "X-GitHub-Event"

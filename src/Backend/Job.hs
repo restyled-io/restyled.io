@@ -15,11 +15,10 @@ import Import hiding (timeout)
 import Backend.Foundation
 import Data.Aeson
 import Database.Persist.Sql (SqlPersistM)
-import GitHub.Data hiding (Repo(..))
 import System.Exit (ExitCode(..))
 
-insertJob :: Entity Repo -> Id PullRequest -> YesodDB App (Entity Job)
-insertJob (Entity _ Repo{..}) pullRequestNumber = do
+insertJob :: Entity Repo -> PullRequestId -> YesodDB App (Entity Job)
+insertJob (Entity _ Repo {..}) pullRequestNumber = do
     now <- liftIO getCurrentTime
     insertEntity Job
         { jobInstallationId = repoInstallationId
@@ -42,7 +41,8 @@ completeJob
     -> SqlPersistM ()
 completeJob jid ec out err = do
     now <- liftIO getCurrentTime
-    update jid
+    update
+        jid
         [ JobUpdatedAt =. now
         , JobCompletedAt =. Just now
         , JobExitCode =. Just (toInt ec)
@@ -59,13 +59,15 @@ awaitRestylerJob timeout = do
     eresult <- runRedis $ brpop [queueName] timeout
     logDebugN $ "Popped value: " <> tshow eresult
     return $ either (const Nothing) (decodePopped =<<) eresult
-  where
-    decodePopped = decodeStrict . snd
+    where decodePopped = decodeStrict . snd
 
 enqueueRestylerJob :: MonadBackend m => Entity Job -> m ()
 enqueueRestylerJob e@(Entity jid job) = do
-    logDebugN $ "Enqueuing Restyler Job Id "
-        <> toPathPiece jid <> ": " <> tshow job
+    logDebugN
+        $ "Enqueuing Restyler Job Id "
+        <> toPathPiece jid
+        <> ": "
+        <> tshow job
     void $ runRedis $ lpush queueName [toStrict $ encode e]
 
 queueName :: ByteString

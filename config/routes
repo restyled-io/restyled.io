@@ -10,7 +10,7 @@
 
 /gh/#OwnerName/repos/#RepoName RepoP:
   / RepoR GET
-  /pulls/#Int RepoPullP:
+  /pulls/#PullRequestId RepoPullP:
     / RepoPullR GET
     /jobs RepoPullJobsP:
       / RepoPullJobsR GET

@@ -14,9 +14,8 @@ import ClassyPrelude
 
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
-import GitHub.Data hiding (Repo(..), User(..))
 import qualified GitHub.Data as GH
-import GitHub.Data.Apps hiding (installationId)
+import GitHub.Data.PullRequests
 import GitHub.Data.Webhooks.PullRequest
 import Model
 
@@ -51,7 +50,7 @@ data IgnoredWebhookReason
     = IgnoredAction PullRequestEventType
     | IgnoredEventType Text
     | OwnPullRequest Text
-    | PrivateNoPlan (Name Owner) (Name GH.Repo)
+    | PrivateNoPlan OwnerName RepoName
 
 initializeFromWebhook
     :: MonadIO m
@@ -66,11 +65,11 @@ initializeFromWebhook Payload {..}
     = Right <$> findOrCreateRepo pRepository pInstallationId
 
 findOrCreateRepo
-    :: MonadIO m => GH.Repo -> Id Installation -> SqlPersistT m (Entity Repo)
+    :: MonadIO m => GH.Repo -> InstallationId -> SqlPersistT m (Entity Repo)
 findOrCreateRepo ghRepo installationId = do
     let
         repo = Repo
-            { repoOwner = simpleOwnerLogin $ GH.repoOwner ghRepo
+            { repoOwner = GH.simpleOwnerLogin $ GH.repoOwner ghRepo
             , repoName = GH.repoName ghRepo
             , repoInstallationId = installationId
             , repoIsPrivate = GH.repoPrivate ghRepo

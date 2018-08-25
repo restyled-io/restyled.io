@@ -17,7 +17,8 @@ import Control.Monad ((<=<))
 import Control.Monad.Logger (runStdoutLoggingT)
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
-import GitHub.Endpoints.Installations hiding (Repo(..))
+import GitHub.Data.AccessTokens
+import GitHub.Endpoints.Installations
 import LoadEnv (loadEnv)
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
@@ -73,9 +74,9 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
         let
             err = throwString $ unpack $ unlines
                 [ "No active plan for private repository: "
-                <> toPathPart (repoOwner $ entityVal repo)
+                <> toPathPiece (repoOwner $ entityVal repo)
                 <> "/"
-                <> toPathPart (repoName $ entityVal repo)
+                <> toPathPiece (repoName $ entityVal repo)
                 , ""
                 , "Contact support@restyled.io if you would like to discuss a Trial"
                 ]
