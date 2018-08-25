@@ -2,11 +2,7 @@
 
 module GitHub.Endpoints.Installations
     ( createAccessToken
-    , module GitHub.Data
-    , module GitHub.Data.Apps
-    , module GitHub.Data.AccessTokens
-    )
-where
+    ) where
 
 import Prelude
 
@@ -20,9 +16,9 @@ import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
-import GitHub.Data
-import GitHub.Data.AccessTokens
-import GitHub.Data.Apps hiding (installationId)
+import GitHub.Data (Id, toPathPart, untagId)
+import GitHub.Data.AccessTokens (AccessToken(..))
+import GitHub.Data.Apps (App, Installation)
 import Network.HTTP.Simple
 import Network.HTTP.Types
 import qualified Web.JWT as JWT

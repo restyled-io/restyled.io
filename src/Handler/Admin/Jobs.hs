@@ -13,7 +13,6 @@ import Import
 
 import Backend.Foundation (runBackendHandler)
 import Backend.Job
-import GitHub.Data (toPathPart)
 import Widgets.Job
 
 getAdminJobsNewR :: Handler Html
@@ -29,7 +28,7 @@ postAdminJobsR = do
     ((result, widget), enctype) <- runFormPost createJobForm
 
     case result of
-        FormSuccess CreateJob{..} -> do
+        FormSuccess CreateJob {..} -> do
             mRepo <- runDB $ getBy $ UniqueRepo cjOwner cjRepo
 
             for_ mRepo $ \repo -> do
@@ -38,10 +37,12 @@ postAdminJobsR = do
                 setMessage "Job created"
                 redirect AdminR
 
-            setMessage $ toHtml
+            setMessage
+                $ toHtml
                 $ "Unknown Repo: "
-                <> toPathPart cjOwner <> "/"
-                <> toPathPart cjRepo
+                <> toPathPiece cjOwner
+                <> "/"
+                <> toPathPiece cjRepo
 
         _ -> setMessage "Error creating Job"
 

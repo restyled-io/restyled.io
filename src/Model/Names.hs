@@ -2,9 +2,12 @@
 
 module Model.Names
     ( OwnerName
+    , mkOwnerName
     , RepoName
+    , mkRepoName
     , InstallationId
     , PullRequestId
+    , mkPullRequestId
     , GitHubUserId
     , GitHubUserName
     ) where
@@ -17,15 +20,23 @@ import Database.Persist.Sql
 import GitHub.Data
 import GitHub.Data.Apps
 import Text.Blaze (ToMarkup(..))
+import Text.Read
 import Yesod.Core (PathPiece(..))
 
 type OwnerName = Name Owner
 type RepoName = Name Repo
 type InstallationId = Id Installation
+
 type PullRequestId = Id PullRequest
+
+mkPullRequestId :: Int -> PullRequestId
+mkPullRequestId = mkId Proxy
 
 type GitHubUserId = Id User
 type GitHubUserName = Name User
+
+instance Read (Id a) where
+    readPrec = mkId Proxy <$> readPrec
 
 instance PathPiece (Id a) where
     toPathPiece = toPathPiece . untagId

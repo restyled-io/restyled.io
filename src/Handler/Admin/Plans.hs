@@ -11,15 +11,13 @@ module Handler.Admin.Plans
 
 import Import
 
-import GitHub.Data (mkName)
-
 planForm :: Form Plan
 planForm =
     renderDivs
         $ Plan
         <$> areq (selectField optionsEnum) "Type" Nothing
-        <*> (mkName Proxy <$> areq textField "Owner" Nothing)
-        <*> (mkName Proxy <$> areq textField "Repo" Nothing)
+        <*> (mkOwnerName <$> areq textField "Owner" Nothing)
+        <*> (mkRepoName <$> areq textField "Repo" Nothing)
         <*> (mkUTC <$$> aopt dayField "Active" Nothing)
         <*> (mkUTC <$$> aopt dayField "Expires" Nothing)
         <*> (unTextarea <$> areq textareaField "Message" Nothing)

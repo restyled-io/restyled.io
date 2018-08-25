@@ -29,39 +29,40 @@ import Import
 import qualified Data.Text as T
 import Formatting (format)
 import Formatting.Time (diff)
-import GitHub.Data hiding (Repo)
-import qualified GitHub.Data as GH
 
 data CreateJob = CreateJob
-    { cjOwner :: Name Owner
-    , cjRepo :: Name GH.Repo
-    , cjPullRequest :: Id PullRequest
+    { cjOwner :: OwnerName
+    , cjRepo :: RepoName
+    , cjPullRequest :: PullRequestId
     }
 
 -- | Form to use when rendering for real input, or processing
 createJobForm :: Form CreateJob
-createJobForm = renderDivs $ CreateJob
-    <$> (mkName Proxy <$> areq textField "Owner" Nothing)
-    <*> (mkName Proxy <$> areq textField "Repo" Nothing)
-    <*> (mkId Proxy <$> areq intField "Pull Request" Nothing)
+createJobForm =
+    renderDivs
+        $ CreateJob
+        <$> (mkOwnerName <$> areq textField "Owner" Nothing)
+        <*> (mkRepoName <$> areq textField "Repo" Nothing)
+        <*> (mkPullRequestId <$> areq intField "Pull Request" Nothing)
 
 --- | Form to use when re-submitting an existing @'Job'@
 createJobFormFrom :: Job -> Form CreateJob
-createJobFormFrom Job{..} = renderDivs $ CreateJob
-    <$> areq hiddenField "" (Just jobOwner)
-    <*> areq hiddenField "" (Just jobRepo)
-    <*> areq hiddenField "" (Just jobPullRequest)
+createJobFormFrom Job {..} =
+    renderDivs
+        $ CreateJob
+        <$> areq hiddenField "" (Just jobOwner)
+        <*> areq hiddenField "" (Just jobRepo)
+        <*> areq hiddenField "" (Just jobPullRequest)
 
 -- | Form to use when submitting a @'Job'@ for a known @'Repo'@
 createJobFormFromRepo :: Repo -> Form CreateJob
-createJobFormFromRepo Repo{..} = renderDivs $ CreateJob
-    <$> areq hiddenField "" (Just repoOwner)
-    <*> areq hiddenField "" (Just repoName)
-    <*> (mkId Proxy <$> areq intField ("" { fsAttrs = attrs })Nothing)
-  where
-    attrs =
-        [ ("placeholder", "PR Number")
-        ]
+createJobFormFromRepo Repo {..} =
+    renderDivs
+        $ CreateJob
+        <$> areq hiddenField "" (Just repoOwner)
+        <*> areq hiddenField "" (Just repoName)
+        <*> (mkPullRequestId <$> areq intField ("" { fsAttrs = attrs }) Nothing)
+    where attrs = [("placeholder", "PR Number")]
 
 -- | Internal helper for rendering completion state
 data Completion
@@ -70,25 +71,24 @@ data Completion
     | InProgress
 
 jobCompletion :: Job -> Completion
-jobCompletion job =
-    case (jobCompletedAt job, jobExitCode job) of
-        (Just completedAt, Just 0) -> Success completedAt
-        (Just completedAt, Just n) -> Failure completedAt n
-        _ -> InProgress
+jobCompletion job = case (jobCompletedAt job, jobExitCode job) of
+    (Just completedAt, Just 0) -> Success completedAt
+    (Just completedAt, Just n) -> Failure completedAt n
+    _ -> InProgress
 
 jobCard :: Entity Job -> Widget
 jobCard job = do
     now <- liftIO getCurrentTime
 
-    let
-        mActions :: Maybe Widget
+    let mActions :: Maybe Widget
         mActions = Nothing
 
     $(widgetFile "widgets/job-card")
 
+-- brittany-disable-next-binding
+
 jobOutput :: Job -> Widget
-jobOutput job =
-    $(widgetFile "widgets/job-output")
+jobOutput job = $(widgetFile "widgets/job-output")
 
 colorizedLogLine :: Text -> Widget
 colorizedLogLine ln
@@ -106,11 +106,12 @@ adminJobCard :: Entity Job -> Widget
 adminJobCard job = do
     now <- liftIO getCurrentTime
 
-    let
-        mActions :: Maybe Widget
+    let mActions :: Maybe Widget
         mActions = Just $ adminJobActions job
 
     $(widgetFile "widgets/job-card")
+
+-- brittany-disable-next-binding
 
 adminJobActions :: Entity Job -> Widget
 adminJobActions job = do

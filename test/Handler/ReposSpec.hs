@@ -7,9 +7,6 @@ where
 
 import TestImport
 
-import GitHub.Data hiding (Repo(..))
-import qualified GitHub.Data as GH
-
 spec :: Spec
 spec = withApp $ do
     describe "GET gh/:owner/repos/:repo" $ do
@@ -48,7 +45,7 @@ itRequiresRepositoryAccess path = do
     owner = "foo"
     name = "bar"
 
-publicRepo :: Name Owner -> Name GH.Repo -> Repo
+publicRepo :: OwnerName -> RepoName -> Repo
 publicRepo owner name = Repo
     { repoOwner = owner
     , repoName = name

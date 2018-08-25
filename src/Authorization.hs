@@ -10,8 +10,6 @@ import Import.NoFoundation
 
 import Cache
 import qualified Data.Text as T
-import GitHub.Data (Name, toPathPart)
-import qualified GitHub.Data as GH
 import Model.Collaborator
 
 authorizeAdmin
@@ -24,8 +22,8 @@ authorizeAdmin settings (Just userId) = do
 authorizeRepo
     :: (MonadCache m, MonadHandler m)
     => AppSettings
-    -> Name GH.Owner
-    -> Name GH.Repo
+    -> OwnerName
+    -> RepoName
     -> Maybe UserId
     -> SqlPersistT m AuthResult
 authorizeRepo _ owner name Nothing = do
@@ -33,9 +31,9 @@ authorizeRepo _ owner name Nothing = do
 
     logDebugN
         $ "Authorizing "
-        <> toPathPart owner
+        <> toPathPiece owner
         <> "/"
-        <> toPathPart name
+        <> toPathPiece name
         <> " for anonymous user"
 
     authorizeWhen $ not $ repoIsPrivate repo
@@ -45,9 +43,9 @@ authorizeRepo settings owner name (Just userId) = do
 
     logDebugN
         $ "Authorizing "
-        <> toPathPart owner
+        <> toPathPiece owner
         <> "/"
-        <> toPathPart name
+        <> toPathPiece name
         <> " for authenticated user id="
         <> toPathPiece userId
 
@@ -62,17 +60,17 @@ authorizeRepo settings owner name (Just userId) = do
     caching = lift . withCache cacheKey
     cacheKey = CacheKey $ "auth.repo." <> T.intercalate
         "."
-        [toPathPart owner, toPathPart name, toPathPiece userId]
+        [toPathPiece owner, toPathPiece name, toPathPiece userId]
 
     -- Log this at INFO temporarily since it's important and new
     logPrivateRepoResult user canRead =
         logInfoN
             $ "GitHub user name="
-            <> maybe "<none>" toPathPart (userGithubUsername user)
+            <> maybe "<none>" toPathPiece (userGithubUsername user)
             <> " repo="
-            <> toPathPart owner
+            <> toPathPiece owner
             <> "/"
-            <> toPathPart name
+            <> toPathPiece name
             <> " can_read="
             <> tshow canRead
 
