@@ -13,6 +13,7 @@ import Backend.Foundation
 import Backend.Job
 import GitHub.Data.PullRequests
 import GitHub.Data.Webhooks.PullRequest
+import Metrics
 
 postWebhooksR :: Handler ()
 postWebhooksR = maybe rejectRequest handleGitHubEvent =<< githubEventHeader
@@ -22,6 +23,7 @@ handleGitHubEvent = \case
     "pull_request" -> do
         payload <- requireJsonBody
         logDebugN $ "PullRequestEvent received: " <> tshow payload
+        webhookReceived
 
         result <- runDB $ initializeFromWebhook payload
         either handleDiscarded (handleInitialized payload) result

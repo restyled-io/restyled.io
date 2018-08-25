@@ -1,6 +1,10 @@
 ---
 resolver: lts-11.5
 extra-deps:
+  - amazonka-1.6.0
+  - amazonka-cloudwatch-1.6.0
+  - amazonka-core-1.6.0
+  - ekg-cloudwatch-0.0.1.6
   - hoauth2-1.7.1
   - jwt-0.8.0
   - yesod-auth-oauth2-0.5.0.0
