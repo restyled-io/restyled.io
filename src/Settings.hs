@@ -17,6 +17,8 @@ module Settings
     )
 where
 
+-- brittany-disable
+
 import ClassyPrelude.Yesod hiding (Proxy)
 
 import qualified Data.ByteString.Char8 as C8
