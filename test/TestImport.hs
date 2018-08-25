@@ -41,7 +41,6 @@ import Database.Redis (del)
 import Foundation as X
 import LoadEnv (loadEnvFrom)
 import Model as X
-import Model.PlanType as X
 import Routes as X
 import Settings (AppSettings(..), loadEnvSettings)
 import Test.Hspec.Core (SpecM)
@@ -102,12 +101,16 @@ wipeRedis :: App -> IO ()
 wipeRedis app = runBackendApp app $ runRedis $ void $ del [queueName]
 
 getTables :: MonadIO m => ReaderT SqlBackend m [Text]
-getTables = map unSingle <$> rawSql
-    [st|
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_schema = 'public';
-    |] []
+getTables =
+    map unSingle
+        <$> rawSql
+                
+                    [st|
+                        SELECT table_name
+                        FROM information_schema.tables
+                        WHERE table_schema = 'public';
+                    |]
+                []
 
 -- | Insert and authenticate as the given user
 --

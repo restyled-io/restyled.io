@@ -1,26 +1,31 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module GitHub.Instances
-    (
-    -- * Route pieces
-      OwnerName
+module Model.Names
+    ( OwnerName
     , RepoName
-    )
-where
+    , InstallationId
+    , PullRequestId
+    , GitHubUserId
+    , GitHubUserName
+    ) where
 
 import Prelude
 
 import Data.Proxy
 import Data.Text (Text)
 import Database.Persist.Sql
-import GitHub.Data hiding (Repo(..))
-import qualified GitHub.Data as GH
+import GitHub.Data
+import GitHub.Data.Apps
 import Text.Blaze (ToMarkup(..))
 import Yesod.Core (PathPiece(..))
 
--- Types necessary to use Names in config/routes
 type OwnerName = Name Owner
-type RepoName = Name GH.Repo
+type RepoName = Name Repo
+type InstallationId = Id Installation
+type PullRequestId = Id PullRequest
+
+type GitHubUserId = Id User
+type GitHubUserName = Name User
 
 instance PathPiece (Id a) where
     toPathPiece = toPathPiece . untagId
