@@ -55,6 +55,8 @@ backendMain = do
 awaitAndProcessJob :: MonadBackend m => Integer -> m ()
 awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 
+-- brittany-disable-next-binding
+
 processJob :: MonadBackend m => Entity Job -> m ()
 processJob job = do
     logInfoN
@@ -62,18 +64,20 @@ processJob job = do
         <> toPathPiece (entityKey job)
         <> ": "
         <> tshow (entityVal job)
+
     settings <- asks backendSettings
     (ec, out, err) <- execRestyler settings job `catchAny` \ex -> do
-            -- Log and act like a failed process
+        -- Log and act like a failed process
         logErrorN $ tshow ex
         pure (ExitFailure 1, "", show ex)
-
 
     recordJobMetrics ec
     runDB $ completeJob (entityKey job) ec (pack out) (pack err)
   where
     recordJobMetrics ExitSuccess = jobAttempted >> jobSucceeded
     recordJobMetrics _ = jobAttempted >> jobFailed
+
+-- brittany-disable-next-binding
 
 execRestyler
     :: MonadBackend m
@@ -105,32 +109,13 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
         throwString
         (\AccessToken {..} -> readLoggedProcess
             "docker"
-            [ "run"
-            , "--rm"
-            , "--env"
-            , debugEnv repo
-            , "--env"
-            , "GITHUB_ACCESS_TOKEN=" <> unpack atToken
-            , "--volume"
-            , "/tmp:/tmp"
-            , "--volume"
-            , "/var/run/docker.sock:/var/run/docker.sock"
+            [ "run" , "--rm"
+            , "--env" , debugEnv repo
+            , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack atToken
+            , "--volume" , "/tmp:/tmp"
+            , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
             , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-            , "--job-url"
-            , unpack
-            $ appRoot
-            <> "/gh/"
-            <> toPathPiece jobOwner
-            <> "/repos/"
-            <> toPathPiece jobRepo
-            <> "/jobs/"
-            <> toPathPiece jobId
-            , unpack
-            $ toPathPiece jobOwner
-            <> "/"
-            <> toPathPiece jobRepo
-            <> "#"
-            <> toPathPiece jobPullRequest
+            , "--job-url" , unpack jobUrl, unpack prSpec
             ]
         )
         eAccessToken
@@ -139,6 +124,15 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
         | appSettings `allowsLevel` LevelDebug = "DEBUG=1"
         | repoDebugEnabled = "DEBUG=1"
         | otherwise = "DEBUG="
+
+    jobUrl = appRoot
+        <> "/gh/" <> toPathPiece jobOwner
+        <> "/repos/" <> toPathPiece jobRepo
+        <> "/jobs/" <> toPathPiece jobId
+
+    prSpec = toPathPiece jobOwner
+        <> "/" <> toPathPiece jobRepo
+        <> "#" <> toPathPiece jobPullRequest
 
 readLoggedProcess
     :: (MonadIO m, MonadLogger m)
