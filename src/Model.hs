@@ -6,7 +6,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -18,16 +17,12 @@ where
 
 import ClassyPrelude.Yesod
 
-import Cache
 import Database.Persist.Quasi
 import GitHub.Data (Id, Name, Owner, PullRequest)
 import qualified GitHub.Data as GH
 import GitHub.Data.Apps (Installation)
 import GitHub.Instances ()
 import Model.PlanType
-
-type DB a = forall backend m.
-    (backend ~ SqlBackend, MonadCache m, MonadHandler m) => ReaderT backend m a
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
