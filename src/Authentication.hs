@@ -12,15 +12,14 @@ import Import.NoFoundation
 import Cache
 import Data.Aeson
 import Data.Aeson.Casing
-import GitHub.Data (Id, Name)
 import Yesod.Auth
 import Yesod.Auth.Message
 import Yesod.Auth.OAuth2
 
 data GitHubUser = GitHubUser
     { ghuEmail :: Text
-    , ghuId :: Id User
-    , ghuLogin :: Name User
+    , ghuId :: GitHubUserId
+    , ghuLogin :: GitHubUserName
     }
     deriving (Eq, Show, Generic)
 

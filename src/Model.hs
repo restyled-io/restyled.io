@@ -12,16 +12,14 @@
 
 module Model
     ( module Model
-    )
-where
+    , module Model.PlanType
+    , module Model.Names
+    ) where
 
 import ClassyPrelude.Yesod
 
 import Database.Persist.Quasi
-import GitHub.Data (Id, Name, Owner, PullRequest)
-import qualified GitHub.Data as GH
-import GitHub.Data.Apps (Installation)
-import GitHub.Instances ()
+import Model.Names
 import Model.PlanType
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]

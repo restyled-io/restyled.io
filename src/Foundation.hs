@@ -24,7 +24,6 @@ import Data.Aeson (decode, encode)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import qualified Database.Redis as Redis
-import GitHub.Instances (OwnerName, RepoName)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Auth
