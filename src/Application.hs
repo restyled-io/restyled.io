@@ -135,8 +135,7 @@ appMain = do
 
     let store = amStore $ appMetrics foundation
 
-    if appCloudWatchEKG settings
-        then forkCloudWatchServer store
-        else forkLocalhostServer store 8000
+    when (appCloudWatchEKG settings) $ forkCloudWatchServer store
+    when (appLocalEKG settings) $ forkLocalhostServer store 8000
 
     runSettings (warpSettings foundation) app

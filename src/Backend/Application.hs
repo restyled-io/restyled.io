@@ -46,9 +46,8 @@ backendMain = do
     backendMetrics <- buildAppMetrics
 
     let store = amStore backendMetrics
-    if appCloudWatchEKG backendSettings
-        then forkCloudWatchServer store
-        else forkLocalhostServer store 8001
+    when (appCloudWatchEKG backendSettings) $ forkCloudWatchServer store
+    when (appLocalEKG backendSettings) $ forkLocalhostServer store 8001
 
     runBackend Backend {..} $ forever $ awaitAndProcessJob 120
 

@@ -66,6 +66,7 @@ data AppSettings = AppSettings
     -- verified with GitHub.
     , appAllowDummyAuth :: Bool
     , appCloudWatchEKG :: Bool
+    , appLocalEKG :: Bool
     }
 
 instance Show AppSettings where
@@ -133,6 +134,7 @@ envSettings = AppSettings
     <*> Env.switch "AUTH_DUMMY_LOGIN" mempty
 #endif
     <*> Env.switch "CLOUDWATCH_EKG" mempty
+    <*> Env.switch "LOCAL_EKG" mempty
 
 envDatabaseConfig :: EnvParser PostgresConf
 envDatabaseConfig = PostgresConf
