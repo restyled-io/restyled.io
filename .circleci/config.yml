@@ -13,11 +13,14 @@ jobs:
       - image: redis:4.0.2-alpine
     steps:
       - checkout
+      - run:
+          name: Digest
+          command: git ls-files | xargs md5sum > digest
       - restore_cache:
           keys:
-            - stack-{{ .Branch }}-{{ checksum "stack.yaml" }}
-            - stack-{{ .Branch }}
-            - stack-
+            - v1-{{ .Branch }}-{{ checksum "digest" }}
+            - v1-{{ .Branch }}
+            - v1-
       - run:
           name: Dependencies
           command: |
@@ -33,7 +36,7 @@ jobs:
           name: Lint
           command: make lint
       - save_cache:
-          key: stack-{{ .Branch }}-{{ checksum "stack.yaml" }}
+          key: v1-{{ .Branch }}-{{ checksum "digest" }}
           paths:
             - ~/.stack
             - ./.stack-work
