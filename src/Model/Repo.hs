@@ -49,7 +49,7 @@ repoWithStats repo =
 data IgnoredWebhookReason
     = IgnoredAction PullRequestEventType
     | IgnoredEventType Text
-    | OwnPullRequest Text
+    | OwnPullRequest Text Text
     | PrivateNoPlan OwnerName RepoName
 
 initializeFromWebhook
@@ -57,12 +57,11 @@ initializeFromWebhook
     => Payload
     -> SqlPersistT m (Either IgnoredWebhookReason (Entity Repo))
 initializeFromWebhook Payload {..}
-    | pAction `notElem` enqueueEvents
-    = pure $ Left $ IgnoredAction pAction
-    | "-restyled" `isSuffixOf` headBranch pPullRequest
-    = pure $ Left $ OwnPullRequest $ headBranch pPullRequest
-    | otherwise
-    = Right <$> findOrCreateRepo pRepository pInstallationId
+    | pAction `notElem` enqueueEvents = pure $ Left $ IgnoredAction pAction
+    | isRestyled pPullRequest = pure $ Left $ OwnPullRequest
+        (simpleAuthor pPullRequest)
+        (headBranch pPullRequest)
+    | otherwise = Right <$> findOrCreateRepo pRepository pInstallationId
 
 findOrCreateRepo
     :: MonadIO m => GH.Repo -> InstallationId -> SqlPersistT m (Entity Repo)
@@ -84,6 +83,20 @@ findOrCreateRepo ghRepo installationId = do
 
 enqueueEvents :: [PullRequestEventType]
 enqueueEvents = [PullRequestOpened, PullRequestSynchronized]
+
+isRestyled :: PullRequest -> Bool
+isRestyled pr = isRestyledAuthor pr && isRestyledBranch pr
+  where
+    isRestyledAuthor = not . isActualAuthor . simpleAuthor
+    isRestyledBranch = ("-restyled" `isSuffixOf`) . headBranch
+
+    isActualAuthor login
+        | "restyled-io" `isPrefixOf` login = False
+        | "[bot]" `isSuffixOf` login = False
+        | otherwise = True
+
+simpleAuthor :: PullRequest -> Text
+simpleAuthor = GH.untagName . GH.simpleUserLogin . pullRequestUser
 
 headBranch :: PullRequest -> Text
 headBranch = pullRequestCommitRef . pullRequestHead

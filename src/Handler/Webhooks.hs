@@ -51,7 +51,8 @@ reasonToLogMessage :: IgnoredWebhookReason -> Text
 reasonToLogMessage = \case
     IgnoredAction action -> "ignored action: " <> tshow action
     IgnoredEventType event -> "ignored event: " <> tshow event
-    OwnPullRequest branch -> "branch appears to be our own: " <> branch
+    OwnPullRequest author branch ->
+        "PR appears to be our own: " <> author <> "/" <> branch
     PrivateNoPlan owner repo ->
         "private repository with no plan: "
             <> toPathPiece owner
