@@ -12,14 +12,16 @@
 
 module Model
     ( module Model
-    , module Model.PlanType
     , module Model.Names
+    , module Model.Payload
+    , module Model.PlanType
     ) where
 
 import ClassyPrelude.Yesod
 
 import Database.Persist.Quasi
 import Model.Names
+import Model.Payload
 import Model.PlanType
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]

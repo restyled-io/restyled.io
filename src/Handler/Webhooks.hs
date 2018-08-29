@@ -11,7 +11,6 @@ import Import
 
 import Backend.Foundation
 import Backend.Job
-import GitHub.Data.PullRequests
 import GitHub.Data.Webhooks.PullRequest
 import Metrics
 
@@ -21,7 +20,7 @@ postWebhooksR = maybe rejectRequest handleGitHubEvent =<< githubEventHeader
 handleGitHubEvent :: Text -> Handler a
 handleGitHubEvent = \case
     "pull_request" -> do
-        payload <- requireJsonBody
+        GitHubPayload payload <- requireJsonBody
         logDebugN $ "PullRequestEvent received: " <> tshow payload
         webhookReceived
 
@@ -37,8 +36,7 @@ handleGitHubEvent = \case
 
 handleInitialized :: Payload -> Entity Repo -> Handler a
 handleInitialized payload repo = do
-    let prNumber = mkPullRequestNum $ pullRequestNumber $ pPullRequest payload
-    job <- runDB $ insertJob repo prNumber
+    job <- runDB $ insertJob repo $ pPullRequest payload
     runBackendHandler $ enqueueRestylerJob job
     sendResponseStatus status201 ()
 
@@ -51,8 +49,7 @@ reasonToLogMessage :: IgnoredWebhookReason -> Text
 reasonToLogMessage = \case
     IgnoredAction action -> "ignored action: " <> tshow action
     IgnoredEventType event -> "ignored event: " <> tshow event
-    OwnPullRequest author branch ->
-        "PR appears to be our own: " <> author <> "/" <> branch
+    OwnPullRequest author -> "PR appears to be our own, author=" <> author
     PrivateNoPlan owner repo ->
         "private repository with no plan: "
             <> toPathPiece owner
