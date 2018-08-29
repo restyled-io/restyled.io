@@ -14,9 +14,6 @@ import ClassyPrelude
 
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
-import qualified GitHub.Data as GH
-import GitHub.Data.PullRequests
-import GitHub.Data.Webhooks.PullRequest
 import Model
 
 data RepoWithStats = RepoWithStats
@@ -49,29 +46,26 @@ repoWithStats repo =
 data IgnoredWebhookReason
     = IgnoredAction PullRequestEventType
     | IgnoredEventType Text
-    | OwnPullRequest Text Text
+    | OwnPullRequest Text
     | PrivateNoPlan OwnerName RepoName
 
 initializeFromWebhook
     :: MonadIO m
     => Payload
     -> SqlPersistT m (Either IgnoredWebhookReason (Entity Repo))
-initializeFromWebhook Payload {..}
+initializeFromWebhook payload@Payload {..}
     | pAction `notElem` enqueueEvents = pure $ Left $ IgnoredAction pAction
-    | isRestyled pPullRequest = pure $ Left $ OwnPullRequest
-        (simpleAuthor pPullRequest)
-        (headBranch pPullRequest)
-    | otherwise = Right <$> findOrCreateRepo pRepository pInstallationId
+    | not $ isActualAuthor pAuthor = pure $ Left $ OwnPullRequest pAuthor
+    | otherwise = Right <$> findOrCreateRepo payload
 
-findOrCreateRepo
-    :: MonadIO m => GH.Repo -> InstallationId -> SqlPersistT m (Entity Repo)
-findOrCreateRepo ghRepo installationId = do
+findOrCreateRepo :: MonadIO m => Payload -> SqlPersistT m (Entity Repo)
+findOrCreateRepo Payload {..} = do
     let
         repo = Repo
-            { repoOwner = GH.simpleOwnerLogin $ GH.repoOwner ghRepo
-            , repoName = GH.repoName ghRepo
-            , repoInstallationId = installationId
-            , repoIsPrivate = GH.repoPrivate ghRepo
+            { repoOwner = pOwnerName
+            , repoName = pRepoName
+            , repoInstallationId = pInstallationId
+            , repoIsPrivate = pRepoIsPrivate
             , repoDebugEnabled = False
             }
 
@@ -81,22 +75,8 @@ findOrCreateRepo ghRepo installationId = do
         , RepoIsPrivate =. repoIsPrivate repo
         ]
 
-enqueueEvents :: [PullRequestEventType]
-enqueueEvents = [PullRequestOpened, PullRequestSynchronized]
-
-isRestyled :: PullRequest -> Bool
-isRestyled pr = isRestyledAuthor pr && isRestyledBranch pr
-  where
-    isRestyledAuthor = not . isActualAuthor . simpleAuthor
-    isRestyledBranch = ("-restyled" `isSuffixOf`) . headBranch
-
-    isActualAuthor login
-        | "restyled-io" `isPrefixOf` login = False
-        | "[bot]" `isSuffixOf` login = False
-        | otherwise = True
-
-simpleAuthor :: PullRequest -> Text
-simpleAuthor = GH.untagName . GH.simpleUserLogin . pullRequestUser
-
-headBranch :: PullRequest -> Text
-headBranch = pullRequestCommitRef . pullRequestHead
+isActualAuthor :: Text -> Bool
+isActualAuthor author
+    | "restyled-io" `isPrefixOf` author = False
+    | "[bot]" `isSuffixOf` author = False
+    | otherwise = True

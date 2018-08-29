@@ -1,13 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
--- |
---
--- TODO: upstream installation.id parsing to @"GitHub.Data.PullRequestEvent"@
---
 module GitHub.Data.Webhooks.PullRequest
-    ( Payload(..)
-    )
-where
+    ( GitHubPayload(..)
+    ) where
 
 import Prelude
 
@@ -15,25 +11,27 @@ import Data.Aeson
 import Data.Aeson.Types (typeMismatch)
 import GitHub.Data
 import GitHub.Data.Apps
+import Model.Names
+import Model.Payload
 
-data Payload = Payload
-    { pAction :: PullRequestEventType
-    , pPullRequest :: PullRequest
-    , pRepository :: Repo
-    , pInstallationId :: Id Installation
-    }
-    deriving Show
+newtype GitHubPayload = GitHubPayload Payload
 
-instance FromJSON Payload where
+instance FromJSON GitHubPayload where
     parseJSON v@(Object o) = do
         event <- parseJSON v
         installation <- o .: "installation"
 
-        pure Payload
+        let PullRequest {..} = pullRequestEventPullRequest event
+            Repo {..} = pullRequestRepository event
+
+        pure $ GitHubPayload Payload
             { pAction = pullRequestEventAction event
-            , pPullRequest = pullRequestEventPullRequest event
-            , pRepository = pullRequestRepository event
+            , pAuthor = untagName $ simpleUserLogin pullRequestUser
+            , pOwnerName = simpleOwnerLogin repoOwner
+            , pRepoName = repoName
+            , pRepoIsPrivate = repoPrivate
             , pInstallationId = installationId installation
+            , pPullRequest = mkPullRequestNum pullRequestNumber
             }
 
     parseJSON v = typeMismatch "PullRequestEvent" v
