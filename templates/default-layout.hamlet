@@ -18,4 +18,13 @@ $maybe msg <- mmsg
 
 <footer>
   <section>
-    <small>#{appCopyright $ appSettings master}
+    <small>
+      © #{appCopyright $ appSettings master}
+      |
+      <a href=https://github.com/restyled-io/restyled.io>source
+      |
+      <a href=mailto:support@restyled.io>support
+      |
+      <a href=https://twitter.com/restyled_io>twitter
+      |
+      <a href=https://webchat.freenode.net/?channels=restyled>#freenode
