@@ -75,6 +75,7 @@ instance Yesod App where
     isAuthorized HomeR _ = pure Authorized
     isAuthorized RevisionR _ = pure Authorized
     isAuthorized RobotsR _ = pure Authorized
+    isAuthorized ThanksGitHubR _ = pure Authorized
 
     isAuthorized AdminR _ = do
         settings <- getsYesod appSettings

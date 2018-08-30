@@ -7,6 +7,7 @@
 / HomeR GET
 /webhooks WebhooksR POST
 /privacy-policy PrivacyPolicyR GET
+/thanks/github ThanksGitHubR GET
 
 /gh/#OwnerName/repos/#RepoName RepoP:
   / RepoR GET
