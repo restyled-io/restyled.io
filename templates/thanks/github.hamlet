@@ -1,0 +1,53 @@
+<main>
+  <h1>Thanks
+
+<section>
+  <p>
+    Thanks for installing the Restyled GitHub App! Here are some resources to
+    help you get started:
+
+<section .action>
+  <ul>
+    <li>
+      To get an idea of what kind of things might start happening in your
+      Repositories and on your Pull Requests, check out
+      <a href=https://github.com/restyled-io/restyled.io/wiki/What-to-Expect>
+        What to Expect
+
+    <li>
+      To change how Restyled behaves (any files to exclude, which restylers to
+      run, if comments should be left, etc), see the
+      <a href=https://github.com/restyled-io/restyled.io/wiki/Configuration-Reference>
+        Configuration Reference
+
+    <li>
+      To change how things are actually <em>styled</em>, you're going to want to
+      learn about the
+      <a href=https://github.com/restyled-io/restyled.io/wiki/Available-Restylers#available-now>
+        individual auto-formatters
+      that we run for the kinds of files you edit. In fact, you may already have
+      a
+      <code>.prettier.json
+      or
+      <code>.brittany.yaml
+      in your repository
+
+    <li>
+      If you're happy with Restyled, please consider
+      <a href=https://twitter.com/restyled_io>
+        tweeting about it
+
+    <li>
+      If you want it to stop, see
+      <a href=https://github.com/restyled-io/restyled.io/wiki/Disabling-Restyled>
+        Disabling Restyled
+
+<section>
+  <p>
+    Restyled is being built entirely the open. Check out the
+    <a href=https://github.com/restyled-io>
+      GitHub organization
+    and
+    <a href=https://github.com/restyled-io/restyled.io/wiki/Contributing-to-Restyled>
+      contributing guide
+    to get involved!
