@@ -25,9 +25,9 @@ import Data.Text (Text, pack, unpack)
 import Data.Text.Encoding
 import GHC.Generics
 import GitHub.Data (toPathPart)
-import SVCS.Names
 import Network.HTTP.Client (responseBody)
 import Network.HTTP.Simple
+import SVCS.Names
 
 data RepoPermission
     = AdminPermission
