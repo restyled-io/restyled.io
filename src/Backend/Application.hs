@@ -112,7 +112,7 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
             , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
             , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
             , "--job-url" , unpack jobUrl
-            , unpack prSpec
+            , unpack $ repoPullPath jobOwner jobRepo jobPullRequest
             ]
         )
         eAccessToken
@@ -126,8 +126,6 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
         <> "/gh/" <> toPathPiece jobOwner
         <> "/repos/" <> toPathPiece jobRepo
         <> "/jobs/" <> toPathPiece jobId
-
-    prSpec = repoPullPath jobOwner jobRepo jobPullRequest
 
 readLoggedProcess
     :: (MonadIO m, MonadLogger m)
