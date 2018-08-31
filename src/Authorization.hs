@@ -55,7 +55,7 @@ authorizeRepo settings owner name (Just userId) = do
         then do
             user <- get404 userId
             canRead <- caching $ collaboratorCanRead settings repo user
-            logPrivateRepoResult user canRead
+            logPrivateRepoResult user canRead $ repoSVCS $ entityVal repo
             authorizeWhen canRead
         else pure Authorized
   where
@@ -65,16 +65,19 @@ authorizeRepo settings owner name (Just userId) = do
         [toPathPiece owner, toPathPiece name, toPathPiece userId]
 
     -- Log this at INFO temporarily since it's important and new
-    logPrivateRepoResult user canRead =
+    logPrivateRepoResult user canRead svcs =
         logInfoN
-            $ "GitHub user name="
-            <> maybe "<none>" toPathPiece (userGithubUsername user)
+            $ "authentication result"
             <> " repo="
             <> toPathPiece owner
             <> "/"
             <> toPathPiece name
             <> " can_read="
             <> tshow canRead
+            <> " svcs="
+            <> tshow svcs
+            <> " github_username="
+            <> maybe "<none>" toPathPiece (userGithubUsername user)
 
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized

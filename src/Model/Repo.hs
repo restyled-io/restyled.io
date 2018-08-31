@@ -24,6 +24,9 @@ import SVCS.GitHub
 
 data RepoSVCS = GitHubSVCS
 
+instance Show RepoSVCS where
+    show GitHubSVCS = "GitHub"
+
 repoSVCS :: Repo -> RepoSVCS
 repoSVCS = const GitHubSVCS
 
