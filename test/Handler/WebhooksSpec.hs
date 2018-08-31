@@ -28,7 +28,6 @@ spec = withApp $ do
             Just jobQ <- runBackendTest $ awaitRestylerJob 5
 
             entityKey jobD `shouldBe` entityKey jobQ
-            jobInstallationId (entityVal jobD) `shouldBe` 58920
             jobOwner (entityVal jobD) `shouldBe` "restyled-io"
             jobRepo (entityVal jobD) `shouldBe` "demo"
             jobPullRequest (entityVal jobD) `shouldBe` 1
