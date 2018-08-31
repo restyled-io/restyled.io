@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Authorization
     ( authorizeAdmin
@@ -9,8 +10,9 @@ module Authorization
 import Import.NoFoundation
 
 import Cache
+import Control.Monad.Except
 import qualified Data.Text as T
-import Model.Collaborator
+import SVCS.GitHub.Collaborator
 
 authorizeAdmin
     :: MonadHandler m => AppSettings -> Maybe UserId -> SqlPersistT m AuthResult
@@ -77,3 +79,29 @@ authorizeRepo settings owner name (Just userId) = do
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized
 authorizeWhen False = notFound
+
+collaboratorCanRead
+    :: (MonadIO m, MonadLogger m)
+    => AppSettings
+    -> Entity Repo
+    -> User
+    -> m Bool
+collaboratorCanRead settings e@(Entity _ repo) User {..} = do
+    result <- runExceptT $ do
+        token <- ExceptT $ repoAccessToken settings e
+
+        case repoSVCS repo of
+            GitHubSVCS -> do
+                username <- liftEither
+                    $ note "No GitHub username" userGithubUsername
+                githubCollaboratorCanRead
+                    token
+                    (repoOwner repo)
+                    (repoName repo)
+                    username
+
+    either err pure result
+  where
+    err msg = do
+        logErrorN $ "Error authorizing repository:\n" <> pack msg
+        pure False
