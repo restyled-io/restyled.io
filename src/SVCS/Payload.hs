@@ -1,13 +1,12 @@
-module Model.Payload
+module SVCS.Payload
     ( Payload(..)
     , PullRequestEventType(..)
-    , enqueueEvents
     ) where
 
 import ClassyPrelude
 
 import GitHub.Data.PullRequests (PullRequestEventType(..))
-import Model.Names
+import SVCS.Names
 
 data Payload = Payload
     { pAction :: PullRequestEventType
@@ -19,6 +18,3 @@ data Payload = Payload
     , pPullRequest :: PullRequestNum
     }
     deriving Show
-
-enqueueEvents :: [PullRequestEventType]
-enqueueEvents = [PullRequestOpened, PullRequestSynchronized]

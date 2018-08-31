@@ -11,11 +11,14 @@ import Import
 
 import Backend.Foundation
 import Backend.Job
-import GitHub.Data.Webhooks.PullRequest
 import Metrics
+import SVCS.GitHub.Webhook
 
 postWebhooksR :: Handler ()
 postWebhooksR = maybe rejectRequest handleGitHubEvent =<< githubEventHeader
+
+githubEventHeader :: Handler (Maybe Text)
+githubEventHeader = decodeUtf8 <$$> lookupHeader "X-GitHub-Event"
 
 handleGitHubEvent :: Text -> Handler a
 handleGitHubEvent = \case
@@ -55,9 +58,6 @@ reasonToLogMessage = \case
             <> toPathPiece owner
             <> "/"
             <> toPathPiece repo
-
-githubEventHeader :: Handler (Maybe Text)
-githubEventHeader = decodeUtf8 <$$> lookupHeader "X-GitHub-Event"
 
 rejectRequest :: MonadHandler m => m a
 rejectRequest = do

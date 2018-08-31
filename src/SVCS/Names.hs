@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Model.Names
+module SVCS.Names
     ( OwnerName
     , mkOwnerName
     , RepoName
@@ -10,6 +10,7 @@ module Model.Names
     , mkPullRequestNum
     , GitHubUserId
     , GitHubUserName
+    , RepoAccessToken(..)
     ) where
 
 import Prelude
@@ -34,6 +35,8 @@ mkPullRequestNum = mkId Proxy
 
 type GitHubUserId = Id User
 type GitHubUserName = Name User
+
+newtype RepoAccessToken = RepoAccessToken { unRepoAccessToken :: Text }
 
 instance Read (Id a) where
     readPrec = mkId Proxy <$> readPrec

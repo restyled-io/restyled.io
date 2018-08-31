@@ -39,7 +39,7 @@ authorizeRepo _ owner name Nothing = do
     authorizeWhen $ not $ repoIsPrivate repo
 
 authorizeRepo settings owner name (Just userId) = do
-    Entity _ repo <- getBy404 $ UniqueRepo owner name
+    repo <- getBy404 $ UniqueRepo owner name
 
     logDebugN
         $ "Authorizing "
@@ -49,7 +49,7 @@ authorizeRepo settings owner name (Just userId) = do
         <> " for authenticated user id="
         <> toPathPiece userId
 
-    if repoIsPrivate repo
+    if repoIsPrivate $ entityVal repo
         then do
             user <- get404 userId
             canRead <- caching $ collaboratorCanRead settings repo user

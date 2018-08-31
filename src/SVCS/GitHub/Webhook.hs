@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module GitHub.Data.Webhooks.PullRequest
+module SVCS.GitHub.Webhook
     ( GitHubPayload(..)
     ) where
 
@@ -11,8 +11,8 @@ import Data.Aeson
 import Data.Aeson.Types (typeMismatch)
 import GitHub.Data
 import GitHub.Data.Apps
-import Model.Names
-import Model.Payload
+import SVCS.Names
+import SVCS.Payload
 
 newtype GitHubPayload = GitHubPayload Payload
 
