@@ -89,9 +89,9 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
         let
             err = throwString $ unpack $ unlines
                 [ "No active plan for private repository: "
-                <> toPathPiece (repoOwner $ entityVal repo)
-                <> "/"
-                <> toPathPiece (repoName $ entityVal repo)
+                <> repoPath
+                    (repoOwner $ entityVal repo)
+                    (repoName $ entityVal repo)
                 , ""
                 , "Contact support@restyled.io if you would like to discuss a Trial"
                 ]
@@ -111,7 +111,8 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
             , "--volume" , "/tmp:/tmp"
             , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
             , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-            , "--job-url" , unpack jobUrl, unpack prSpec
+            , "--job-url" , unpack jobUrl
+            , unpack prSpec
             ]
         )
         eAccessToken
@@ -126,9 +127,7 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
         <> "/repos/" <> toPathPiece jobRepo
         <> "/jobs/" <> toPathPiece jobId
 
-    prSpec = toPathPiece jobOwner
-        <> "/" <> toPathPiece jobRepo
-        <> "#" <> toPathPiece jobPullRequest
+    prSpec = repoPullPath jobOwner jobRepo jobPullRequest
 
 readLoggedProcess
     :: (MonadIO m, MonadLogger m)

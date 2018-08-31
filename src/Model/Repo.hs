@@ -11,6 +11,8 @@ module Model.Repo
     , initializeFromWebhook
     , RepoAccessToken(..)
     , repoAccessToken
+    , repoPath
+    , repoPullPath
     )
 where
 
@@ -21,6 +23,7 @@ import Database.Persist.Sql (SqlPersistT)
 import Model
 import Settings
 import SVCS.GitHub
+import Yesod.Core (toPathPiece)
 
 repoSVCS :: Repo -> RepoSVCS
 repoSVCS = const GitHubSVCS
@@ -106,3 +109,13 @@ repoAccessToken AppSettings {..} (Entity _ repo) =
                 appGitHubAppId
                 appGitHubAppKey
                 (repoInstallationId repo)
+
+-- | Make a nicely-formatted @:owner\/:name@
+--
+-- Surprisingly, this can be valuable to have a shorter name available
+--
+repoPath :: OwnerName -> RepoName -> Text
+repoPath owner name = toPathPiece owner <> "/" <> toPathPiece name
+
+repoPullPath :: OwnerName -> RepoName -> PullRequestNum -> Text
+repoPullPath owner name num = repoPath owner name <> "#" <> toPathPiece num

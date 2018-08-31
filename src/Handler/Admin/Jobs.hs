@@ -37,12 +37,7 @@ postAdminJobsR = do
                 setMessage "Job created"
                 redirect AdminR
 
-            setMessage
-                $ toHtml
-                $ "Unknown Repo: "
-                <> toPathPiece cjOwner
-                <> "/"
-                <> toPathPiece cjRepo
+            setMessage $ toHtml $ "Unknown Repo: " <> repoPath cjOwner cjRepo
 
         _ -> setMessage "Error creating Job"
 

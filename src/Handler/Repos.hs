@@ -28,14 +28,7 @@ getRepoPullJobsR owner name num = do
         [Desc JobCompletedAt, Desc JobCreatedAt]
 
     defaultLayout $ do
-        setTitle
-            $ toHtml
-            $ toPathPiece owner
-            <> "/"
-            <> toPathPiece name
-            <> "#"
-            <> toPathPiece num
-            <> " jobs"
+        setTitle $ toHtml $ repoPullPath owner name num <> " jobs"
         $(widgetFile "jobs")
 
 getRepoJobsR :: OwnerName -> RepoName -> Handler Html
@@ -45,12 +38,7 @@ getRepoJobsR owner name = do
         [Desc JobCompletedAt, Desc JobCreatedAt]
 
     defaultLayout $ do
-        setTitle
-            $ toHtml
-            $ toPathPiece owner
-            <> "/"
-            <> toPathPiece name
-            <> " jobs"
+        setTitle $ toHtml $ repoPath owner name <> " jobs"
         $(widgetFile "jobs")
 
 getRepoJobR :: OwnerName -> RepoName -> JobId -> Handler Html
@@ -58,11 +46,5 @@ getRepoJobR owner name jobId = do
     job <- runDB $ fromMaybeM notFound =<< getEntity jobId
 
     defaultLayout $ do
-        setTitle
-            $ toHtml
-            $ toPathPiece owner
-            <> "/"
-            <> toPathPiece name
-            <> " #"
-            <> toPathPiece jobId
+        setTitle $ toHtml $ repoPath owner name <> " #" <> toPathPiece jobId
         $(widgetFile "job")
