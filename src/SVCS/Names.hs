@@ -11,6 +11,7 @@ module SVCS.Names
     , GitHubUserId
     , GitHubUserName
     , RepoAccessToken(..)
+    , RepoSVCS(..)
     ) where
 
 import Prelude
@@ -37,6 +38,11 @@ type GitHubUserId = Id User
 type GitHubUserName = Name User
 
 newtype RepoAccessToken = RepoAccessToken { unRepoAccessToken :: Text }
+
+data RepoSVCS = GitHubSVCS
+
+instance Show RepoSVCS where
+    show GitHubSVCS = "GitHub"
 
 instance Read (Id a) where
     readPrec = mkId Proxy <$> readPrec
