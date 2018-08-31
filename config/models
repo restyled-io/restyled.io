@@ -23,7 +23,7 @@ Repo json
   deriving Eq Show
 
 Job json
-  installationId InstallationId
+  installationId InstallationId MigrationOnly default=0
   owner OwnerName
   repo RepoName
   pullRequest PullRequestNum
