@@ -2,11 +2,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module SVCS.GitHub.AccessToken
-    ( AccessToken(..)
-    , installationAccessToken
-    , GitHubAppId
+    ( GitHubAppId
     , mkGitHubAppId
     , GitHubAppKey
+    , githubInstallationToken
     ) where
 
 import Prelude
@@ -46,8 +45,8 @@ data TokenResponse
 instance FromJSON TokenResponse where
     parseJSON o = (Token <$> parseJSON o) <|> (ErrorResponse <$> parseJSON o)
 
-tokenResponseToEither :: TokenResponse -> Either String AccessToken
-tokenResponseToEither (Token x) = Right x
+tokenResponseToEither :: TokenResponse -> Either String RepoAccessToken
+tokenResponseToEither (Token x) = Right $ RepoAccessToken $ atToken x
 tokenResponseToEither (ErrorResponse (ErrorMessage x)) = Left $ T.unpack x
 
 -- | Maximum expiration
@@ -68,12 +67,12 @@ newtype GitHubAppKey = AppKey Text
     deriving IsString
 
 -- | Create an Access Token for an installation of the given App
-installationAccessToken
+githubInstallationToken
     :: GitHubAppId
     -> GitHubAppKey
     -> InstallationId
-    -> IO (Either String AccessToken)
-installationAccessToken githubAppId (AppKey pem) installationId =
+    -> IO (Either String RepoAccessToken)
+githubInstallationToken githubAppId (AppKey pem) installationId =
     handleAny (pure . Left . show) $ do
         jwt <- encodeJWT githubAppId (T.unpack pem)
         request <-
