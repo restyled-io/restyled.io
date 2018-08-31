@@ -26,9 +26,9 @@ import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
 import GitHub.Data (Id, mkId, toPathPart, untagId)
 import GitHub.Data.AccessTokens (AccessToken(..))
 import GitHub.Data.Apps (App)
-import SVCS.Names
 import Network.HTTP.Simple hiding (Proxy)
 import Network.HTTP.Types
+import SVCS.Names
 import qualified Web.JWT as JWT
 
 newtype ErrorMessage = ErrorMessage Text
