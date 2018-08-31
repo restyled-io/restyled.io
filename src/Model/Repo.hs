@@ -3,7 +3,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Model.Repo
-    ( RepoWithStats(..)
+    ( RepoSVCS(..)
+    , repoSVCS
+    , RepoWithStats(..)
     , repoWithStats
     , IgnoredWebhookReason(..)
     , initializeFromWebhook
@@ -19,6 +21,11 @@ import Database.Persist.Sql (SqlPersistT)
 import Model
 import Settings
 import SVCS.GitHub
+
+data RepoSVCS = GitHubSVCS
+
+repoSVCS :: Repo -> RepoSVCS
+repoSVCS = const GitHubSVCS
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
@@ -94,10 +101,10 @@ repoAccessToken
     => AppSettings
     -> Entity Repo
     -> m (Either String RepoAccessToken)
-repoAccessToken AppSettings {..} (Entity _ Repo {..}) =
-    liftIO
-        $ fmap (RepoAccessToken . atToken)
-        <$> installationAccessToken
+repoAccessToken AppSettings {..} (Entity _ repo) =
+    liftIO $ case repoSVCS repo of
+        GitHubSVCS ->
+            fmap (RepoAccessToken . atToken) <$> installationAccessToken
                 appGitHubAppId
                 appGitHubAppKey
-                repoInstallationId
+                (repoInstallationId repo)
