@@ -47,7 +47,8 @@ itRequiresRepositoryAccess path = do
 
 publicRepo :: OwnerName -> RepoName -> Repo
 publicRepo owner name = Repo
-    { repoOwner = owner
+    { repoSvcs = GitHubSVCS
+    , repoOwner = owner
     , repoName = name
     , repoInstallationId = 1
     , repoIsPrivate = False

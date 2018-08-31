@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module SVCS.Names
@@ -16,13 +18,16 @@ module SVCS.Names
 
 import Prelude
 
+import Control.Monad ((<=<))
+import Data.Aeson
 import Data.Proxy
-import Data.Text (Text)
+import Data.Semigroup ((<>))
+import Data.Text (Text, unpack)
 import Database.Persist.Sql
 import GitHub.Data
 import GitHub.Data.Apps
 import Text.Blaze (ToMarkup(..))
-import Text.Read
+import Text.Read hiding (String)
 import Yesod.Core (PathPiece(..))
 
 type OwnerName = Name Owner
@@ -42,8 +47,35 @@ newtype RepoAccessToken = RepoAccessToken { unRepoAccessToken :: Text }
 data RepoSVCS = GitHubSVCS
     deriving Eq
 
+readRepoSVCS :: Text -> Either Text RepoSVCS
+readRepoSVCS = \case
+    "github" -> Right GitHubSVCS
+    x -> Left $ "Invalid SVCS value: " <> x
+
+showRepoSVCS :: RepoSVCS -> Text
+showRepoSVCS = \case
+    GitHubSVCS -> "github"
+
 instance Show RepoSVCS where
     show GitHubSVCS = "GitHub"
+
+instance PathPiece RepoSVCS where
+    toPathPiece GitHubSVCS = "gh"
+    fromPathPiece "gh" = Just GitHubSVCS
+    fromPathPiece _ = Nothing
+
+instance PersistField RepoSVCS where
+    toPersistValue = toPersistValue . showRepoSVCS
+    fromPersistValue = readRepoSVCS <=< fromPersistValue
+
+instance ToJSON RepoSVCS where
+    toJSON GitHubSVCS = String "github"
+
+instance FromJSON RepoSVCS where
+    parseJSON = withText "SVCS" $ either (fail . unpack) pure . readRepoSVCS
+
+instance PersistFieldSql RepoSVCS where
+    sqlType _ = sqlType (Proxy :: Proxy Text)
 
 instance Read (Id a) where
     readPrec = mkId Proxy <$> readPrec

@@ -13,6 +13,7 @@ User
   deriving Eq Show
 
 Repo json
+  svcs RepoSVCS default='github'
   owner OwnerName
   name RepoName
   installationId InstallationId
