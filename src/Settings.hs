@@ -19,20 +19,18 @@ where
 
 -- brittany-disable
 
-import ClassyPrelude.Yesod hiding (Proxy)
+import ClassyPrelude.Yesod
 
 import qualified Data.ByteString.Char8 as C8
 import Data.FileEmbed (embedFile)
-import Data.Proxy
 import qualified Data.Text as T
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..), PortID(..), parseConnectInfo)
 import Development.GitRev (gitCommitDate, gitHash)
 import qualified Env
-import GitHub.Data
-import GitHub.Data.Apps
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
+import SVCS.GitHub
 #if DEVELOPMENT
 import Yesod.Default.Util (widgetFileReload)
 #else
@@ -54,8 +52,8 @@ data AppSettings = AppSettings
     , appLogLevel :: LogLevel
     , appMutableStatic :: Bool
     , appCopyright :: Text
-    , appGitHubAppId :: Id App
-    , appGitHubAppKey :: Text
+    , appGitHubAppId :: GitHubAppId
+    , appGitHubAppKey :: GitHubAppKey
     , appGitHubOAuthKeys :: OAuthKeys
     , appRestylerImage :: String
     , appRestylerTag :: Maybe String
@@ -117,7 +115,7 @@ envSettings = AppSettings
     <*> envLogLevel
     <*> Env.switch "MUTABLE_STATIC" mempty
     <*> pure "Patrick Brisbin 2018"
-    <*> (mkId Proxy <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
+    <*> (mkGitHubAppId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
     <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
     <*> (OAuthKeys
         <$> Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_ID" mempty

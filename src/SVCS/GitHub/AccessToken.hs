@@ -1,7 +1,12 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module GitHub.Endpoints.Installations
-    ( createAccessToken
+module SVCS.GitHub.AccessToken
+    ( AccessToken(..)
+    , installationAccessToken
+    , GitHubAppId
+    , mkGitHubAppId
+    , GitHubAppKey
     ) where
 
 import Prelude
@@ -11,15 +16,18 @@ import Control.Exception.Safe
 import Data.Aeson
 import qualified Data.Map as Map
 import Data.Monoid ((<>))
+import Data.Proxy
+import Data.String
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
-import GitHub.Data (Id, toPathPart, untagId)
+import GitHub.Data (Id, mkId, toPathPart, untagId)
 import GitHub.Data.AccessTokens (AccessToken(..))
-import GitHub.Data.Apps (App, Installation)
-import Network.HTTP.Simple
+import GitHub.Data.Apps (App)
+import SVCS.Names
+import Network.HTTP.Simple hiding (Proxy)
 import Network.HTTP.Types
 import qualified Web.JWT as JWT
 
@@ -51,10 +59,21 @@ tokenResponseToEither (ErrorResponse (ErrorMessage x)) = Left $ T.unpack x
 maxExpiration :: NominalDiffTime
 maxExpiration = 5 * 60
 
+type GitHubAppId = Id App
+
+mkGitHubAppId :: Int -> GitHubAppId
+mkGitHubAppId = mkId Proxy
+
+newtype GitHubAppKey = AppKey Text
+    deriving IsString
+
 -- | Create an Access Token for an installation of the given App
-createAccessToken
-    :: Id App -> Text -> Id Installation -> IO (Either String AccessToken)
-createAccessToken githubAppId pem installationId =
+installationAccessToken
+    :: GitHubAppId
+    -> GitHubAppKey
+    -> InstallationId
+    -> IO (Either String AccessToken)
+installationAccessToken githubAppId (AppKey pem) installationId =
     handleAny (pure . Left . show) $ do
         jwt <- encodeJWT githubAppId (T.unpack pem)
         request <-

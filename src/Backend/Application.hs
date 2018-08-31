@@ -18,8 +18,6 @@ import Control.Monad ((<=<))
 import Control.Monad.Logger (runStdoutLoggingT)
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
-import GitHub.Data.AccessTokens
-import GitHub.Endpoints.Installations
 import LoadEnv (loadEnv)
 import Model.AppMetrics
 import System.Exit (ExitCode(..))
@@ -101,16 +99,15 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
         now <- liftIO getCurrentTime
         void . fromMaybeM err =<< selectActivePlan now (entityVal repo)
 
-    eAccessToken <- liftIO
-        $ createAccessToken appGitHubAppId appGitHubAppKey jobInstallationId
+    eAccessToken <- repoAccessToken appSettings repo
 
     either
         throwString
-        (\AccessToken {..} -> readLoggedProcess
+        (\token -> readLoggedProcess
             "docker"
             [ "run" , "--rm"
             , "--env" , debugEnv repo
-            , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack atToken
+            , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
             , "--volume" , "/tmp:/tmp"
             , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
             , appRestylerImage ++ maybe "" (":" ++) appRestylerTag

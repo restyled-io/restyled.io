@@ -7,6 +7,8 @@ module Model.Repo
     , repoWithStats
     , IgnoredWebhookReason(..)
     , initializeFromWebhook
+    , RepoAccessToken(..)
+    , repoAccessToken
     )
 where
 
@@ -15,6 +17,8 @@ import ClassyPrelude
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
 import Model
+import Settings
+import SVCS.GitHub
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
@@ -80,3 +84,20 @@ isActualAuthor author
     | "restyled-io" `isPrefixOf` author = False
     | "[bot]" `isSuffixOf` author = False
     | otherwise = True
+
+enqueueEvents :: [PullRequestEventType]
+enqueueEvents = [PullRequestOpened, PullRequestSynchronized]
+
+-- | Get an AccessToken for a Repository (VCS-agnostic)
+repoAccessToken
+    :: MonadIO m
+    => AppSettings
+    -> Entity Repo
+    -> m (Either String RepoAccessToken)
+repoAccessToken AppSettings {..} (Entity _ Repo {..}) =
+    liftIO
+        $ fmap (RepoAccessToken . atToken)
+        <$> installationAccessToken
+                appGitHubAppId
+                appGitHubAppKey
+                repoInstallationId
