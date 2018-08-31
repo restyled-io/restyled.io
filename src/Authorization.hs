@@ -37,9 +37,9 @@ authorizeRepo'
     -> Entity Repo
     -> Maybe UserId
     -> SqlPersistT m AuthResult
-authorizeRepo' _ (Entity _ repo) _
-    | not $ repoIsPrivate repo = pure Authorized
-    | repoSVCS repo /= GitHubSVCS = notFound
+authorizeRepo' _ (Entity _ Repo {..}) _
+    | not repoIsPrivate = pure Authorized
+    | repoSvcs /= GitHubSVCS = notFound
 authorizeRepo' _ _ Nothing = notFound
 
 -- By this point, we know:

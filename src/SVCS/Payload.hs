@@ -9,7 +9,8 @@ import GitHub.Data.PullRequests (PullRequestEventType(..))
 import SVCS.Names
 
 data Payload = Payload
-    { pAction :: PullRequestEventType
+    { pSVCS :: RepoSVCS
+    , pAction :: PullRequestEventType
     , pAuthor :: Text
     , pOwnerName :: OwnerName
     , pRepoName :: RepoName

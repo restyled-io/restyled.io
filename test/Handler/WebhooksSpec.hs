@@ -107,7 +107,8 @@ setupPrivatePlan activeIn expiresIn = do
 
     runDB $ do
         insert_ Repo
-            { repoOwner = "restyled-io"
+            { repoSvcs = GitHubSVCS
+            , repoOwner = "restyled-io"
             , repoName = "restyled.io"
             , repoInstallationId = 55758
             , repoIsPrivate = True

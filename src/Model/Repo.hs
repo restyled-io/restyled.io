@@ -3,8 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Model.Repo
-    ( repoSVCS
-    , repoPath
+    ( repoPath
     , repoPullPath
     , repoAccessToken
     , RepoWithStats(..)
@@ -23,9 +22,6 @@ import Settings
 import SVCS.GitHub
 import Yesod.Core (toPathPiece)
 
-repoSVCS :: Repo -> RepoSVCS
-repoSVCS = const GitHubSVCS
-
 -- | Make a nicely-formatted @:owner\/:name@
 --
 -- Surprisingly, this can be valuable to have a shorter name available
@@ -42,10 +38,12 @@ repoAccessToken
     => AppSettings
     -> Entity Repo
     -> m (Either String RepoAccessToken)
-repoAccessToken AppSettings {..} (Entity _ repo) =
-    liftIO $ case repoSVCS repo of
-        GitHubSVCS -> githubInstallationToken appGitHubAppId appGitHubAppKey
-            $ repoInstallationId repo
+repoAccessToken AppSettings {..} (Entity _ Repo {..}) =
+    liftIO $ case repoSvcs of
+        GitHubSVCS -> githubInstallationToken
+            appGitHubAppId
+            appGitHubAppKey
+            repoInstallationId
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
@@ -93,7 +91,8 @@ findOrCreateRepo :: MonadIO m => Payload -> SqlPersistT m (Entity Repo)
 findOrCreateRepo Payload {..} = do
     let
         repo = Repo
-            { repoOwner = pOwnerName
+            { repoSvcs = pSVCS
+            , repoOwner = pOwnerName
             , repoName = pRepoName
             , repoInstallationId = pInstallationId
             , repoIsPrivate = pRepoIsPrivate

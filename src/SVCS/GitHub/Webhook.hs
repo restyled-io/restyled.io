@@ -25,7 +25,8 @@ instance FromJSON GitHubPayload where
             Repo {..} = pullRequestRepository event
 
         pure $ GitHubPayload Payload
-            { pAction = pullRequestEventAction event
+            { pSVCS = GitHubSVCS
+            , pAction = pullRequestEventAction event
             , pAuthor = untagName $ simpleUserLogin pullRequestUser
             , pOwnerName = simpleOwnerLogin repoOwner
             , pRepoName = repoName
