@@ -11,7 +11,6 @@ import Import.NoFoundation
 
 import Cache
 import Control.Monad.Except
-import qualified Data.Text as T
 import SVCS.GitHub.Collaborator
 
 authorizeAdmin
@@ -28,83 +27,67 @@ authorizeRepo
     -> RepoName
     -> Maybe UserId
     -> SqlPersistT m AuthResult
-authorizeRepo _ owner name Nothing = do
-    Entity _ repo <- getBy404 $ UniqueRepo owner name
-
-    logDebugN
-        $ "Authorizing "
-        <> toPathPiece owner
-        <> "/"
-        <> toPathPiece name
-        <> " for anonymous user"
-
-    authorizeWhen $ not $ repoIsPrivate repo
-
-authorizeRepo settings owner name (Just userId) = do
+authorizeRepo settings owner name mUserId = do
     repo <- getBy404 $ UniqueRepo owner name
+    authorizeRepo' settings repo mUserId
 
+authorizeRepo'
+    :: (MonadCache m, MonadHandler m)
+    => AppSettings
+    -> Entity Repo
+    -> Maybe UserId
+    -> SqlPersistT m AuthResult
+authorizeRepo' _ (Entity _ repo) _
+    | not $ repoIsPrivate repo = pure Authorized
+    | repoSVCS repo /= GitHubSVCS = notFound
+authorizeRepo' _ _ Nothing = notFound
+
+-- By this point, we know:
+--
+-- 1. The repo is private
+-- 2. The repo is GitHub
+-- 3. The user is authenticated
+--
+-- So we just go ahead with the GitHub-specific collaborators check.
+--
+authorizeRepo' settings repo (Just userId) = do
     logDebugN
-        $ "Authorizing "
-        <> toPathPiece owner
-        <> "/"
-        <> toPathPiece name
+        $ "Authorizing private GitHub repository"
+        <> repoPath owner name
         <> " for authenticated user id="
         <> toPathPiece userId
 
-    if repoIsPrivate $ entityVal repo
-        then do
-            user <- get404 userId
-            canRead <- caching $ collaboratorCanRead settings repo user
-            logPrivateRepoResult user canRead $ repoSVCS $ entityVal repo
-            authorizeWhen canRead
-        else pure Authorized
-  where
-    caching = lift . withCache cacheKey
-    cacheKey = CacheKey $ "auth.repo." <> T.intercalate
-        "."
-        [toPathPiece owner, toPathPiece name, toPathPiece userId]
+    User {..} <- get404 userId
+    canRead <- caching cacheKey $ runCanRead $ do
+        token <- ExceptT $ repoAccessToken settings repo
+        username <- liftEither $ note "No GitHub username" userGithubUsername
+        githubCollaboratorCanRead token owner name username
 
-    -- Log this at INFO temporarily since it's important and new
-    logPrivateRepoResult user canRead svcs =
-        logInfoN
-            $ "authentication result"
-            <> " repo="
-            <> toPathPiece owner
-            <> "/"
-            <> toPathPiece name
-            <> " can_read="
-            <> tshow canRead
-            <> " svcs="
-            <> tshow svcs
-            <> " github_username="
-            <> maybe "<none>" toPathPiece (userGithubUsername user)
+    logInfoN
+        $ "Authentication result"
+        <> " github_username="
+        <> maybe "<none>" toPathPiece userGithubUsername
+        <> " repo="
+        <> repoPath owner name
+        <> " can_read="
+        <> tshow canRead
+
+    authorizeWhen canRead
+  where
+    owner = repoOwner $ entityVal repo
+    name = repoName $ entityVal repo
+    cacheKey =
+        [ "auth"
+        , "repo"
+        , toPathPiece owner
+        , toPathPiece name
+        , toPathPiece userId
+        ]
 
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized
 authorizeWhen False = notFound
 
-collaboratorCanRead
-    :: (MonadIO m, MonadLogger m)
-    => AppSettings
-    -> Entity Repo
-    -> User
-    -> m Bool
-collaboratorCanRead settings e@(Entity _ repo) User {..} = do
-    result <- runExceptT $ do
-        token <- ExceptT $ repoAccessToken settings e
-
-        case repoSVCS repo of
-            GitHubSVCS -> do
-                username <- liftEither
-                    $ note "No GitHub username" userGithubUsername
-                githubCollaboratorCanRead
-                    token
-                    (repoOwner repo)
-                    (repoName repo)
-                    username
-
-    either err pure result
-  where
-    err msg = do
-        logErrorN $ "Error authorizing repository:\n" <> pack msg
-        pure False
+-- | Run the Collaborator check and log-mask errors as @'False'@
+runCanRead :: MonadLogger m => ExceptT String m Bool -> m Bool
+runCanRead = either ((False <$) . logWarnN . pack) pure <=< runExceptT

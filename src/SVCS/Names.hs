@@ -40,6 +40,7 @@ type GitHubUserName = Name User
 newtype RepoAccessToken = RepoAccessToken { unRepoAccessToken :: Text }
 
 data RepoSVCS = GitHubSVCS
+    deriving Eq
 
 instance Show RepoSVCS where
     show GitHubSVCS = "GitHub"
