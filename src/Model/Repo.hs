@@ -3,16 +3,14 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Model.Repo
-    ( RepoSVCS(..)
-    , repoSVCS
+    ( repoSVCS
+    , repoPath
+    , repoPullPath
+    , repoAccessToken
     , RepoWithStats(..)
     , repoWithStats
     , IgnoredWebhookReason(..)
     , initializeFromWebhook
-    , RepoAccessToken(..)
-    , repoAccessToken
-    , repoPath
-    , repoPullPath
     )
 where
 
@@ -27,6 +25,27 @@ import Yesod.Core (toPathPiece)
 
 repoSVCS :: Repo -> RepoSVCS
 repoSVCS = const GitHubSVCS
+
+-- | Make a nicely-formatted @:owner\/:name@
+--
+-- Surprisingly, this can be valuable to have a shorter name available
+--
+repoPath :: OwnerName -> RepoName -> Text
+repoPath owner name = toPathPiece owner <> "/" <> toPathPiece name
+
+repoPullPath :: OwnerName -> RepoName -> PullRequestNum -> Text
+repoPullPath owner name num = repoPath owner name <> "#" <> toPathPiece num
+
+-- | Get an AccessToken for a Repository, as appopriate for its SVCS
+repoAccessToken
+    :: MonadIO m
+    => AppSettings
+    -> Entity Repo
+    -> m (Either String RepoAccessToken)
+repoAccessToken AppSettings {..} (Entity _ repo) =
+    liftIO $ case repoSVCS repo of
+        GitHubSVCS -> githubInstallationToken appGitHubAppId appGitHubAppKey
+            $ repoInstallationId repo
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
@@ -95,27 +114,3 @@ isActualAuthor author
 
 enqueueEvents :: [PullRequestEventType]
 enqueueEvents = [PullRequestOpened, PullRequestSynchronized]
-
--- | Get an AccessToken for a Repository (VCS-agnostic)
-repoAccessToken
-    :: MonadIO m
-    => AppSettings
-    -> Entity Repo
-    -> m (Either String RepoAccessToken)
-repoAccessToken AppSettings {..} (Entity _ repo) =
-    liftIO $ case repoSVCS repo of
-        GitHubSVCS ->
-            fmap (RepoAccessToken . atToken) <$> installationAccessToken
-                appGitHubAppId
-                appGitHubAppKey
-                (repoInstallationId repo)
-
--- | Make a nicely-formatted @:owner\/:name@
---
--- Surprisingly, this can be valuable to have a shorter name available
---
-repoPath :: OwnerName -> RepoName -> Text
-repoPath owner name = toPathPiece owner <> "/" <> toPathPiece name
-
-repoPullPath :: OwnerName -> RepoName -> PullRequestNum -> Text
-repoPullPath owner name num = repoPath owner name <> "#" <> toPathPiece num
