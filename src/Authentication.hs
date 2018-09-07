@@ -31,49 +31,52 @@ authenticateUser
     => Creds site
     -> SqlPersistT m (AuthenticationResult site)
 authenticateUser creds@Creds {..} = do
-    mUserId <- entityKey <$$> getBy (UniqueUser credsPlugin credsIdent)
-    logDebugN $ "Existing User Id: " <> tshow (toPathPiece <$> mUserId)
+    mUserId <- findUserForCreds creds
 
-    let eGhUser = getUserResponseJSON creds
-    logDebugN $ "GitHub user: " <> tshow eGhUser
+    logDebugN $ "Authentication credentials: " <> tshow creds
+    logDebugN $ "Existing User: " <> maybe "none" toPathPiece mUserId
 
-    case (mUserId, eGhUser) of
-        (Nothing, Left err) -> do
-            logWarnN $ "Error parsing user response: " <> pack err
-            pure $ UserError $ IdentifierNotFound "GitHub OAuth2 response"
+    case (mUserId, userFromCreds creds) of
+        -- Existing user, good data: update accordingly
+        (Just userId, Right user) ->
+            Authenticated userId <$ replaceUser userId user
 
-        (Nothing, Right ghUser) -> createFromGitHub creds ghUser
-        (Just userId, Right ghUser) -> updateFromGitHub creds userId ghUser
-
-        -- Probably testing via auth/dummy, just authenticate
+        -- Existing user, no data: authenticate anyway
         (Just userId, Left _) -> pure $ Authenticated userId
 
-createFromGitHub
-    :: (AuthId site ~ UserId, MonadIO m)
-    => Creds site
-    -> GitHubUser
-    -> SqlPersistT m (AuthenticationResult site)
-createFromGitHub Creds {..} GitHubUser {..} = Authenticated <$> insert User
-    { userEmail = ghuEmail
-    , userGithubUserId = Just ghuId
-    , userGithubUsername = Just ghuLogin
-    , userCredsIdent = credsIdent
-    , userCredsPlugin = credsPlugin
-    }
+        -- New user, good data: create accordingly
+        (Nothing, Right user) -> Authenticated <$> insert user
 
-updateFromGitHub
-    :: (AuthId site ~ UserId, MonadIO m)
-    => Creds site
-    -> UserId
-    -> GitHubUser
-    -> SqlPersistT m (AuthenticationResult site)
-updateFromGitHub Creds {..} userId GitHubUser {..} =
-    Authenticated userId <$ updateWhere
-        [ UserId ==. userId
-        , UserCredsIdent ==. credsIdent
-        , UserCredsPlugin ==. credsPlugin
-        ]
-        [ UserEmail =. ghuEmail
-        , UserGithubUserId =. Just ghuId
-        , UserGithubUsername =. Just ghuLogin
-        ]
+        -- No user, no data: bail
+        (Nothing, Left err) -> do
+            logWarnN $ "OAuth2 response error: " <> pack err
+            pure $ UserError $ IdentifierNotFound "OAuth2 Response"
+
+findUserForCreds :: MonadIO m => Creds site -> SqlPersistT m (Maybe UserId)
+findUserForCreds creds@Creds {..} =
+    (entityKey <$$>) . runMaybeT $ getMatchingCreds <|> getMatchingEmail
+  where
+    getMatchingCreds = MaybeT $ getBy $ UniqueUser credsPlugin credsIdent
+    getMatchingEmail = do
+        User {..} <- liftMaybe $ hush $ userFromCreds creds
+        MaybeT $ selectFirst [UserEmail ==. userEmail] []
+
+-- | A version of 'replace' that avoids clobbering when possible
+replaceUser :: MonadIO m => UserId -> User -> SqlPersistT m ()
+replaceUser userId User {..} = update userId $ catMaybes
+    [ Just $ UserEmail =. userEmail
+    , (UserGithubUserId =.) . Just <$> userGithubUserId
+    , (UserGithubUsername =.) . Just <$> userGithubUsername
+    ]
+
+userFromCreds :: Creds site -> Either String User
+userFromCreds creds = do
+    GitHubUser {..} <- getUserResponseJSON creds
+
+    pure User
+        { userEmail = ghuEmail
+        , userGithubUserId = Just ghuId
+        , userGithubUsername = Just ghuLogin
+        , userCredsIdent = credsIdent creds
+        , userCredsPlugin = credsPlugin creds
+        }
