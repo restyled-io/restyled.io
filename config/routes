@@ -36,3 +36,6 @@
     / AdminPlansR GET POST
     /new AdminPlansNewR GET
     !/#PlanId AdminPlanR DELETE
+  /users AdminUsersP:
+    / AdminUsersR GET
+    /#UserId AdminUserR DELETE

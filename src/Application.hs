@@ -59,6 +59,7 @@ import Handler.Admin
 import Handler.Admin.Jobs
 import Handler.Admin.Plans
 import Handler.Admin.Repos
+import Handler.Admin.Users
 
 mkYesodDispatch "App" resourcesApp
 
