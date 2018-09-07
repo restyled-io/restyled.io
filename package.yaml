@@ -52,6 +52,7 @@ library:
     - template-haskell
     - text
     - time
+    - transformers
     - unix
     - unordered-containers
     - vector
