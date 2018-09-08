@@ -7,6 +7,8 @@
         <a href=@{AdminP $ AdminJobsP AdminJobsNewR}>New Job
       <li>
         <a href=@{AdminP $ AdminPlansP AdminPlansR}>Plans
+      <li>
+        <a href=@{AdminP $ AdminUsersP AdminUsersR}>Users
       $maybe _ <- mUserId
         <li>
           <a href=@{AuthR $ LogoutR}>Log out
