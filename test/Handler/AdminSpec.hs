@@ -19,6 +19,8 @@ spec = withApp $ do
                 { userEmail = "normie@restyled.io"
                 , userGithubUserId = Nothing
                 , userGithubUsername = Nothing
+                , userGitlabUserId = Nothing
+                , userGitlabUsername = Nothing
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
                 }
@@ -33,6 +35,8 @@ spec = withApp $ do
                 { userEmail = "admin1@restyled.io"
                 , userGithubUserId = Nothing
                 , userGithubUsername = Nothing
+                , userGitlabUserId = Nothing
+                , userGitlabUsername = Nothing
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
                 }
@@ -43,6 +47,8 @@ spec = withApp $ do
                 { userEmail = "admin2@restyled.io"
                 , userGithubUserId = Nothing
                 , userGithubUsername = Nothing
+                , userGitlabUserId = Nothing
+                , userGitlabUsername = Nothing
                 , userCredsIdent = "2"
                 , userCredsPlugin = "dummy"
                 }
