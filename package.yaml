@@ -39,6 +39,7 @@ library:
     - http-client-tls
     - http-conduit
     - http-types
+    - hoauth2
     - jwt
     - load-env
     - monad-logger

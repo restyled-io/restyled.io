@@ -41,6 +41,8 @@ spec = withApp $ do
                             , userGithubUsername = Nothing
                             , userGitlabUserId = Nothing
                             , userGitlabUsername = Nothing
+                            , userGitlabAccessToken = Nothing
+                            , userGitlabRefreshToken = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
                             }
@@ -66,6 +68,8 @@ spec = withApp $ do
                             , userGithubUsername = Nothing
                             , userGitlabUserId = Nothing
                             , userGitlabUsername = Nothing
+                            , userGitlabAccessToken = Nothing
+                            , userGitlabRefreshToken = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
                             }
@@ -105,6 +109,8 @@ spec = withApp $ do
                     , userGithubUsername = Just "pbrisbin"
                     , userGitlabUserId = Nothing
                     , userGitlabUsername = Nothing
+                    , userGitlabAccessToken = Nothing
+                    , userGitlabRefreshToken = Nothing
                     , userCredsIdent = credsIdent creds
                     , userCredsPlugin = credsPlugin creds
                     }
@@ -119,6 +125,8 @@ spec = withApp $ do
                             , userGithubUsername = Nothing
                             , userGitlabUserId = Nothing
                             , userGitlabUsername = Nothing
+                            , userGitlabAccessToken = Nothing
+                            , userGitlabRefreshToken = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
                             }
@@ -134,6 +142,8 @@ spec = withApp $ do
                     , userGithubUsername = Just "pbrisbin"
                     , userGitlabUserId = Nothing
                     , userGitlabUsername = Nothing
+                    , userGitlabAccessToken = Nothing
+                    , userGitlabRefreshToken = Nothing
                     , userCredsIdent = credsIdent creds
                     , userCredsPlugin = credsPlugin creds
                     }
