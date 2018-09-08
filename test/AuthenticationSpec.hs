@@ -39,6 +39,8 @@ spec = withApp $ do
                             { userEmail = "pat@example.com"
                             , userGithubUserId = Nothing
                             , userGithubUsername = Nothing
+                            , userGitlabUserId = Nothing
+                            , userGitlabUsername = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
                             }
@@ -62,6 +64,8 @@ spec = withApp $ do
                             { userEmail = "pat@example.com"
                             , userGithubUserId = Nothing
                             , userGithubUsername = Nothing
+                            , userGitlabUserId = Nothing
+                            , userGitlabUsername = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
                             }
@@ -99,6 +103,8 @@ spec = withApp $ do
                     { userEmail = "me@example.com"
                     , userGithubUserId = Just 1
                     , userGithubUsername = Just "pbrisbin"
+                    , userGitlabUserId = Nothing
+                    , userGitlabUsername = Nothing
                     , userCredsIdent = credsIdent creds
                     , userCredsPlugin = credsPlugin creds
                     }
@@ -111,6 +117,8 @@ spec = withApp $ do
                             { userEmail = "pat@example.com"
                             , userGithubUserId = Nothing
                             , userGithubUsername = Nothing
+                            , userGitlabUserId = Nothing
+                            , userGitlabUsername = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
                             }
@@ -124,6 +132,8 @@ spec = withApp $ do
                     { userEmail = "me@example.com"
                     , userGithubUserId = Just 1
                     , userGithubUsername = Just "pbrisbin"
+                    , userGitlabUserId = Nothing
+                    , userGitlabUsername = Nothing
                     , userCredsIdent = credsIdent creds
                     , userCredsPlugin = credsPlugin creds
                     }
