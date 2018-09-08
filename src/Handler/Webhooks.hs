@@ -13,9 +13,14 @@ import Backend.Foundation
 import Backend.Job
 import Metrics
 import SVCS.GitHub.Webhook
+import SVCS.GitLab.Webhook
 
 postWebhooksR :: Handler ()
-postWebhooksR = maybe rejectRequest handleGitHubEvent =<< githubEventHeader
+postWebhooksR = void $ runMaybeT $ asum
+    [ MaybeT . handleGitHubEvent =<< MaybeT githubEventHeader
+    , MaybeT . handleGitLabEvent =<< MaybeT gitlabEventHeader
+    , rejectRequest
+    ]
 
 githubEventHeader :: Handler (Maybe Text)
 githubEventHeader = decodeUtf8 <$$> lookupHeader "X-GitHub-Event"
@@ -34,6 +39,21 @@ handleGitHubEvent = \case
         event <- requireJsonBody
         logDebugN $ "PingEvent received: " <> tshow @Value event
         handleDiscarded $ IgnoredEventType "ping"
+
+    event -> handleDiscarded $ IgnoredEventType event
+
+gitlabEventHeader :: Handler (Maybe Text)
+gitlabEventHeader = decodeUtf8 <$$> lookupHeader "X-Gitlab-Event"
+
+handleGitLabEvent :: Text -> Handler a
+handleGitLabEvent = \case
+    "Merge Request Hook" -> do
+        GitLabPayload payload <- requireJsonBody
+        logDebugN $ "PullRequestEvent received: " <> tshow payload
+        webhookReceived
+
+        result <- runDB $ initializeFromWebhook payload
+        either handleDiscarded (handleInitialized payload) result
 
     event -> handleDiscarded $ IgnoredEventType event
 

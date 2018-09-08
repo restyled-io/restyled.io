@@ -50,24 +50,29 @@ type GitLabUserName = Name User
 
 newtype RepoAccessToken = RepoAccessToken { unRepoAccessToken :: Text }
 
-data RepoSVCS = GitHubSVCS
+data RepoSVCS = GitHubSVCS | GitLabSVCS
     deriving Eq
 
 readRepoSVCS :: Text -> Either Text RepoSVCS
 readRepoSVCS = \case
     "github" -> Right GitHubSVCS
+    "gitlab" -> Right GitLabSVCS
     x -> Left $ "Invalid SVCS value: " <> x
 
 showRepoSVCS :: RepoSVCS -> Text
 showRepoSVCS = \case
     GitHubSVCS -> "github"
+    GitLabSVCS -> "gitlab"
 
 instance Show RepoSVCS where
     show GitHubSVCS = "GitHub"
+    show GitLabSVCS = "GitLab"
 
 instance PathPiece RepoSVCS where
     toPathPiece GitHubSVCS = "gh"
+    toPathPiece GitLabSVCS = "gh"
     fromPathPiece "gh" = Just GitHubSVCS
+    fromPathPiece "gl" = Just GitLabSVCS
     fromPathPiece _ = Nothing
 
 instance PersistField RepoSVCS where
@@ -75,7 +80,7 @@ instance PersistField RepoSVCS where
     fromPersistValue = readRepoSVCS <=< fromPersistValue
 
 instance ToJSON RepoSVCS where
-    toJSON GitHubSVCS = String "github"
+    toJSON = String . showRepoSVCS
 
 instance FromJSON RepoSVCS where
     parseJSON = withText "SVCS" $ either (fail . unpack) pure . readRepoSVCS
