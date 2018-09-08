@@ -124,7 +124,6 @@ adminLayout :: Widget -> Handler Html
 adminLayout widget = do
     master <- getYesod
     mmsg <- getMessage
-    mUserId <- maybeAuthId
     pc <- widgetToPageContent $ do
         addStylesheet $ StaticR css_strapless_css
         addStylesheet $ StaticR css_main_css

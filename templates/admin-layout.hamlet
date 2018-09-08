@@ -9,9 +9,8 @@
         <a href=@{AdminP $ AdminPlansP AdminPlansR}>Plans
       <li>
         <a href=@{AdminP $ AdminUsersP AdminUsersR}>Users
-      $maybe _ <- mUserId
-        <li>
-          <a href=@{AuthR $ LogoutR}>Log out
+      <li>
+        <a href=@{AuthR $ LogoutR}>Log out
 
 $maybe msg <- mmsg
   <aside #message .info>
