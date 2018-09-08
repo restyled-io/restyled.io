@@ -58,7 +58,12 @@ instance Yesod App where
     defaultLayout widget = do
         master <- getYesod
         mmsg <- getMessage
-        mUserId <- maybeAuthId
+        mUser <- maybeAuth
+
+        let
+            adminEmails = appAdmins $ appSettings master
+            isAdmin = (`elem` adminEmails) . userEmail
+
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_strapless_css
             addStylesheet $ StaticR css_main_css

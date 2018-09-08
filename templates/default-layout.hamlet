@@ -6,7 +6,10 @@
     <ul>
       <li>
         <a href=https://github.com/restyled-io/restyled.io/wiki>Documentation
-      $maybe _ <- mUserId
+      $maybe Entity _ user <- mUser
+        $if isAdmin user
+          <li>
+            <a href=@{AdminR}>Admin
         <li>
           <a href=@{AuthR $ LogoutR}>Log out
 
