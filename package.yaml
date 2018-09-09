@@ -19,6 +19,7 @@ library:
     - amazonka
     - blaze-markup
     - bytestring
+    - case-insensitive
     - classy-prelude
     - classy-prelude-yesod
     - conduit

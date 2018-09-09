@@ -61,7 +61,7 @@ newtype User = User { uUsername :: Text }
 instance FromJSON User where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
-newtype GitLabPayload = GitLabPayload Payload
+newtype GitLabPayload = GitLabPayload { unGitLabPayload :: Payload }
 
 instance FromJSON GitLabPayload where
     parseJSON v = do

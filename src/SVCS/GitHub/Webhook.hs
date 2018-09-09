@@ -14,7 +14,7 @@ import GitHub.Data.Apps
 import SVCS.Names
 import SVCS.Payload
 
-newtype GitHubPayload = GitHubPayload Payload
+newtype GitHubPayload = GitHubPayload { unGitHubPayload :: Payload }
 
 instance FromJSON GitHubPayload where
     parseJSON v@(Object o) = do
