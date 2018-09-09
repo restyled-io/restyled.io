@@ -11,51 +11,39 @@ import Import
 
 import Backend.Foundation
 import Backend.Job
+import Data.CaseInsensitive (CI)
 import Metrics
 import SVCS.GitHub.Webhook
 import SVCS.GitLab.Webhook
 
 postWebhooksR :: Handler ()
 postWebhooksR = void $ runMaybeT $ asum
-    [ MaybeT . handleGitHubEvent =<< MaybeT githubEventHeader
-    , MaybeT . handleGitLabEvent =<< MaybeT gitlabEventHeader
+    [ handleWebhook "X-GitHub-Event" "pull_request" unGitHubPayload
+    , handleWebhook "X-GitLab-Event" "Merge Request Hook" unGitLabPayload
     , rejectRequest
     ]
 
-githubEventHeader :: Handler (Maybe Text)
-githubEventHeader = decodeUtf8 <$$> lookupHeader "X-GitHub-Event"
+handleWebhook
+    :: FromJSON a
+    => CI ByteString -- ^ Header name for event type
+    -> Text -- ^ Header value for PR event(s)
+    -> (a -> Payload) -- ^ How to unwrap this SVCS' payload to @'Payload'@
+    -> MaybeT Handler ()
+handleWebhook header event unwrap = do
+    value <- decodeUtf8 <$> MaybeT (lookupHeader header)
 
-handleGitHubEvent :: Text -> Handler a
-handleGitHubEvent = \case
-    "pull_request" -> do
-        GitHubPayload payload <- requireJsonBody
-        logDebugN $ "PullRequestEvent received: " <> tshow payload
-        webhookReceived
+    if value == event
+        then lift $ do
+            payload <- unwrap <$> requireJsonBody
+            logDebugN $ "Webhook received: " <> tshow payload
+            webhookReceived
 
-        result <- runDB $ initializeFromWebhook payload
-        either handleDiscarded (handleInitialized payload) result
-
-    "ping" -> do
-        event <- requireJsonBody
-        logDebugN $ "PingEvent received: " <> tshow @Value event
-        handleDiscarded $ IgnoredEventType "ping"
-
-    event -> handleDiscarded $ IgnoredEventType event
-
-gitlabEventHeader :: Handler (Maybe Text)
-gitlabEventHeader = decodeUtf8 <$$> lookupHeader "X-Gitlab-Event"
-
-handleGitLabEvent :: Text -> Handler a
-handleGitLabEvent = \case
-    "Merge Request Hook" -> do
-        GitLabPayload payload <- requireJsonBody
-        logDebugN $ "PullRequestEvent received: " <> tshow payload
-        webhookReceived
-
-        result <- runDB $ initializeFromWebhook payload
-        either handleDiscarded (handleInitialized payload) result
-
-    event -> handleDiscarded $ IgnoredEventType event
+            result <- runDB $ initializeFromWebhook payload
+            either handleDiscarded (handleInitialized payload) result
+        else do
+            payload <- requireJsonBody
+            logDebugN $ "Webhook received: " <> tshow @Value payload
+            handleDiscarded $ IgnoredEventType value
 
 handleInitialized :: Payload -> Entity Repo -> Handler a
 handleInitialized payload repo = do
