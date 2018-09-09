@@ -25,11 +25,12 @@ Repo json
   isPrivate Bool
   debugEnabled Bool
 
-  UniqueRepo owner name
+  UniqueRepo svcs owner name
   deriving Eq Show
 
 Job json
   installationId InstallationId MigrationOnly default=0
+  svcs RepoSVCS default='github'
   owner OwnerName
   repo RepoName
   pullRequest PullRequestNum
