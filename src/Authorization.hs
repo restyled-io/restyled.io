@@ -11,6 +11,7 @@ import Import.NoFoundation
 
 import Cache
 import Control.Monad.Except
+import SVCS.GitHub.AccessToken
 import SVCS.GitHub.Collaborator
 
 authorizeAdmin
@@ -28,66 +29,53 @@ authorizeRepo
     -> Maybe UserId
     -> SqlPersistT m AuthResult
 authorizeRepo settings owner name mUserId = do
-    repo <- getBy404 $ UniqueRepo owner name
-    authorizeRepo' settings repo mUserId
+    -- We only support checking collaborator access for GitHub right now. This
+    -- will naturally return 404 for other cases for now.
+    Entity _ repo <- getBy404 $ UniqueRepo GitHubSVCS owner name
 
-authorizeRepo'
+    if repoIsPrivate repo
+        then do
+            mUser <- join <$> traverse get mUserId
+            maybe notFound (authorizePrivateRepo settings repo) mUser
+        else pure Authorized
+
+-- | Authorize if the @'User'@ is a Collaborator according to GitHub
+authorizePrivateRepo
     :: (MonadCache m, MonadHandler m)
     => AppSettings
-    -> Entity Repo
-    -> Maybe UserId
+    -> Repo
+    -> User
     -> SqlPersistT m AuthResult
-authorizeRepo' _ (Entity _ Repo {..}) _
-    | not repoIsPrivate = pure Authorized
-    | repoSvcs /= GitHubSVCS = notFound
-authorizeRepo' _ _ Nothing = notFound
-
--- By this point, we know:
---
--- 1. The repo is private
--- 2. The repo is GitHub
--- 3. The user is authenticated
---
--- So we just go ahead with the GitHub-specific collaborators check.
---
-authorizeRepo' settings repo (Just userId) = do
-    logDebugN
-        $ "Authorizing private GitHub repository"
-        <> repoPath owner name
-        <> " for authenticated user id="
-        <> toPathPiece userId
-
-    User {..} <- get404 userId
-    canRead <- caching cacheKey $ runCanRead $ do
-        token <- ExceptT $ repoAccessToken settings repo Nothing
-        username <- liftEither $ note "No GitHub username" userGithubUsername
-        githubCollaboratorCanRead token owner name username
+authorizePrivateRepo AppSettings {..} Repo {..} User {..} = do
+    result <- runExceptT $ do
+        username <- maybeToExceptT "User has no GitHub Username"
+            $ liftMaybe userGithubUsername
+        caching (cacheKey username) $ do
+            token <- ExceptT $ liftIO $ githubInstallationToken
+                appGitHubAppId
+                appGitHubAppKey
+                repoInstallationId
+            githubCollaboratorCanRead token repoOwner repoName username
 
     logInfoN
-        $ "Authentication result"
-        <> " github_username="
-        <> maybe "<none>" toPathPiece userGithubUsername
-        <> " repo="
-        <> repoPath owner name
-        <> " can_read="
-        <> tshow canRead
+        $ "Authorization result for "
+        <> repoPath repoOwner repoName
+        <> " for "
+        <> maybe "<unknown>" toPathPiece userGithubUsername
+        <> ": "
+        <> tshow result
 
-    authorizeWhen canRead
+    either (const notFound) authorizeWhen result
   where
-    owner = repoOwner $ entityVal repo
-    name = repoName $ entityVal repo
-    cacheKey =
+    cacheKey username =
         [ "auth"
         , "repo"
-        , toPathPiece owner
-        , toPathPiece name
-        , toPathPiece userId
+        , toPathPiece repoSvcs
+        , toPathPiece repoOwner
+        , toPathPiece repoName
+        , toPathPiece username
         ]
 
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized
 authorizeWhen False = notFound
-
--- | Run the Collaborator check and log-mask errors as @'False'@
-runCanRead :: MonadLogger m => ExceptT String m Bool -> m Bool
-runCanRead = either ((False <$) . logWarnN . pack) pure <=< runExceptT

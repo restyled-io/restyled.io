@@ -21,7 +21,8 @@ insertJob :: Entity Repo -> PullRequestNum -> YesodDB App (Entity Job)
 insertJob (Entity _ Repo {..}) pullRequestNumber = do
     now <- liftIO getCurrentTime
     insertEntity Job
-        { jobOwner = repoOwner
+        { jobSvcs = repoSvcs
+        , jobOwner = repoOwner
         , jobRepo = repoName
         , jobPullRequest = pullRequestNumber
         , jobCreatedAt = now
