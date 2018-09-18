@@ -17,7 +17,6 @@ where
 import ClassyPrelude
 
 import Control.Error.Util (note)
-import Control.Monad.Except
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
 import Model
@@ -49,16 +48,26 @@ repoAccessToken AppSettings {..} (Entity _ Repo {..}) mUser =
             appGitHubAppId
             appGitHubAppKey
             repoInstallationId
-        GitLabSVCS -> runExceptT $ do
-            -- Until we truly support GitLab, these error scenarios are very
-            -- unlikely outside of my own testing. So let's be terse.
-            oauthKeys <- noteE "No GitLab OAuth2 keys" appGitLabOAuthKeys
-            Entity _ User {..} <- noteE "GitLab requires user" mUser
-            refreshToken <- noteE "No refreshToken" userGitlabRefreshToken
-            ExceptT $ liftIO $ gitlabRefreshedToken oauthKeys refreshToken
+        GitLabSVCS -> either
+            (pure . Left)
+            (gitlabRefreshedToken appGitLabOAuthKeys)
+            eGitLabRefreshToken
   where
-    noteE :: Monad m => e -> Maybe a -> ExceptT e m a
-    noteE msg = liftEither . note msg
+    eGitLabRefreshToken = do
+        Entity _ user <- note repoOwnerNotFound mUser
+        note (missingRefreshToken user) $ userGitlabRefreshToken user
+
+    repoOwnerNotFound =
+        "Unable to find an owner for repository "
+            <> unpack (repoPath repoOwner repoName)
+            <> ". Please authorize with GitLab as a user with read access on this repository."
+
+    missingRefreshToken User {..} =
+        "GitLab user "
+            <> unpack (maybe "<unknown>" toPathPiece userGitlabUsername)
+            <> " was identified as an owner for repository "
+            <> unpack (repoPath repoOwner repoName)
+            <> " but somehow has no Refresh Token."
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
