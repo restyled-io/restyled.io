@@ -54,8 +54,8 @@ data AppSettings = AppSettings
     , appCopyright :: Text
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
-    , appGitHubOAuthKeys :: OAuthKeys
-    , appGitLabOAuthKeys :: OAuthKeys
+    , appGitHubOAuthKeys :: Maybe OAuthKeys
+    , appGitLabOAuthKeys :: Maybe OAuthKeys
     , appRestylerImage :: String
     , appRestylerTag :: Maybe String
     , appAdmins :: [Text]
@@ -118,12 +118,12 @@ envSettings = AppSettings
     <*> pure "Patrick Brisbin 2018"
     <*> (mkGitHubAppId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
     <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
-    <*> (OAuthKeys
-        <$> Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_ID" mempty
-        <*> Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_SECRET" mempty)
-    <*> (OAuthKeys
-        <$> Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_ID" mempty
-        <*> Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_SECRET" mempty)
+    <*> (liftA2 OAuthKeys
+        <$> optional (Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_ID" mempty)
+        <*> optional (Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_SECRET" mempty))
+    <*> (liftA2 OAuthKeys
+        <$> optional (Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_ID" mempty)
+        <*> optional (Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_SECRET" mempty))
     <*> Env.var Env.str "RESTYLER_IMAGE" (Env.def "restyled/restyler")
     <*> optional (Env.var Env.str "RESTYLER_TAG" mempty)
     <*> (map T.strip . T.splitOn "," <$> Env.var Env.str "ADMIN_EMAILS" (Env.def ""))

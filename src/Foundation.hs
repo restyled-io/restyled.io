@@ -155,13 +155,17 @@ instance YesodAuth App where
             $(widgetFile "login")
 
     authPlugins App{..} = addAuthBackDoor appSettings
-        [ oauth2GitHub
-            (oauthKeysClientId $ appGitHubOAuthKeys appSettings)
-            (oauthKeysClientSecret $ appGitHubOAuthKeys appSettings)
-        , oauth2GitLab
-            (oauthKeysClientId $ appGitLabOAuthKeys appSettings)
-            (oauthKeysClientSecret $ appGitLabOAuthKeys appSettings)
-        ]
+        . addOAuth2Plugin oauth2GitLab (appGitLabOAuthKeys appSettings)
+        . addOAuth2Plugin oauth2GitHub (appGitHubOAuthKeys appSettings)
+        $ []
+
+addOAuth2Plugin
+    :: (Text -> Text -> AuthPlugin App)
+    -> Maybe OAuthKeys
+    -> [AuthPlugin App]
+    -> [AuthPlugin App]
+addOAuth2Plugin mkPlugin = maybe id $ \OAuthKeys {..} ->
+    (<> [mkPlugin oauthKeysClientId oauthKeysClientSecret])
 
 addAuthBackDoor :: AppSettings -> [AuthPlugin App] -> [AuthPlugin App]
 addAuthBackDoor AppSettings {..} =
