@@ -6,9 +6,6 @@ User
   githubUserId GitHubUserId Maybe sqltype=integer
   githubUsername GitHubUserName Maybe
 
-  gitlabUserId GitLabUserId Maybe sqltype=integer
-  gitlabUsername GitLabUserName Maybe
-
   credsIdent Text
   credsPlugin Text
 
