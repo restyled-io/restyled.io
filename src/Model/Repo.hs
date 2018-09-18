@@ -10,19 +10,16 @@ module Model.Repo
     , repoWithStats
     , IgnoredWebhookReason(..)
     , initializeFromWebhook
-    , findRepoOwner
     )
 where
 
 import ClassyPrelude
 
-import Control.Error.Util (note)
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
 import Model
 import Settings
 import SVCS.GitHub
-import SVCS.GitLab
 import Yesod.Core (toPathPiece)
 
 -- | Make a nicely-formatted @:owner\/:name@
@@ -40,34 +37,14 @@ repoAccessToken
     :: MonadIO m
     => AppSettings
     -> Entity Repo
-    -> Maybe (Entity User)
     -> m (Either String RepoAccessToken)
-repoAccessToken AppSettings {..} (Entity _ Repo {..}) mUser =
+repoAccessToken AppSettings {..} (Entity _ Repo {..}) =
     liftIO $ case repoSvcs of
         GitHubSVCS -> githubInstallationToken
             appGitHubAppId
             appGitHubAppKey
             repoInstallationId
-        GitLabSVCS -> either
-            (pure . Left)
-            (gitlabRefreshedToken appGitLabOAuthKeys)
-            eGitLabRefreshToken
-  where
-    eGitLabRefreshToken = do
-        Entity _ user <- note repoOwnerNotFound mUser
-        note (missingRefreshToken user) $ userGitlabRefreshToken user
-
-    repoOwnerNotFound =
-        "Unable to find an owner for repository "
-            <> unpack (repoPath repoOwner repoName)
-            <> ". Please authorize with GitLab as a user with read access on this repository."
-
-    missingRefreshToken User {..} =
-        "GitLab user "
-            <> unpack (maybe "<unknown>" toPathPiece userGitlabUsername)
-            <> " was identified as an owner for repository "
-            <> unpack (repoPath repoOwner repoName)
-            <> " but somehow has no Refresh Token."
+        GitLabSVCS -> error "Exchange Access Token!"
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
@@ -137,12 +114,3 @@ isActualAuthor author
 
 enqueueEvents :: [PullRequestEventType]
 enqueueEvents = [PullRequestOpened, PullRequestSynchronized]
-
-findRepoOwner :: MonadIO m => Entity Repo -> SqlPersistT m (Maybe (Entity User))
-findRepoOwner (Entity _ Repo {..}) = selectFirst filters []
-  where
-    filters = case repoSvcs of
-        GitHubSVCS ->
-            [UserGithubUsername ==. Just (githubOwnerToUser repoOwner)]
-        GitLabSVCS ->
-            [UserGitlabUsername ==. Just (gitlabOwnerToUser repoOwner)]

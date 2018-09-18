@@ -59,7 +59,7 @@ authorizeRepo' settings repo (Just userId) = do
 
     User {..} <- get404 userId
     canRead <- caching cacheKey $ runCanRead $ do
-        token <- ExceptT $ repoAccessToken settings repo Nothing
+        token <- ExceptT $ repoAccessToken settings repo
         username <- liftEither $ note "No GitHub username" userGithubUsername
         githubCollaboratorCanRead token owner name username
 

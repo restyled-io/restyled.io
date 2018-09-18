@@ -99,8 +99,7 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
         now <- liftIO getCurrentTime
         void . fromMaybeM err =<< selectActivePlan now (entityVal repo)
 
-    mUser <- runDB $ findRepoOwner repo
-    eAccessToken <- repoAccessToken appSettings repo mUser
+    eAccessToken <- repoAccessToken appSettings repo
 
     either
         throwString
