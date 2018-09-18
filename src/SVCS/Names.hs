@@ -12,10 +12,8 @@ module SVCS.Names
     , mkPullRequestNum
     , GitHubUserId
     , GitHubUserName
-    , githubOwnerToUser
     , GitLabUserId
     , GitLabUserName
-    , gitlabOwnerToUser
     , RepoAccessToken(..)
     , RepoSVCS(..)
     ) where
@@ -46,15 +44,9 @@ mkPullRequestNum = mkId Proxy
 type GitHubUserId = Id User
 type GitHubUserName = Name User
 
-githubOwnerToUser :: OwnerName -> GitHubUserName
-githubOwnerToUser = mkName Proxy . untagName
-
 -- TODO: newtype for actual safety
 type GitLabUserId = Id User
 type GitLabUserName = Name User
-
-gitlabOwnerToUser :: OwnerName -> GitHubUserName
-gitlabOwnerToUser = mkName Proxy . untagName
 
 newtype RepoAccessToken = RepoAccessToken { unRepoAccessToken :: Text }
 
