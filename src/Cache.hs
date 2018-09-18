@@ -10,7 +10,6 @@ module Cache
 
 import Prelude
 
-import Control.Monad.Except (ExceptT)
 import Control.Monad.Trans (lift)
 import Data.Aeson
 import Data.Text (Text)
@@ -22,10 +21,6 @@ newtype CacheKey = CacheKey Text
 class Monad m => MonadCache m where
     getCache :: FromJSON a => CacheKey -> m (Maybe a)
     setCache :: ToJSON a => CacheKey -> a -> m ()
-
-instance MonadCache m => MonadCache (ExceptT e m) where
-    getCache = lift . getCache
-    setCache k = lift . setCache k
 
 instance MonadCache m => MonadCache (SqlPersistT m) where
     getCache = lift . getCache

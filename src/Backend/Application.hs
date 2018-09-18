@@ -83,7 +83,7 @@ execRestyler
     -> m (ExitCode, String, String)
 execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
     repo <- fromMaybeM (throwString "Repo not found")
-        =<< runDB (getBy $ UniqueRepo jobSvcs jobOwner jobRepo)
+        =<< runDB (getBy $ UniqueRepo jobOwner jobRepo)
 
     when (repoIsPrivate $ entityVal repo) $ runDB $ do
         let
