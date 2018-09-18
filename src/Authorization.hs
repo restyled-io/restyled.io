@@ -48,7 +48,8 @@ authorizePrivateRepo
     -> SqlPersistT m AuthResult
 authorizePrivateRepo AppSettings {..} Repo {..} User {..} = do
     result <- runExceptT $ do
-        username <- userGithubUsername ?? "User has no GitHub Username"
+        username <- maybeToExceptT "User has no GitHub Username"
+            $ liftMaybe userGithubUsername
         caching (cacheKey username) $ do
             token <- ExceptT $ liftIO $ githubInstallationToken
                 appGitHubAppId
