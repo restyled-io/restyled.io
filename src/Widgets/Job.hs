@@ -31,7 +31,8 @@ import Formatting (format)
 import Formatting.Time (diff)
 
 data CreateJob = CreateJob
-    { cjOwner :: OwnerName
+    { cjSvcs :: RepoSVCS
+    , cjOwner :: OwnerName
     , cjRepo :: RepoName
     , cjPullRequest :: PullRequestNum
     }
@@ -41,7 +42,8 @@ createJobForm :: Form CreateJob
 createJobForm =
     renderDivs
         $ CreateJob
-        <$> (mkOwnerName <$> areq textField "Owner" Nothing)
+        <$> areq (selectField optionsEnum) "SVCS" Nothing
+        <*> (mkOwnerName <$> areq textField "Owner" Nothing)
         <*> (mkRepoName <$> areq textField "Repo" Nothing)
         <*> (mkPullRequestNum <$> areq intField "Pull Request" Nothing)
 
@@ -50,7 +52,8 @@ createJobFormFrom :: Job -> Form CreateJob
 createJobFormFrom Job {..} =
     renderDivs
         $ CreateJob
-        <$> areq hiddenField "" (Just jobOwner)
+        <$> areq hiddenField "" (Just jobSvcs)
+        <*> areq hiddenField "" (Just jobOwner)
         <*> areq hiddenField "" (Just jobRepo)
         <*> areq hiddenField "" (Just jobPullRequest)
 
@@ -59,9 +62,11 @@ createJobFormFromRepo :: Repo -> Form CreateJob
 createJobFormFromRepo Repo {..} =
     renderDivs
         $ CreateJob
-        <$> areq hiddenField "" (Just repoOwner)
+        <$> areq hiddenField "" (Just repoSvcs)
+        <*> areq hiddenField "" (Just repoOwner)
         <*> areq hiddenField "" (Just repoName)
-        <*> (mkPullRequestNum <$> areq intField ("" { fsAttrs = attrs }) Nothing)
+        <*> (mkPullRequestNum <$> areq intField ("" { fsAttrs = attrs }) Nothing
+            )
     where attrs = [("placeholder", "PR Number")]
 
 -- | Internal helper for rendering completion state

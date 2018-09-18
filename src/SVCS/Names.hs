@@ -59,7 +59,7 @@ gitlabOwnerToUser = mkName Proxy . untagName
 newtype RepoAccessToken = RepoAccessToken { unRepoAccessToken :: Text }
 
 data RepoSVCS = GitHubSVCS | GitLabSVCS
-    deriving Eq
+    deriving (Eq, Ord, Read, Show, Enum, Bounded)
 
 readRepoSVCS :: Text -> Either Text RepoSVCS
 readRepoSVCS = \case
@@ -71,10 +71,6 @@ showRepoSVCS :: RepoSVCS -> Text
 showRepoSVCS = \case
     GitHubSVCS -> "github"
     GitLabSVCS -> "gitlab"
-
-instance Show RepoSVCS where
-    show GitHubSVCS = "GitHub"
-    show GitLabSVCS = "GitLab"
 
 instance PathPiece RepoSVCS where
     toPathPiece GitHubSVCS = "gh"
