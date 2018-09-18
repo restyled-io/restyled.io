@@ -26,6 +26,16 @@ data GitHubUser = GitHubUser
 instance FromJSON GitHubUser where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
+data GitLabUser = GitLabUser
+    { gluEmail :: Text
+    , gluId :: GitLabUserId
+    , glUsername :: GitLabUserName
+    }
+    deriving (Eq, Show, Generic)
+
+instance FromJSON GitLabUser where
+    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+
 authenticateUser
     :: (AuthId site ~ UserId, MonadCache m, MonadHandler m)
     => Creds site
@@ -67,16 +77,38 @@ replaceUser userId User {..} = update userId $ catMaybes
     [ Just $ UserEmail =. userEmail
     , (UserGithubUserId =.) . Just <$> userGithubUserId
     , (UserGithubUsername =.) . Just <$> userGithubUsername
+    , (UserGitlabUserId =.) . Just <$> userGitlabUserId
+    , (UserGitlabUsername =.) . Just <$> userGitlabUsername
+    , Just $ UserCredsIdent =. userCredsIdent
+    , Just $ UserCredsPlugin =. userCredsPlugin
     ]
 
 userFromCreds :: Creds site -> Either String User
-userFromCreds creds = do
-    GitHubUser {..} <- getUserResponseJSON creds
+userFromCreds creds = case credsPlugin creds of
+    "github" -> do
+        GitHubUser {..} <- getUserResponseJSON creds
 
-    pure User
-        { userEmail = ghuEmail
-        , userGithubUserId = Just ghuId
-        , userGithubUsername = Just ghuLogin
-        , userCredsIdent = credsIdent creds
-        , userCredsPlugin = credsPlugin creds
-        }
+        pure User
+            { userEmail = ghuEmail
+            , userGithubUserId = Just ghuId
+            , userGithubUsername = Just ghuLogin
+            , userGitlabUserId = Nothing
+            , userGitlabUsername = Nothing
+            , userCredsIdent = credsIdent creds
+            , userCredsPlugin = credsPlugin creds
+            }
+
+    "gitlab" -> do
+        GitLabUser {..} <- getUserResponseJSON creds
+
+        pure User
+            { userEmail = gluEmail
+            , userGithubUserId = Nothing
+            , userGithubUsername = Nothing
+            , userGitlabUserId = Just gluId
+            , userGitlabUsername = Just glUsername
+            , userCredsIdent = credsIdent creds
+            , userCredsPlugin = credsPlugin creds
+            }
+
+    x -> Left $ unpack $ "Unexpected AuthPlugin: " <> x

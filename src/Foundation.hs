@@ -30,7 +30,8 @@ import Text.Jasmine (minifym)
 import Yesod.Auth
 import Yesod.Auth.Dummy
 import Yesod.Auth.OAuth2
-import Yesod.Auth.OAuth2.Github
+import Yesod.Auth.OAuth2.GitHub
+import Yesod.Auth.OAuth2.GitLab
 import Yesod.Core.Types (Logger)
 import Yesod.Default.Util (addStaticContentExternal)
 
@@ -142,9 +143,12 @@ instance YesodAuth App where
     logoutDest _ = HomeR
 
     authPlugins App{..} = addAuthBackDoor appSettings
-        [ oauth2Github
+        [ oauth2GitHub
             (oauthKeysClientId $ appGitHubOAuthKeys appSettings)
             (oauthKeysClientSecret $ appGitHubOAuthKeys appSettings)
+        , oauth2GitLab
+            (oauthKeysClientId $ appGitLabOAuthKeys appSettings)
+            (oauthKeysClientSecret $ appGitLabOAuthKeys appSettings)
         ]
 
 addAuthBackDoor :: AppSettings -> [AuthPlugin App] -> [AuthPlugin App]

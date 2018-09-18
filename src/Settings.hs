@@ -55,6 +55,7 @@ data AppSettings = AppSettings
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
     , appGitHubOAuthKeys :: OAuthKeys
+    , appGitLabOAuthKeys :: OAuthKeys
     , appRestylerImage :: String
     , appRestylerTag :: Maybe String
     , appAdmins :: [Text]
@@ -120,6 +121,9 @@ envSettings = AppSettings
     <*> (OAuthKeys
         <$> Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_ID" mempty
         <*> Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_SECRET" mempty)
+    <*> (OAuthKeys
+        <$> Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_ID" mempty
+        <*> Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_SECRET" mempty)
     <*> Env.var Env.str "RESTYLER_IMAGE" (Env.def "restyled/restyler")
     <*> optional (Env.var Env.str "RESTYLER_TAG" mempty)
     <*> (map T.strip . T.splitOn "," <$> Env.var Env.str "ADMIN_EMAILS" (Env.def ""))

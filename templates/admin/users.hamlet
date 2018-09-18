@@ -4,6 +4,7 @@
       <th>Email
       <th>OAuth2
       <th>GitHub
+      <th>GitLab
       <th>
 
     <tbody>
@@ -14,6 +15,9 @@
           <td>
             $maybe ghUsername <- userGithubUsername user
               #{ghUsername}
+          <td>
+            $maybe glUsername <- userGitlabUsername user
+              #{glUsername}
           <td>
             <form
               method=post
