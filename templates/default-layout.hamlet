@@ -12,9 +12,6 @@
             <a href=@{AdminR}>Admin
         <li>
           <a href=@{AuthR $ LogoutR}>Log out
-      $nothing
-        <li>
-          <a href=@{AuthR $ LoginR}>Log in
 
 $maybe msg <- mmsg
   <aside #message .info>
