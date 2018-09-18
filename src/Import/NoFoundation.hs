@@ -4,7 +4,8 @@ module Import.NoFoundation
     ) where
 
 import ClassyPrelude.Yesod as Import hiding (Proxy)
-import Control.Error.Util as Import (hush, note)
+import Control.Error.Util as Import (hush, hushT, note, noteT, (??))
+import Control.Monad.Except as Import (ExceptT, liftEither, runExceptT)
 import Control.Monad.Logger as Import
 import Control.Monad.Trans.Maybe as Import
 import Data.Proxy as Import
@@ -21,6 +22,3 @@ infixl 4 <$$>
 
 (<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
 f <$$> a = fmap f <$> a
-
-liftMaybe :: Applicative m => Maybe a -> MaybeT m a
-liftMaybe = MaybeT . pure

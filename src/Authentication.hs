@@ -69,7 +69,7 @@ findUserForCreds creds@Creds {..} =
   where
     getMatchingCreds = MaybeT $ getBy $ UniqueUser credsPlugin credsIdent
     getMatchingEmail = do
-        User {..} <- liftMaybe $ hush $ userFromCreds creds
+        User {..} <- hushT $ liftEither $ userFromCreds creds
         MaybeT $ selectFirst [UserEmail ==. userEmail] []
 
 -- | A version of 'replace' that avoids clobbering when possible
