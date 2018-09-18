@@ -12,7 +12,6 @@ import Import.NoFoundation
 import Cache
 import Data.Aeson
 import Data.Aeson.Casing
-import Network.OAuth.OAuth2 as OAuth2
 import Yesod.Auth
 import Yesod.Auth.Message
 import Yesod.Auth.OAuth2
@@ -80,8 +79,6 @@ replaceUser userId User {..} = update userId $ catMaybes
     , (UserGithubUsername =.) . Just <$> userGithubUsername
     , (UserGitlabUserId =.) . Just <$> userGitlabUserId
     , (UserGitlabUsername =.) . Just <$> userGitlabUsername
-    , (UserGitlabAccessToken =.) . Just <$> userGitlabAccessToken
-    , (UserGitlabRefreshToken =.) . Just <$> userGitlabRefreshToken
     , Just $ UserCredsIdent =. userCredsIdent
     , Just $ UserCredsPlugin =. userCredsPlugin
     ]
@@ -97,8 +94,6 @@ userFromCreds creds = case credsPlugin creds of
             , userGithubUsername = Just ghuLogin
             , userGitlabUserId = Nothing
             , userGitlabUsername = Nothing
-            , userGitlabAccessToken = Nothing
-            , userGitlabRefreshToken = Nothing
             , userCredsIdent = credsIdent creds
             , userCredsPlugin = credsPlugin creds
             }
@@ -112,8 +107,6 @@ userFromCreds creds = case credsPlugin creds of
             , userGithubUsername = Nothing
             , userGitlabUserId = Just gluId
             , userGitlabUsername = Just glUsername
-            , userGitlabAccessToken = OAuth2.atoken <$> getAccessToken creds
-            , userGitlabRefreshToken = OAuth2.rtoken <$> getRefreshToken creds
             , userCredsIdent = credsIdent creds
             , userCredsPlugin = credsPlugin creds
             }
