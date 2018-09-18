@@ -21,6 +21,8 @@ spec = withApp $ do
                 , userGithubUsername = Nothing
                 , userGitlabUserId = Nothing
                 , userGitlabUsername = Nothing
+                , userGitlabRefreshToken = Nothing
+                , userGitlabAccessToken = Nothing
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
                 }
@@ -37,6 +39,8 @@ spec = withApp $ do
                 , userGithubUsername = Nothing
                 , userGitlabUserId = Nothing
                 , userGitlabUsername = Nothing
+                , userGitlabAccessToken = Nothing
+                , userGitlabRefreshToken = Nothing
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
                 }
@@ -49,6 +53,8 @@ spec = withApp $ do
                 , userGithubUsername = Nothing
                 , userGitlabUserId = Nothing
                 , userGitlabUsername = Nothing
+                , userGitlabAccessToken = Nothing
+                , userGitlabRefreshToken = Nothing
                 , userCredsIdent = "2"
                 , userCredsPlugin = "dummy"
                 }

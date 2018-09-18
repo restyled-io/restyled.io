@@ -8,6 +8,8 @@ User
 
   gitlabUserId GitLabUserId Maybe sqltype=integer
   gitlabUsername GitLabUserName Maybe
+  gitlabAccessToken Text Maybe
+  gitlabRefreshToken Text Maybe
 
   credsIdent Text
   credsPlugin Text
