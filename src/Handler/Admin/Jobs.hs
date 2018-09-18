@@ -29,7 +29,7 @@ postAdminJobsR = do
 
     case result of
         FormSuccess CreateJob {..} -> do
-            mRepo <- runDB $ getBy $ UniqueRepo cjOwner cjRepo
+            mRepo <- runDB $ getBy $ UniqueRepo cjSvcs cjOwner cjRepo
 
             for_ mRepo $ \repo -> do
                 job <- runDB $ insertJob repo cjPullRequest
