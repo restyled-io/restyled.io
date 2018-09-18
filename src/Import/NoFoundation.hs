@@ -6,6 +6,7 @@ module Import.NoFoundation
 import ClassyPrelude.Yesod as Import hiding (Proxy)
 import Control.Error.Util as Import (hush, note)
 import Control.Monad.Logger as Import
+import Control.Monad.Trans.Maybe as Import
 import Data.Proxy as Import
 import Data.Time as Import
 import Model as Import
@@ -20,3 +21,6 @@ infixl 4 <$$>
 
 (<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
 f <$$> a = fmap f <$> a
+
+liftMaybe :: Applicative m => Maybe a -> MaybeT m a
+liftMaybe = MaybeT . pure
