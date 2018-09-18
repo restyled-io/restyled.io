@@ -44,6 +44,7 @@ repoAccessToken AppSettings {..} (Entity _ Repo {..}) =
             appGitHubAppId
             appGitHubAppKey
             repoInstallationId
+        GitLabSVCS -> error "Exchange Access Token!"
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
