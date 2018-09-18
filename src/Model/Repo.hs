@@ -16,7 +16,7 @@ where
 
 import ClassyPrelude
 
-import Control.Error.Util ((??))
+import Control.Error.Util (note)
 import Control.Monad.Except
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
@@ -52,10 +52,13 @@ repoAccessToken AppSettings {..} (Entity _ Repo {..}) mUser =
         GitLabSVCS -> runExceptT $ do
             -- Until we truly support GitLab, these error scenarios are very
             -- unlikely outside of my own testing. So let's be terse.
-            oauthKeys <- appGitLabOAuthKeys ?? "No GitLab OAuth2 keys"
-            Entity _ User {..} <- mUser ?? "GitLab requires user"
-            refreshToken <- userGitlabRefreshToken ?? "No refreshToken"
+            oauthKeys <- noteE "No GitLab OAuth2 keys" appGitLabOAuthKeys
+            Entity _ User {..} <- noteE "GitLab requires user" mUser
+            refreshToken <- noteE "No refreshToken" userGitlabRefreshToken
             ExceptT $ liftIO $ gitlabRefreshedToken oauthKeys refreshToken
+  where
+    noteE :: Monad m => e -> Maybe a -> ExceptT e m a
+    noteE msg = liftEither . note msg
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
