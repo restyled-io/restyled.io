@@ -51,52 +51,6 @@ form .errors {
   text-align: center;
 }
 
-section.login {
-  margin-top: 3em;
-}
-
-.login li {
-  list-style: none;
-  text-align: center;
-}
-
-.login a {
-  font-size: 16pt;
-  line-height: 32pt;
-  padding-left: 32px;
-  text-align: left;
-  width: 13em;
-}
-
-.login a .logo {
-  display: inline-block;
-  height: 32px;
-  left: -6pt;
-  position: relative;
-  top: 6pt;
-  width: 32px;
-}
-
-.login a.github {
-  background: #04AA51;
-  border-color: #04aa51;
-  color: #ffffff;
-}
-
-.login a.github .logo {
-  background-image: url("/static/img/logos/github-light-32px.png");
-}
-
-.login a.gitlab {
-  background: #f3f3f3;
-  border-color: #909090;
-  color: #909090;
-}
-
-.login a.gitlab .logo {
-  background-image: url("/static/img/logos/gitlab-whitespace.png");
-}
-
 /* Strapless styling for textual inputs. Why not number too? */
 form input[type="number"] {
   width: 100%;

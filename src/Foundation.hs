@@ -142,18 +142,6 @@ instance YesodAuth App where
     loginDest _ = HomeR
     logoutDest _ = HomeR
 
-    loginHandler = do
-        plugins <- getsYesod authPlugins
-
-        let formatPluginName = \case
-                "github" -> "GitHub"
-                "gitlab" -> "GitLab"
-                name -> name
-
-        authLayout $ do
-            setTitle "Log In"
-            $(widgetFile "login")
-
     authPlugins App{..} = addAuthBackDoor appSettings
         [ oauth2GitHub
             (oauthKeysClientId $ appGitHubOAuthKeys appSettings)
