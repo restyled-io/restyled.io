@@ -51,9 +51,10 @@ patchAdminRepoR repoId = do
 
 getAdminRepoJobsR :: RepoId -> Handler Html
 getAdminRepoJobsR repoId = do
-    (repo, jobs) <- runDB $ do
+    (repo, pages) <- runDB $ do
         repo@Repo {..} <- get404 repoId
-        (repo, ) <$> selectList
+        (repo, ) <$> selectPaginated
+            5
             [JobOwner ==. repoOwner, JobRepo ==. repoName]
             [Desc JobCreatedAt]
 

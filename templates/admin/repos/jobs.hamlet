@@ -8,5 +8,8 @@
       #{repoOwner repo}/#{repoName repo}
 
 <section>
-  $forall job <- jobs
+  $forall job <- pageItems $ pagesCurrent pages
     ^{adminJobCard job}
+
+  <aside>
+    ^{simple 3 pages}
