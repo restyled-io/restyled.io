@@ -1,6 +1,9 @@
 <section>
-  $if null jobs
+  $if null $ pageItems $ pagesCurrent pages
     <p>Hmm, no Jobs yet...
   $else
-    $forall job <- jobs
+    $forall job <- pageItems $ pagesCurrent pages
       ^{jobCard job}
+
+    <aside>
+      ^{simple 3 pages}

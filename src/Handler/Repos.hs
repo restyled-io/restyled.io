@@ -14,6 +14,7 @@ where
 import Import
 
 import Widgets.Job
+import Yesod.Paginator
 
 getRepoR :: OwnerName -> RepoName -> Handler Html
 getRepoR = getRepoJobsR
@@ -23,7 +24,8 @@ getRepoPullR = getRepoPullJobsR
 
 getRepoPullJobsR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html
 getRepoPullJobsR owner name num = do
-    jobs <- runDB $ selectList
+    pages <- runDB $ selectPaginated
+        5
         [JobOwner ==. owner, JobRepo ==. name, JobPullRequest ==. num]
         [Desc JobCompletedAt, Desc JobCreatedAt]
 
@@ -33,7 +35,8 @@ getRepoPullJobsR owner name num = do
 
 getRepoJobsR :: OwnerName -> RepoName -> Handler Html
 getRepoJobsR owner name = do
-    jobs <- runDB $ selectList
+    pages <- runDB $ selectPaginated
+        5
         [JobOwner ==. owner, JobRepo ==. name]
         [Desc JobCompletedAt, Desc JobCreatedAt]
 
