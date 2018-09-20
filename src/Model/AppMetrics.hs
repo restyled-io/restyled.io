@@ -14,7 +14,9 @@ import Prelude
 
 import Control.Monad (void)
 import Control.Monad.IO.Class
+import Data.Text (Text)
 import qualified Network.AWS as AWS
+import qualified Network.AWS.CloudWatch as AWS
 import System.Metrics (Store)
 import qualified System.Metrics as EKG
 import System.Metrics.Counter (Counter)
@@ -53,7 +55,14 @@ increment = liftIO . EKG.inc
 forkLocalhostServer :: Store -> Int -> IO ()
 forkLocalhostServer store = void . EKG.forkServerWith store "localhost"
 
-forkCloudWatchServer :: Store -> IO ()
-forkCloudWatchServer store = do
+forkCloudWatchServer :: Store -> [(Text, Text)] -> IO ()
+forkCloudWatchServer store dimensions = do
     env <- AWS.newEnv AWS.Discover
-    void $ EKG.forkCloudWatch (EKG.defaultCloudWatchEnv "EKG" env) store
+
+    let
+        cloudWatchEnv = (EKG.defaultCloudWatchEnv "EKG" env)
+            { EKG.cweFlushInterval = 5000
+            , EKG.cweDimensions = map (uncurry AWS.dimension) dimensions
+            }
+
+    void $ EKG.forkCloudWatch cloudWatchEnv store

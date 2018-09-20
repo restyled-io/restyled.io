@@ -17,6 +17,7 @@ library:
     - aeson
     - aeson-casing
     - amazonka
+    - amazonka-cloudwatch
     - blaze-markup
     - bytestring
     - case-insensitive
