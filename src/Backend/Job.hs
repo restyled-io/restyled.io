@@ -14,7 +14,6 @@ import Import hiding (timeout)
 
 import Backend.Foundation
 import Data.Aeson
-import Database.Persist.Sql (SqlPersistM)
 import System.Exit (ExitCode(..))
 
 insertJob :: Entity Repo -> PullRequestNum -> YesodDB App (Entity Job)
@@ -34,11 +33,12 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         }
 
 completeJob
-    :: JobId
+    :: MonadIO m
+    => JobId
     -> ExitCode
     -> Text -- ^ stdout
     -> Text -- ^ stderr
-    -> SqlPersistM ()
+    -> SqlPersistT m ()
 completeJob jid ec out err = do
     now <- liftIO getCurrentTime
     update

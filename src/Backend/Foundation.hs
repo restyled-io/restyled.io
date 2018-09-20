@@ -9,6 +9,7 @@ module Backend.Foundation
     , runBackend
     , runBackendHandler
     , runBackendApp
+    , runBackendLogger
     , runRedis
     , module Control.Monad.Logger
     , module Database.Redis
@@ -43,10 +44,12 @@ type MonadBackend m =
 -- Uses supplied settings and connections, logs to stdout
 --
 runBackend :: MonadIO m => Backend -> ReaderT Backend (LoggingT m) a -> m a
-runBackend b@Backend {..} f =
-    runStdoutLoggingT
-        $ filterLogger (const (backendSettings `allowsLevel`))
-        $ runReaderT f b
+runBackend b@Backend {..} f = runBackendLogger backendSettings $ runReaderT f b
+
+-- | Extracted for re-use when building the Postgres connection
+runBackendLogger :: MonadIO m => AppSettings -> LoggingT m a -> m a
+runBackendLogger settings =
+    runStdoutLoggingT . filterLogger (const (settings `allowsLevel`))
 
 -- | Run a backend action from a Handler (e.g. enqueuing a job)
 --

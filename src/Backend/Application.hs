@@ -15,7 +15,6 @@ import Backend.Foundation
 import Backend.Job
 import Backend.Metrics
 import Control.Monad ((<=<))
-import Control.Monad.Logger (runStdoutLoggingT)
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
 import LoadEnv (loadEnv)
@@ -33,10 +32,7 @@ backendMain = do
     hSetBuffering stdout LineBuffering
     hSetBuffering stderr LineBuffering
 
-    -- In the backend, we just log to stdout; so it's simpler to repeat that
-    -- knowledge here than to do the chicken-and-egg dance as in the
-    -- construction of the Application connection pool.
-    backendConnPool <- runStdoutLoggingT $ createPostgresqlPool
+    backendConnPool <- runBackendLogger backendSettings $ createPostgresqlPool
         (pgConnStr $ appDatabaseConf backendSettings)
         (pgPoolSize $ appDatabaseConf backendSettings)
 

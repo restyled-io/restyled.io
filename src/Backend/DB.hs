@@ -13,9 +13,9 @@ module Backend.DB
 import Import hiding (runDB)
 
 import Backend.Foundation
-import Database.Persist.Sql (SqlPersistM, runSqlPersistMPool)
+import Database.Persist.Sql (SqlPersistT, runSqlPool)
 
-runDB :: MonadBackend m => SqlPersistM a -> m a
-runDB query = do
-    pool <- asks backendConnPool
-    liftIO $ runSqlPersistMPool query pool
+runDB :: MonadBackend m => SqlPersistT m a -> m a
+runDB action = do
+    settings <- ask
+    runSqlPool action $ backendConnPool settings
