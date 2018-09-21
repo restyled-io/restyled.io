@@ -18,6 +18,7 @@ module SVCS.Names
     , gitlabOwnerToUser
     , RepoAccessToken(..)
     , RepoSVCS(..)
+    , showRepoSVCS
     ) where
 
 import Prelude
@@ -74,7 +75,7 @@ showRepoSVCS = \case
 
 instance PathPiece RepoSVCS where
     toPathPiece GitHubSVCS = "gh"
-    toPathPiece GitLabSVCS = "gh"
+    toPathPiece GitLabSVCS = "gl"
     fromPathPiece "gh" = Just GitHubSVCS
     fromPathPiece "gl" = Just GitLabSVCS
     fromPathPiece _ = Nothing

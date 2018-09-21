@@ -42,10 +42,26 @@ createJobForm :: Form CreateJob
 createJobForm =
     renderDivs
         $ CreateJob
-        <$> areq (selectField optionsEnum) "SVCS" Nothing
+        <$> areq svcsSelectField "SVCS" Nothing
         <*> (mkOwnerName <$> areq textField "Owner" Nothing)
         <*> (mkRepoName <$> areq textField "Repo" Nothing)
         <*> (mkPullRequestNum <$> areq intField "Pull Request" Nothing)
+
+svcsSelectField :: Field (HandlerFor App) RepoSVCS
+svcsSelectField = selectField $ pure optionList
+  where
+    optionList :: OptionList RepoSVCS
+    optionList = OptionList
+        { olOptions = map toOption [minBound .. maxBound]
+        , olReadExternal = fromPathPiece
+        }
+
+    toOption :: RepoSVCS -> Option RepoSVCS
+    toOption svcs = Option
+        { optionDisplay = showRepoSVCS svcs
+        , optionInternalValue = svcs
+        , optionExternalValue = toPathPiece svcs
+        }
 
 --- | Form to use when re-submitting an existing @'Job'@
 createJobFormFrom :: Job -> Form CreateJob
