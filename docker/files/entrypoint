@@ -21,4 +21,18 @@ done
 
 # shellcheck disable=SC1090
 source "$tmp"
+
+if [ -n "$DOCKER_HOST" ]; then
+  printf 'Configuring TLS for remote Docker host %s\n' "$DOCKER_HOST"
+  export DOCKER_TLS_VERIFY="1"
+  export DOCKER_CERT_PATH="$HOME/.docker/restyled/cert"
+  mkdir -p "$DOCKER_CERT_PATH"
+
+  set -u
+  printf '%s\n' "$DOCKER_TLS_CACERT" >"$DOCKER_CERT_PATH"/ca.pem
+  printf '%s\n' "$DOCKER_TLS_CERT" >"$DOCKER_CERT_PATH"/cert.pem
+  printf '%s\n' "$DOCKER_TLS_KEY" >"$DOCKER_CERT_PATH"/key.pem
+  set +u
+fi
+
 exec "$@"
