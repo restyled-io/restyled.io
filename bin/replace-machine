@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# Example:
+#
+#   bin/replace-machine restyled-prod-2 \
+#     --driver amazonec2 \
+#     --amazonec2-instance-type t3.micro \
+#     --amazonec2-monitoring
+#
+###
+set -e
+
+if [ -z "$1" ]; then
+  echo "usage: replace-machine <name> [create-option...]" >&2
+  exit 64
+fi
+
+machine_name=$1
+shift
+
+printf 'Creating new docker machine (%s)\n' "$machine_name"
+docker-machine create "$@" "$machine_name"
+
+# shellcheck disable=SC2046
+eval $(docker-machine env "$machine_name")
+
+echo
+echo "Updating restyled-io Heroku App"
+heroku --app restyled-io config:set \
+  "DOCKER_HOST=$DOCKER_HOST" \
+  "DOCKER_TLS_CACERT=$(cat "$DOCKER_CERT_PATH"/ca.pem)" \
+  "DOCKER_TLS_CERT=$(cat "$DOCKER_CERT_PATH"/cert.pem)" \
+  "DOCKER_TLS_KEY=$(cat "$DOCKER_CERT_PATH"/key.pem)"

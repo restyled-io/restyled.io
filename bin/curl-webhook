@@ -8,7 +8,7 @@ fi
 
 event=$1
 payload=${2:--}
-host=http://localhost:3000
+host=${3:-http://localhost:3000}
 
 curl \
   --header "Accept: application/json" \
