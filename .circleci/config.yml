@@ -80,7 +80,7 @@ jobs:
 
   deploy:
     docker:
-      - image: restyled/ops
+      - image: restyled/ops:heroku
     steps:
       - attach_workspace:
           at: /tmp/workspace
