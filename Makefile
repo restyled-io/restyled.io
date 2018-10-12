@@ -1,3 +1,6 @@
+LOCAL_IMAGE   ?= restyled/restyled.io
+RELEASE_IMAGE ?= $(LOCAL_IMAGE)
+
 DOCKER_USERNAME ?= x
 DOCKER_PASSWORD ?= x
 
@@ -64,22 +67,15 @@ config/revision:
 
 .PHONY: image.build
 image.build: config/revision
-	docker build --tag registry.heroku.com/restyled-io/web .
-	@sed -i 's|CMD.*/app/restyled.io|&-backend|' Dockerfile
-	docker build --tag registry.heroku.com/restyled-io/backend .
-	@sed -i 's|\(CMD.*/app/restyled.io\)-backend|\1|' Dockerfile
+	docker build --tag "$(LOCAL_IMAGE)" .
 	@# cleanup, in case we're testing locally
 	@$(RM) config/revision
 
-.PHONY: image.push
-image.push:
+.PHONY: image.release
+image.release:
 	@docker login \
 	  --username "$(DOCKER_USERNAME)" \
 	  --password "$(DOCKER_PASSWORD)" || \
 	  echo "docker login failed, release may fail."
-	docker push registry.heroku.com/restyled-io/web
-	docker push registry.heroku.com/restyled-io/backend
-
-.PHONY: image.release
-image.release:
-	heroku container:release web backend
+	docker tag "$(LOCAL_IMAGE)" "$(RELEASE_IMAGE)"
+	docker push "$(RELEASE_IMAGE)"
