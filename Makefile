@@ -31,7 +31,7 @@ db.reset: db.drop db.create
 setup:
 	stack setup
 	stack build --dependencies-only --test --no-run-tests
-	stack install hlint weeder
+	stack install --copy-compiler-tool hlint weeder
 
 .PHONY: build
 build:
@@ -47,13 +47,12 @@ watch:
 
 .PHONY: lint
 lint:
-	hlint .
-	weeder .
+	stack exec hlint .
+	stack exec weeder .
 
 .PHONY: test
 test:
-	stack build \
-	  --fast --pedantic --test
+	stack build --fast --pedantic --test
 
 .PHONY: clean
 clean:
