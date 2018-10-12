@@ -57,40 +57,21 @@ jobs:
           command: apk add --update git make
       - run:
           name: Build image
-          command: |
-            make image.build
+          command: make image.build
       - run:
           name: Push image
           command: |
-            make image.release \
-              DOCKER_USERNAME=$DOCKERHUB_USERNAME \
-              DOCKER_PASSWORD=$DOCKERHUB_PASSWORD \
-              RELEASE_IMAGE=restyled/restyled.io:b$CIRCLE_BUILD_NUM
-
-      - run:
-          name: Record image tag
-          command: |
-            mkdir -p /tmp/workspace
-            echo "b$CIRCLE_BUILD_NUM" > /tmp/workspace/image-tag
-
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - image-tag
+            make image.push \
+              DOCKER_USERNAME=$HEROKU_EMAIL \
+              DOCKER_PASSWORD=$HEROKU_API_KEY
 
   deploy:
     docker:
-      - image: restyled/ops
+      - image: dickeyxxx/heroku-cli:v7.16.8
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
       - deploy:
           name: Deploy
-          command: |
-            read -r image_tag < /tmp/workspace/image-tag
-            restyled-ops update \
-              --message "[PROD] restyled.io => $image_tag" \
-              "AppsImageTag=$image_tag"
+          command: make image.release
 
 workflows:
   version: 2
