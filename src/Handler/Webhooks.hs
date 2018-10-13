@@ -12,7 +12,6 @@ import Import
 import Backend.Foundation
 import Backend.Job
 import Data.CaseInsensitive (CI)
-import Metrics
 import SVCS.GitHub.Webhook
 import SVCS.GitLab.Webhook
 
@@ -36,7 +35,6 @@ handleWebhook header event unwrap = do
         then lift $ do
             payload <- unwrap <$> requireJsonBody
             logDebugN $ "Webhook received: " <> tshow payload
-            webhookReceived
 
             result <- runDB $ initializeFromWebhook payload
             either handleDiscarded (handleInitialized payload) result

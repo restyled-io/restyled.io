@@ -21,14 +21,12 @@ import Control.Monad.Logger
 import Database.Persist.Sql (ConnectionPool)
 import Database.Redis hiding (Desc, decode, runRedis)
 import qualified Database.Redis as Redis
-import Model.AppMetrics
 
 -- | Like @'App'@ but with no webapp-related bits
 data Backend = Backend
     { backendSettings :: AppSettings
     , backendConnPool :: ConnectionPool
     , backendRedisConn :: Connection
-    , backendMetrics :: AppMetrics
     }
 
 -- | Constraint synonym for backend actions' requirements
@@ -69,7 +67,6 @@ runBackendApp app@App {..} f = runLoggingT
             { backendSettings = appSettings
             , backendConnPool = appConnPool
             , backendRedisConn = appRedisConn
-            , backendMetrics = appMetrics
             }
     )
     (messageLoggerSource app appLogger)

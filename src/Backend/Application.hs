@@ -13,12 +13,10 @@ import Import hiding (runDB)
 import Backend.DB
 import Backend.Foundation
 import Backend.Job
-import Backend.Metrics
 import Control.Monad ((<=<))
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
 import LoadEnv (loadEnv)
-import Model.AppMetrics
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
 import System.Process (readProcessWithExitCode)
@@ -37,12 +35,6 @@ backendMain = do
         (pgPoolSize $ appDatabaseConf backendSettings)
 
     backendRedisConn <- checkedConnect (appRedisConf backendSettings)
-    backendMetrics <- buildAppMetrics
-
-    let store = amStore backendMetrics
-    when (appLocalEKG backendSettings) $ forkLocalhostServer store 8001
-    when (appCloudWatchEKG backendSettings)
-        $ forkCloudWatchServer store [("Service", "Backend")]
 
     runBackend Backend {..} $ forever $ awaitAndProcessJob 120
 
@@ -65,11 +57,7 @@ processJob job = do
         logErrorN $ tshow ex
         pure (ExitFailure 1, "", show ex)
 
-    recordJobMetrics ec
     runDB $ completeJob (entityKey job) ec (pack out) (pack err)
-  where
-    recordJobMetrics ExitSuccess = jobAttempted >> jobSucceeded
-    recordJobMetrics _ = jobAttempted >> jobFailed
 
 -- brittany-disable-next-binding
 

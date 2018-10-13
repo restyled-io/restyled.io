@@ -16,8 +16,6 @@ library:
   dependencies:
     - aeson
     - aeson-casing
-    - amazonka
-    - amazonka-cloudwatch
     - blaze-markup
     - bytestring
     - case-insensitive
@@ -25,9 +23,6 @@ library:
     - classy-prelude-yesod
     - conduit
     - containers
-    - ekg
-    - ekg-cloudwatch
-    - ekg-core
     - envparse
     - errors
     - fast-logger

@@ -64,8 +64,6 @@ data AppSettings = AppSettings
     -- taken only from GitHub credentials, and will only be present there if
     -- verified with GitHub.
     , appAllowDummyAuth :: Bool
-    , appCloudWatchEKG :: Bool
-    , appLocalEKG :: Bool
     }
 
 instance Show AppSettings where
@@ -135,8 +133,6 @@ envSettings = AppSettings
 #else
     <*> Env.switch "AUTH_DUMMY_LOGIN" mempty
 #endif
-    <*> Env.switch "CLOUDWATCH_EKG" mempty
-    <*> Env.switch "LOCAL_EKG" mempty
 
 envDatabaseConfig :: EnvParser PostgresConf
 envDatabaseConfig = PostgresConf

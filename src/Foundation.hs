@@ -24,7 +24,6 @@ import Data.Aeson (decode, encode)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import qualified Database.Redis as Redis
-import Model.AppMetrics
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Auth
@@ -42,7 +41,6 @@ data App = App
     , appRedisConn :: Connection
     , appHttpManager :: Manager
     , appLogger :: Logger
-    , appMetrics :: AppMetrics
     }
 
 mkYesodData "App" $(parseRoutesFile "config/routes")
