@@ -23,7 +23,7 @@
 /admin AdminR GET
 /admin AdminP:
   /jobs AdminJobsP:
-    / AdminJobsR POST
+    / AdminJobsR GET POST
     /new AdminJobsNewR GET
     !/#JobId AdminJobR DELETE
   /repos AdminReposP:

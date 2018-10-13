@@ -4,6 +4,7 @@
 
 module Handler.Admin.Jobs
     ( getAdminJobsNewR
+    , getAdminJobsR
     , postAdminJobsR
     , deleteAdminJobR
     )
@@ -14,6 +15,8 @@ import Import
 import Backend.Foundation (runBackendHandler)
 import Backend.Job
 import Widgets.Job
+import Yesod.Paginator
+import Yesod.Paginator.Instances ()
 
 getAdminJobsNewR :: Handler Html
 getAdminJobsNewR = do
@@ -22,6 +25,14 @@ getAdminJobsNewR = do
     adminLayout $ do
         setTitle "Restyled Admin / New Job"
         $(widgetFile "admin/jobs/new")
+
+getAdminJobsR :: Handler Html
+getAdminJobsR = do
+    pages <- runDB $ selectPaginated 5 [] [Desc JobCreatedAt]
+
+    adminLayout $ do
+        setTitle "Restyled Admin / Jobs"
+        $(widgetFile "admin/jobs")
 
 postAdminJobsR :: Handler Html
 postAdminJobsR = do

@@ -5,4 +5,4 @@ module Handler.Admin
 import Import
 
 getAdminR :: Handler Html
-getAdminR = redirect $ AdminP $ AdminReposP AdminReposR
+getAdminR = redirect $ AdminP $ AdminJobsP AdminJobsR
