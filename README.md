@@ -73,6 +73,15 @@ This process assumes the following:
 
 See [restyled-ops](https://github.com/restyled-io/ops).
 
+## LICENSE
+
+Restyled is source-available, [Commons Claused][cc] licensed. For a detailed
+description of another project's rationale for this licensing model, one with
+which I agree, see [here][level].
+
+[cc]: https://commonsclause.com/
+[level]: https://leveljournal.com/source-available-licensing
+
 ---
 
 [CHANGELOG](./CHANGELOG.md) | [LICENSE](./LICENSE)
