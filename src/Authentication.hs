@@ -75,7 +75,7 @@ findUserForCreds creds@Creds {..} =
 -- | A version of 'replace' that avoids clobbering when possible
 replaceUser :: MonadIO m => UserId -> User -> SqlPersistT m ()
 replaceUser userId User {..} = update userId $ catMaybes
-    [ Just $ UserEmail =. userEmail
+    [ (UserEmail =.) . Just <$> userEmail
     , (UserGithubUserId =.) . Just <$> userGithubUserId
     , (UserGithubUsername =.) . Just <$> userGithubUsername
     , (UserGitlabUserId =.) . Just <$> userGitlabUserId
