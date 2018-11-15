@@ -16,7 +16,7 @@ spec = withApp $ do
 
         it "404s for un-authorized users" $ do
             authenticateAsUser User
-                { userEmail = "normie@restyled.io"
+                { userEmail = Just "normie@restyled.io"
                 , userGithubUserId = Nothing
                 , userGithubUsername = Nothing
                 , userGitlabUserId = Nothing
@@ -34,7 +34,7 @@ spec = withApp $ do
         -- N.B. .env.test is known to have an admin1 and admin2
         it "allows only authorized users" $ do
             authenticateAsUser User
-                { userEmail = "admin1@restyled.io"
+                { userEmail = Just "admin1@restyled.io"
                 , userGithubUserId = Nothing
                 , userGithubUsername = Nothing
                 , userGitlabUserId = Nothing
@@ -48,7 +48,7 @@ spec = withApp $ do
             statusIs 200
 
             authenticateAsUser User
-                { userEmail = "admin2@restyled.io"
+                { userEmail = Just "admin2@restyled.io"
                 , userGithubUserId = Nothing
                 , userGithubUsername = Nothing
                 , userGitlabUserId = Nothing

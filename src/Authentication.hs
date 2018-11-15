@@ -18,7 +18,7 @@ import Yesod.Auth.Message
 import Yesod.Auth.OAuth2
 
 data GitHubUser = GitHubUser
-    { ghuEmail :: Text
+    { ghuEmail :: Maybe Text
     , ghuId :: GitHubUserId
     , ghuLogin :: GitHubUserName
     }
@@ -28,7 +28,7 @@ instance FromJSON GitHubUser where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
 data GitLabUser = GitLabUser
-    { gluEmail :: Text
+    { gluEmail :: Maybe Text
     , gluId :: GitLabUserId
     , glUsername :: GitLabUserName
     }

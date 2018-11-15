@@ -10,7 +10,7 @@
     <tbody>
       $forall Entity userId user <- users
         <tr>
-          <td>#{userEmail user}
+          <td>#{fromMaybe "None" $ userEmail user}
           <td>#{userCredsPlugin user}/#{userCredsIdent user}
           <td>
             $maybe ghUsername <- userGithubUsername user

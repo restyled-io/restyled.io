@@ -61,7 +61,7 @@ instance Yesod App where
 
         let
             adminEmails = appAdmins $ appSettings master
-            isAdmin = (`elem` adminEmails) . userEmail
+            isAdmin = maybe False (`elem` adminEmails) . userEmail
 
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_strapless_css

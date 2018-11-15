@@ -1,5 +1,5 @@
 User
-  email Text
+  email Text Maybe
 
   -- For some reason persistent wanted to migrate this as var char, which it
   -- didn't do for any of the other `Id a` fields... :shrug:

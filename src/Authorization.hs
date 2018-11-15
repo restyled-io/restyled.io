@@ -19,7 +19,7 @@ authorizeAdmin
 authorizeAdmin _ Nothing = notFound
 authorizeAdmin settings (Just userId) = do
     user <- fromMaybeM notFound =<< get userId
-    authorizeWhen $ userEmail user `elem` appAdmins settings
+    authorizeWhen $ maybe False (`elem` appAdmins settings) $ userEmail user
 
 authorizeRepo
     :: (MonadCache m, MonadHandler m)

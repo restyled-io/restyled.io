@@ -36,7 +36,7 @@ spec = withApp $ do
                     runDB
                     $ (,)
                     <$> insert User
-                            { userEmail = "pat@example.com"
+                            { userEmail = Just "pat@example.com"
                             , userGithubUserId = Nothing
                             , userGithubUsername = Nothing
                             , userGitlabUserId = Nothing
@@ -63,7 +63,7 @@ spec = withApp $ do
                     runDB
                     $ (,)
                     <$> insert User
-                            { userEmail = "pat@example.com"
+                            { userEmail = Just "pat@example.com"
                             , userGithubUserId = Nothing
                             , userGithubUsername = Nothing
                             , userGitlabUserId = Nothing
@@ -104,7 +104,7 @@ spec = withApp $ do
                 Just result `shouldBe` (authenticatedAs <$> mUser)
 
                 (entityVal <$> mUser) `shouldBe` Just User
-                    { userEmail = "me@example.com"
+                    { userEmail = Just "me@example.com"
                     , userGithubUserId = Just 1
                     , userGithubUsername = Just "pbrisbin"
                     , userGitlabUserId = Nothing
@@ -120,7 +120,7 @@ spec = withApp $ do
                     runDB
                     $ (,,)
                     <$> insert User
-                            { userEmail = "pat@example.com"
+                            { userEmail = Just "pat@example.com"
                             , userGithubUserId = Nothing
                             , userGithubUsername = Nothing
                             , userGitlabUserId = Nothing
@@ -137,7 +137,7 @@ spec = withApp $ do
 
                 (entityKey <$> mUser) `shouldBe` Just userId
                 (entityVal <$> mUser) `shouldBe` Just User
-                    { userEmail = "me@example.com"
+                    { userEmail = Just "me@example.com"
                     , userGithubUserId = Just 1
                     , userGithubUsername = Just "pbrisbin"
                     , userGitlabUserId = Nothing
