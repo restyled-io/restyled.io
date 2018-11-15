@@ -69,7 +69,7 @@ instance Yesod App where
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
-    authRoute _ = Just $ AuthR $ oauth2Url "github"
+    authRoute _ = Just $ AuthR LoginR
 
     isAuthorized (AuthR _) _ = pure Authorized
     isAuthorized (StaticR _) _ = pure Authorized
