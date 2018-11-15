@@ -61,7 +61,7 @@ authenticateUser creds@Creds {..} = do
         -- No user, no data: bail
         (Nothing, Left err) -> do
             logWarnN $ "OAuth2 response error: " <> pack err
-            pure $ UserError $ IdentifierNotFound "OAuth2 Response"
+            pure $ UserError $ IdentifierNotFound "Unexpected OAuth2 Response"
 
 findUserForCreds :: MonadIO m => Creds site -> SqlPersistT m (Maybe UserId)
 findUserForCreds creds@Creds {..} =
