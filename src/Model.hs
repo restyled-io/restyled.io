@@ -24,5 +24,4 @@ import Model.PlanType
 import SVCS.Names
 import SVCS.Payload
 
-share [mkPersist sqlSettings, mkMigrate "migrateAll"]
-    $(persistFileWith lowerCaseSettings "config/models")
+mkPersist sqlSettings $(persistFileWith lowerCaseSettings "config/models")
