@@ -19,19 +19,24 @@ db.create:
 	PGPASSWORD=password createdb --user postgres --host localhost restyled
 	PGPASSWORD=password createdb --user postgres --host localhost restyled_test
 
+.PHONY: db.migrate
+db.migrate:
+	db/migrate dev upgrade
+	db/migrate test upgrade
+
 # N.B. db.seed clears seeded tables
 .PHONY: db.seed
 db.seed:
 	PGPASSWORD=password psql --user postgres --host localhost restyled < db/seeds.sql
 
 .PHONY: db.reset
-db.reset: db.drop db.create
+db.reset: db.drop db.create db.migrate db.seed
 
 .PHONY: setup
 setup:
 	stack setup
 	stack build --dependencies-only --test --no-run-tests
-	stack install --copy-compiler-tool hlint weeder
+	stack install --copy-compiler-tool dbmigrations-postgresql hlint weeder
 
 .PHONY: build
 build:

@@ -1,0 +1,16 @@
+# vim: ft=yaml
+Description: Create plan table
+Created: 2018-12-03 13:46:22.880627 UTC
+Depends:
+Apply: |
+  CREATE TABLE plan (
+    id SERIAL PRIMARY KEY,
+    type varchar NOT NULL,
+    owner varchar NOT NULL,
+    repo varchar NOT NULL,
+    active_at timestamp with time zone,
+    expires_at timestamp with time zone,
+    message varchar NOT NULL
+  );
+Revert: |
+  DROP TABLE plan;

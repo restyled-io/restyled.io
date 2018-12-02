@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e
+
+if [ -z "$1" ]; then
+  set -- dev upgrade
+fi
+
+DBM_MIGRATION_STORE=$(cd "$(dirname "$0")" && pwd)/migrations
+
+case "$1" in
+  dev)
+    DBM_DATABASE=postgres://postgres:password@localhost/restyled
+    ;;
+  test)
+    DBM_DATABASE=postgres://postgres:password@localhost/restyled_test
+    ;;
+  prod)
+    DBM_DATABASE=$(heroku config:get DATABASE_URL --app restyled-io)
+    ;;
+  *)
+    echo "usage: migrate <env> <cmd>" >&2
+    exit 64
+    ;;
+esac
+shift
+
+export DBM_DATABASE
+export DBM_MIGRATION_STORE
+exec stack exec -- moo-postgresql "$@"
