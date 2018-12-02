@@ -39,6 +39,9 @@ jobs:
             - ~/.stack
             - ./.stack-work
       - run:
+          name: Migrate
+          command: db/migrate test upgrade
+      - run:
           name: Test
           command: make test
 
