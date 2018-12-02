@@ -22,7 +22,7 @@ db.create:
 # N.B. db.seed clears seeded tables
 .PHONY: db.seed
 db.seed:
-	PGPASSWORD=password psql --user postgres --host localhost restyled < seeds.sql
+	PGPASSWORD=password psql --user postgres --host localhost restyled < db/seeds.sql
 
 .PHONY: db.reset
 db.reset: db.drop db.create
