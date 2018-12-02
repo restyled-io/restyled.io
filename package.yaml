@@ -1,6 +1,7 @@
 ---
 name: restyled
 version: 0.1.1.0
+license: MIT
 
 # Dependencies shared in *all* targets
 dependencies:
