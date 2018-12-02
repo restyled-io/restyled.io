@@ -23,18 +23,16 @@ jobs:
             - v1-
       - run:
           name: Dependencies
-          command: |
-            make setup
-            curl "$HLINT_YAML_SRC" > .hlint.yaml
-          environment:
-            # yamllint disable-line rule:line-length
-            HLINT_YAML_SRC: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
+          command: make setup
       - run:
           name: Build
           command: make build
       - run:
           name: Lint
-          command: make lint
+          command: |
+            curl -o .hlint.yaml \
+              https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
+            make lint
       - save_cache:
           key: v1-{{ .Branch }}-{{ checksum "digest" }}
           paths:
