@@ -1,13 +1,7 @@
-LOCAL_IMAGE   ?= restyled/restyled.io
-RELEASE_IMAGE ?= $(LOCAL_IMAGE)
-
-DOCKER_USERNAME ?= x
-DOCKER_PASSWORD ?= x
-
 # https://stackoverflow.com/questions/19232784/how-to-correctly-escape-sign-when-using-pattern-rules-and-patsubst-in-gnu-ma
 PERCENT = %
 
-all: build lint test
+all: setup setup.lint setup.tools build lint test
 
 .PHONY: db.drop
 db.drop:
@@ -34,34 +28,42 @@ db.reset: db.drop db.create db.migrate db.seed
 
 .PHONY: setup
 setup:
-	stack setup
-	stack build --dependencies-only --test --no-run-tests
-	stack install --copy-compiler-tool dbmigrations-postgresql hlint weeder
+	stack setup $(STACK_ARGUMENTS)
+	stack build $(STACK_ARGUMENTS) --dependencies-only --test --no-run-tests
+
+.PHONY: setup.lint
+setup.lint:
+	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
+	  hlint \
+	  weeder
+
+.PHONY: setup.tools
+setup.tools:
+	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
+	  brittany \
+	  fast-tags \
+	  stylish-haskell
 
 .PHONY: build
 build:
-	stack build \
-	  --fast --pedantic --test --no-run-tests
+	stack build $(STACK_ARGUMENTS) --pedantic --test --no-run-tests
+
+.PHONY: lint
+lint:
+	stack exec $(STACK_ARGUMENTS) hlint app src test
+	stack exec $(STACK_ARGUMENTS) weeder .
+
+.PHONY: test
+test:
+	stack build $(STACK_ARGUMENTS) --test
 
 .PHONY: watch
 watch:
-	stack build \
+	stack build $(STACK_ARGUMENTS) \
 	  --fast --pedantic --test --file-watch \
 	  --exec 'sh -c "pkill restyled.io; stack exec restyled.io &"' \
 	  --ghc-options -DDEVELOPMENT
 
-.PHONY: lint
-lint:
-	stack exec hlint .
-	stack exec weeder .
-
-.PHONY: test
-test:
-	stack build --fast --pedantic --test
-
-.PHONY: clean
-clean:
-	stack clean
 
 .PHONY: config/revision
 config/revision:
@@ -70,17 +72,21 @@ config/revision:
 	  "$$(git log HEAD -1 --format="$(PERCENT)cd")" \
 	  > config/revision
 
-.PHONY: image.build
-image.build: config/revision
-	docker build --tag "$(LOCAL_IMAGE)" .
-	@# cleanup, in case we're testing locally
-	@$(RM) config/revision
+Dockerfile.web: Dockerfile.in
+	m4 -DAPPCMD=/app/restyled.io $^ > $@
 
-.PHONY: image.release
-image.release:
-	@docker login \
-	  --username "$(DOCKER_USERNAME)" \
-	  --password "$(DOCKER_PASSWORD)" || \
-	  echo "docker login failed, release may fail."
-	docker tag "$(LOCAL_IMAGE)" "$(RELEASE_IMAGE)"
-	docker push "$(RELEASE_IMAGE)"
+Dockerfile.backend: Dockerfile.in
+	m4 -DAPPCMD=/app/restyled.io-backend $^ > $@
+
+.PHONY: dockerfiles
+dockerfiles: Dockerfile.web Dockerfile.backend
+
+# To release is just to tag. Quay.io will pick it up and build the image. Two
+# tags are created because we need to build two images, one for each process,
+# because Heroku provides no way to override CMD.
+.PHONY: release
+release:
+	[ -n "$(VERSION)" ]
+	git tag -a -m "v$(VERSION)" "v$(VERSION)"
+	git tag -a -m "backend-v$(VERSION)" "backend-v$(VERSION)"
+	git push --tags
