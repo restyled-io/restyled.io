@@ -3,7 +3,7 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: quay.io/haskell_works/stack-build-minimal
+      - image: fpco/stack-build:lts
         environment:
           STACK_ARGUMENTS: --no-terminal
       - image: circleci/postgres:9.6.5-alpine
