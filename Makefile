@@ -1,6 +1,3 @@
-# https://stackoverflow.com/questions/19232784/how-to-correctly-escape-sign-when-using-pattern-rules-and-patsubst-in-gnu-ma
-PERCENT = %
-
 all: setup setup.lint setup.tools build lint test dockerfiles
 
 .PHONY: db.drop
@@ -63,14 +60,6 @@ watch:
 	  --fast --pedantic --test --file-watch \
 	  --exec 'sh -c "pkill restyled.io; stack exec restyled.io &"' \
 	  --ghc-options -DDEVELOPMENT
-
-
-.PHONY: config/revision
-config/revision:
-	printf "$(PERCENT)s - $(PERCENT)s\n" \
-	  "$$(git rev-parse HEAD)" \
-	  "$$(git log HEAD -1 --format="$(PERCENT)cd")" \
-	  > config/revision
 
 Dockerfile.web: Dockerfile.in
 	m4 -DAPPCMD=/app/restyled.io $^ > $@
