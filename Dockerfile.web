@@ -21,6 +21,7 @@ COPY backend /src/backend
 
 COPY config /src/config
 COPY static /src/static
+COPY .git/refs/heads/master /src/config/revision
 
 COPY LICENSE /src/
 
