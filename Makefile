@@ -1,7 +1,7 @@
 # https://stackoverflow.com/questions/19232784/how-to-correctly-escape-sign-when-using-pattern-rules-and-patsubst-in-gnu-ma
 PERCENT = %
 
-all: setup setup.lint setup.tools build lint test
+all: setup setup.lint setup.tools build lint test dockerfiles
 
 .PHONY: db.drop
 db.drop:
