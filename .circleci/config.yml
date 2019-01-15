@@ -61,3 +61,33 @@ jobs:
               git tag -a -m "backend-b$CIRCLE_BUILD_NUM" "backend-b$CIRCLE_BUILD_NUM"
               git push --tags
             fi
+
+  # Triggered manually via API to deploy image built in Quay
+  deploy:
+    docker:
+      image: quay.io/restyled-io/ops
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Deploy
+          command: |
+            registry=registry.heroku.com
+
+            case "$DEPLOY_TAG" in
+              web-b*) image=$registry/restyled-io/web ;;
+              backend-b*) image=$registry/restyled-io/backend ;;
+              *)
+                echo "Invalid DEPLOY_TAG: $DEPLOY_TAG" >&2
+                exit 1
+                ;;
+            esac
+
+            docker login \
+              --email "$HEROKU_EMAIL" \
+              --password "$HEROKU_API_KEY" \
+              "$registry"
+
+            docker pull "$DEPLOY_IMAGE:$DEPLOY_TAG"
+            docker tag "$DEPLOY_IMAGE:$DEPLOY_TAG" "$image"
+            docker push "$image"
+            notify "restyled-io" "Deploy of $image ($DEPLOY_TAG) successful"
