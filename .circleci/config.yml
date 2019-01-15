@@ -53,8 +53,11 @@ jobs:
           name: Lint
           command: make lint
       - run:
-          name: Release
+          name: Tag Master Build
           command: |
             if [ "$CIRCLE_BRANCH" = master ]; then
-              make release VERSION=$CIRCLE_BUILD_NUM
+              # Two tags, each one becomes a separate Docker image
+              git tag -a -m "web-b$CIRCLE_BUILD_NUM" "web-b$CIRCLE_BUILD_NUM"
+              git tag -a -m "backend-b$CIRCLE_BUILD_NUM" "backend-b$CIRCLE_BUILD_NUM"
+              git push --tags
             fi

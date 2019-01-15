@@ -69,13 +69,3 @@ Dockerfile.backend: Dockerfile.in
 
 .PHONY: dockerfiles
 dockerfiles: Dockerfile.web Dockerfile.backend
-
-# To release is just to tag. Quay.io will pick it up and build the image. Two
-# tags are created because we need to build two images, one for each process,
-# because Heroku provides no way to override CMD.
-.PHONY: release
-release:
-	[ -n "$(VERSION)" ]
-	git tag -a -m "v$(VERSION)" "v$(VERSION)"
-	git tag -a -m "backend-v$(VERSION)" "backend-v$(VERSION)"
-	git push --tags
