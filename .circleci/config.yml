@@ -91,5 +91,5 @@ jobs:
             docker pull "$DEPLOY_IMAGE:$DEPLOY_TAG"
             docker tag "$DEPLOY_IMAGE:$DEPLOY_TAG" "$image"
             docker push "$image"
-            heroku container:release "$process_type"
+            heroku container:release "$process_type" --app restyled-io
             notify "restyled-io" "Deploy of $image ($DEPLOY_TAG) successful"
