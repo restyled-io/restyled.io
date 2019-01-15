@@ -71,16 +71,17 @@ jobs:
       - run:
           name: Deploy
           command: |
-            registry=registry.heroku.com
-
             case "$DEPLOY_TAG" in
-              web-b*) image=$registry/restyled-io/web ;;
-              backend-b*) image=$registry/restyled-io/backend ;;
+              web-b*) process_type=web ;;
+              backend-b*) process_type=backend ;;
               *)
                 echo "Invalid DEPLOY_TAG: $DEPLOY_TAG" >&2
                 exit 1
                 ;;
             esac
+
+            registry=registry.heroku.com
+            image=$registry/restyled-io/$process_type
 
             docker login \
               --username "$HEROKU_EMAIL" \
@@ -90,4 +91,5 @@ jobs:
             docker pull "$DEPLOY_IMAGE:$DEPLOY_TAG"
             docker tag "$DEPLOY_IMAGE:$DEPLOY_TAG" "$image"
             docker push "$image"
+            heroku container:release "$process_type"
             notify "restyled-io" "Deploy of $image ($DEPLOY_TAG) successful"
