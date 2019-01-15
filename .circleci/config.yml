@@ -83,7 +83,7 @@ jobs:
             esac
 
             docker login \
-              --email "$HEROKU_EMAIL" \
+              --username "$HEROKU_EMAIL" \
               --password "$HEROKU_API_KEY" \
               "$registry"
 
