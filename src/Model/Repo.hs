@@ -123,8 +123,13 @@ isActualAuthor author
     | "[bot]" `isSuffixOf` author = False
     | otherwise = True
 
+-- | Events that should enqueue a Restyler job
+--
+-- N.B. includes Closed because restyler will handle cleaning up any outstanding
+-- Restyled PRs when a source PR closes. That's all it will do with such a case.
+--
 enqueueEvents :: [PullRequestEventType]
-enqueueEvents = [PullRequestOpened, PullRequestSynchronized]
+enqueueEvents = [PullRequestOpened, PullRequestSynchronized, PullRequestClosed]
 
 findRepoOwner :: MonadIO m => Entity Repo -> SqlPersistT m (Maybe (Entity User))
 findRepoOwner (Entity _ Repo {..}) = selectFirst filters []
