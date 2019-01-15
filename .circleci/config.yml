@@ -1,3 +1,4 @@
+# yamllint disable rule:line-length
 version: 2.0
 
 jobs:
@@ -23,7 +24,6 @@ jobs:
           command: git ls-files | xargs md5sum > digest
       - restore_cache:
           keys:
-            # yamllint disable-line rule:line-length
             - v1-{{ .Branch }}-{{ checksum "stack.yaml" }}-{{ checksum "digest" }}
             - v1-{{ .Branch }}-{{ checksum "stack.yaml" }}-
             - v1-{{ .Branch }}
@@ -34,13 +34,11 @@ jobs:
             make setup setup.lint
             curl "$HLINT_YAML_SRC" > .hlint.yaml
           environment:
-            # yamllint disable-line rule:line-length
             HLINT_YAML_SRC: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
       - run:
           name: Build
           command: make build
       - save_cache:
-          # yamllint disable-line rule:line-length
           key: v1-{{ .Branch }}-{{ checksum "stack.yaml" }}-{{ checksum "digest" }}
           paths:
             - ~/.stack
