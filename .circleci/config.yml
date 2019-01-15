@@ -65,7 +65,7 @@ jobs:
   # Triggered manually via API to deploy image built in Quay
   deploy:
     docker:
-      image: quay.io/restyled-io/ops
+      - image: quay.io/restyled-io/ops
     steps:
       - setup_remote_docker
       - run:
