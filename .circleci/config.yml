@@ -4,7 +4,7 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: fpco/stack-build:lts
+      - image: fpco/stack-build:lts-13.3
         environment:
           GIT_AUTHOR_EMAIL: ci@restyled.io
           GIT_AUTHOR_NAME: Restyled.io CI
