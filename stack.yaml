@@ -1,17 +1,12 @@
 ---
-resolver: lts-11.5
+resolver: lts-13.3
 extra-deps:
-  - amazonka-1.6.0
-  - amazonka-cloudwatch-1.6.0
-  - amazonka-core-1.6.0
-  - ekg-cloudwatch-0.0.1.6
-  - hoauth2-1.7.1
-  - jwt-0.8.0
-  - yesod-auth-oauth2-0.5.1.0
-  - yesod-paginator-1.1.0.0
+  - envparse-0.4.1@sha256:989902e6368532548f61de1fa245ad2b39176cddd8743b20071af519a709ce30
+  - github-0.20@sha256:df31940c0ffcd17bc273e2424f1521dc071a9252904c3b82ae51bbd5e320cecf
+  - jwt-0.9.0@sha256:82df51e48d2c7a6773bac7cd0f99f221107e7124db5d118f828dc08af025edee
 
   # for dbmigrations-postgresql
-  - HDBC-postgresql-2.3.2.5@sha256:5d46e19ddd92349546117d5558b7d1a9d0f7fa363a394e21bb41cc39acc6d0d7
+  - HDBC-postgresql-2.3.2.6@sha256:6e1636b0414ae7b028a01f1a90cf3e28c14f1df7867cf2615d5357d9abcd6279
   - HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da
   - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075
   - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d
