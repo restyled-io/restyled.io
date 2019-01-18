@@ -5,25 +5,18 @@
 module Model.Repo
     ( repoPath
     , repoPullPath
-    , repoAccessToken
     , RepoWithStats(..)
     , repoWithStats
     , IgnoredWebhookReason(..)
     , initializeFromWebhook
-    , findRepoOwner
     )
 where
 
 import ClassyPrelude
 
-import Control.Error.Util ((??))
-import Control.Monad.Except
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
 import Model
-import Settings
-import SVCS.GitHub
-import SVCS.GitLab
 import Yesod.Core (toPathPiece)
 
 -- | Make a nicely-formatted @:owner\/:name@
@@ -35,27 +28,6 @@ repoPath owner name = toPathPiece owner <> "/" <> toPathPiece name
 
 repoPullPath :: OwnerName -> RepoName -> PullRequestNum -> Text
 repoPullPath owner name num = repoPath owner name <> "#" <> toPathPiece num
-
--- | Get an AccessToken for a Repository, as appopriate for its SVCS
-repoAccessToken
-    :: MonadIO m
-    => AppSettings
-    -> Entity Repo
-    -> Maybe (Entity User)
-    -> m (Either String RepoAccessToken)
-repoAccessToken AppSettings {..} (Entity _ Repo {..}) mUser =
-    liftIO $ case repoSvcs of
-        GitHubSVCS -> githubInstallationToken
-            appGitHubAppId
-            appGitHubAppKey
-            repoInstallationId
-        GitLabSVCS -> runExceptT $ do
-            -- Until we truly support GitLab, these error scenarios are very
-            -- unlikely outside of my own testing. So let's be terse.
-            oauthKeys <- appGitLabOAuthKeys ?? "No GitLab OAuth2 keys"
-            Entity _ User {..} <- mUser ?? "GitLab requires user"
-            refreshToken <- userGitlabRefreshToken ?? "No refreshToken"
-            ExceptT $ liftIO $ gitlabRefreshedToken oauthKeys refreshToken
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
@@ -130,12 +102,3 @@ isActualAuthor author
 --
 enqueueEvents :: [PullRequestEventType]
 enqueueEvents = [PullRequestOpened, PullRequestSynchronized, PullRequestClosed]
-
-findRepoOwner :: MonadIO m => Entity Repo -> SqlPersistT m (Maybe (Entity User))
-findRepoOwner (Entity _ Repo {..}) = selectFirst filters []
-  where
-    filters = case repoSvcs of
-        GitHubSVCS ->
-            [UserGithubUsername ==. Just (githubOwnerToUser repoOwner)]
-        GitLabSVCS ->
-            [UserGitlabUsername ==. Just (gitlabOwnerToUser repoOwner)]
