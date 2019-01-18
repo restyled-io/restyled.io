@@ -4,6 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -fno-warn-deprecations #-}
 
 module Settings
     ( OAuthKeys(..)
@@ -92,6 +93,9 @@ instance Show AppSettings where
             , "/", show connectDatabase
             ]
 
+        -- N.B. here is the cause of -fno-warn-deprecations. Redis is using the
+        -- old Network interface, so we have no choice (other than giving up
+        -- this bit of debugging).
         showPortID :: PortID -> String
         showPortID (Service s) = s
         showPortID (PortNumber p) = show p

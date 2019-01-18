@@ -95,10 +95,12 @@ tests:
     source-dirs: test
     dependencies:
       - restyled
+      - HUnit
       - bytestring
       - classy-prelude
       - hedis
       - hspec
+      - hspec-core
       - hspec-expectations-lifted
       - load-env
       - monad-logger

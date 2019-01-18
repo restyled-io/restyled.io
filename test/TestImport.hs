@@ -23,6 +23,7 @@ import Backend.Foundation (Backend, runBackendApp, runRedis)
 import Backend.Job (queueName)
 import Cache
 import ClassyPrelude as X hiding (Handler, delete, deleteBy)
+import Control.Monad.Fail (MonadFail(..))
 import Control.Monad.Logger (LoggingT, NoLoggingT)
 import Control.Monad.Trans.Resource (ResourceT)
 import qualified Data.ByteString.Lazy as LBS
@@ -43,8 +44,9 @@ import LoadEnv (loadEnvFrom)
 import Model as X
 import Routes as X
 import Settings (AppSettings(..), loadEnvSettings)
-import Test.Hspec.Core (SpecM)
+import Test.Hspec.Core.Spec (SpecM)
 import Test.Hspec.Lifted as X
+import Test.HUnit (assertFailure)
 import Text.Shakespeare.Text (st)
 import Yesod.Core (MonadHandler(..))
 import Yesod.Test as X hiding (YesodSpec)
@@ -61,6 +63,9 @@ instance MonadHandler (NoLoggingT (ResourceT IO)) where
 
     liftHandler = error "liftHandler used in test"
     liftSubHandler = error "liftSubHandler used in test"
+
+instance MonadFail (SIO s) where
+    fail = liftIO . assertFailure
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
