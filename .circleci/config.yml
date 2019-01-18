@@ -56,9 +56,7 @@ jobs:
           name: Tag Master Build
           command: |
             if [ "$CIRCLE_BRANCH" = master ]; then
-              # Two tags, each one becomes a separate Docker image
-              git tag -a -m "web-b$CIRCLE_BUILD_NUM" "web-b$CIRCLE_BUILD_NUM"
-              git tag -a -m "backend-b$CIRCLE_BUILD_NUM" "backend-b$CIRCLE_BUILD_NUM"
+              git tag -a -m "b$CIRCLE_BUILD_NUM" "b$CIRCLE_BUILD_NUM"
               git push --tags
             fi
 
@@ -71,25 +69,17 @@ jobs:
       - run:
           name: Deploy
           command: |
-            case "$DEPLOY_TAG" in
-              web-b*) process_type=web ;;
-              backend-b*) process_type=backend ;;
-              *)
-                echo "Invalid DEPLOY_TAG: $DEPLOY_TAG" >&2
-                exit 1
-                ;;
-            esac
+            cat >Dockerfile.web <<EOM
+            FROM $DEPLOY_IMAGE:$DEPLOY_TAG
+            CMD ["/app/restyled.io"]
+            EOM
 
-            registry=registry.heroku.com
-            image=$registry/restyled-io/$process_type
+            cat >Dockerfile.backend <<EOM
+            FROM $DEPLOY_IMAGE:$DEPLOY_TAG
+            CMD ["/app/restyled.io-backend"]
+            EOM
 
-            docker login \
-              --username "$HEROKU_EMAIL" \
-              --password "$HEROKU_API_KEY" \
-              "$registry"
-
-            docker pull "$DEPLOY_IMAGE:$DEPLOY_TAG"
-            docker tag "$DEPLOY_IMAGE:$DEPLOY_TAG" "$image"
-            docker push "$image"
-            heroku container:release "$process_type" --app restyled-io
-            notify "restyled-io" "Deploy of $image ($DEPLOY_TAG) successful"
+            heroku container:login
+            heroku container:push --recursive --app restyled-io
+            heroku container:release web backend --app restyled-io
+            notify "restyled-io" "Deploy of $DEPLOY_TAG successful"
