@@ -17,6 +17,7 @@ import Control.Monad ((<=<))
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
 import LoadEnv (loadEnv)
+import SVCS.GitHub.AccessToken (githubInstallationToken)
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
 import System.Process (readProcessWithExitCode)
@@ -67,25 +68,20 @@ execRestyler
     -> Entity Job
     -> m (ExitCode, String, String)
 execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
+    unless (jobSvcs == GitHubSVCS) $ throwNonGitHub jobSvcs $ repoPath jobOwner jobRepo
+
     repo <- fromMaybeM (throwString "Repo not found")
         =<< runDB (getBy $ UniqueRepo jobSvcs jobOwner jobRepo)
 
     when (repoIsPrivate $ entityVal repo) $ runDB $ do
-        let
-            err = throwString $ unpack $ unlines
-                [ "No active plan for private repository: "
-                <> repoPath
-                    (repoOwner $ entityVal repo)
-                    (repoName $ entityVal repo)
-                , ""
-                , "Contact support@restyled.io if you would like to discuss a Trial"
-                ]
-
         now <- liftIO getCurrentTime
-        void . fromMaybeM err =<< selectActivePlan now (entityVal repo)
+        mPlan <- selectActivePlan now (entityVal repo)
+        void $ fromMaybeM (throwPrivateNoPlan $ entityVal repo) mPlan
 
-    mUser <- runDB $ findRepoOwner repo
-    eAccessToken <- repoAccessToken appSettings repo mUser
+    eAccessToken <- liftIO
+        $ githubInstallationToken appGitHubAppId appGitHubAppKey
+        $ repoInstallationId
+        $ entityVal repo
 
     either
         throwString
@@ -133,3 +129,15 @@ selectActivePlan now repo = selectFirst filters [Desc PlanId]
     activeFilters = [PlanActiveAt ==. Nothing] ||. [PlanActiveAt <=. Just now]
     expiredFilters =
         [PlanExpiresAt ==. Nothing] ||. [PlanExpiresAt >=. Just now]
+
+throwPrivateNoPlan :: MonadIO m => Repo -> m a
+throwPrivateNoPlan Repo {..} = throwString $ unpack $ unlines
+    [ "No active plan for private repository: " <> repoPath repoOwner repoName
+    , "\nContact support@restyled.io if you would like to discuss a Trial"
+    ]
+
+throwNonGitHub :: MonadIO m => RepoSVCS -> Text -> m a
+throwNonGitHub svcs path = throwString $ unpack $ unlines
+    [ "Non-GitHub (" <> tshow svcs <> "): " <> path
+    , "\nSee https://github.com/restyled-io/restyled.io/issues/76"
+    ]
