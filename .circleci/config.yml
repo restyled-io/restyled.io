@@ -24,10 +24,10 @@ jobs:
           command: git ls-files | xargs md5sum > digest
       - restore_cache:
           keys:
-            - v1-{{ .Branch }}-{{ checksum "stack.yaml" }}-{{ checksum "digest" }}
-            - v1-{{ .Branch }}-{{ checksum "stack.yaml" }}-
-            - v1-{{ .Branch }}
-            - v1-
+            - v2-{{ .Branch }}-{{ checksum "stack.yaml" }}-{{ checksum "digest" }}
+            - v2-{{ .Branch }}-{{ checksum "stack.yaml" }}-
+            - v2-{{ .Branch }}
+            - v2-
       - run:
           name: Dependencies
           command: |
@@ -39,7 +39,7 @@ jobs:
           name: Build
           command: make build
       - save_cache:
-          key: v1-{{ .Branch }}-{{ checksum "stack.yaml" }}-{{ checksum "digest" }}
+          key: v2-{{ .Branch }}-{{ checksum "stack.yaml" }}-{{ checksum "digest" }}
           paths:
             - ~/.stack
             - ./.stack-work
