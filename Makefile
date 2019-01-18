@@ -27,6 +27,8 @@ db.reset: db.drop db.create db.migrate db.seed
 setup:
 	stack setup $(STACK_ARGUMENTS)
 	stack build $(STACK_ARGUMENTS) --dependencies-only --test --no-run-tests
+	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
+	  dbmigrations-postgresql
 
 .PHONY: setup.lint
 setup.lint:
