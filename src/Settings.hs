@@ -75,6 +75,7 @@ instance Show AppSettings where
         , " root=", show appRoot
         , " db=[", redact $ C8.unpack $ pgConnStr appDatabaseConf, "]"
         , " redis=[", toURL appRedisConf, "]"
+        , " restyler=[", restylerImage, "]"
         ]
       where
         redact :: String -> String
@@ -100,6 +101,8 @@ instance Show AppSettings where
         showPortID (Service s) = s
         showPortID (PortNumber p) = show p
         showPortID (UnixSocket s) = s
+
+        restylerImage = appRestylerImage <> maybe "" (":" <>) appRestylerTag
 
 type EnvParser a = forall e.
     (Env.AsUnset e, Env.AsUnread e, Env.AsEmpty e) => Env.Parser e a

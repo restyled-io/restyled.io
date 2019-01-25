@@ -78,7 +78,7 @@ makeFoundation appSettings = do
         (pgConnStr $ appDatabaseConf appSettings)
         (pgPoolSize $ appDatabaseConf appSettings)
 
-    runLoggingT (logInfoN $ "settings " <> tshow appSettings) logFunc
+    runLoggingT (logInfoN $ "STARTUP{ " <> tshow appSettings <> " }") logFunc
 
     pure $ mkFoundation pool
 
