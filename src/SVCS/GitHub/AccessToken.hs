@@ -13,12 +13,10 @@ import Prelude
 import Control.Applicative
 import Control.Exception.Safe
 import Data.Aeson
-import qualified Data.Map as Map
 import Data.Monoid ((<>))
 import Data.Proxy
 import Data.String
-import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text (Text, pack, unpack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
@@ -47,7 +45,7 @@ instance FromJSON TokenResponse where
 
 tokenResponseToEither :: TokenResponse -> Either String RepoAccessToken
 tokenResponseToEither (Token x) = Right $ RepoAccessToken $ atToken x
-tokenResponseToEither (ErrorResponse (ErrorMessage x)) = Left $ T.unpack x
+tokenResponseToEither (ErrorResponse (ErrorMessage x)) = Left $ unpack x
 
 -- | Maximum expiration
 --
@@ -74,11 +72,11 @@ githubInstallationToken
     -> IO (Either String RepoAccessToken)
 githubInstallationToken githubAppId (AppKey pem) installationId =
     handleAny (pure . Left . show) $ do
-        jwt <- encodeJWT githubAppId (T.unpack pem)
+        jwt <- encodeJWT githubAppId $ unpack pem
         request <-
             parseRequest
             $ "POST https://api.github.com/installations/"
-            <> T.unpack (toPathPart installationId)
+            <> unpack (toPathPart installationId)
             <> "/access_tokens"
 
         tokenResponseToEither . getResponseBody <$> httpJSON
@@ -98,22 +96,11 @@ encodeJWT githubAppId pem = do
 
     pure $ JWT.encodeSigned
         signer
-        defaultClaimsSet
+        mempty
             { JWT.iat = numericDate now
             , JWT.exp = numericDate $ addUTCTime maxExpiration now
-            , JWT.iss = JWT.stringOrURI $ T.pack $ show $ untagId githubAppId
+            , JWT.iss = JWT.stringOrURI $ pack $ show $ untagId githubAppId
             }
-    where numericDate = JWT.numericDate . utcTimeToPOSIXSeconds
 
--- | Where'd the @'Default'@ instance go?
-defaultClaimsSet :: JWT.JWTClaimsSet
-defaultClaimsSet = JWT.JWTClaimsSet
-    { JWT.iat = Nothing
-    , JWT.exp = Nothing
-    , JWT.iss = Nothing
-    , JWT.sub = Nothing
-    , JWT.aud = Nothing
-    , JWT.nbf = Nothing
-    , JWT.jti = Nothing
-    , JWT.unregisteredClaims = JWT.ClaimsMap Map.empty
-    }
+numericDate :: UTCTime -> Maybe JWT.NumericDate
+numericDate = JWT.numericDate . utcTimeToPOSIXSeconds
