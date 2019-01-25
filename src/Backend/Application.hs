@@ -45,12 +45,12 @@ awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 -- brittany-disable-next-binding
 
 processJob :: MonadBackend m => Entity Job -> m ()
-processJob job = do
+processJob job@(Entity jobId Job{..}) = do
     logInfoN
         $ "Processing Restyler Job Id "
-        <> toPathPiece (entityKey job)
+        <> toPathPiece jobId
         <> ": "
-        <> tshow (entityVal job)
+        <> repoPullPath jobOwner jobRepo jobPullRequest
 
     settings <- asks backendSettings
     (ec, out, err) <- execRestyler settings job `catchAny` \ex -> do
@@ -58,7 +58,7 @@ processJob job = do
         logErrorN $ tshow ex
         pure (ExitFailure 1, "", show ex)
 
-    runDB $ completeJob (entityKey job) ec (pack out) (pack err)
+    runDB $ completeJob jobId ec (pack out) (pack err)
 
 -- brittany-disable-next-binding
 
