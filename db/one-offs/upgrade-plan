@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Automated pg:copy-based DB plan update. pg:copy is required when dealing with
+# a Hobby plan DB (to/from). See here for details:
+#
+# https://devcenter.heroku.com/articles/upgrading-heroku-postgres-databases#upgrading-with-pg-copy
+#
+# NOTE: If this fails part-way through, it may leave the app in maintenance
+# mode, and/or connected to a non-functioning DB. Consider how you might correct
+# that before proceeding.
+#
+###
+set -e
+
+_heroku() { heroku "$@" --app restyled-io; }
+
+_heroku addons:create heroku-postgresql:hobby-basic
+_heroku pg:wait
+
+echo "What is the new DB color (just color, all caps)"?
+read -r color
+printf 'Migrating to HEROKU_POSTGRESQL_%s in 3 seconds...\n' "$color"
+sleep 3
+
+db=HEROKU_POSTGRESQL_$color
+
+_heroku maintenance:on
+_heroku pg:copy DATABASE_URL "$db" --confirm
+_heroku pg:promote "$db"
+_heroku maintenance:off
+
+echo "What is the old DB color (just color, all caps)"?
+read -r old_color
+printf 'De-provisioning HEROKU_POSTGRESQL_%s in 3 seconds...\n' "$old_color"
+sleep 3
+
+old_db=HEROKU_POSTGRESQL_$old_color
+
+_heroku addons:destroy "$old_db" --confirm
