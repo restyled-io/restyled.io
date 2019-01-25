@@ -60,7 +60,6 @@ data IgnoredWebhookReason
     = IgnoredAction PullRequestEventType
     | IgnoredEventType Text
     | OwnPullRequest Text
-    | PrivateNoPlan OwnerName RepoName
 
 initializeFromWebhook
     :: MonadIO m

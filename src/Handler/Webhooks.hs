@@ -59,7 +59,6 @@ reasonToLogMessage = \case
     IgnoredAction action -> "ignored action: " <> tshow action
     IgnoredEventType event -> "ignored event: " <> tshow event
     OwnPullRequest author -> "PR appears to be our own, author=" <> author
-    PrivateNoPlan owner repo -> "private without plan: " <> repoPath owner repo
 
 rejectRequest :: MonadHandler m => m a
 rejectRequest = do
