@@ -147,13 +147,14 @@ readLoggedProcess cmd args = do
 
 selectActivePlan
     :: MonadIO m => UTCTime -> Repo -> SqlPersistT m (Maybe (Entity Plan))
-selectActivePlan now repo = selectFirst filters [Desc PlanId]
-  where
-    filters = repoFilters <> activeFilters <> expiredFilters
-    repoFilters = [PlanOwner ==. repoOwner repo, PlanRepo ==. repoName repo]
-    activeFilters = [PlanActiveAt ==. Nothing] ||. [PlanActiveAt <=. Just now]
-    expiredFilters =
-        [PlanExpiresAt ==. Nothing] ||. [PlanExpiresAt >=. Just now]
+selectActivePlan now repo = selectFirst
+    (concat
+        [ [PlanOwner ==. repoOwner repo, PlanRepo ==. repoName repo]
+        , [PlanActiveAt ==. Nothing] ||. [PlanActiveAt <=. Just now]
+        , [PlanExpiresAt ==. Nothing] ||. [PlanExpiresAt >=. Just now]
+        ]
+    )
+    []
 
 nonGitHubMsg :: Repo -> String
 nonGitHubMsg Repo {..} = unpack $ unlines
