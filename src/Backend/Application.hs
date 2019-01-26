@@ -42,53 +42,88 @@ backendMain = do
 awaitAndProcessJob :: MonadBackend m => Integer -> m ()
 awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 
--- brittany-disable-next-binding
+-- brittany-next-binding --columns=85
 
 processJob :: MonadBackend m => Entity Job -> m ()
-processJob job@(Entity jobId Job{..}) = do
+processJob job@(Entity jobId Job {..}) = do
     logInfoN
         $ "Processing Restyler Job Id "
         <> toPathPiece jobId
         <> ": "
         <> repoPullPath jobOwner jobRepo jobPullRequest
 
-    settings <- asks backendSettings
-    (ec, out, err) <- execRestyler settings job `catchAny` \ex -> do
-        -- Log and act like a failed process
-        logErrorN $ tshow ex
-        pure (ExitFailure 1, "", show ex)
+    result <- runDB $ guardRepositoryJob job
+
+    (ec, out, err) <- case result of
+        RepoNotFound -> jobSkipped "Repo not found"
+        NonGitHub repo -> jobSkipped $ nonGitHubMsg $ entityVal repo
+        PrivateNoPlan repo -> jobSkipped $ privateNoPlanMsg $ entityVal repo
+        JobCanProceed repo -> handleAny (jobFailed . show) $ execRestyler repo job
 
     runDB $ completeJob jobId ec (pack out) (pack err)
+
+jobSkipped :: Applicative f => String -> f (ExitCode, String, String)
+jobSkipped msg = pure (ExitSuccess, "", "Job skipped: " <> msg)
+
+jobFailed :: MonadLogger m => String -> m (ExitCode, String, String)
+jobFailed msg = do
+    logErrorN $ pack msg
+    pure (ExitFailure 1, "", msg)
+
+data JobGuardResult
+    = RepoNotFound
+    | NonGitHub (Entity Repo)
+    | PrivateNoPlan (Entity Repo)
+    | JobCanProceed (Entity Repo)
+
+guardRepositoryJob :: MonadIO m => Entity Job -> SqlPersistT m JobGuardResult
+guardRepositoryJob (Entity _ Job {..}) = do
+    mRepo <- getBy $ UniqueRepo jobSvcs jobOwner jobRepo
+
+    case mRepo of
+        Nothing -> pure RepoNotFound
+        Just repo@(Entity _ Repo {..})
+            | repoSvcs /= GitHubSVCS -> pure $ NonGitHub repo
+            | repoIsPrivate -> do
+                now <- liftIO getCurrentTime
+                mPlan <- selectActivePlan now $ entityVal repo
+                pure $ maybe
+                    (PrivateNoPlan repo)
+                    (const $ JobCanProceed repo)
+                    mPlan
+            | otherwise -> pure $ JobCanProceed repo
 
 -- brittany-disable-next-binding
 
 execRestyler
     :: MonadBackend m
-    => AppSettings
+    => Entity Repo
     -> Entity Job
     -> m (ExitCode, String, String)
-execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
-    unless (jobSvcs == GitHubSVCS) $ throwNonGitHub jobSvcs $ repoPath jobOwner jobRepo
+execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
+    appSettings@AppSettings {..} <- asks backendSettings
 
-    repo <- fromMaybeM (throwString "Repo not found")
-        =<< runDB (getBy $ UniqueRepo jobSvcs jobOwner jobRepo)
+    let debugEnv
+            | appSettings `allowsLevel` LevelDebug = "DEBUG=1"
+            | repoDebugEnabled = "DEBUG=1"
+            | otherwise = "DEBUG="
 
-    when (repoIsPrivate $ entityVal repo) $ runDB $ do
-        now <- liftIO getCurrentTime
-        mPlan <- selectActivePlan now (entityVal repo)
-        void $ fromMaybeM (throwPrivateNoPlan $ entityVal repo) mPlan
+        jobUrl = appRoot
+            <> "/gh/" <> toPathPiece jobOwner
+            <> "/repos/" <> toPathPiece jobRepo
+            <> "/jobs/" <> toPathPiece jobId
 
-    eAccessToken <- liftIO
-        $ githubInstallationToken appGitHubAppId appGitHubAppKey
-        $ repoInstallationId
-        $ entityVal repo
+    eAccessToken <- liftIO $ githubInstallationToken
+        appGitHubAppId
+        appGitHubAppKey
+        repoInstallationId
 
     either
         throwString
         (\token -> readLoggedProcess
             "docker"
             [ "run" , "--rm"
-            , "--env" , debugEnv repo
+            , "--env" , debugEnv
             , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
             , "--volume" , "/tmp:/tmp"
             , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
@@ -98,16 +133,6 @@ execRestyler appSettings@AppSettings {..} (Entity jobId Job {..}) = do
             ]
         )
         eAccessToken
-  where
-    debugEnv (Entity _ Repo {..})
-        | appSettings `allowsLevel` LevelDebug = "DEBUG=1"
-        | repoDebugEnabled = "DEBUG=1"
-        | otherwise = "DEBUG="
-
-    jobUrl = appRoot
-        <> "/gh/" <> toPathPiece jobOwner
-        <> "/repos/" <> toPathPiece jobRepo
-        <> "/jobs/" <> toPathPiece jobId
 
 readLoggedProcess
     :: (MonadIO m, MonadLogger m)
@@ -130,14 +155,16 @@ selectActivePlan now repo = selectFirst filters [Desc PlanId]
     expiredFilters =
         [PlanExpiresAt ==. Nothing] ||. [PlanExpiresAt >=. Just now]
 
-throwPrivateNoPlan :: MonadIO m => Repo -> m a
-throwPrivateNoPlan Repo {..} = throwString $ unpack $ unlines
-    [ "No active plan for private repository: " <> repoPath repoOwner repoName
-    , "\nContact support@restyled.io if you would like to discuss a Trial"
+nonGitHubMsg :: Repo -> String
+nonGitHubMsg Repo {..} = unpack $ unlines
+    [ "Non-GitHub (" <> tshow repoSvcs <> "): " <> path <> "."
+    , "See https://github.com/restyled-io/restyled.io/issues/76"
     ]
+    where path = repoPath repoOwner repoName
 
-throwNonGitHub :: MonadIO m => RepoSVCS -> Text -> m a
-throwNonGitHub svcs path = throwString $ unpack $ unlines
-    [ "Non-GitHub (" <> tshow svcs <> "): " <> path
-    , "\nSee https://github.com/restyled-io/restyled.io/issues/76"
+privateNoPlanMsg :: Repo -> String
+privateNoPlanMsg Repo {..} = unpack $ unlines
+    [ "No active plan for private repository: " <> path <> "."
+    , "Contact support@restyled.io if you would like to discuss a Trial"
     ]
+    where path = repoPath repoOwner repoName
