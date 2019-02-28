@@ -14,6 +14,8 @@
       <li>
         <a href=@{AdminP $ AdminUsersP AdminUsersR}>Users
       <li>
+        <a href=@{AdminP $ AdminMachinesP AdminMachinesR}>Machines
+      <li>
         <a href=@{AuthR $ LogoutR}>Log out
 
 $maybe msg <- mmsg

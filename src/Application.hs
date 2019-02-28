@@ -55,6 +55,7 @@ import Handler.Webhooks
 
 import Handler.Admin
 import Handler.Admin.Jobs
+import Handler.Admin.Machines
 import Handler.Admin.Plans
 import Handler.Admin.Repos
 import Handler.Admin.Users

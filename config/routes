@@ -39,3 +39,7 @@
   /users AdminUsersP:
     / AdminUsersR GET
     /#UserId AdminUserR DELETE
+  /machines AdminMachinesP:
+    / AdminMachinesR GET POST
+    /new AdminMachinesNewR GET
+    !/#RestyleMachineId AdminMachineR DELETE

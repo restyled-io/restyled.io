@@ -55,3 +55,14 @@ Plan
   message Text
 
   deriving Eq Show
+
+RestyleMachine
+  name Text
+  enabled Bool
+  host Text
+  caCert Text
+  cert Text
+  key Text
+
+  UniqueRestyledMachine name
+  deriving Eq Show
