@@ -27,6 +27,9 @@
             #{restyleMachineKey machine}
 
       <aside>
+        <a .button href=@{AdminP $ AdminMachinesP $ AdminMachineInfoR machineId}>
+          Docker Info
+
         <form
           method=post
           action=@{AdminP $ AdminMachinesP $ AdminMachineR machineId}
