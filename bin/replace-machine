@@ -4,7 +4,7 @@
 #
 #   bin/replace-machine restyled-prod-2 \
 #     --driver amazonec2 \
-#     --amazonec2-instance-type t3.micro \
+#     --amazonec2-instance-type t2.micro \
 #     --amazonec2-monitoring
 #
 ###
@@ -26,8 +26,9 @@ eval $(docker-machine env "$machine_name")
 
 echo
 echo "Updating restyled-io Heroku App"
-heroku --app restyled-io config:set \
+heroku config:set \
   "DOCKER_HOST=$DOCKER_HOST" \
   "DOCKER_TLS_CACERT=$(cat "$DOCKER_CERT_PATH"/ca.pem)" \
   "DOCKER_TLS_CERT=$(cat "$DOCKER_CERT_PATH"/cert.pem)" \
-  "DOCKER_TLS_KEY=$(cat "$DOCKER_CERT_PATH"/key.pem)"
+  "DOCKER_TLS_KEY=$(cat "$DOCKER_CERT_PATH"/key.pem)" \
+  --app restyled-io
