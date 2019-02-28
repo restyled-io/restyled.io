@@ -1,0 +1,40 @@
+<section>
+  $forall Entity machineId machine <- machines
+    <div .card>
+      <header>
+        <div .right>
+          $if restyleMachineEnabled machine
+            <i .fas .fa-check>
+          $else
+            <i .fas .fa-ban>
+
+        #{restyleMachineName machine} (#{restyleMachineHost machine})
+
+      <div>
+        <details>
+          <summary>Certificate Authority
+          <pre>
+            #{restyleMachineCaCert machine}
+
+        <details>
+          <summary>Certificate
+          <pre>
+            #{restyleMachineCert machine}
+
+        <details>
+          <summary>Private Key
+          <pre>
+            #{restyleMachineKey machine}
+
+      <aside>
+        <form
+          method=post
+          action=@{AdminP $ AdminMachinesP $ AdminMachineR machineId}
+          onsubmit="return confirm('Are you sure?');"
+          >
+          <input type=hidden name=_method value=DELETE />
+          <input .warning type=submit value="Delete" />
+
+<section>
+  <aside>
+    <a .button href=@{AdminP $ AdminMachinesP AdminMachinesNewR}>New Machine

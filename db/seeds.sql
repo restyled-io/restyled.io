@@ -130,4 +130,27 @@ $$,
   NULL
 );
 
+-- We don't seed an enabled example because for it to be functional would mean
+-- having secrets in the seeds, and we'd rather not have a non-functional
+-- machine in the seeded database.
+DELETE FROM restyle_machine;
+INSERT INTO restyle_machine (
+  name,
+  enabled,
+  host,
+  ca_cert,
+  cert,
+  key
+) VALUES (
+  'disabled-example',
+  false,
+  'tcp://123.123.123:123',
+  $$-- CA --
+$$,
+  $$-- CERT --
+$$,
+  $$-- Key --
+$$
+);
+
 COMMIT;

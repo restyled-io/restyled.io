@@ -1,3 +1,15 @@
+details {
+  margin: 0px 20px;
+}
+
+details:first-child {
+  margin-top: 20px;
+}
+
+details:last-child {
+  margin-bottom: 20px;
+}
+
 body {
   text-align: justify;
 }

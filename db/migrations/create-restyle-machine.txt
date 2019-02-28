@@ -1,0 +1,16 @@
+# vim: ft=yaml
+Description: Create restyle_machine table
+Created: 2019-02-27 21:42:49.257899701 UTC
+Depends:
+Apply: |
+  CREATE TABLE "restyle_machine" (
+    id SERIAL PRIMARY KEY,
+    name varchar NOT NULL,
+    enabled bool NOT NULL,
+    host varchar NOT NULL,
+    ca_cert varchar NOT NULL,
+    cert varchar NOT NULL,
+    key varchar NOT NULL
+  )
+Revert: |
+  DROP TABLE "restyle_machine";
