@@ -8,7 +8,7 @@ fi
 
 event=$1
 payload=${2:--}
-host=${3:-http://localhost:3000}
+host=${3:-https://restyled.ngrok.io}
 
 curl \
   --header "Accept: application/json" \

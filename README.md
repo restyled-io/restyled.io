@@ -4,7 +4,7 @@ Website and backend for Restyled, https://restyled.io.
 
 ## Development & Testing
 
-1. Start persistence services
+1. Start persistence services:
 
    ```console
    docker-compose up -d
@@ -13,7 +13,7 @@ Website and backend for Restyled, https://restyled.io.
 1. Create and seed the database, install dependencies:
 
    ```console
-   make db.create db.seed setup
+   make db.create db.migrate db.seed setup setup.lint setup.tools
    ```
 
 1. Build, test, and lint the application:
@@ -22,56 +22,58 @@ Website and backend for Restyled, https://restyled.io.
    make
    ```
 
-   From here, you can use any `stack`-based development work-flow.
+   From here, you can use any `stack`-based development and testing work-flow.
 
-1. Run (just) the website:
+## Fully-functional Website
+
+1. Setup local secrets in `.env`
+
+   ```console
+   cp .env.example .env
+   $EDITOR .env
+   ```
+
+1. Run the site and backend locally:
 
    ```console
    make watch
    ```
 
-   Visit `http://localhost:3000`.
+1. Run ngrok:
 
-## End-to-end Processing
-
-To process real `restyled-io/demo` Pull Requests:
-
-1. Ensure you have the latest restyler Docker image
+   _This is required for OAuth login and receiving webhooks from our development
+   GitHub Application. You will need to get the ngrok authentication token out
+   of band somehow._
 
    ```console
-   (cd ../restyler && make image.build)
-   ```
-
-   Individual Restylers will be pulled as needed.
-
-1. Run the website and backend
-
-   ```console
-   make watch
-   ```
-
-   ```console
-   stack exec restyled.io-backend
-   ```
-
-1. Run ngrok
-
-   ```console
+   ngrok authtoken <YOUR_AUTHTOKEN>
    ngrok http -subdomain restyled 3000
    ```
 
    Visit `https://restyled.ngrok.io`.
 
-1. Open a PR on `restyled-io/demo`, or re-deliver an existing Webhook.
+## End-to-end Processing
 
-This process assumes the following:
+To process real `restyled-io/demo` Pull Requests:
 
-1. You have access to the development GitHub App and have configured your `.env`
-1. You have authenticated `ngrok` to use the `restyled` subdomain
+1. Ensure a Restyler image is available to use:
 
-## Deployment & Self-Hosting
+   To use a locally-built image:
 
-See [restyled-ops](https://github.com/restyled-io/ops).
+   ```console
+   (cd ../restyler && docker build --tag restyled/restyler .)
+   ```
+
+   To use a deployed image, set `RESTYLER_IMAGE` and `RESTYLER_TAG` in `.env`.
+
+   _At this time, individual Restylers will always be pulled from deployed
+   sources._
+
+1. Trigger a restyling:
+
+   - Open a PR on `restyled-io/demo`,
+   - Re-deliver an existing Webhook, or
+   - Use `bin/curl-webhook` with files under `fixtures/`
 
 ## LICENSE
 

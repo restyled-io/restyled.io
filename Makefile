@@ -1,4 +1,4 @@
-all: setup setup.lint setup.tools build lint test dockerfiles
+all: setup setup.lint setup.tools build lint test
 
 .PHONY: db.drop
 db.drop:
@@ -62,5 +62,5 @@ test:
 watch:
 	stack build $(STACK_ARGUMENTS) \
 	  --fast --pedantic --test --file-watch \
-	  --exec 'sh -c "pkill restyled.io; stack exec restyled.io &"' \
+	  --exec 'sh -c "pkill restyled.io; stack exec restyled.io & stack exec restyled.io-backend &"' \
 	  --ghc-options -DDEVELOPMENT
