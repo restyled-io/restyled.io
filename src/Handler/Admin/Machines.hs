@@ -7,9 +7,13 @@ module Handler.Admin.Machines
     , getAdminMachinesNewR
     , postAdminMachinesR
     , deleteAdminMachineR
+    , getAdminMachineInfoR
     ) where
 
 import Import
+
+import Model.RestyleMachine (runRestyleMachine)
+import System.Exit (ExitCode(..))
 
 machineForm :: Form RestyleMachine
 machineForm =
@@ -61,3 +65,17 @@ deleteAdminMachineR machineId = do
         delete machineId
     setMessage "Machine deleted"
     redirect $ AdminP $ AdminMachinesP AdminMachinesR
+
+getAdminMachineInfoR :: RestyleMachineId -> Handler Html
+getAdminMachineInfoR machineId = do
+    machine <- runDB $ get404 machineId
+    (ec', out, err) <- runRestyleMachine [machine] "docker" ["info"]
+
+    let
+        ec = case ec' of
+            ExitSuccess -> "0"
+            ExitFailure n -> show n
+
+    adminLayout $ do
+        setTitle "Restyled Amin / Machine Info"
+        $(widgetFile "admin/machines/info")
