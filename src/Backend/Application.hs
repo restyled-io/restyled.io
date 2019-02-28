@@ -1,6 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 {-# LANGUAGE RecordWildCards #-}
 
 module Backend.Application
@@ -17,10 +18,10 @@ import Control.Monad ((<=<))
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
 import LoadEnv (loadEnv)
+import Model.RestyleMachine (runRestyleMachine)
 import SVCS.GitHub.AccessToken (githubInstallationToken)
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
-import System.Process (readProcessWithExitCode)
 
 backendMain :: IO ()
 backendMain = do
@@ -118,10 +119,12 @@ execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
         appGitHubAppKey
         repoInstallationId
 
+    machines <- runDB
+        $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
+
     either
         throwString
-        (\token -> readLoggedProcess
-            "docker"
+        (\token -> runRestyleMachine machines "docker"
             [ "run" , "--rm"
             , "--env" , debugEnv
             , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
@@ -133,17 +136,6 @@ execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
             ]
         )
         eAccessToken
-
-readLoggedProcess
-    :: (MonadIO m, MonadLogger m)
-    => String
-    -> [String]
-    -> m (ExitCode, String, String)
-readLoggedProcess cmd args = do
-    logDebugN $ "process: " <> tshow (cmd : args)
-    result <- liftIO $ readProcessWithExitCode cmd args ""
-    logDebugN $ "process result: " <> tshow result
-    pure result
 
 selectActivePlan
     :: MonadIO m => UTCTime -> Repo -> SqlPersistT m (Maybe (Entity Plan))

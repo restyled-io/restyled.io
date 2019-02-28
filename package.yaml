@@ -24,10 +24,12 @@ library:
     - classy-prelude-yesod
     - conduit
     - containers
+    - directory
     - envparse
     - errors
     - fast-logger
     - file-embed
+    - filepath
     - formatting
     - github
     - gitrev
