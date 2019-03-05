@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 module Handler.PrivacyPolicy
     ( getPrivacyPolicyR
     ) where
@@ -8,6 +5,5 @@ module Handler.PrivacyPolicy
 import Import
 
 getPrivacyPolicyR :: Handler Html
-getPrivacyPolicyR = defaultLayout $ do
-    setTitle "Restyled Privacy Policy"
-    $(widgetFile "privacy-policy")
+getPrivacyPolicyR =
+    redirect "https://github.com/restyled-io/restyled.io/wiki/Privacy-Policy"
