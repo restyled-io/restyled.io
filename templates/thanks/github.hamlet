@@ -42,6 +42,18 @@
         Disabling Restyled
 
 <section>
+  <div .login>
+    <p>
+      If you installed Restyled via the GitHub Marketplace and/or plan to use
+      private Repositories on Restyled, please authorize with GitHub:
+
+    <ul>
+      <li>
+        <a .button .github href=@{AuthR $ PluginR "github" ["forward"]}>
+          <span .logo>
+          Log in with GitHub
+
+<section>
   <p>
     Restyled is being built entirely in the open. Check out the
     <a href=https://github.com/restyled-io>

@@ -7,6 +7,8 @@ module Handler.Thanks
 
 import Import
 
+import Yesod.Auth
+
 -- brittany-disable-next-binding
 
 getThanksGitHubR :: Handler Html
