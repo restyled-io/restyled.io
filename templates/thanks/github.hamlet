@@ -25,12 +25,11 @@
       learn about the
       <a href=https://github.com/restyled-io/restyled.io/wiki/Available-Restylers#available-now>
         individual auto-formatters
-      that we run for the kinds of files you edit. In fact, you may already have
-      a
+      that we run for the kinds of files you edit. If you already have a
       <code>.prettier.json
       or
       <code>.brittany.yaml
-      in your repository
+      in your repository, you're probably all set!
 
     <li>
       If you're happy with Restyled, please consider
