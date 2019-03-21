@@ -13,6 +13,7 @@ import Import hiding (runDB)
 import Backend.DB
 import Backend.Foundation
 import Backend.Job
+import Backend.Marketplace (synchronizeMarketplacePlans)
 import Control.Monad ((<=<))
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
@@ -37,7 +38,9 @@ backendMain = do
 
     backendRedisConn <- checkedConnect (appRedisConf backendSettings)
 
-    runBackend Backend {..} $ forever $ awaitAndProcessJob 120
+    runBackend Backend {..} $ do
+        void $ async synchronizeMarketplacePlans
+        forever $ awaitAndProcessJob 120
 
 awaitAndProcessJob :: MonadBackend m => Integer -> m ()
 awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
