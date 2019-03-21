@@ -38,10 +38,6 @@ data GitHubAccount = GitHubAccount
 instance FromJSON GitHubAccount where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
-marketplaceListing :: Text
---marketplaceListing = "/marketplace_listing"
-marketplaceListing = "/marketplace_listing/stubbed"
-
 synchronizeMarketplacePlans :: MonadBackend m => m a
 synchronizeMarketplacePlans = do
     handleAny (logWarnN . tshow) runSynchronize
@@ -51,7 +47,7 @@ synchronizeMarketplacePlans = do
 runSynchronize :: MonadBackend m => m ()
 runSynchronize = do
     logInfoN "Synchronizing GitHub Marketplace data"
-    plans <- getGitHub $ marketplaceListing <> "/plans"
+    plans <- getGitHub $ marketplaceListingPath <> "/plans"
 
     for_ @[_] plans $ \plan -> do
         logDebugN $ "Plan: " <> tshow plan
@@ -68,7 +64,7 @@ runSynchronize = do
 
         accounts <-
             getGitHub
-            $ marketplaceListing
+            $ marketplaceListingPath
             <> "/plans/"
             <> toPathPiece (ghmpId plan)
             <> "/accounts"
