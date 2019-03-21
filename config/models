@@ -14,6 +14,8 @@ User
   credsIdent Text
   credsPlugin Text
 
+  marketplacePlan MarketplacePlanId Maybe
+
   UniqueUser credsPlugin credsIdent
   deriving Eq Show
 
@@ -65,4 +67,12 @@ RestyleMachine
   key Text
 
   UniqueRestyledMachine name
+  deriving Eq Show
+
+MarketplacePlan
+  githubId Int
+  name Text
+  description Text
+
+  UniqueMarketplacePlan githubId
   deriving Eq Show
