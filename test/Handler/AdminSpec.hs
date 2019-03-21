@@ -25,6 +25,7 @@ spec = withApp $ do
                 , userGitlabAccessToken = Nothing
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
+                , userMarketplacePlan = Nothing
                 }
 
             get $ AdminP $ AdminPlansP AdminPlansR
@@ -43,6 +44,7 @@ spec = withApp $ do
                 , userGitlabRefreshToken = Nothing
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
+                , userMarketplacePlan = Nothing
                 }
             get $ AdminP $ AdminPlansP AdminPlansR
             statusIs 200
@@ -57,6 +59,7 @@ spec = withApp $ do
                 , userGitlabRefreshToken = Nothing
                 , userCredsIdent = "2"
                 , userCredsPlugin = "dummy"
+                , userMarketplacePlan = Nothing
                 }
             get $ AdminP $ AdminPlansP AdminPlansR
             statusIs 200
