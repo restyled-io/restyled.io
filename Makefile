@@ -1,4 +1,4 @@
-all: setup setup.lint setup.tools build lint test
+all: setup setup.lint setup.tools db.setup build lint test
 
 .PHONY: db.drop
 db.drop:
@@ -20,8 +20,11 @@ db.migrate:
 db.seed:
 	PGPASSWORD=password psql --user postgres --host localhost restyled < db/seeds.sql
 
+.PHONY: db.setup
+db.setup: db.create db.migrate db.seed
+
 .PHONY: db.reset
-db.reset: db.drop db.create db.migrate db.seed
+db.reset: db.drop db.setup
 
 .PHONY: setup
 setup:
@@ -41,9 +44,15 @@ setup.lint:
 .PHONY: setup.tools
 setup.tools:
 	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
-	  brittany \
 	  fast-tags \
 	  stylish-haskell
+
+.PHONY: setup.ngrok
+setup.ngrok:
+	if ! command -v ngrok; then \
+	  aurget -S ngrok; \
+	  ngrok authtoken $$(pass ngrok/authtoken); \
+	fi
 
 .PHONY: build
 build:
@@ -64,3 +73,7 @@ watch:
 	  --fast --pedantic --test --file-watch \
 	  --exec 'sh -c "pkill restyled.io; stack exec restyled.io & stack exec restyled.io-backend &"' \
 	  --ghc-options -DDEVELOPMENT
+
+.PHONY: ngrok.http
+ngrok.http: setup.ngrok
+	ngrok http -subdomain restyled 3000
