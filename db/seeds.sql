@@ -153,4 +153,15 @@ $$,
 $$
 );
 
+DELETE FROM marketplace_plan;
+INSERT INTO marketplace_plan (
+  github_id,
+  name,
+  description
+) VALUES (
+  99,
+  'Open Source',
+  'Run Restyled on your public repositories'
+);
+
 COMMIT;
