@@ -15,6 +15,7 @@ module Settings
     , appStaticDir
     , appFavicon
     , appRevision
+    , marketplaceListingPath
     )
 where
 
@@ -200,3 +201,11 @@ widgetFile =
     widgetFileNoReload
 #endif
     def
+
+marketplaceListingPath :: Text
+marketplaceListingPath =
+#if DEVELOPMENT
+    "/marketplace_listing/stubbed"
+#else
+    "/marketplace_listing"
+#endif
