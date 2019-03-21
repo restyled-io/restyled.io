@@ -12,6 +12,7 @@ import Data.Proxy as Import
 import Data.Time as Import
 import Model as Import
 import Model.Repo as Import
+import Model.User as Import
 import Settings as Import
 import Settings.StaticFiles as Import
 
