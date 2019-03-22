@@ -101,12 +101,12 @@ checkMarketplacePlan
     -> Entity Repo
     -> SqlPersistT m JobGuardResult
 checkMarketplacePlan MarketplacePlan {..} repo
-    | marketplacePlanName `elem` privateRepoPlanNames = pure
+    | marketplacePlanGithubId `elem` privateRepoPlanGitHubIds = pure
     $ JobCanProceed repo
     | otherwise = pure $ PublicOnlyPlan repo
 
-privateRepoPlanNames :: [Text]
-privateRepoPlanNames = ["Friends & Family"]
+privateRepoPlanGitHubIds :: [Int]
+privateRepoPlanGitHubIds = [0]
 
 -- brittany-disable-next-binding
 
