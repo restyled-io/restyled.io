@@ -31,28 +31,6 @@ getProfileR = do
     Entity _ user <- requireAuth
     mUserIdentity <- runDB $ fetchGitHubIdentityForUser user
 
-    -- TODO: https://github.community/t5/GitHub-API-Development-and/How-to-list-a-user-s-organizations/m-p/20864#M1208
-    --
-    -- What I /should/ get:
-    --
-    -- let
-    --     orgs =
-    --         [ Org
-    --             { orgId = 31419072
-    --             , orgLogin = "restyled-io"
-    --             , orgAvatarUrl = "https://avatars0.githubusercontent.com/u/31419072?v=4"
-    --             }
-    --         , Org
-    --             { orgId = 8933560
-    --             , orgLogin = "freckle"
-    --             , orgAvatarUrl = "https://avatars0.githubusercontent.com/u/8933560?v=4"
-    --             }
-    --         , Org
-    --             { orgId = 930379
-    --             , orgLogin = "yesod"
-    --             , orgAvatarUrl = "https://avatars0.githubusercontent.com/u/930379?v=4"
-    --             }
-    --         ]
     orgs <- requestUserOrgs user
     orgIdentities <- traverse (runDB . fetchGitHubIdentityForOrg) orgs
 
@@ -73,6 +51,7 @@ requestUserNameOrgs username = do
 requestOrgs :: MonadIO m => AppSettings -> GitHubUserName -> m [Org]
 requestOrgs AppSettings {..} username = liftIO $ do
     request <- githubGET $ "/users/" <> toPathPart username <> "/orgs"
+    -- TODO: https://github.community/t5/GitHub-API-Development-and/How-to-list-a-user-s-organizations/m-p/20864#M1208
     -- requestJWT appGitHubAppId appGitHubAppKey request
     requestToken appGitHubRateLimitToken request
 
