@@ -1,0 +1,17 @@
+# vim: ft=yaml
+Description: Migration old plan records to marketplace_account
+Created: 2019-03-22 19:49:21.393490067 UTC
+Depends: add-marketplace-account create-marketplace-plan
+Apply: |
+  INSERT INTO marketplace_plan
+    (github_id, name, description) VALUES
+    (0, 'Friends & Family', 'Manually managed discount plan');
+
+  INSERT INTO marketplace_account
+    (github_id, github_login, marketplace_plan)
+    SELECT 0, plan.owner, marketplace_plan.id
+     FROM plan
+     JOIN marketplace_plan
+       ON true
+    WHERE marketplace_plan.github_id = 0
+  ON CONFLICT DO NOTHING;

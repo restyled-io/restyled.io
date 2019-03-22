@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Backend.Application
     ( backendMain
@@ -61,6 +62,7 @@ processJob job@(Entity jobId Job {..}) = do
         RepoNotFound -> jobSkipped "Repo not found"
         NonGitHub repo -> jobSkipped $ nonGitHubMsg $ entityVal repo
         PrivateNoPlan repo -> jobSkipped $ privateNoPlanMsg $ entityVal repo
+        PublicOnlyPlan repo -> jobSkipped $ publicOnlyPlanMsg $ entityVal repo
         JobCanProceed repo -> handleAny (jobFailed . show) $ execRestyler repo job
 
     runDB $ completeJob jobId ec (pack out) (pack err)
@@ -77,6 +79,7 @@ data JobGuardResult
     = RepoNotFound
     | NonGitHub (Entity Repo)
     | PrivateNoPlan (Entity Repo)
+    | PublicOnlyPlan (Entity Repo)
     | JobCanProceed (Entity Repo)
 
 guardRepositoryJob :: MonadIO m => Entity Job -> SqlPersistT m JobGuardResult
@@ -88,13 +91,22 @@ guardRepositoryJob (Entity _ Job {..}) = do
         Just repo@(Entity _ Repo {..})
             | repoSvcs /= GitHubSVCS -> pure $ NonGitHub repo
             | repoIsPrivate -> do
-                now <- liftIO getCurrentTime
-                mPlan <- selectActivePlan now $ entityVal repo
-                pure $ maybe
-                    (PrivateNoPlan repo)
-                    (const $ JobCanProceed repo)
-                    mPlan
+                mPlan <- fetchMarketplacePlanByLogin $ ownerToUserName repoOwner
+                maybe (pure . PrivateNoPlan) checkMarketplacePlan mPlan repo
             | otherwise -> pure $ JobCanProceed repo
+
+checkMarketplacePlan
+    :: MonadIO m
+    => MarketplacePlan
+    -> Entity Repo
+    -> SqlPersistT m JobGuardResult
+checkMarketplacePlan MarketplacePlan {..} repo
+    | marketplacePlanGithubId `elem` privateRepoPlanGitHubIds = pure
+    $ JobCanProceed repo
+    | otherwise = pure $ PublicOnlyPlan repo
+
+privateRepoPlanGitHubIds :: [Int]
+privateRepoPlanGitHubIds = [0]
 
 -- brittany-disable-next-binding
 
@@ -139,17 +151,6 @@ execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
         )
         eAccessToken
 
-selectActivePlan
-    :: MonadIO m => UTCTime -> Repo -> SqlPersistT m (Maybe (Entity Plan))
-selectActivePlan now repo = selectFirst
-    (concat
-        [ [PlanOwner ==. repoOwner repo, PlanRepo ==. repoName repo]
-        , [PlanActiveAt ==. Nothing] ||. [PlanActiveAt <=. Just now]
-        , [PlanExpiresAt ==. Nothing] ||. [PlanExpiresAt >=. Just now]
-        ]
-    )
-    []
-
 nonGitHubMsg :: Repo -> String
 nonGitHubMsg Repo {..} = unpack $ unlines
     [ "Non-GitHub (" <> tshow repoSvcs <> "): " <> path <> "."
@@ -163,3 +164,9 @@ privateNoPlanMsg Repo {..} = unpack $ unlines
     , "Contact support@restyled.io if you would like to discuss a Trial"
     ]
     where path = repoPath repoOwner repoName
+
+publicOnlyPlanMsg :: Repo -> String
+publicOnlyPlanMsg _ = unpack $ unlines @Text
+    [ "Your plan does not allow private repositories."
+    , "Contact support@restyled.io if you would like to discuss a Trial"
+    ]

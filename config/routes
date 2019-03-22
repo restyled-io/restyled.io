@@ -9,6 +9,8 @@
 /privacy-policy PrivacyPolicyR GET
 /thanks/github ThanksGitHubR GET
 
+/profile ProfileR GET
+
 -- TODO: /repos/#RepoSVCS/#OwnerName/#RepoName/...
 /gh/#OwnerName/repos/#RepoName RepoP:
   / RepoR GET
@@ -32,10 +34,6 @@
     !/#RepoId AdminRepoP:
       / AdminRepoR PATCH
       /jobs AdminRepoJobsR GET
-  /plans AdminPlansP:
-    / AdminPlansR GET POST
-    /new AdminPlansNewR GET
-    !/#PlanId AdminPlanR DELETE
   /users AdminUsersP:
     / AdminUsersR GET
     /#UserId AdminUserR DELETE

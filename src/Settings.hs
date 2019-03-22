@@ -33,6 +33,7 @@ import qualified Env
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
 import SVCS.GitHub
+import SVCS.GitHub.ApiClient (GitHubToken)
 #if DEVELOPMENT
 import Yesod.Default.Util (widgetFileReload)
 #else
@@ -57,6 +58,7 @@ data AppSettings = AppSettings
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
     , appGitHubOAuthKeys :: Maybe OAuthKeys
+    , appGitHubRateLimitToken :: GitHubToken
     , appGitLabOAuthKeys :: Maybe OAuthKeys
     , appRestylerImage :: String
     , appRestylerTag :: Maybe String
@@ -127,6 +129,7 @@ envSettings = AppSettings
     <*> (liftA2 OAuthKeys
         <$> optional (Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_ID" mempty)
         <*> optional (Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_SECRET" mempty))
+    <*> Env.var Env.nonempty "GITHUB_RATE_LIMIT_TOKEN" mempty
     <*> (liftA2 OAuthKeys
         <$> optional (Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_ID" mempty)
         <*> optional (Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_SECRET" mempty))

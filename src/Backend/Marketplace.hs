@@ -17,7 +17,7 @@ import Backend.Foundation
 import Control.Concurrent (threadDelay)
 import Data.Aeson
 import Data.Aeson.Casing
-import SVCS.GitHub.JWTClient
+import SVCS.GitHub.ApiClient
 
 data GitHubMarketplacePlan = GitHubMarketplacePlan
     { ghmpId :: Int

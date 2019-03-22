@@ -1,0 +1,11 @@
+<section>
+  $maybe userIdentity <- mUserIdentity
+    ^{githubIdentityCard userIdentity}
+
+<section>
+  $forall orgIdentity <- orgIdentities
+    ^{githubIdentityCard orgIdentity}
+
+<section>
+  <p>
+    <a href=https://github.com/restyled-io/restyled.io/wiki>Documentation

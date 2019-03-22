@@ -1,12 +1,8 @@
 module Test.Hspec.Lifted
     ( module X
-    , module Test.Hspec.Lifted
-    ) where
+    )
+where
 
-import Prelude
-
-import Control.Monad.IO.Class
-import Test.Hspec as Hspec
 import Test.Hspec as X hiding
     ( expectationFailure
     , pending
@@ -37,6 +33,3 @@ import Test.Hspec.Expectations.Lifted as X
     , shouldSatisfy
     , shouldStartWith
     )
-
-pendingWith :: MonadIO m => String -> m ()
-pendingWith = liftIO . Hspec.pendingWith

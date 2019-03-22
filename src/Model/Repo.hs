@@ -9,6 +9,7 @@ module Model.Repo
     , repoWithStats
     , IgnoredWebhookReason(..)
     , initializeFromWebhook
+    , fetchReposByOwnerName
     )
 where
 
@@ -55,6 +56,11 @@ repoWithStats repo =
                 , JobCompletedAt !=. Nothing
                 ]
                 [Desc JobCreatedAt]
+
+-- TODO: naive limiting for now
+fetchReposByOwnerName :: MonadIO m => OwnerName -> SqlPersistT m [Entity Repo]
+fetchReposByOwnerName owner =
+    selectList [RepoOwner ==. owner] [Asc RepoName, LimitTo 10]
 
 data IgnoredWebhookReason
     = IgnoredAction PullRequestEventType
