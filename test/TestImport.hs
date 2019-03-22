@@ -112,7 +112,8 @@ getTables = map unSingle <$> rawSql
     [st|
         SELECT table_name
         FROM information_schema.tables
-        WHERE table_schema = 'public';
+        WHERE table_schema = 'public'
+          AND table_name <> 'installed_migrations';
     |] []
 
 -- | Insert and authenticate as the given user
