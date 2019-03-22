@@ -16,7 +16,6 @@ import Data.Monoid ((<>))
 import Data.Text (Text, unpack)
 import GitHub.Data (toPathPart)
 import GitHub.Data.AccessTokens (AccessToken(..))
-import Network.HTTP.Simple hiding (Proxy)
 import SVCS.GitHub.JWTClient
 import SVCS.Names
 
@@ -48,9 +47,8 @@ githubInstallationToken
 githubInstallationToken appId appKey installationId =
     handleAny (pure . Left . show) $ do
         request <-
-            parseRequest
-            $ "POST https://api.github.com/installations/"
-            <> unpack (toPathPart installationId)
+            githubPOST
+            $ "/installations/"
+            <> toPathPart installationId
             <> "/access_tokens"
-
         tokenResponseToEither <$> requestJWT appId appKey request

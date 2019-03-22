@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -5,7 +6,13 @@ module SVCS.GitHub.JWTClient
     ( GitHubAppId
     , mkGitHubAppId
     , GitHubAppKey
+    , githubGET
+    , githubPOST
     , requestJWT
+
+    -- * Long story
+    , PersonalAccessToken
+    , requestToken
     ) where
 
 import Prelude
@@ -32,6 +39,12 @@ mkGitHubAppId = mkId Proxy
 
 newtype GitHubAppKey = AppKey Text
     deriving IsString
+
+githubGET :: MonadThrow m => Text -> m Request
+githubGET = parseRequest . ("GET https://api.github.com" <>) . unpack
+
+githubPOST :: MonadThrow m => Text -> m Request
+githubPOST = parseRequest . ("POST https://api.github.com" <>) . unpack
 
 requestJWT :: FromJSON a => GitHubAppId -> GitHubAppKey -> Request -> IO a
 requestJWT githubAppId (AppKey pem) request = do
@@ -70,3 +83,16 @@ maxExpiration = 5 * 60
 
 numericDate :: UTCTime -> Maybe JWT.NumericDate
 numericDate = JWT.numericDate . utcTimeToPOSIXSeconds
+
+newtype PersonalAccessToken = PersonalAccessToken Text
+    deriving newtype IsString
+
+requestToken :: FromJSON a => PersonalAccessToken -> Request -> IO a
+requestToken (PersonalAccessToken token) request = getResponseBody <$> httpJSON
+    (setRequestHeaders
+        [ (hAccept, "application/vnd.github.machine-man-preview+json")
+        , (hAuthorization, "token " <> encodeUtf8 token)
+        , (hUserAgent, "restyled-io")
+        ]
+        request
+    )

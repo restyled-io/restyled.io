@@ -83,6 +83,9 @@ instance Yesod App where
     isAuthorized RobotsR _ = pure Authorized
     isAuthorized ThanksGitHubR _ = pure Authorized
 
+    isAuthorized ProfileR _ =
+        maybe AuthenticationRequired (const Authorized) <$> maybeAuthId
+
     isAuthorized AdminR _ = do
         settings <- getsYesod appSettings
         runDB $ authorizeAdmin settings =<< maybeAuthId

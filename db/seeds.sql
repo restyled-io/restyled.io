@@ -153,15 +153,27 @@ $$,
 $$
 );
 
+DELETE FROM marketplace_account;
 DELETE FROM marketplace_plan;
 INSERT INTO marketplace_plan (
   github_id,
   name,
   description
 ) VALUES (
-  99,
-  'Open Source',
-  'Run Restyled on your public repositories'
+  0,
+  'Friends & Family',
+  'Manually managed discount plan'
 );
+INSERT INTO marketplace_account (
+  github_id,
+  github_login,
+  marketplace_plan
+)
+SELECT
+  50812 as github_id,
+  'pbrisbin' as github_login,
+  marketplace_plan.id
+FROM marketplace_plan
+WHERE marketplace_plan.github_id = 0;
 
 COMMIT;

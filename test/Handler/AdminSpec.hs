@@ -9,8 +9,11 @@ import TestImport
 spec :: Spec
 spec = withApp $ do
     describe "AdminP" $ do
+        -- Just a simple example page
+        let getAdmin = get $ AdminP $ AdminMachinesP AdminMachinesR
+
         it "404s for un-authenticated users" $ do
-            get $ AdminP $ AdminPlansP AdminPlansR
+            getAdmin
 
             statusIs 404
 
@@ -27,7 +30,7 @@ spec = withApp $ do
                 , userCredsPlugin = "dummy"
                 }
 
-            get $ AdminP $ AdminPlansP AdminPlansR
+            getAdmin
 
             statusIs 404
 
@@ -44,7 +47,7 @@ spec = withApp $ do
                 , userCredsIdent = "1"
                 , userCredsPlugin = "dummy"
                 }
-            get $ AdminP $ AdminPlansP AdminPlansR
+            getAdmin
             statusIs 200
 
             authenticateAsUser User
@@ -58,5 +61,5 @@ spec = withApp $ do
                 , userCredsIdent = "2"
                 , userCredsPlugin = "dummy"
                 }
-            get $ AdminP $ AdminPlansP AdminPlansR
+            getAdmin
             statusIs 200

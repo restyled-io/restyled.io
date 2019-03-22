@@ -26,6 +26,14 @@ img {
   outline-offset: -3px;
 }
 
+.avatar {
+  width: 40px;
+  box-shadow: none;
+  vertical-align: middle;
+  background: white;
+  margin-right: 10px;
+}
+
 table {
   margin-bottom: 12px;
 }

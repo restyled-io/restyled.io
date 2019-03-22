@@ -68,61 +68,6 @@ spec = withApp $ do
             postFixture "webhooks/github/pull-request-opened-restyled.json"
             statusIs 200
 
-        it "ignores private repositories if no plan" $ do
-            pendingWith "Moved to Backend"
-            postFixture "webhooks/github/pull-request-opened-private.json"
-            statusIs 200
-
-        it "ignores private repositories if inactive plan" $ do
-            pendingWith "Moved to Backend"
-            setupPrivatePlan (Just 100) Nothing
-            postFixture "webhooks/github/pull-request-opened-private.json"
-            statusIs 200
-
-        it "ignores private repositories if expired plan" $ do
-            pendingWith "Moved to Backend"
-            setupPrivatePlan Nothing $ Just (-100)
-            postFixture "webhooks/github/pull-request-opened-private.json"
-            statusIs 200
-
-        it "accepts private repositories if active plan" $ do
-            pendingWith "Moved to Backend"
-            setupPrivatePlan (Just (-100)) $ Just 100
-            postFixture "webhooks/github/pull-request-opened-private.json"
-            statusIs 201
-
-        it "accepts private repositories if forever plan" $ do
-            pendingWith "Moved to Backend"
-            setupPrivatePlan Nothing Nothing
-            postFixture "webhooks/github/pull-request-opened-private.json"
-            statusIs 201
-
-setupPrivatePlan
-    :: Maybe NominalDiffTime -> Maybe NominalDiffTime -> YesodExample App ()
-setupPrivatePlan activeIn expiresIn = do
-    now <- liftIO getCurrentTime
-
-    let activeAt = (`addUTCTime` now) <$> activeIn
-        expiresAt = (`addUTCTime` now) <$> expiresIn
-
-    runDB $ do
-        insert_ Repo
-            { repoSvcs = GitHubSVCS
-            , repoOwner = "restyled-io"
-            , repoName = "restyled.io"
-            , repoInstallationId = 55758
-            , repoIsPrivate = True
-            , repoDebugEnabled = False
-            }
-        insert_ Plan
-            { planType = Trial
-            , planOwner = "restyled-io"
-            , planRepo = "restyled.io"
-            , planActiveAt = activeAt
-            , planExpiresAt = expiresAt
-            , planMessage = "Test plan"
-            }
-
 postFixture :: FilePath -> YesodExample App ()
 postFixture = postFixtureAs "pull_request"
 

@@ -49,6 +49,7 @@ import Yesod.Default.Config2 (makeYesodLogger)
 import Handler.Common
 import Handler.Home
 import Handler.PrivacyPolicy
+import Handler.Profile
 import Handler.Repos
 import Handler.Thanks
 import Handler.Webhooks
@@ -56,7 +57,6 @@ import Handler.Webhooks
 import Handler.Admin
 import Handler.Admin.Jobs
 import Handler.Admin.Machines
-import Handler.Admin.Plans
 import Handler.Admin.Repos
 import Handler.Admin.Users
 

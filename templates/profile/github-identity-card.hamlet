@@ -1,0 +1,17 @@
+<div .card>
+  <header>
+    <div .right>
+      $maybe plan <- ghiMarketplacePlan
+        #{marketplacePlanName plan}
+
+    <img .avatar src=#{ghiAvatarUrl}>
+    #{ghiUserName}
+
+  $if null ghiKnownRepos
+    <p>
+      <em>No known Repositories
+  $else
+    $forall Entity _ repo <- ghiKnownRepos
+      <p>
+        <a href=@{repoR (repoOwner repo) (repoName repo)}>
+          #{repoPath (repoOwner repo) (repoName repo)}

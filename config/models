@@ -44,18 +44,6 @@ Job json
 
   deriving Eq Show
 
-Plan
-  type PlanType
-  owner OwnerName
-  repo RepoName
-
-  activeAt UTCTime Maybe
-  expiresAt UTCTime Maybe
-
-  message Text
-
-  deriving Eq Show
-
 RestyleMachine
   name Text
   enabled Bool
