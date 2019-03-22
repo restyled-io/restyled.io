@@ -45,7 +45,6 @@ spec = withApp $ do
                             , userGitlabRefreshToken = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
-                            , userMarketplacePlan = Nothing
                             }
                     <*> authenticateUser creds
 
@@ -73,7 +72,6 @@ spec = withApp $ do
                             , userGitlabRefreshToken = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
-                            , userMarketplacePlan = Nothing
                             }
                     <*> authenticateUser creds
 
@@ -115,7 +113,6 @@ spec = withApp $ do
                     , userGitlabRefreshToken = Nothing
                     , userCredsIdent = credsIdent creds
                     , userCredsPlugin = credsPlugin creds
-                    , userMarketplacePlan = Nothing
                     }
 
             it "updates an existing user" $ do
@@ -132,7 +129,6 @@ spec = withApp $ do
                             , userGitlabRefreshToken = Nothing
                             , userCredsIdent = credsIdent creds
                             , userCredsPlugin = credsPlugin creds
-                            , userMarketplacePlan = Nothing
                             }
                     <*> authenticateUser creds
                     <*> selectFirst [UserCredsPlugin ==. "github"] []
@@ -150,7 +146,6 @@ spec = withApp $ do
                     , userGitlabRefreshToken = Nothing
                     , userCredsIdent = credsIdent creds
                     , userCredsPlugin = credsPlugin creds
-                    , userMarketplacePlan = Nothing
                     }
 
 authenticatedAs :: Entity User -> AuthenticationResult App

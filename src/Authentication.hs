@@ -101,7 +101,6 @@ userFromCreds creds = case credsPlugin creds of
             , userGitlabRefreshToken = Nothing
             , userCredsIdent = credsIdent creds
             , userCredsPlugin = credsPlugin creds
-            , userMarketplacePlan = Nothing
             }
 
     "gitlab" -> do
@@ -117,7 +116,6 @@ userFromCreds creds = case credsPlugin creds of
             , userGitlabRefreshToken = OAuth2.rtoken <$> getRefreshToken creds
             , userCredsIdent = credsIdent creds
             , userCredsPlugin = credsPlugin creds
-            , userMarketplacePlan = Nothing
             }
 
     x -> Left $ unpack $ "Unexpected AuthPlugin: " <> x

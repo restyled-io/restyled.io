@@ -1,0 +1,14 @@
+# vim: ft=yaml
+Description: Create marketplace_account table
+Created: 2019-03-22 12:54:15.309616868 UTC
+Depends: create-marketplace-plan
+Apply: |
+  CREATE TABLE "marketplace_account" (
+    id SERIAL PRIMARY KEY,
+    github_id integer NOT NULL,
+    github_login varchar NOT NULL,
+    marketplace_plan integer REFERENCES marketplace_plan (id)
+  );
+  CREATE UNIQUE INDEX ON marketplace_account (github_id, github_login);
+Revert: |
+  DROP TABLE "marketplace_account"

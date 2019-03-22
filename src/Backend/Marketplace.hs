@@ -72,11 +72,13 @@ runSynchronize = do
         for_ @[_] accounts $ \account -> do
             logDebugN $ "Account: " <> tshow account
 
-            runDB $ updateWhere
-                [ UserGithubUserId ==. Just (ghaId account)
-                , UserGithubUsername ==. Just (ghaLogin account)
-                ]
-                [UserMarketplacePlan =. Just planId]
+            void $ runDB $ upsert
+                MarketplaceAccount
+                    { marketplaceAccountGithubId = ghaId account
+                    , marketplaceAccountGithubLogin = ghaLogin account
+                    , marketplaceAccountMarketplacePlan = planId
+                    }
+                [MarketplaceAccountMarketplacePlan =. planId]
 
     logInfoN "GitHub Marketplace data synchronized"
 

@@ -1,5 +1,7 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Model.User
-    ( fetchMarketplacePlan
+    ( fetchMarketplacePlanForUser
     )
 where
 
@@ -11,8 +13,10 @@ import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
 import Model
 
-fetchMarketplacePlan
-    :: MonadIO m => Entity User -> SqlPersistT m (Maybe MarketplacePlan)
-fetchMarketplacePlan user = runMaybeT $ do
-    planId <- hoistMaybe $ userMarketplacePlan $ entityVal user
-    MaybeT $ get planId
+fetchMarketplacePlanForUser
+    :: MonadIO m => User -> SqlPersistT m (Maybe MarketplacePlan)
+fetchMarketplacePlanForUser User {..} = runMaybeT $ do
+    githubId <- hoistMaybe userGithubUserId
+    githubLogin <- hoistMaybe userGithubUsername
+    account <- MaybeT $ getBy $ UniqueMarketplaceAccount githubId githubLogin
+    MaybeT $ get $ marketplaceAccountMarketplacePlan $ entityVal account

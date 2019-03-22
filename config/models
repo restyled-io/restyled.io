@@ -14,8 +14,6 @@ User
   credsIdent Text
   credsPlugin Text
 
-  marketplacePlan MarketplacePlanId Maybe
-
   UniqueUser credsPlugin credsIdent
   deriving Eq Show
 
@@ -75,4 +73,13 @@ MarketplacePlan
   description Text
 
   UniqueMarketplacePlan githubId
+  deriving Eq Show
+
+MarketplaceAccount
+  githubId GitHubUserId
+  githubLogin GitHubUserName
+
+  marketplacePlan MarketplacePlanId
+
+  UniqueMarketplaceAccount githubId githubLogin
   deriving Eq Show
