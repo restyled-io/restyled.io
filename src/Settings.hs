@@ -33,7 +33,7 @@ import qualified Env
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
 import SVCS.GitHub
-import SVCS.GitHub.JWTClient (PersonalAccessToken)
+import SVCS.GitHub.JWTClient (GitHubToken)
 #if DEVELOPMENT
 import Yesod.Default.Util (widgetFileReload)
 #else
@@ -58,7 +58,7 @@ data AppSettings = AppSettings
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
     , appGitHubOAuthKeys :: Maybe OAuthKeys
-    , appGitHubRateLimitToken :: PersonalAccessToken
+    , appGitHubRateLimitToken :: GitHubToken
     , appGitLabOAuthKeys :: Maybe OAuthKeys
     , appRestylerImage :: String
     , appRestylerTag :: Maybe String

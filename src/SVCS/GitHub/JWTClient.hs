@@ -11,7 +11,7 @@ module SVCS.GitHub.JWTClient
     , requestJWT
 
     -- * Token
-    , PersonalAccessToken
+    , GitHubToken
     , requestToken
 
     -- * Request builders
@@ -88,11 +88,11 @@ maxExpiration = 5 * 60
 numericDate :: UTCTime -> Maybe JWT.NumericDate
 numericDate = JWT.numericDate . utcTimeToPOSIXSeconds
 
-newtype PersonalAccessToken = PersonalAccessToken Text
+newtype GitHubToken = GitHubToken Text
     deriving newtype IsString
 
-requestToken :: FromJSON a => PersonalAccessToken -> Request -> IO a
-requestToken (PersonalAccessToken token) request = getResponseBody <$> httpJSON
+requestToken :: FromJSON a => GitHubToken -> Request -> IO a
+requestToken (GitHubToken token) request = getResponseBody <$> httpJSON
     (setRequestHeaders
         [ (hAccept, "application/vnd.github.machine-man-preview+json")
         , (hAuthorization, "token " <> encodeUtf8 token)
