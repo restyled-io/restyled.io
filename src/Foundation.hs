@@ -58,8 +58,6 @@ instance Yesod App where
         master <- getYesod
         mmsg <- getMessage
         mUser <- maybeAuth
-        mMarketplacePlan <- join
-            <$> traverse (runDB . fetchMarketplacePlanForUser . entityVal) mUser
 
         let
             adminEmails = appAdmins $ appSettings master
