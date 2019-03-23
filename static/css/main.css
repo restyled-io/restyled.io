@@ -27,11 +27,13 @@ img {
 }
 
 .avatar {
-  width: 40px;
-  box-shadow: none;
-  vertical-align: middle;
   background: white;
-  margin-right: 10px;
+  border-radius: 20px;
+  box-shadow: none;
+  margin: 10px 10px 10px 0px;
+  outline: none;
+  vertical-align: middle;
+  width: 40px;
 }
 
 table {
