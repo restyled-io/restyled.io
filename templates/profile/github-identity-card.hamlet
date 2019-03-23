@@ -2,7 +2,12 @@
   <header>
     <div .right>
       $maybe plan <- ghiMarketplacePlan
-        #{marketplacePlanName plan}
+        $if marketplacePlanGithubId plan /= 0
+          $# edit plan directly in Marketplace
+          <a href=https://github.com/marketplace/restyled-io>
+            #{marketplacePlanName plan}
+        $else
+          #{marketplacePlanName plan}
 
     <img .avatar src=#{ghiAvatarUrl}>
     #{ghiUserName}
