@@ -26,6 +26,14 @@ db.setup: db.create db.migrate db.seed
 .PHONY: db.reset
 db.reset: db.drop db.setup
 
+.PHONY: db.console
+db.console:
+	PGHOST=localhost PGUSER=postgres PGPASSWORD=password psql restyled
+
+.PHONY: db.console.prod
+db.console.prod:
+	heroku pg:psql --app restyled-io
+
 .PHONY: setup
 setup:
 	stack setup $(STACK_ARGUMENTS)
