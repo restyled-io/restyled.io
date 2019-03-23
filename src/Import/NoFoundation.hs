@@ -19,6 +19,9 @@ import Settings.StaticFiles as Import
 fromMaybeM :: Applicative m => m a -> Maybe a -> m a
 fromMaybeM d = maybe d pure
 
+assertJust :: MonadIO m => String -> Maybe a -> m a
+assertJust msg = fromMaybeM (throwString $ "Failed assertion: " <> msg)
+
 infixl 4 <$$>
 
 (<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)

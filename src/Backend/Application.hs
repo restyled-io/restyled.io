@@ -14,7 +14,7 @@ import Import hiding (runDB)
 import Backend.DB
 import Backend.Foundation
 import Backend.Job
-import Backend.Marketplace (synchronizeMarketplacePlans)
+import Backend.Marketplace
 import Control.Monad ((<=<))
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
@@ -60,10 +60,11 @@ processJob job@(Entity jobId Job {..}) = do
 
     (ec, out, err) <- case result of
         RepoNotFound -> jobSkipped "Repo not found"
-        NonGitHub repo -> jobSkipped $ nonGitHubMsg $ entityVal repo
-        PrivateNoPlan repo -> jobSkipped $ privateNoPlanMsg $ entityVal repo
-        PublicOnlyPlan repo -> jobSkipped $ publicOnlyPlanMsg $ entityVal repo
-        JobCanProceed repo -> handleAny (jobFailed . show) $ execRestyler repo job
+        NonGitHub repo -> jobSkipped $ nonGitHubMsg repo
+        PlanChecked (MarketplacePlanForbids limitation) repo ->
+            jobSkipped $ planLimitation limitation repo
+        PlanChecked MarketplacePlanAllows repo ->
+            handleAny (jobFailed . show) $ execRestyler repo job
 
     runDB $ completeJob jobId ec (pack out) (pack err)
 
@@ -78,35 +79,21 @@ jobFailed msg = do
 data JobGuardResult
     = RepoNotFound
     | NonGitHub (Entity Repo)
-    | PrivateNoPlan (Entity Repo)
-    | PublicOnlyPlan (Entity Repo)
-    | JobCanProceed (Entity Repo)
+    | PlanChecked MarketplacePlanAllows (Entity Repo)
 
 guardRepositoryJob :: MonadIO m => Entity Job -> SqlPersistT m JobGuardResult
 guardRepositoryJob (Entity _ Job {..}) = do
     mRepo <- getBy $ UniqueRepo jobSvcs jobOwner jobRepo
+    maybe (pure RepoNotFound) checkRepo mRepo
+  where
+    checkRepo repo
+        | isNonGitHub repo = pure $ NonGitHub repo
+        | otherwise = checkPlan repo
 
-    case mRepo of
-        Nothing -> pure RepoNotFound
-        Just repo@(Entity _ Repo {..})
-            | repoSvcs /= GitHubSVCS -> pure $ NonGitHub repo
-            | repoIsPrivate -> do
-                mPlan <- fetchMarketplacePlanByLogin $ ownerToUserName repoOwner
-                maybe (pure . PrivateNoPlan) checkMarketplacePlan mPlan repo
-            | otherwise -> pure $ JobCanProceed repo
+    checkPlan repo = PlanChecked <$> marketplacePlanAllows repo <*> pure repo
 
-checkMarketplacePlan
-    :: MonadIO m
-    => MarketplacePlan
-    -> Entity Repo
-    -> SqlPersistT m JobGuardResult
-checkMarketplacePlan MarketplacePlan {..} repo
-    | marketplacePlanGithubId `elem` privateRepoPlanGitHubIds = pure
-    $ JobCanProceed repo
-    | otherwise = pure $ PublicOnlyPlan repo
-
-privateRepoPlanGitHubIds :: [Int]
-privateRepoPlanGitHubIds = [0]
+isNonGitHub :: Entity Repo -> Bool
+isNonGitHub = (/= GitHubSVCS) . repoSvcs . entityVal
 
 -- brittany-disable-next-binding
 
@@ -151,22 +138,21 @@ execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
         )
         eAccessToken
 
-nonGitHubMsg :: Repo -> String
-nonGitHubMsg Repo {..} = unpack $ unlines
+nonGitHubMsg :: Entity Repo -> String
+nonGitHubMsg (Entity _ Repo {..}) = unpack $ unlines
     [ "Non-GitHub (" <> tshow repoSvcs <> "): " <> path <> "."
     , "See https://github.com/restyled-io/restyled.io/issues/76"
     ]
     where path = repoPath repoOwner repoName
 
-privateNoPlanMsg :: Repo -> String
-privateNoPlanMsg Repo {..} = unpack $ unlines
+planLimitation :: MarketplacePlanLimitation -> Entity Repo -> String
+planLimitation MarketplacePlanNotFound (Entity _ Repo {..}) = unpack $ unlines
     [ "No active plan for private repository: " <> path <> "."
     , "Contact support@restyled.io if you would like to discuss a Trial"
     ]
     where path = repoPath repoOwner repoName
 
-publicOnlyPlanMsg :: Repo -> String
-publicOnlyPlanMsg _ = unpack $ unlines @Text
+planLimitation MarketplacePlanPublicOnly _ = unpack $ unlines @Text
     [ "Your plan does not allow private repositories."
     , "Contact support@restyled.io if you would like to discuss a Trial"
     ]

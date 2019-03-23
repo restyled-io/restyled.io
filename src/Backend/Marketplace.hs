@@ -2,10 +2,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeApplications #-}
 
 module Backend.Marketplace
     ( synchronizeMarketplacePlans
+    , MarketplacePlanAllows(..)
+    , MarketplacePlanLimitation(..)
+    , marketplacePlanAllows
     )
 where
 
@@ -48,11 +50,9 @@ runSynchronize :: MonadBackend m => m ()
 runSynchronize = do
     logInfoN "Synchronizing GitHub Marketplace data"
     plans <- getGitHub $ marketplaceListingPath <> "/plans"
-
-    for_ @[_] plans $ \plan -> do
+    synchronizedAccountIds <- for plans $ \plan -> do
         logDebugN $ "Plan: " <> tshow plan
-
-        Entity planId _ <- runDB $ upsert
+        planId <- runDB $ entityKey <$> upsert
             MarketplacePlan
                 { marketplacePlanGithubId = ghmpId plan
                 , marketplacePlanName = ghmpName plan
@@ -69,10 +69,9 @@ runSynchronize = do
             <> toPathPiece (ghmpId plan)
             <> "/accounts"
 
-        for_ @[_] accounts $ \account -> do
+        for accounts $ \account -> do
             logDebugN $ "Account: " <> tshow account
-
-            void $ runDB $ upsert
+            runDB $ entityKey <$> upsert
                 MarketplaceAccount
                     { marketplaceAccountGithubId = ghaId account
                     , marketplaceAccountGithubLogin = ghaLogin account
@@ -81,6 +80,22 @@ runSynchronize = do
                 [MarketplaceAccountMarketplacePlan =. planId]
 
     logInfoN "GitHub Marketplace data synchronized"
+    runDB $ deleteUnsynchronized $ mconcat synchronizedAccountIds
+
+deleteUnsynchronized :: MonadIO m => [MarketplaceAccountId] -> SqlPersistT m ()
+deleteUnsynchronized synchronizedAccountIds = do
+    planId <- entityKey <$> fetchDiscountMarketplacePlan
+
+    deleteWhere
+        [ MarketplaceAccountId /<-. synchronizedAccountIds
+        , MarketplaceAccountMarketplacePlan !=. planId
+        ]
+
+fetchDiscountMarketplacePlan
+    :: MonadIO m => SqlPersistT m (Entity MarketplacePlan)
+fetchDiscountMarketplacePlan =
+    assertJust "Discount Plan must exist"
+        =<< selectFirst [MarketplacePlanGithubId ==. 0] []
 
 getGitHub :: (FromJSON a, MonadBackend m) => Text -> m a
 getGitHub path = do
@@ -89,3 +104,32 @@ getGitHub path = do
     liftIO $ do
         request <- parseRequest $ unpack $ "GET https://api.github.com" <> path
         requestJWT appGitHubAppId appGitHubAppKey request
+
+data MarketplacePlanAllows
+    = MarketplacePlanAllows
+    | MarketplacePlanForbids MarketplacePlanLimitation
+
+data MarketplacePlanLimitation
+    = MarketplacePlanNotFound
+    | MarketplacePlanPublicOnly
+
+-- | Current, naive @'MarketplacePlan'@ limitations
+marketplacePlanAllows
+    :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
+marketplacePlanAllows (Entity _ Repo {..}) = do
+    mPlan <- fetchMarketplacePlanByLogin $ ownerToUserName repoOwner
+
+    pure $ case (repoIsPrivate, mPlan) of
+        (False, _) -> MarketplacePlanAllows
+        (True, Nothing) -> MarketplacePlanForbids MarketplacePlanNotFound
+        (True, Just plan)
+            | isPrivateRepoPlan plan -> MarketplacePlanAllows
+            | otherwise -> MarketplacePlanForbids MarketplacePlanPublicOnly
+
+isPrivateRepoPlan :: MarketplacePlan -> Bool
+isPrivateRepoPlan MarketplacePlan {..} =
+    marketplacePlanGithubId `elem` privateRepoPlanGitHubIds
+
+-- | Only our fake "Friends & Family" plan allows Private today
+privateRepoPlanGitHubIds :: [Int]
+privateRepoPlanGitHubIds = [0]
