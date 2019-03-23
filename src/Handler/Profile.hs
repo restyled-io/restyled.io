@@ -13,7 +13,7 @@ import Import
 import Data.Aeson
 import Data.Aeson.Casing
 import GitHub.Data (toPathPart)
-import SVCS.GitHub.JWTClient
+import SVCS.GitHub.ApiClient
 import Yesod.Auth
 
 data Org = Org

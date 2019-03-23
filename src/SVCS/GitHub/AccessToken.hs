@@ -16,7 +16,7 @@ import Data.Monoid ((<>))
 import Data.Text (Text, unpack)
 import GitHub.Data (toPathPart)
 import GitHub.Data.AccessTokens (AccessToken(..))
-import SVCS.GitHub.JWTClient
+import SVCS.GitHub.ApiClient
 import SVCS.Names
 
 newtype ErrorMessage = ErrorMessage Text

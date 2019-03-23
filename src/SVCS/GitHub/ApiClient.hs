@@ -2,7 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module SVCS.GitHub.JWTClient
+module SVCS.GitHub.ApiClient
     (
     -- * JWT
       GitHubAppId

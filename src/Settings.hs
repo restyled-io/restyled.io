@@ -33,7 +33,7 @@ import qualified Env
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
 import SVCS.GitHub
-import SVCS.GitHub.JWTClient (GitHubToken)
+import SVCS.GitHub.ApiClient (GitHubToken)
 #if DEVELOPMENT
 import Yesod.Default.Util (widgetFileReload)
 #else
