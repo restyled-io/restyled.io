@@ -80,6 +80,7 @@ instance Yesod App where
     isAuthorized RevisionR _ = pure Authorized
     isAuthorized RobotsR _ = pure Authorized
     isAuthorized ThanksGitHubR _ = pure Authorized
+    isAuthorized ThanksGitHubSetupR _ = pure Authorized
 
     isAuthorized ProfileR _ =
         maybe AuthenticationRequired (const Authorized) <$> maybeAuthId

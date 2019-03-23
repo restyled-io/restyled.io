@@ -1,6 +1,3 @@
-<main>
-  <h1>Thanks
-
 <section>
   <p>
     Thanks for installing the Restyled GitHub App! Here are some resources to
@@ -40,18 +37,6 @@
       If you want it to stop, see
       <a href=https://github.com/restyled-io/restyled.io/wiki/Disabling-Restyled>
         Disabling Restyled
-
-<section>
-  <div .login>
-    <p>
-      If you installed Restyled via the GitHub Marketplace and/or plan to use
-      private Repositories on Restyled, please authorize with GitHub:
-
-    <ul>
-      <li>
-        <a .button .github href=@{AuthR $ PluginR "github" ["forward"]}>
-          <span .logo>
-          Log in with GitHub
 
 <section>
   <p>
