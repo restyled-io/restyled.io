@@ -3,16 +3,20 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module SVCS.GitHub.JWTClient
-    ( GitHubAppId
+    (
+    -- * JWT
+      GitHubAppId
     , mkGitHubAppId
     , GitHubAppKey
-    , githubGET
-    , githubPOST
     , requestJWT
 
-    -- * Long story
+    -- * Token
     , PersonalAccessToken
     , requestToken
+
+    -- * Request builders
+    , githubGET
+    , githubPOST
     ) where
 
 import Prelude
