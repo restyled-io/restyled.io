@@ -1,5 +1,5 @@
 <main>
-  <h1>restyled
+  <h1>Restyled
   <p>Nudge your team towards consistent coding style with every PR
 
 <section>
@@ -28,15 +28,7 @@
   <h2>How it works
 
   <p>
-    Install the 
-    <a href="https://github.com/apps/restyled-io">Restyled.io
-    GitHub App:
-
-  <p>
-    <img src=@{StaticR img_docs_install_confirm_png}>
-
-  <p>
-    Open a Pull Request that changes files in one of our
+    Open a Pull Request on a public repository that changes files in one of our
     <a href=https://github.com/restyled-io/restyled.io/wiki/Available-Restylers>supported languages</a>.
     If it doesn't conform to your preferred style, you'll receive a comment that
     it's been <i>restyled</i>:
@@ -90,18 +82,15 @@
     <img src=@{StaticR img_docs_green_status_png}>
 
 <section .action>
-  <p .install-button>
-    <a .button .action href="https://github.com/apps/restyled-io">
-      Install the App
-      <i .fas .fa-external-link-alt>
+  <h2>Try it free
+  <p>
+    A free plan (public repositories only) is available in the
+    <a href="https://github.com/marketplace/restyled-io">GitHub Marketplace</a>.
 
   <p>
-    <strong>NOTE</strong>:
-    Restyled operates on public repositories only. If you would like to try
-    Restyled on a private repository, please
-    <a href=mailto:support@restyled.io>email support</a>.
-    Paid plans are coming soon through the GitHub Marketplace. Until then,
-    private repositories can only be enabled by support.
+    If want to use Restyled on private repositories, just send a quick email to
+    <a href=mailto@support@restyled.io>support@restyled.io
+    and we can discuss a Trial.
 
 <section>
   <h2>Open Source
