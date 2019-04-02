@@ -19,7 +19,6 @@ module Routes
     -- * Admin routes
     , adminReposP
     , adminRepoP
-    , adminRepoR
     , adminJobsP
     )
 where
@@ -54,9 +53,6 @@ adminReposP = AdminP . AdminReposP
 
 adminRepoP :: RepoId -> AdminRepoP -> Route App
 adminRepoP repoId = adminReposP . AdminRepoP repoId
-
-adminRepoR :: RepoId -> Route App
-adminRepoR repoId = adminRepoP repoId AdminRepoR
 
 adminJobsP :: AdminJobsP -> Route App
 adminJobsP = AdminP . AdminJobsP

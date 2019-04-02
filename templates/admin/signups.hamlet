@@ -1,4 +1,0 @@
-<section>
-  <ul>
-    $forall Entity _ s <- signups
-      <li>#{signupEmail s}

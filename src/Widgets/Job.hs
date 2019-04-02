@@ -21,7 +21,6 @@ module Widgets.Job
     -- * Creating Jobs
     , CreateJob(..)
     , createJobForm
-    , createJobFormFromRepo
     ) where
 
 import Import
@@ -72,18 +71,6 @@ createJobFormFrom Job {..} =
         <*> areq hiddenField "" (Just jobOwner)
         <*> areq hiddenField "" (Just jobRepo)
         <*> areq hiddenField "" (Just jobPullRequest)
-
--- | Form to use when submitting a @'Job'@ for a known @'Repo'@
-createJobFormFromRepo :: Repo -> Form CreateJob
-createJobFormFromRepo Repo {..} =
-    renderDivs
-        $ CreateJob
-        <$> areq hiddenField "" (Just repoSvcs)
-        <*> areq hiddenField "" (Just repoOwner)
-        <*> areq hiddenField "" (Just repoName)
-        <*> (mkPullRequestNum <$> areq intField ("" { fsAttrs = attrs }) Nothing
-            )
-    where attrs = [("placeholder", "PR Number")]
 
 -- | Internal helper for rendering completion state
 data Completion

@@ -33,7 +33,3 @@
 
       <a href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>
         #{format (diff True) $ diffUTCTime (jobUpdatedAt job) now}
-
-  $maybe action <- mAction
-    <aside>
-      ^{action}

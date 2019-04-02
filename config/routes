@@ -27,17 +27,12 @@
 /admin AdminP:
   /jobs AdminJobsP:
     / AdminJobsR GET POST
-    /new AdminJobsNewR GET
-    !/#JobId AdminJobR DELETE
+    /#JobId AdminJobR DELETE
   /repos AdminReposP:
     / AdminReposR GET
     /search AdminReposSearchR GET
     !/#RepoId AdminRepoP:
-      / AdminRepoR PATCH
       /jobs AdminRepoJobsR GET
-  /users AdminUsersP:
-    / AdminUsersR GET
-    /#UserId AdminUserR DELETE
   /machines AdminMachinesP:
     / AdminMachinesR GET POST
     /new AdminMachinesNewR GET

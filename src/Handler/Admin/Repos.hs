@@ -6,7 +6,6 @@
 module Handler.Admin.Repos
     ( getAdminReposR
     , getAdminReposSearchR
-    , patchAdminRepoR
     , getAdminRepoJobsR
     )
 where
@@ -40,15 +39,6 @@ getAdminReposSearchR = do
             setTitle "Restyled Admin / Search"
             $(widgetFile "admin/repos/search")
 
-patchAdminRepoR :: RepoId -> Handler ()
-patchAdminRepoR repoId = do
-    debugEnabled <- runInputPost $ ireq boolField "debugEnabled"
-    setMessage
-        $ (if debugEnabled then "Enabled" else "Disabled")
-        <> " debug for repository"
-    runDB $ update repoId [RepoDebugEnabled =. debugEnabled]
-    redirect $ AdminP $ AdminReposP AdminReposR
-
 getAdminRepoJobsR :: RepoId -> Handler Html
 getAdminRepoJobsR repoId = do
     (repo, pages) <- runDB $ do
@@ -57,8 +47,6 @@ getAdminRepoJobsR repoId = do
             5
             [JobOwner ==. repoOwner, JobRepo ==. repoName]
             [Desc JobCreatedAt]
-
-    (widget, enctype) <- generateFormPost $ createJobFormFromRepo repo
 
     adminLayout $ do
         setTitle "Restyled Admin / Repo Jobs"
