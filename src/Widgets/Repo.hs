@@ -15,17 +15,18 @@ import Formatting.Time (diff)
 import Widgets.Job
 
 adminRepoCard :: RepoWithStats -> Widget
-adminRepoCard RepoWithStats{..} = do
+adminRepoCard RepoWithStats {..} = do
     now <- liftIO getCurrentTime
 
-    let
-        jobsRoute :: Entity Repo -> Route App
+    let jobsRoute :: Entity Repo -> Route App
         jobsRoute (Entity repoId _) = adminRepoP repoId AdminRepoJobsR
 
         mAction :: Maybe Widget
         mAction = Just $ adminRepoActions rwsRepo
 
     $(widgetFile "widgets/repo-card")
+
+-- brittany-disable-next-binding
 
 adminRepoActions :: Entity Repo -> Widget
 adminRepoActions repo = [whamlet|
