@@ -1,9 +1,5 @@
 <section>
-  <header .with-button>
-    <form method=post action=@{AdminP $ AdminJobsP AdminJobsR} enctype=#{enctype}>
-      <aside>
-        ^{widget}
-        <button type=submit>Restyle
+  <header>
     <h2>
       #{repoOwner repo}/#{repoName repo}
 
