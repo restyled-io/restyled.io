@@ -1,0 +1,19 @@
+<section>
+  <div .card>
+    <header>
+      <div .right>
+        <i .fas .fa-ban>
+      <em>No Marketplace Account
+    ^{accountsList noPlanRepoOwners}
+
+  $forall plan <- pageItems $ pagesCurrent pages
+    <div .card>
+      <header>
+        <div .right>
+          $if isPrivateRepoPlan $ entityVal $ mpwaPlan plan
+            <i .fas .fa-lock>
+        #{marketplacePlanName $ entityVal $ mpwaPlan plan}:
+        #{marketplacePlanDescription $ entityVal $ mpwaPlan plan}
+      ^{accountsList $ map (marketplaceAccountGithubOwner . entityVal) $ mpwaAccounts plan}
+  <aside>
+    ^{simple 3 pages}

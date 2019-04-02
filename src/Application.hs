@@ -57,6 +57,7 @@ import Handler.Webhooks
 import Handler.Admin
 import Handler.Admin.Jobs
 import Handler.Admin.Machines
+import Handler.Admin.Marketplace
 import Handler.Admin.Repos
 import Handler.Admin.Users
 
