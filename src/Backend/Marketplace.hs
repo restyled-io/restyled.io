@@ -8,6 +8,7 @@ module Backend.Marketplace
     , MarketplacePlanAllows(..)
     , MarketplacePlanLimitation(..)
     , marketplacePlanAllows
+    , isPrivateRepoPlan
     )
 where
 
