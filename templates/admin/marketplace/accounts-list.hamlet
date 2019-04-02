@@ -1,0 +1,8 @@
+$if null owners
+  <p>
+    <em>No accounts
+$else
+  <p>#{pluralize "account" "acounts" $ length owners}
+    <ul>
+      $forall owner <- owners
+        <li>#{owner}

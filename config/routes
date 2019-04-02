@@ -43,3 +43,4 @@
     /new AdminMachinesNewR GET
     !/#RestyleMachineId AdminMachineR DELETE
     !/#RestyleMachineId/info AdminMachineInfoR GET
+  /marketplace AdminMarketplaceR GET
