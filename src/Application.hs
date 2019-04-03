@@ -30,6 +30,7 @@ import Network.Wai.Handler.Warp
     , setOnException
     , setPort
     )
+import Network.Wai.Middleware.ForceSSL
 import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.RequestLogger
     ( Destination(Callback, Logger)
@@ -90,7 +91,7 @@ makeApplication foundation = do
     pure $ logWare $ waiMiddleware appPlain
 
 waiMiddleware :: Middleware
-waiMiddleware = methodOverridePost . defaultMiddlewaresNoLogging
+waiMiddleware = forceSSL . methodOverridePost . defaultMiddlewaresNoLogging
 
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation = do
