@@ -44,6 +44,7 @@ import LoadEnv (loadEnvFrom)
 import Model as X
 import Routes as X
 import Settings (AppSettings(..), loadEnvSettings)
+import System.Environment (lookupEnv)
 import Test.Hspec.Core.Spec (SpecM)
 import Test.Hspec.Lifted as X
 import Test.HUnit (assertFailure)
@@ -82,7 +83,8 @@ runBackendTest query = do
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
-    loadEnvFrom ".env.test"
+    envFile <- fromMaybe ".env.test" <$> lookupEnv "ENVFILE"
+    loadEnvFrom envFile
     settings <- loadEnvSettings
     foundation <- makeFoundation settings
     wipeDB foundation
