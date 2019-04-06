@@ -25,7 +25,7 @@ steps:
   - wait
 
   - label: Migrate
-    command: db/migrate test upgrade
+    command: db/migrate ci upgrade
     <<: *docker-build
 
   - wait
