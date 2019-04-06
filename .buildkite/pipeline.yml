@@ -24,16 +24,10 @@ steps:
 
   - wait
 
-  - label: Migrate
+  - label: Test
     command: |
       sleep 3
       db/migrate ci upgrade
-    <<: *docker-build
-
-  - wait
-
-  - label: Test
-    command: |
       cp .env.ci .env.test
       make test
     <<: *docker-build
