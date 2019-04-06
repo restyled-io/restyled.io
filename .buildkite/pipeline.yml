@@ -27,7 +27,7 @@ steps:
   - label: Test
     command: |
       sleep 3
-      db/migrate ci upgrade
+      db/migrate test upgrade
       ENVFILE=.env.ci make test
     <<: *docker-build
 

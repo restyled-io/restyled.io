@@ -19,6 +19,7 @@ services:
       GIT_COMMITTER_EMAIL: ci@restyled.io
       GIT_COMMITTER_NAME: Restyled.io CI
       STACK_ARGUMENTS: --no-terminal
+      PGHOST: postgres
     working_dir: ${BUILDKITE_BUILD_CHECKOUT_PATH}
     volumes:
       - '/cache/stack:/root/.stack'
