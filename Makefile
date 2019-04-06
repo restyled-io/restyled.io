@@ -68,6 +68,11 @@ build:
 
 .PHONY: lint
 lint:
+	@# On CI, we won't have global HLint configuration
+	@if [ ! -f ~/.hlint.yaml ]; then \
+	  echo "Downloading .hlint.yaml"; \
+	  curl --output .hlint.yaml https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml; \
+	fi
 	stack exec $(STACK_ARGUMENTS) hlint app src test
 	stack exec $(STACK_ARGUMENTS) weeder .
 
