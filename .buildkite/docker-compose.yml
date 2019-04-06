@@ -3,6 +3,8 @@ version: '3'
 services:
   postgres:
     image: postgres:9.6.5-alpine
+    ports:
+      - 5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -10,6 +12,8 @@ services:
 
   redis:
     image: redis:4.0.2-alpine
+    ports:
+      - 6379
 
   build:
     image: fpco/stack-build:lts-13.3
