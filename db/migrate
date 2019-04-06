@@ -14,6 +14,9 @@ case "$1" in
   test)
     DBM_DATABASE=postgres://postgres:password@localhost/restyled_test
     ;;
+  ci)
+    DBM_DATABASE=postgres://postgres:password@postgres/restyled_test
+    ;;
   prod)
     DBM_DATABASE=$(heroku config:get DATABASE_URL --app restyled-io)
     ;;

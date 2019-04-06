@@ -31,7 +31,9 @@ steps:
   - wait
 
   - label: Test
-    command: make test
+    command: |
+      cp .env.ci .env.test
+      make test
     <<: *docker-build
 
   - label: Lint
