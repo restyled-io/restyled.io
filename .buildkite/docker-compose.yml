@@ -2,14 +2,18 @@ version: '3'
 
 services:
   postgres:
-    image: circleci/postgres:9.6.5-alpine
+    image: postgres:9.6.5-alpine
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: restyled_test
 
   redis:
-      image: redis:4.0.2-alpine
+    image: redis:4.0.2-alpine
+    ports:
+      - 6379:6379
 
   build:
     image: fpco/stack-build:lts-13.3
