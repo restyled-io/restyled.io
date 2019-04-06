@@ -1,0 +1,71 @@
+references:
+  docker-build: &docker-build
+    plugins:
+      - docker-compose#v3.0.0:
+          config: .buildkite/docker-compose.yml
+          run: build
+
+  docker-ops: &docker-ops
+    plugins:
+      - docker-compose#v3.0.0:
+          config: .buildkite/docker-compose.yml
+          run: ops
+
+steps:
+  - label: Dependencies
+    command: make setup setup.lint
+    <<: *docker-build
+
+  - wait
+
+  - label: Build
+    command: make build
+    <<: *docker-build
+
+  - wait
+
+  - label: Migrate
+    command: db/migrate test upgrade
+    <<: *docker-build
+
+  - wait
+
+  - label: Test
+    command: make test
+    <<: *docker-build
+
+  - label: Lint
+    command: make lint
+    <<: *docker-build
+
+  - label: Build image
+    command: docker build --tag restyled/restyled.io .
+    <<: *docker-ops
+
+  - wait
+
+  - label: Release image if master
+    command: |
+      if [ "$BUILDKITE_BRANCH" = master ]; then
+        cat >Dockerfile.web <<EOM
+      FROM restyled/restyled.io
+      CMD ["/app/restyled.io"]
+      EOM
+
+        cat >Dockerfile.backend <<EOM
+      FROM restyled/restyled.io
+      CMD ["/app/restyled.io-backend"]
+      EOM
+
+        # Unclear why this is required, but it is
+        export HEROKU_EMAIL=$HEROKU_EMAIL
+        export HEROKU_API_KEY=$HEROKU_API_KEY
+        export PUSHOVER_API_KEY=$PUSHOVER_API_KEY
+        export PUSHOVER_USER_KEY=$PUSHOVER_USER_KEY
+
+        heroku container:login
+        heroku container:push --recursive --app restyled-io
+        heroku container:release web backend --app restyled-io
+        notify "restyled-io" "Deploy of bk$BUILDKITE_BUILD_NUMBER successful"
+      fi
+    <<: *docker-ops
