@@ -22,8 +22,8 @@ services:
       PGHOST: postgres
     working_dir: ${BUILDKITE_BUILD_CHECKOUT_PATH}
     volumes:
-      - '/cache/stack:/root/.stack'
-      - '/cache/restyled.io/.stack-work:${BUILDKITE_BUILD_CHECKOUT_PATH}/.stack-work'
+      - '/root/.stack:/root/.stack'
+      - '${BUILDKITE_BUILD_CHECKOUT_PATH}/.stack-work:${BUILDKITE_BUILD_CHECKOUT_PATH}/.stack-work'
 
     depends_on:
       - postgres
