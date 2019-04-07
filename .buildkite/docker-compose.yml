@@ -20,10 +20,11 @@ services:
       GIT_COMMITTER_NAME: Restyled.io CI
       STACK_ARGUMENTS: --no-terminal
       PGHOST: postgres
+    working_dir: /code
     volumes:
       - '/root/.stack:/root/.stack'
-      - '${BUILDKITE_BUILD_CHECKOUT_PATH}:/workdir'
-      - '/cache/restyled.io/.stack-work:/workdir/.stack-work'
+      - '${BUILDKITE_BUILD_CHECKOUT_PATH}:/code'
+      - '/cache/restyled.io/.stack-work:/code/.stack-work'
 
     depends_on:
       - postgres
