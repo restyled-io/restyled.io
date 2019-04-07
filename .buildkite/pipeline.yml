@@ -26,7 +26,10 @@ steps:
 
   - label: Test
     command: |
-      sleep 3
+      curl -L -O https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
+      chmod +x ./wait-for-it.sh
+      ./wait-for-it.sh --quiet postgres:5432
+
       db/migrate test upgrade
       ENVFILE=.env.ci make test
     <<: *docker-build
