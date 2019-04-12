@@ -52,26 +52,29 @@ jobs:
       - run:
           name: Lint
           command: make lint
-      - run:
-          name: Write release tag
-          command: echo "b$CIRCLE_BUILD_NUM" > release-tag
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - release-tag
 
   image:
     docker:
       - image: quay.io/restyled-io/ops:buildbox
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
       - run:
           name: Build
           command: |
+            release_image=restyled/restyled.io
+            release_tag=b$CIRCLE_BUILD_NUM
+            echo "$release_image" > release-image
+            echo "b$CIRCLE_BUILD_NUM" > release-tag
+
             eval $(buildbox enable)
-            read -r release_tag < /tmp/workspace/release-tag
-            docker build --tag restyled-io/restyler:${release_tag} .
+            docker build --tag "${release_image}:${release_tag}" .
+      - run:
+          name: Write release tag
+          command:
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - release-image
+            - release-tag
 
   release:
     docker:
@@ -82,23 +85,24 @@ jobs:
       - run:
           name: Release
           command: |
-            eval $(buildbox enable)
+            read -r release_image < /tmp/workspace/release-image
             read -r release_tag < /tmp/workspace/release-tag
 
             cat >Dockerfile.web <<EOM
-            FROM restyled-io/restyled.io:${release_tag}
+            FROM ${release_image}:${release_tag}
             CMD ["/app/restyled.io"]
             EOM
 
             cat >Dockerfile.backend <<EOM
-            FROM restyled-io/restyled.io:${release_tag}
+            FROM ${release_image}:${release_tag}
             CMD ["/app/restyled.io-backend"]
             EOM
 
+            eval $(buildbox enable)
             heroku container:login
             heroku container:push --recursive --app restyled-io
             heroku container:release web backend --app restyled-io
-            notify "restyled-io" "Deploy of $DEPLOY_TAG successful"
+            notify "restyled-io" "Deploy of $release_tag successful"
 
 workflows:
   version: 2
