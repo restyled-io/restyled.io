@@ -104,7 +104,6 @@ tests:
       - hspec
       - hspec-core
       - hspec-expectations-lifted
-      - load-env
       - monad-logger
       - persistent
       - resourcet
