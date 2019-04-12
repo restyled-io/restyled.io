@@ -55,7 +55,7 @@ jobs:
 
   image:
     docker:
-      - image: quay.io/restyled-io/ops:buildbox
+      - image: quay.io/restyled-io/ops:buildbox-2
     steps:
       - run:
           name: Build
@@ -75,7 +75,7 @@ jobs:
 
   release:
     docker:
-      - image: quay.io/restyled-io/ops:buildbox
+      - image: quay.io/restyled-io/ops:buildbox-2
     steps:
       - attach_workspace:
           at: /tmp/workspace
