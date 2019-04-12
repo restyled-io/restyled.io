@@ -76,6 +76,7 @@ jobs:
       - persist_to_workspace:
           root: workspace
           paths:
+            - release-tag
             - release-image
 
   release:
