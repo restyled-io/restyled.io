@@ -64,10 +64,11 @@ jobs:
           name: Build
           command: |
             release_image=restyled/restyled.io:b$CIRCLE_BUILD_NUM
-            echo "$release_image" > release-image
+            mkdir -p workspace
+            echo "$release_image" > workspace/release-image
             docker build --tag "$release_image" .
       - persist_to_workspace:
-          root: /tmp/workspace
+          root: workspace
           paths:
             - release-image
 
