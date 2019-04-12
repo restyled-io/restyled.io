@@ -131,6 +131,8 @@ isPrivateRepoPlan :: MarketplacePlan -> Bool
 isPrivateRepoPlan MarketplacePlan {..} =
     marketplacePlanGithubId `elem` privateRepoPlanGitHubIds
 
--- | Only our fake "Friends & Family" plan allows Private today
 privateRepoPlanGitHubIds :: [Int]
-privateRepoPlanGitHubIds = [0]
+privateRepoPlanGitHubIds =
+    [ 0 -- Manually-managed "Friends & Family" plan
+    , 2178 -- Temporary "Early Adopter" plan
+    ]
