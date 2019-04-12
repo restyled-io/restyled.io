@@ -29,8 +29,8 @@ Website and backend for Restyled, https://restyled.io.
 1. Setup local secrets in `.env`
 
    ```console
-   cp .env.example .env
-   $EDITOR .env
+   cp .env.example .env.development
+   $EDITOR .env.development
    ```
 
 1. Run the site and backend locally:
@@ -64,7 +64,8 @@ To process real `restyled-io/demo` Pull Requests:
    (cd ../restyler && docker build --tag restyled/restyler .)
    ```
 
-   To use a deployed image, set `RESTYLER_IMAGE` and `RESTYLER_TAG` in `.env`.
+   To use a deployed image, set `RESTYLER_IMAGE` and `RESTYLER_TAG` in
+   `.env.development`.
 
    _At this time, individual Restylers will always be pulled from deployed
    sources._

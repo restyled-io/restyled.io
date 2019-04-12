@@ -10,6 +10,7 @@ module Settings
     ( OAuthKeys(..)
     , AppSettings(..)
     , loadEnvSettings
+    , loadEnvSettingsTest
     , allowsLevel
     , widgetFile
     , appStaticDir
@@ -31,6 +32,7 @@ import Database.Redis (ConnectInfo(..), PortID(..), parseConnectInfo)
 import Development.GitRev (gitCommitDate, gitHash)
 import qualified Env
 import Language.Haskell.TH.Syntax (Exp, Q)
+import LoadEnv (loadEnvFrom)
 import Network.Wai.Handler.Warp (HostPreference)
 import SVCS.GitHub
 import SVCS.GitHub.ApiClient (GitHubToken)
@@ -110,8 +112,20 @@ instance Show AppSettings where
 type EnvParser a = forall e.
     (Env.AsUnset e, Env.AsUnread e, Env.AsEmpty e) => Env.Parser e a
 
+
 loadEnvSettings :: IO AppSettings
-loadEnvSettings = Env.parse id envSettings
+loadEnvSettings = do
+#if DEVELOPMENT
+    loadEnvFrom ".env.development"
+#endif
+    Env.parse id envSettings
+
+loadEnvSettingsTest :: IO AppSettings
+loadEnvSettingsTest = do
+    loadEnvFrom ".env.test"
+    Env.parse id envSettings
+
+{-# ANN loadEnvSettings ("HLint: ignore Redundant do" :: String) #-}
 
 envSettings :: EnvParser AppSettings
 envSettings = AppSettings

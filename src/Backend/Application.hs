@@ -18,7 +18,6 @@ import Backend.Marketplace
 import Control.Monad ((<=<))
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
-import LoadEnv (loadEnv)
 import Model.RestyleMachine (runRestyleMachine)
 import SVCS.GitHub.AccessToken (githubInstallationToken)
 import System.Exit (ExitCode(..))
@@ -26,7 +25,6 @@ import System.IO (BufferMode(..))
 
 backendMain :: IO ()
 backendMain = do
-    loadEnv
     backendSettings <- loadEnvSettings
 
     -- Ensure container logs are visible immediately

@@ -18,7 +18,6 @@ import Control.Monad.Logger (liftLoc, runLoggingT)
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
 import Language.Haskell.TH.Syntax (qLocation)
-import LoadEnv (loadEnv)
 import Network.HTTP.Client.TLS (getGlobalManager)
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
@@ -128,7 +127,6 @@ warpSettings foundation =
 
 appMain :: IO ()
 appMain = do
-    loadEnv
     settings <- loadEnvSettings
     foundation <- makeFoundation settings
     app <- makeApplication foundation

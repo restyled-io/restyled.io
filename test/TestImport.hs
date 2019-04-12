@@ -40,10 +40,9 @@ import Database.Persist.Sql
     )
 import Database.Redis (del)
 import Foundation as X
-import LoadEnv (loadEnvFrom)
 import Model as X
 import Routes as X
-import Settings (AppSettings(..), loadEnvSettings)
+import Settings (AppSettings(..), loadEnvSettingsTest)
 import Test.Hspec.Core.Spec (SpecM)
 import Test.Hspec.Lifted as X
 import Test.HUnit (assertFailure)
@@ -82,8 +81,7 @@ runBackendTest query = do
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
-    loadEnvFrom ".env.test"
-    settings <- loadEnvSettings
+    settings <- loadEnvSettingsTest
     foundation <- makeFoundation settings
     wipeDB foundation
     wipeRedis foundation
