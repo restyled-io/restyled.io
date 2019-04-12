@@ -57,6 +57,7 @@ jobs:
     docker:
       - image: quay.io/restyled-io/ops:buildbox-2
     steps:
+      - checkout
       - run:
           name: Build
           command: |
