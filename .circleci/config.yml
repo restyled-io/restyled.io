@@ -105,7 +105,7 @@ jobs:
             heroku container:login
             heroku container:push --recursive --app restyled-io
             heroku container:release web backend --app restyled-io
-            notify "restyled-io" "$release_image deployed"
+            notify "restyled-io" "Deploy of $release_tag successful"
 
 workflows:
   version: 2
