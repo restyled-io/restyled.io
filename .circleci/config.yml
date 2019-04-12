@@ -63,10 +63,16 @@ jobs:
       - run:
           name: Build
           command: |
-            release_image=restyled/restyled.io:b$CIRCLE_BUILD_NUM
+            release_tag=b$CIRCLE_BUILD_NUM
+            release_image=quay.io/restyled-io/restyled.io
+
             mkdir -p workspace
+            echo "$release_tag" > workspace/release-tag
             echo "$release_image" > workspace/release-image
-            docker build --tag "$release_image" .
+
+            docker build --tag "${release_image}:${release_tag}" .
+            docker login -u "$QUAY_USERNAME" -p "$QUAY_PASSWORD" quay.io
+            docker push "${release_image}:${release_tag}"
       - persist_to_workspace:
           root: workspace
           paths:
@@ -83,15 +89,16 @@ jobs:
       - run:
           name: Release
           command: |
+            read -r release_tag < /tmp/workspace/release-tag
             read -r release_image < /tmp/workspace/release-image
 
             cat >Dockerfile.web <<EOM
-            FROM ${release_image}
+            FROM ${release_image}:${release_tag}
             CMD ["/app/restyled.io"]
             EOM
 
             cat >Dockerfile.backend <<EOM
-            FROM ${release_image}
+            FROM ${release_image}:${release_tag}
             CMD ["/app/restyled.io-backend"]
             EOM
 
