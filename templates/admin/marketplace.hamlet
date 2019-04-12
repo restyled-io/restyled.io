@@ -12,8 +12,10 @@
         <div .right>
           $if isPrivateRepoPlan $ entityVal $ mpwaPlan plan
             <i .fas .fa-lock>
-        #{marketplacePlanName $ entityVal $ mpwaPlan plan}:
-        #{marketplacePlanDescription $ entityVal $ mpwaPlan plan}
+        #{marketplacePlanGithubId $ entityVal $ mpwaPlan plan}:
+        #{marketplacePlanName $ entityVal $ mpwaPlan plan}
+      <p>
+        <em>#{marketplacePlanDescription $ entityVal $ mpwaPlan plan}
       ^{accountsList $ map (marketplaceAccountGithubOwner . entityVal) $ mpwaAccounts plan}
   <aside>
     ^{simple 3 pages}
