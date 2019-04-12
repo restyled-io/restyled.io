@@ -55,52 +55,49 @@ jobs:
 
   image:
     docker:
-      - image: quay.io/restyled-io/ops:buildbox-2
+      - image: quay.io/restyled-io/ops
     steps:
       - checkout
+      - setup_remote_docker:
+         docker_layer_caching: true
       - run:
           name: Build
           command: |
-            release_image=restyled/restyled.io
-            release_tag=b$CIRCLE_BUILD_NUM
+            release_image=restyled/restyled.io:b$CIRCLE_BUILD_NUM
             echo "$release_image" > release-image
-            echo "b$CIRCLE_BUILD_NUM" > release-tag
-
-            eval $(buildbox enable)
-            docker build --tag "${release_image}:${release_tag}" .
+            docker build --tag "$release_image" .
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - release-image
-            - release-tag
 
   release:
     docker:
-      - image: quay.io/restyled-io/ops:buildbox-2
+      - image: quay.io/restyled-io/ops
     steps:
+      - setup_remote_docker:
+         docker_layer_caching: true
       - attach_workspace:
           at: /tmp/workspace
       - run:
           name: Release
           command: |
             read -r release_image < /tmp/workspace/release-image
-            read -r release_tag < /tmp/workspace/release-tag
 
             cat >Dockerfile.web <<EOM
-            FROM ${release_image}:${release_tag}
+            FROM ${release_image}
             CMD ["/app/restyled.io"]
             EOM
 
             cat >Dockerfile.backend <<EOM
-            FROM ${release_image}:${release_tag}
+            FROM ${release_image}
             CMD ["/app/restyled.io-backend"]
             EOM
 
-            eval $(buildbox enable)
             heroku container:login
             heroku container:push --recursive --app restyled-io
             heroku container:release web backend --app restyled-io
-            notify "restyled-io" "Deploy of $release_tag successful"
+            notify "restyled-io" "$release_image deployed"
 
 workflows:
   version: 2
