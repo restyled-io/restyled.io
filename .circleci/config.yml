@@ -67,9 +67,6 @@ jobs:
 
             eval $(buildbox enable)
             docker build --tag "${release_image}:${release_tag}" .
-      - run:
-          name: Write release tag
-          command:
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
