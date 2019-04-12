@@ -53,29 +53,45 @@ jobs:
           name: Lint
           command: make lint
       - run:
-          name: Tag Master Build
-          command: |
-            if [ "$CIRCLE_BRANCH" = master ]; then
-              git tag -a -m "b$CIRCLE_BUILD_NUM" "b$CIRCLE_BUILD_NUM"
-              git push --tags
-            fi
+          name: Write release tag
+          command: echo "b$CIRCLE_BUILD_NUM" > release-tag
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - release-tag
 
-  # Triggered manually via API to deploy image built in Quay
-  deploy:
+  image:
     docker:
-      - image: quay.io/restyled-io/ops
+      - image: quay.io/restyled-io/ops:buildbox
     steps:
-      - setup_remote_docker
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
-          name: Deploy
+          name: Build
           command: |
+            eval $(buildbox enable)
+            read -r release_tag < /tmp/workspace/release-tag
+            docker build --tag restyled-io/restyler:${release_tag} .
+
+  release:
+    docker:
+      - image: quay.io/restyled-io/ops:buildbox
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Release
+          command: |
+            eval $(buildbox enable)
+            read -r release_tag < /tmp/workspace/release-tag
+
             cat >Dockerfile.web <<EOM
-            FROM $DEPLOY_IMAGE:$DEPLOY_TAG
+            FROM restyled-io/restyled.io:${release_tag}
             CMD ["/app/restyled.io"]
             EOM
 
             cat >Dockerfile.backend <<EOM
-            FROM $DEPLOY_IMAGE:$DEPLOY_TAG
+            FROM restyled-io/restyled.io:${release_tag}
             CMD ["/app/restyled.io-backend"]
             EOM
 
@@ -83,3 +99,18 @@ jobs:
             heroku container:push --recursive --app restyled-io
             heroku container:release web backend --app restyled-io
             notify "restyled-io" "Deploy of $DEPLOY_TAG successful"
+
+workflows:
+  version: 2
+  build_and_release:
+    jobs:
+      - build
+      - image
+      - release:
+          requires:
+            - build
+            - image
+          filters:
+            branches:
+              only:
+                - master
