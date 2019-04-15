@@ -70,7 +70,7 @@ findUserForCreds creds@Creds {..} =
     getMatchingCreds = MaybeT $ getBy $ UniqueUser credsPlugin credsIdent
     getMatchingEmail = do
         User {..} <- hushT $ liftEither $ userFromCreds creds
-        MaybeT $ selectFirst [UserEmail ==. userEmail] []
+        MaybeT $ selectFirst [UserEmail ==. userEmail, UserEmail !=. Nothing] []
 
 -- | A version of 'replace' that avoids clobbering when possible
 replaceUser :: MonadIO m => UserId -> User -> SqlPersistT m ()
