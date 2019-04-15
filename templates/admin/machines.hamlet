@@ -32,6 +32,13 @@
 
         <form
           method=post
+          action=@{AdminP $ AdminMachinesP $ AdminMachinePruneR machineId}
+          onsubmit="return confirm('Are you sure?');"
+          >
+          <input .warning type=submit value="Prune" />
+
+        <form
+          method=post
           action=@{AdminP $ AdminMachinesP $ AdminMachineR machineId}
           onsubmit="return confirm('Are you sure?');"
           >

@@ -1,0 +1,6 @@
+<section>
+  <pre>
+    \$ docker system prune --all --force
+    [#{ec}]
+    #{out}
+    #{err}

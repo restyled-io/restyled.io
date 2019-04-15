@@ -8,6 +8,7 @@ module Handler.Admin.Machines
     , postAdminMachinesR
     , deleteAdminMachineR
     , getAdminMachineInfoR
+    , postAdminMachinePruneR
     ) where
 
 import Import
@@ -79,3 +80,20 @@ getAdminMachineInfoR machineId = do
     adminLayout $ do
         setTitle "Restyled Amin / Machine Info"
         $(widgetFile "admin/machines/info")
+
+postAdminMachinePruneR :: RestyleMachineId -> Handler Html
+postAdminMachinePruneR machineId = do
+    machine <- runDB $ get404 machineId
+    (ec', out, err) <- runRestyleMachine
+        [machine]
+        "docker"
+        ["system", "prune", "--all", "--force"]
+
+    let
+        ec = case ec' of
+            ExitSuccess -> "0"
+            ExitFailure n -> show n
+
+    adminLayout $ do
+        setTitle "Restyled Amin / Machine Prune"
+        $(widgetFile "admin/machines/prune")
