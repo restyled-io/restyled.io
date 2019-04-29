@@ -98,6 +98,7 @@ tests:
     dependencies:
       - restyled
       - HUnit
+      - QuickCheck
       - bytestring
       - classy-prelude
       - hedis

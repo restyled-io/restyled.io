@@ -11,6 +11,7 @@ import Import.NoFoundation
 
 import Cache
 import Control.Monad.Except
+import Data.Either (fromRight)
 import SVCS.GitHub.AccessToken
 import SVCS.GitHub.Collaborator
 
@@ -19,7 +20,7 @@ authorizeAdmin
 authorizeAdmin _ Nothing = notFound
 authorizeAdmin settings (Just userId) = do
     user <- fromMaybeM notFound =<< get userId
-    authorizeWhen $ maybe False (`elem` appAdmins settings) $ userEmail user
+    authorizeWhen $ userIsAdmin settings user
 
 authorizeRepo
     :: (MonadCache m, MonadHandler m)
@@ -46,7 +47,7 @@ authorizePrivateRepo
     -> Repo
     -> User
     -> SqlPersistT m AuthResult
-authorizePrivateRepo AppSettings {..} Repo {..} User {..} = do
+authorizePrivateRepo settings@AppSettings {..} Repo {..} user@User {..} = do
     result <- runExceptT $ do
         username <- userGithubUsername ?? "User has no GitHub Username"
         caching (cacheKey username) $ do
@@ -56,6 +57,8 @@ authorizePrivateRepo AppSettings {..} Repo {..} User {..} = do
                 repoInstallationId
             githubCollaboratorCanRead token repoOwner repoName username
 
+    let isAdmin = userIsAdmin settings user
+
     logInfoN
         $ "Authorization result for "
         <> repoPath repoOwner repoName
@@ -63,8 +66,9 @@ authorizePrivateRepo AppSettings {..} Repo {..} User {..} = do
         <> maybe "<unknown>" toPathPiece userGithubUsername
         <> ": "
         <> tshow result
+        <> if isAdmin then " (granting via Admin)" else ""
 
-    either (const notFound) authorizeWhen result
+    authorizeWhen $ isAdmin || fromRight False result
   where
     cacheKey username =
         [ "auth"

@@ -1,7 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Model.User
-    ( fetchMarketplacePlanForUser
+    (
+    -- * Virtual properties
+      userIsAdmin
+
+    -- * Data access
+    , fetchMarketplacePlanForUser
     , fetchMarketplacePlanByLogin
     )
 where
@@ -13,6 +18,10 @@ import Control.Monad.Trans.Maybe
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
 import Model
+import Settings
+
+userIsAdmin :: AppSettings -> User -> Bool
+userIsAdmin AppSettings {..} = maybe False (`elem` appAdmins) . userEmail
 
 fetchMarketplacePlanForUser
     :: MonadIO m => User -> SqlPersistT m (Maybe MarketplacePlan)
