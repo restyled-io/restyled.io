@@ -5,7 +5,7 @@
 
     <ul>
       $maybe Entity _ user <- mUser
-        $if isAdmin user
+        $if userIsAdmin (appSettings master) user
           <li>
             <a href=@{AdminR}>Admin
         <li>

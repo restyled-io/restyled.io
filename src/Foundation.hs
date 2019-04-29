@@ -59,10 +59,6 @@ instance Yesod App where
         mmsg <- getMessage
         mUser <- maybeAuth
 
-        let
-            adminEmails = appAdmins $ appSettings master
-            isAdmin = maybe False (`elem` adminEmails) . userEmail
-
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_strapless_css
             addStylesheet $ StaticR css_main_css
