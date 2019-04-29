@@ -15,11 +15,6 @@ module Routes
 
     -- * Repos' Pulls' Jobs
     , pullJobsR
-
-    -- * Admin routes
-    , adminReposP
-    , adminRepoP
-    , adminJobsP
     )
 where
 
@@ -43,16 +38,7 @@ jobsR :: RepoP
 jobsR = RepoJobsP RepoJobsR
 
 jobR :: JobId -> RepoP
-jobR = RepoJobsP . RepoJobR
+jobR jobId = RepoJobsP $ RepoJobP jobId RepoJobR
 
 pullJobsR :: PullRequestNum -> RepoP
 pullJobsR num = pullP num $ RepoPullJobsP RepoPullJobsR
-
-adminReposP :: AdminReposP -> Route App
-adminReposP = AdminP . AdminReposP
-
-adminRepoP :: RepoId -> AdminRepoP -> Route App
-adminRepoP repoId = adminReposP . AdminRepoP repoId
-
-adminJobsP :: AdminJobsP -> Route App
-adminJobsP = AdminP . AdminJobsP

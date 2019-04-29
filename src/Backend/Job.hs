@@ -4,6 +4,7 @@
 
 module Backend.Job
     ( insertJob
+    , insertJobRetry
     , completeJob
     , awaitRestylerJob
     , enqueueRestylerJob
@@ -24,6 +25,22 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         , jobOwner = repoOwner
         , jobRepo = repoName
         , jobPullRequest = pullRequestNumber
+        , jobCreatedAt = now
+        , jobUpdatedAt = now
+        , jobCompletedAt = Nothing
+        , jobExitCode = Nothing
+        , jobStdout = Nothing
+        , jobStderr = Nothing
+        }
+
+insertJobRetry :: Job -> YesodDB App (Entity Job)
+insertJobRetry job = do
+    now <- liftIO getCurrentTime
+    insertEntity Job
+        { jobSvcs = jobSvcs job
+        , jobOwner = jobOwner job
+        , jobRepo = jobRepo job
+        , jobPullRequest = jobPullRequest job
         , jobCreatedAt = now
         , jobUpdatedAt = now
         , jobCompletedAt = Nothing

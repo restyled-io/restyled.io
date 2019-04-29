@@ -8,11 +8,14 @@ module Handler.Repos
     , getRepoPullJobsR
     , getRepoJobsR
     , getRepoJobR
+    , postRepoJobRetryR
     )
 where
 
 import Import
 
+import Backend.Foundation (runBackendHandler)
+import Backend.Job
 import Widgets.Job
 import Yesod.Paginator
 
@@ -51,3 +54,10 @@ getRepoJobR owner name jobId = do
     defaultLayout $ do
         setTitle $ toHtml $ repoPath owner name <> " #" <> toPathPiece jobId
         $(widgetFile "job")
+
+postRepoJobRetryR :: OwnerName -> RepoName -> JobId -> Handler Html
+postRepoJobRetryR owner name jobId = do
+    job <- runDB $ insertJobRetry =<< get404 jobId
+    runBackendHandler $ enqueueRestylerJob job
+    setMessage "Job enqueued"
+    redirect $ repoP owner name $ jobR $ entityKey job

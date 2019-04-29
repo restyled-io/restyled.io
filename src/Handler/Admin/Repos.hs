@@ -3,17 +3,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TupleSections #-}
 
+-- | All repos in the system
 module Handler.Admin.Repos
     ( getAdminReposR
     , getAdminReposSearchR
-    , getAdminRepoJobsR
     )
 where
 
 import Import
 
 import Admin.RepoSearch
-import Widgets.Job
 import Widgets.Repo
 import Yesod.Paginator
 import Yesod.Paginator.Instances ()
@@ -38,16 +37,3 @@ getAdminReposSearchR = do
         provideRep $ adminLayout $ do
             setTitle "Restyled Admin / Search"
             $(widgetFile "admin/repos/search")
-
-getAdminRepoJobsR :: RepoId -> Handler Html
-getAdminRepoJobsR repoId = do
-    (repo, pages) <- runDB $ do
-        repo@Repo {..} <- get404 repoId
-        (repo, ) <$> selectPaginated
-            5
-            [JobOwner ==. repoOwner, JobRepo ==. repoName]
-            [Desc JobCreatedAt]
-
-    adminLayout $ do
-        setTitle "Restyled Admin / Repo Jobs"
-        $(widgetFile "admin/repos/jobs")

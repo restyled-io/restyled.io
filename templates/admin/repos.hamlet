@@ -5,7 +5,7 @@
 
 <section>
   $forall repoWithStats <- pageItems $ pagesCurrent pages
-    ^{adminRepoCard repoWithStats}
+    ^{repoCard repoWithStats}
 
   <aside>
     ^{simple 3 pages}

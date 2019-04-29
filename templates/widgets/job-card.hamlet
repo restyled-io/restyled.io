@@ -29,6 +29,7 @@ $with Entity jobId job <- job
 
     ^{jobOutput job}
 
-    $maybe actions <- mActions
-      <aside>
-        ^{actions}
+    <aside>
+      $if jobIsComplete job
+        <form method=post action=@{rerunR}>
+          <button .action>Rerun job
