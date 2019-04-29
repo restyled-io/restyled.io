@@ -8,7 +8,7 @@ $(function() {
       _.each(data.repos, function(repo) {
         const result = $(`
           <li>
-            <a href="/admin/repos/${repo.id}/jobs">
+            <a href="/gh/${repo.owner}/repos/${repo.name}/jobs">
               ${repo.owner} / ${repo.name}
             </a>
           </li>

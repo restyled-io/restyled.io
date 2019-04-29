@@ -1,3 +1,4 @@
+-- | Redirect to a good route for Admin homepage
 module Handler.Admin
     ( getAdminR
     ) where

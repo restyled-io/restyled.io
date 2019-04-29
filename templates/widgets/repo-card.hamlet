@@ -14,8 +14,10 @@
     $if rwsJobCount == 0
       No Jobs yet
     $else
-      <a href=@{jobsRoute rwsRepo}>#{pluralize "Job" "Jobs" rwsJobCount}</a>,
-      #{pluralize "error" "errors" rwsErrorCount}
+      $with repo <- entityVal rwsRepo
+        <a href=@{repoP (repoOwner repo) (repoName repo) jobsR}>
+          #{pluralize "Job" "Jobs" rwsJobCount}</a>,
+        #{pluralize "error" "errors" rwsErrorCount}
 
   $maybe Entity jobId job <- rwsLastJob
     <p>
