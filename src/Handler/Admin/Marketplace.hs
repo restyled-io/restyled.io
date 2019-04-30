@@ -12,7 +12,6 @@ import Import
 import Backend.Marketplace (isPrivateRepoPlan)
 import Data.List (nub)
 import Yesod.Paginator
-import Yesod.Paginator.Instances ()
 
 data MarketplacePlanWithAccounts = MarketplacePlanWithAccounts
     { mpwaPlan :: Entity MarketplacePlan

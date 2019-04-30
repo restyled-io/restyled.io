@@ -62,7 +62,7 @@ requestJWT githubAppId (AppKey pem) request = do
             request
         )
 
-encodeJWT :: Id App -> String -> IO JWT.JSON
+encodeJWT :: Id App -> String -> IO Text
 encodeJWT githubAppId pem = do
     now <- getCurrentTime
     signer <- maybe (throwString "Invalid RSA data") pure
@@ -70,6 +70,7 @@ encodeJWT githubAppId pem = do
 
     pure $ JWT.encodeSigned
         signer
+        mempty { JWT.alg = Just JWT.RS256 }
         mempty
             { JWT.iat = numericDate now
             , JWT.exp = numericDate $ addUTCTime maxExpiration now

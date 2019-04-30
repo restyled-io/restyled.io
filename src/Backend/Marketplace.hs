@@ -12,7 +12,6 @@ module Backend.Marketplace
     )
 where
 
-
 import Import hiding (runDB)
 
 import Backend.DB

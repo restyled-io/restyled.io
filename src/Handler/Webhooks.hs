@@ -33,13 +33,13 @@ handleWebhook header event unwrap = do
 
     if value == event
         then lift $ do
-            payload <- unwrap <$> requireJsonBody
+            payload <- unwrap <$> requireCheckJsonBody
             logDebugN $ "Webhook received: " <> tshow payload
 
             result <- runDB $ initializeFromWebhook payload
             either handleDiscarded (handleInitialized payload) result
         else do
-            payload <- requireJsonBody
+            payload <- requireCheckJsonBody
             logDebugN $ "Webhook received: " <> tshow @Value payload
             handleDiscarded $ IgnoredEventType value
 
