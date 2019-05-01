@@ -136,6 +136,7 @@ postGitHubEvent event body = request $ do
     setUrl WebhooksR
     setMethod "POST"
     setRequestBody body
+    addRequestHeader ("Content-Type", "application/json")
     addRequestHeader ("X-GitHub-Event", event)
 
 authPage :: Text -> YesodExample App Text

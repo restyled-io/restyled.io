@@ -1,5 +1,7 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module SVCS.Names
@@ -9,7 +11,6 @@ module SVCS.Names
     , mkRepoName
     , InstallationId
     , PullRequestNum
-    , mkPullRequestNum
     , GitHubUserId
     , GitHubUserName
     , userToOwnerName
@@ -39,13 +40,10 @@ type OwnerName = Name Owner
 type RepoName = Name Repo
 type InstallationId = Id Installation
 
-type PullRequestNum = Id PullRequest
-
-mkPullRequestNum :: Int -> PullRequestNum
-mkPullRequestNum = mkId Proxy
-
 type GitHubUserId = Id User
 type GitHubUserName = Name User
+
+type PullRequestNum = IssueNumber
 
 userToOwnerName :: GitHubUserName -> OwnerName
 userToOwnerName = mkName Proxy . untagName
@@ -109,6 +107,13 @@ instance PersistFieldSql (Id a) where
 
 instance ToMarkup (Id a) where
     toMarkup = toMarkup . untagId
+
+deriving instance Num IssueNumber
+deriving instance Read IssueNumber
+deriving instance PathPiece IssueNumber
+deriving instance PersistField IssueNumber
+deriving instance PersistFieldSql IssueNumber
+deriving instance ToMarkup IssueNumber
 
 instance Read (Name a) where
     readsPrec n = map (\(x, s) -> (mkName Proxy x, s)) . readsPrec n

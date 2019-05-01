@@ -15,7 +15,6 @@ import Import
 import Admin.RepoSearch
 import Widgets.Repo
 import Yesod.Paginator
-import Yesod.Paginator.Instances ()
 
 getAdminReposR :: Handler Html
 getAdminReposR = do

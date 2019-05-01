@@ -12,7 +12,6 @@ import Import
 
 import Widgets.Job
 import Yesod.Paginator
-import Yesod.Paginator.Instances ()
 
 getAdminJobsR :: Handler Html
 getAdminJobsR = do

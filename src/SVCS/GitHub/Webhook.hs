@@ -32,7 +32,7 @@ instance FromJSON GitHubPayload where
             , pRepoName = repoName
             , pRepoIsPrivate = repoPrivate
             , pInstallationId = installationId installation
-            , pPullRequest = mkPullRequestNum pullRequestNumber
+            , pPullRequest = pullRequestNumber
             }
 
     parseJSON v = typeMismatch "PullRequestEvent" v
