@@ -16,6 +16,10 @@ restylers:
         - "!src/Widgets/Repo.hs"
         - "!test/TestImport.hs"
   - prettier:
+      # Explicitly set parser so it works on .julius
+      arguments:
+        - --parser
+        - babylon # named babel after v1.16.0
       include:
         - "**/*.js"
         - "**/*.julius"
