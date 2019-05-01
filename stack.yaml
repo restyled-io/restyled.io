@@ -7,10 +7,10 @@ extra-deps:
   - yesod-paginator-1.1.0.2@sha256:f21d30b5a02e23a5ff65461cef6a1ca1c6c26700b8fa4013d5114c3291d7a9ed
 
   # for dbmigrations-postgresql
-  # - HDBC-postgresql-2.3.2.6@sha256:6e1636b0414ae7b028a01f1a90cf3e28c14f1df7867cf2615d5357d9abcd6279
-  # - HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da
-  # - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075
-  # - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d
+  - HDBC-postgresql-2.3.2.6@sha256:6e1636b0414ae7b028a01f1a90cf3e28c14f1df7867cf2615d5357d9abcd6279
+  - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075
+  - HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da
+  - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d
 
 ghc-options:
   "$locals": -fhide-source-paths
