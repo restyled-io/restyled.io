@@ -42,6 +42,7 @@ library:
     - hoauth2
     - jwt
     - load-env
+    - megaparsec
     - monad-logger
     - mtl
     - persistent
@@ -105,6 +106,7 @@ tests:
       - hspec
       - hspec-core
       - hspec-expectations-lifted
+      - megaparsec
       - monad-logger
       - persistent
       - resourcet
