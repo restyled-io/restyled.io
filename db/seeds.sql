@@ -96,6 +96,14 @@ stderr:
   docker: command not found
     1:some/stack
     75:trace/there
+
+Please see https://google.com
+
+Please see
+
+  - https://google.com
+  - https://google.com
+  - https://google.com
 $$
 ), (
   -- Successful
