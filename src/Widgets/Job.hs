@@ -58,7 +58,7 @@ colorizedLogLine ln
     | Just message <- T.stripPrefix "[Info] " ln = logLine "info" message
     | Just message <- T.stripPrefix "[Warn] " ln = logLine "warn" message
     | Just message <- T.stripPrefix "[Error] " ln = logLine "error" message
-    | otherwise = renderWithURLs ln
+    | otherwise = logLine "unknown" ln
   where
     logLine :: Text -> Text -> Widget
     logLine level message = $(widgetFile "widgets/log-line")
