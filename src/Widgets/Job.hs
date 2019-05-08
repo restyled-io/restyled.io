@@ -21,6 +21,7 @@ import Import
 import qualified Data.Text as T
 import Formatting (format)
 import Formatting.Time (diff)
+import Widgets.ContainsURLs
 
 -- | Internal helper for rendering completion state
 data Completion
@@ -57,7 +58,7 @@ colorizedLogLine ln
     | Just message <- T.stripPrefix "[Info] " ln = logLine "info" message
     | Just message <- T.stripPrefix "[Warn] " ln = logLine "warn" message
     | Just message <- T.stripPrefix "[Error] " ln = logLine "error" message
-    | otherwise = [whamlet|#{ln}|]
+    | otherwise = renderWithURLs ln
   where
     logLine :: Text -> Text -> Widget
     logLine level message = $(widgetFile "widgets/log-line")

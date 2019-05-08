@@ -1,2 +1,2 @@
 $newline never
-<span .level-#{level}>#{message}
+<span .level-#{level}>^{renderWithURLs message}
