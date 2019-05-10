@@ -4,8 +4,15 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Model.Repo
-    ( repoPath
+    (
+    -- * Virtual attributes
+      repoPath
     , repoPullPath
+
+    -- * Queries
+    , fetchReposByOwnerName
+
+    -- * Decorated
     , RepoWithStats(..)
     , repoWithStats
 
@@ -13,7 +20,6 @@ module Model.Repo
     , IgnoredWebhookReason(..)
     , reasonToLogMessage
     , initializeFromWebhook
-    , fetchReposByOwnerName
     )
 where
 
