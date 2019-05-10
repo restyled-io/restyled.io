@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -7,7 +8,10 @@ module Model.Repo
     , repoPullPath
     , RepoWithStats(..)
     , repoWithStats
+
+    -- * Repo Webhooks
     , IgnoredWebhookReason(..)
+    , reasonToLogMessage
     , initializeFromWebhook
     , fetchReposByOwnerName
     )
@@ -63,9 +67,17 @@ fetchReposByOwnerName owner =
     selectList [RepoOwner ==. owner] [Asc RepoName, LimitTo 10]
 
 data IgnoredWebhookReason
-    = IgnoredAction PullRequestEventType
+    = InvalidJSON String
+    | IgnoredAction PullRequestEventType
     | IgnoredEventType Text
     | OwnPullRequest Text
+
+reasonToLogMessage :: IgnoredWebhookReason -> Text
+reasonToLogMessage = \case
+    InvalidJSON errs -> "invalid JSON: " <> pack errs
+    IgnoredAction action -> "ignored action: " <> tshow action
+    IgnoredEventType event -> "ignored event: " <> tshow event
+    OwnPullRequest author -> "PR appears to be our own, author=" <> author
 
 initializeFromWebhook
     :: MonadIO m

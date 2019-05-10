@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -53,12 +52,6 @@ handleDiscarded :: MonadHandler m => IgnoredWebhookReason -> m a
 handleDiscarded reason = do
     logWarnN $ "Webhook discarded: " <> reasonToLogMessage reason
     sendResponseStatus status200 ()
-
-reasonToLogMessage :: IgnoredWebhookReason -> Text
-reasonToLogMessage = \case
-    IgnoredAction action -> "ignored action: " <> tshow action
-    IgnoredEventType event -> "ignored event: " <> tshow event
-    OwnPullRequest author -> "PR appears to be our own, author=" <> author
 
 rejectRequest :: MonadHandler m => m a
 rejectRequest = do
