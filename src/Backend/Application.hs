@@ -12,9 +12,11 @@ module Backend.Application
 import Import hiding (runDB)
 
 import Backend.DB
+import Backend.ExecRestyler
 import Backend.Foundation
 import Backend.Job
 import Backend.Marketplace
+import Backend.Webhook
 import Control.Monad ((<=<))
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
@@ -38,11 +40,17 @@ backendMain = do
     backendRedisConn <- checkedConnect (appRedisConf backendSettings)
 
     runBackend Backend {..} $ do
+        -- LEGACY: flush old pre-processed Jobs queue
+        void $ async $ forever $ awaitAndProcessJob 120
         void $ async synchronizeMarketplacePlans
-        forever $ awaitAndProcessJob 120
+        forever $ awaitAndProcessWebhook 120
 
 awaitAndProcessJob :: MonadBackend m => Integer -> m ()
 awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
+
+awaitAndProcessWebhook :: MonadBackend m => Integer -> m ()
+awaitAndProcessWebhook = traverse_ processWebhook' <=< awaitWebhook
+    where processWebhook' = processWebhook $ ExecRestyler execRestyler
 
 -- brittany-next-binding --columns=85
 
