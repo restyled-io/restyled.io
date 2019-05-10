@@ -17,7 +17,8 @@ import Backend.Foundation
 import Data.Aeson
 import System.Exit (ExitCode(..))
 
-insertJob :: Entity Repo -> PullRequestNum -> YesodDB App (Entity Job)
+insertJob
+    :: MonadIO m => Entity Repo -> PullRequestNum -> SqlPersistT m (Entity Job)
 insertJob (Entity _ Repo {..}) pullRequestNumber = do
     now <- liftIO getCurrentTime
     insertEntity Job
@@ -33,7 +34,7 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         , jobStderr = Nothing
         }
 
-insertJobRetry :: Job -> YesodDB App (Entity Job)
+insertJobRetry :: MonadIO m => Job -> SqlPersistT m (Entity Job)
 insertJobRetry job = do
     now <- liftIO getCurrentTime
     insertEntity Job
