@@ -19,10 +19,10 @@ library:
     - aeson-casing
     - blaze-markup
     - bytestring
-    - case-insensitive
     - classy-prelude
     - classy-prelude-yesod
     - conduit
+    - conduit-extra
     - containers
     - directory
     - envparse

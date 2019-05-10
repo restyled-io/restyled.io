@@ -8,6 +8,7 @@ module Backend.Marketplace
     , MarketplacePlanAllows(..)
     , MarketplacePlanLimitation(..)
     , marketplacePlanAllows
+    , whenMarketplacePlanForbids
     , isPrivateRepoPlan
     )
 where
@@ -125,6 +126,14 @@ marketplacePlanAllows (Entity _ Repo {..}) = do
         (True, Just plan)
             | isPrivateRepoPlan plan -> MarketplacePlanAllows
             | otherwise -> MarketplacePlanForbids MarketplacePlanPublicOnly
+
+whenMarketplacePlanForbids
+    :: Applicative f
+    => MarketplacePlanAllows
+    -> (MarketplacePlanLimitation -> f ())
+    -> f ()
+whenMarketplacePlanForbids MarketplacePlanAllows _ = pure ()
+whenMarketplacePlanForbids (MarketplacePlanForbids limitation) f = f limitation
 
 isPrivateRepoPlan :: MarketplacePlan -> Bool
 isPrivateRepoPlan MarketplacePlan {..} =

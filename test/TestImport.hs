@@ -14,19 +14,18 @@ module TestImport
     , withApp
     , runBackendTest
     , authenticateAsUser
-    , postGitHubEvent
     , module X
     ) where
 
 import Application (makeFoundation, makeLogWare)
 import Backend.Foundation (Backend, runBackendApp, runRedis)
 import Backend.Job (queueName)
+import Backend.Webhook (webhookQueueName)
 import Cache
 import ClassyPrelude as X hiding (Handler, delete, deleteBy)
 import Control.Monad.Fail (MonadFail(..))
 import Control.Monad.Logger (LoggingT, NoLoggingT)
 import Control.Monad.Trans.Resource (ResourceT)
-import qualified Data.ByteString.Lazy as LBS
 import Data.Time as X
 import Database.Persist as X hiding (get)
 import Database.Persist.Sql
@@ -101,7 +100,9 @@ wipeDB app = runDBWithApp app $ do
     rawExecute query []
 
 wipeRedis :: App -> IO ()
-wipeRedis app = runBackendApp app $ runRedis $ void $ del [queueName]
+wipeRedis app = runBackendApp app $ runRedis $ do
+    void $ del [queueName]
+    void $ del [webhookQueueName]
 
 -- brittany-disable-next-binding
 
@@ -129,15 +130,6 @@ authenticateAs (Entity _ u) = do
         setMethod "POST"
         addPostParam "ident" $ userCredsIdent u
         setUrl dummyLogin
-
--- | Post to @\/webhooks@ as a GitHub event
-postGitHubEvent :: ByteString -> LBS.ByteString -> YesodExample App ()
-postGitHubEvent event body = request $ do
-    setUrl WebhooksR
-    setMethod "POST"
-    setRequestBody body
-    addRequestHeader ("Content-Type", "application/json")
-    addRequestHeader ("X-GitHub-Event", event)
 
 authPage :: Text -> YesodExample App Text
 authPage page = do
