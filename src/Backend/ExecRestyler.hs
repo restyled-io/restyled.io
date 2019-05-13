@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 -- | Execution of the Restyler process
 module Backend.ExecRestyler
     ( ExecRestyler(..)

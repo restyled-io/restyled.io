@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 -- |
 --
@@ -8,7 +6,8 @@
 --
 module SVCS.GitHub.Collaborator
     ( githubCollaboratorCanRead
-    ) where
+    )
+where
 
 import Prelude
 

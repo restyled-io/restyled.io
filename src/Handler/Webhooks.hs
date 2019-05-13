@@ -13,4 +13,4 @@ postWebhooksR :: Handler ()
 postWebhooksR = do
     body <- runConduit $ rawRequestBody .| sinkLbs
     runBackendHandler $ enqueueWebhook $ toStrict body
-    sendResponseStatus status201 ""
+    sendResponseStatus @_ @Text status201 ""

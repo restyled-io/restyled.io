@@ -1,8 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Handler.AdminSpec
     ( spec
-    ) where
+    )
+where
 
 import TestImport
 

@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 module Backend.Job
     ( awaitRestylerJob
     , enqueueRestylerJob

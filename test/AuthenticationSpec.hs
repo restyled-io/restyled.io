@@ -1,11 +1,9 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module AuthenticationSpec
     ( spec
-    ) where
+    )
+where
 
 import TestImport hiding (isUserError)
 

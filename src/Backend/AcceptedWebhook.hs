@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 -- | Type and handler for a Webhook we've decided to accept
 module Backend.AcceptedWebhook
     ( AcceptedWebhook(..)

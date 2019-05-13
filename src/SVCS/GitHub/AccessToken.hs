@@ -1,11 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module SVCS.GitHub.AccessToken
     ( GitHubAppId
     , mkGitHubAppId
     , GitHubAppKey
     , githubInstallationToken
-    ) where
+    )
+where
 
 import Prelude
 

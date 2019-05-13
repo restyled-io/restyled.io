@@ -1,9 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Import.NoFoundation
     ( module Import
     , module Import.NoFoundation
-    ) where
+    )
+where
 
 import ClassyPrelude.Yesod as Import hiding (Proxy)
 import Control.Error.Util as Import (hush, hushT, note, noteT, (??))

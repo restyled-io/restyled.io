@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 -- |
 --
 -- This should ideally be in @"Backend.Foundation"@, but we put it here to avoid

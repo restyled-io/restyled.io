@@ -1,9 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Model.PlanType
     ( PlanType(..)
-    ) where
+    )
+where
 
 import ClassyPrelude
 
