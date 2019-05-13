@@ -8,7 +8,8 @@ module TestImport
     , runBackendTest
     , authenticateAsUser
     , module X
-    ) where
+    )
+where
 
 import Application (makeFoundation, makeLogWare)
 import Backend.Foundation (Backend, runBackendApp, runRedis)
