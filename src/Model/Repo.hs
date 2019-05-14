@@ -77,7 +77,6 @@ data IgnoredWebhookReason
     | IgnoredAction PullRequestEventType
     | IgnoredEventType Text
     | OwnPullRequest Text
-    deriving Show
 
 reasonToLogMessage :: IgnoredWebhookReason -> Text
 reasonToLogMessage = \case
