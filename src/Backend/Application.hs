@@ -63,8 +63,7 @@ processJob job@(Entity jobId Job {..}) = do
         <> repoPullPath jobOwner jobRepo jobPullRequest
 
     result <- runDB $ guardRepositoryJob job
-
-    (ec, out, err) <- case result of
+    processResult <- case result of
         RepoNotFound -> jobSkipped "Repo not found"
         NonGitHub repo -> jobSkipped $ nonGitHubMsg repo
         PlanChecked (MarketplacePlanForbids limitation) repo ->
@@ -72,7 +71,8 @@ processJob job@(Entity jobId Job {..}) = do
         PlanChecked MarketplacePlanAllows repo ->
             handleAny (jobFailed . show) $ execRestyler repo job
 
-    runDB $ completeJob jobId ec (pack out) (pack err)
+    now <- liftIO getCurrentTime
+    runDB $ replace jobId $ completeJob now processResult $ entityVal job
 
 jobSkipped :: Applicative f => String -> f (ExitCode, String, String)
 jobSkipped msg = pure (ExitSuccess, "", "Job skipped: " <> msg)

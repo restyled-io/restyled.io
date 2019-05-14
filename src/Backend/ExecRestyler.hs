@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Execution of the Restyler process
@@ -10,7 +9,7 @@ module Backend.ExecRestyler
     )
 where
 
-import Import
+import Import.NoFoundation
 
 import Backend.AcceptedJob
 import Control.Monad.Except
@@ -42,30 +41,6 @@ runExecRestyler (ExecRestyler execRestyler) AcceptedJob {..} = do
         $ tryAny
         $ execRestyler ajRepo ajJob
   where
-    Entity jobId job = ajJob
-
-    success now (ec', out, err) =
-        let
-            ec = case ec' of
-                ExitSuccess -> 0
-                ExitFailure c -> c
-        in
-            SucceededExecRestyler $ Entity
-                jobId
-                job
-                    { jobUpdatedAt = now
-                    , jobCompletedAt = Just now
-                    , jobExitCode = Just ec
-                    , jobStdout = Just $ pack out
-                    , jobStderr = Just $ pack err
-                    }
-
-    failure now ex = FailedExecRestyler $ Entity
-        jobId
-        job
-            { jobUpdatedAt = now
-            , jobCompletedAt = Just now
-            , jobExitCode = Just 99
-            , jobStdout = Just ""
-            , jobStderr = Just $ tshow ex
-            }
+    success now = SucceededExecRestyler . overEntity ajJob . completeJob now
+    failure now =
+        FailedExecRestyler . overEntity ajJob . completeJobErrored now

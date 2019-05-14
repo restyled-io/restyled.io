@@ -16,7 +16,6 @@ import Import.NoFoundation
 import Backend.AcceptedWebhook
 import Backend.Marketplace
 import Control.Monad.Except
-import qualified Data.Text as T
 
 data AcceptedJob = AcceptedJob
     { ajRepo :: Entity Repo
@@ -30,36 +29,32 @@ newtype IgnoredJob = IgnoredJob
 -- | Given an Accepted webhook, accept or ignore that Job
 acceptJob :: MonadIO m => AcceptedWebhook -> ExceptT IgnoredJob m AcceptedJob
 acceptJob AcceptedWebhook {..} = do
-    when (repoSvcs repo /= GitHubSVCS) $ ignoreJob $ NonGitHubRepo repo
-    whenMarketplacePlanForbids allows $ ignoreJob . PlanLimitation repo
+    when (repoSvcs repo /= GitHubSVCS) $ ignoreJob awJob $ NonGitHubRepo repo
+    whenMarketplacePlanForbids allows $ ignoreJob awJob . PlanLimitation repo
     pure $ AcceptedJob awRepo awJob
   where
     repo = entityVal awRepo
     allows = awMarketplaceAllows
-    ignoreJob = throwError <=< toIgnoredJob awJob
+
+-- | Ignore the given @'Job'@ with reason
+ignoreJob
+    :: MonadIO m => Entity Job -> IgnoredJobReason -> ExceptT IgnoredJob m a
+ignoreJob job reason = do
+    now <- liftIO getCurrentTime
+    throwError
+        $ IgnoredJob
+        $ overEntity job
+        $ completeJobSkipped now
+        $ toIgnoredJobStdout reason
 
 data IgnoredJobReason
     = NonGitHubRepo Repo
     | PlanLimitation Repo MarketplacePlanLimitation
 
-toIgnoredJob :: MonadIO m => Entity Job -> IgnoredJobReason -> m IgnoredJob
-toIgnoredJob (Entity jobId job) reason = do
-    now <- liftIO getCurrentTime
-
-    pure $ IgnoredJob $ Entity
-        jobId
-        job
-            { jobUpdatedAt = now
-            , jobCompletedAt = Just now
-            , jobExitCode = Just 0
-            , jobStdout = Just $ toIgnoredJobStdout reason
-            , jobStderr = Just ""
-            }
-
-toIgnoredJobStdout :: IgnoredJobReason -> Text
-toIgnoredJobStdout = T.unlines . \case
+toIgnoredJobStdout :: IgnoredJobReason -> String
+toIgnoredJobStdout = unlines . \case
     NonGitHubRepo repo ->
-        [ "Non-GitHub (" <> tshow (repoSvcs repo) <> "): " <> path repo <> "."
+        [ "Non-GitHub (" <> show (repoSvcs repo) <> "): " <> path repo <> "."
         , "See https://github.com/restyled-io/restyled.io/issues/76"
         ]
     PlanLimitation repo MarketplacePlanNotFound ->
@@ -71,5 +66,5 @@ toIgnoredJobStdout = T.unlines . \case
         , "Contact support@restyled.io if you would like to discuss a Trial"
         ]
   where
-    path :: Repo -> Text
-    path Repo {..} = repoPath repoOwner repoName
+    path :: Repo -> String
+    path Repo {..} = unpack $ repoPath repoOwner repoName
