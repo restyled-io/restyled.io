@@ -53,7 +53,7 @@ completeJob :: UTCTime -> (ExitCode, String, String) -> Job -> Job
 completeJob now (ec, out, err) job = job
     { jobUpdatedAt = now
     , jobCompletedAt = Just now
-    , jobExitCode = Just (toInt ec)
+    , jobExitCode = Just $ toInt ec
     , jobStdout = Just $ pack out
     , jobStderr = Just $ pack err
     }
