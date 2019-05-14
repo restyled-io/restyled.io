@@ -13,6 +13,7 @@ import Control.Monad.Trans.Maybe as Import
 import Data.Proxy as Import
 import Data.Time as Import
 import Model as Import
+import Model.Job as Import
 import Model.Repo as Import
 import Model.User as Import
 import Settings as Import
@@ -35,3 +36,6 @@ f <$$> a = fmap f <$> a
 
 pluralize :: TL.Text -> TL.Text -> Int -> TL.Text
 pluralize s p n = format (int % " " % plural s p) n n
+
+overEntity :: Entity a -> (a -> a) -> Entity a
+overEntity e f = e { entityVal = f $ entityVal e }

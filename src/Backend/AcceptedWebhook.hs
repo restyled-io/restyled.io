@@ -11,7 +11,6 @@ import Import hiding (runDB)
 
 import Backend.DB
 import Backend.Foundation
-import Backend.Job
 import Backend.Marketplace
 import Control.Monad.Except
 import Data.Aeson
