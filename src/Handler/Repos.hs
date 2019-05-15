@@ -30,7 +30,7 @@ getRepoPullJobsR owner name num = do
     pages <- runDB $ selectPaginated
         5
         [JobOwner ==. owner, JobRepo ==. name, JobPullRequest ==. num]
-        [Desc JobCompletedAt, Desc JobCreatedAt]
+        [Desc JobCreatedAt]
 
     defaultLayout $ do
         setTitle $ toHtml $ repoPullPath owner name num <> " jobs"
@@ -41,7 +41,7 @@ getRepoJobsR owner name = do
     pages <- runDB $ selectPaginated
         5
         [JobOwner ==. owner, JobRepo ==. name]
-        [Desc JobCompletedAt, Desc JobCreatedAt]
+        [Desc JobCreatedAt]
 
     defaultLayout $ do
         setTitle $ toHtml $ repoPath owner name <> " jobs"
