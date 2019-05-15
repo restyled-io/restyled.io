@@ -30,6 +30,9 @@ $with Entity jobId job <- job
     ^{jobOutput job}
 
     <aside>
-      $if jobIsComplete job
-        <form method=post action=@{rerunR}>
-          <button .action>Rerun job
+      $if jobIsRetriable job
+        <form
+          method=post
+          action=@{repoP (jobOwner job) (jobRepo job) $ jobRetryR jobId}
+          >
+          <button .action>Retry job

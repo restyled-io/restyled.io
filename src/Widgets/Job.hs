@@ -35,17 +35,30 @@ jobCompletion job = case (jobCompletedAt job, jobExitCode job) of
     (Just completedAt, Just n) -> Failure completedAt n
     _ -> InProgress
 
-jobIsComplete :: Job -> Bool
-jobIsComplete = isJust . jobCompletedAt
+-- | Is this @'Job'@ retriable?
+--
+-- Retries are on a dedicate queue that doesn't have guards that it's an
+-- acceptable Job (GitHub repo, no Plan limitations, etc). This could create a
+-- path around said guards by retrying a @'Job'@ that was skipped because of
+-- them.
+--
+-- To avoid this, we should only allow retries on @'Job'@s that we know we've
+-- accepted once already.
+--
+-- At this time, skipping a @'Job'@ marks it successful; it's also unlikely
+-- retrying a successful @'Job'@ is useful. Therefore, @'jobIsRetriable' checks
+-- that the @'Job'@ is complete and errored as a proxy.
+--
+-- NB. We further rely on the fact that we won't have an exit code for
+-- incomplete @'Job'@, so we don't explicitly check @'jobCompletedAt'@.
+--
+jobIsRetriable :: Job -> Bool
+jobIsRetriable = (`notElem` [Nothing, Just 0]) . jobExitCode
 
 jobCard :: Entity Job -> Widget
 jobCard job = do
     now <- liftIO getCurrentTime
     $(widgetFile "widgets/job-card")
-  where
-    rerunR =
-        let Entity jobId Job {..} = job
-        in repoP jobOwner jobRepo $ RepoJobsP $ RepoJobP jobId RepoJobRetryR
 
 -- brittany-disable-next-binding
 
