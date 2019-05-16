@@ -3,15 +3,61 @@ name: restyled
 version: 0.1.1.0
 license: MIT
 
-# Dependencies shared in *all* targets
-dependencies:
-  - base
-
 default-extensions:
-  # TODO: move away from ClassyPrelude
+  - AutoDeriveTypeable
+  - BangPatterns
+  - BinaryLiterals
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DerivingStrategies
+  - DoAndIfThenElse
+  - EmptyDataDecls
+  - ExistentialQuantification
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - KindSignatures
+  - MonadFailDesugaring
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
   - NoImplicitPrelude
+  - OverloadedStrings
+  - PartialTypeSignatures
+  - PatternGuards
+  - PolyKinds
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TupleSections
+  - TypeApplications
+  - TypeFamilies
+  - TypeSynonymInstances
+  - ViewPatterns
+
+  # Forcing addition of these in-module because of broken tooling
+  # - LambdaCase
 
 ghc-options: -Wall
+  -Wcompat
+  -Widentities
+  -Wincomplete-record-updates
+  -Wincomplete-uni-patterns
+  -Wpartial-fields
+  -Wredundant-constraints
+
+dependencies:
+  - base
 
 library:
   dependencies:

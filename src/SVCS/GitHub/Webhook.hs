@@ -1,9 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-
 module SVCS.GitHub.Webhook
     ( GitHubPayload(..)
-    ) where
+    )
+where
 
 import Prelude
 

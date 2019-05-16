@@ -1,11 +1,7 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeFamilies #-}
-
 module Authentication
     ( authenticateUser
-    ) where
+    )
+where
 
 import Import.NoFoundation
 

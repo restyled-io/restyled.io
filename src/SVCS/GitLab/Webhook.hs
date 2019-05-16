@@ -1,11 +1,9 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module SVCS.GitLab.Webhook
     ( GitLabPayload(..)
-    ) where
+    )
+where
 
 import Prelude
 

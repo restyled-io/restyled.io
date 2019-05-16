@@ -1,7 +1,3 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 module SVCS.GitHub.ApiClient
     (
     -- * JWT
@@ -17,7 +13,8 @@ module SVCS.GitHub.ApiClient
     -- * Request builders
     , githubGET
     , githubPOST
-    ) where
+    )
+where
 
 import Prelude
 

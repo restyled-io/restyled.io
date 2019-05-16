@@ -1,0 +1,65 @@
+conf_version: 1
+
+conf_errorHandling:
+  # Attempt to exact-print unknown things
+  econf_ExactPrintFallback: ExactPrintFallbackModeRisky
+
+conf_layout:
+  # 4-space indent, avoid context-aware anything
+  lconfig_indentAmount: 4
+  lconfig_indentPolicy: IndentPolicyLeft
+  lconfig_columnAlignMode: { tag: ColumnAlignModeDisabled }
+
+  # Don't style imports; stylish haskell does that (and better). Also disables
+  # styling exports, which I could take or leave, but since it's a single
+  # configuration key, we have to turn it off.
+  lconfig_reformatModulePreamble: false
+
+conf_preprocessor:
+  # At least attempt to deal with CPP
+  ppconf_CPPMode: CPPModeWarn
+  ppconf_hackAroundIncludes: true
+
+# N.B. must be kept in sync with package.yaml
+conf_forward:
+  options_ghc:
+    - -XAutoDeriveTypeable
+    - -XBangPatterns
+    - -XBinaryLiterals
+    - -XConstraintKinds
+    - -XDataKinds
+    - -XDefaultSignatures
+    - -XDeriveDataTypeable
+    - -XDeriveFoldable
+    - -XDeriveFunctor
+    - -XDeriveGeneric
+    - -XDeriveTraversable
+    - -XDerivingStrategies
+    - -XDoAndIfThenElse
+    - -XEmptyDataDecls
+    - -XExistentialQuantification
+    - -XFlexibleContexts
+    - -XFlexibleInstances
+    - -XFunctionalDependencies
+    - -XGADTs
+    - -XGeneralizedNewtypeDeriving
+    - -XInstanceSigs
+    - -XKindSignatures
+    - -XMonadFailDesugaring
+    - -XMultiParamTypeClasses
+    - -XMultiWayIf
+    - -XNamedFieldPuns
+    - -XNoImplicitPrelude
+    - -XOverloadedStrings
+    - -XPartialTypeSignatures
+    - -XPatternGuards
+    - -XPolyKinds
+    - -XRankNTypes
+    - -XRecordWildCards
+    - -XScopedTypeVariables
+    - -XStandaloneDeriving
+    - -XTupleSections
+    - -XTypeApplications
+    - -XTypeFamilies
+    - -XTypeSynonymInstances
+    - -XViewPatterns

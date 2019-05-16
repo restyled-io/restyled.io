@@ -1,11 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# OPTIONS_GHC -fno-warn-deprecations #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module TestImport
@@ -15,7 +8,8 @@ module TestImport
     , runBackendTest
     , authenticateAsUser
     , module X
-    ) where
+    )
+where
 
 import Application (makeFoundation, makeLogWare)
 import Backend.Foundation (Backend, runBackendApp, runRedis)

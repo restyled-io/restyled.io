@@ -30,11 +30,7 @@ jobs:
             - v2-
       - run:
           name: Dependencies
-          command: |
-            make setup setup.lint
-            curl "$HLINT_YAML_SRC" > .hlint.yaml
-          environment:
-            HLINT_YAML_SRC: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
+          command: make setup setup.lint
       - run:
           name: Build
           command: make build

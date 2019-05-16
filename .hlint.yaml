@@ -1,0 +1,52 @@
+---
+- ignore:
+    # I find this hint is overwhelmingly false-positives
+    name: Reduce duplication
+- ignore:
+    # It's common to leave a redundant do in spec, describe, it to reduce diff
+    # noise when specifications, contexts, and examples are inevitably added.
+    name: Redundant do
+    within: spec
+
+# N.B. must be kept in sync with package.yaml
+- arguments:
+  - -XAutoDeriveTypeable
+  - -XBangPatterns
+  - -XBinaryLiterals
+  - -XConstraintKinds
+  - -XDataKinds
+  - -XDefaultSignatures
+  - -XDeriveDataTypeable
+  - -XDeriveFoldable
+  - -XDeriveFunctor
+  - -XDeriveGeneric
+  - -XDeriveTraversable
+  - -XDerivingStrategies
+  - -XDoAndIfThenElse
+  - -XEmptyDataDecls
+  - -XExistentialQuantification
+  - -XFlexibleContexts
+  - -XFlexibleInstances
+  - -XFunctionalDependencies
+  - -XGADTs
+  - -XGeneralizedNewtypeDeriving
+  - -XInstanceSigs
+  - -XKindSignatures
+  - -XMonadFailDesugaring
+  - -XMultiParamTypeClasses
+  - -XMultiWayIf
+  - -XNamedFieldPuns
+  - -XNoImplicitPrelude
+  - -XOverloadedStrings
+  - -XPartialTypeSignatures
+  - -XPatternGuards
+  - -XPolyKinds
+  - -XRankNTypes
+  - -XRecordWildCards
+  - -XScopedTypeVariables
+  - -XStandaloneDeriving
+  - -XTupleSections
+  - -XTypeApplications
+  - -XTypeFamilies
+  - -XTypeSynonymInstances
+  - -XViewPatterns

@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module GitHub.Data.Apps
     ( App
     , Installation(..)

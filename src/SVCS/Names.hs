@@ -1,7 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module SVCS.Names
@@ -20,7 +17,8 @@ module SVCS.Names
     , RepoAccessToken(..)
     , RepoSVCS(..)
     , showRepoSVCS
-    ) where
+    )
+where
 
 import Prelude
 

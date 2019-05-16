@@ -1,11 +1,8 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-
 module Authorization
     ( authorizeAdmin
     , authorizeRepo
-    ) where
+    )
+where
 
 import Import.NoFoundation
 

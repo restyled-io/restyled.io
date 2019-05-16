@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Widgets.Job
@@ -14,7 +11,8 @@ module Widgets.Job
     --
     , Completion(..)
     , jobCompletion
-    ) where
+    )
+where
 
 import Import
 
