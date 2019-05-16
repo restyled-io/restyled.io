@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Backend.Webhook
     ( enqueueWebhook
     , awaitWebhook
