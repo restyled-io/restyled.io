@@ -63,6 +63,7 @@ library:
   dependencies:
     - aeson
     - aeson-casing
+    - ansi-terminal
     - blaze-markup
     - bytestring
     - classy-prelude
@@ -97,6 +98,7 @@ library:
     - persistent-template
     - process
     - rio
+    - rio-orphans
     - safe-exceptions
     - shakespeare
     - template-haskell
@@ -158,6 +160,8 @@ tests:
       - monad-logger
       - persistent
       - resourcet
+      - rio
+      - rio-orphans
       - shakespeare
       - text
       - time

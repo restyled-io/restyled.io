@@ -11,8 +11,6 @@ import Backend.Job
 import Backend.Marketplace
 import Backend.Webhook
 import Control.Monad ((<=<))
-import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
-import Database.Redis (checkedConnect)
 import Model.RestyleMachine (runRestyleMachine)
 import SVCS.GitHub.AccessToken (githubInstallationToken)
 import System.Exit (ExitCode(..))
@@ -20,36 +18,39 @@ import System.IO (BufferMode(..))
 
 backendMain :: IO ()
 backendMain = do
-    backendSettings <- loadEnvSettings
-
     -- Ensure container logs are visible immediately
     hSetBuffering stdout LineBuffering
     hSetBuffering stderr LineBuffering
 
-    backendConnPool <- runBackendLogger backendSettings $ createPostgresqlPool
-        (pgConnStr $ appDatabaseConf backendSettings)
-        (pgPoolSize $ appDatabaseConf backendSettings)
+    backend <- loadBackend
 
-    backendRedisConn <- checkedConnect (appRedisConf backendSettings)
-
-    runBackend Backend {..} $ do
+    runRIO backend $ do
         -- LEGACY: flush old pre-processed Jobs queue
         void $ async $ forever $ awaitAndProcessJob 120
         void $ async synchronizeMarketplacePlans
         forever $ awaitAndProcessWebhook 120
 
-awaitAndProcessJob :: MonadBackend m => Integer -> m ()
+awaitAndProcessJob
+    :: (HasLogFunc env, HasSettings env, HasDB env, HasRedis env)
+    => Integer
+    -> RIO env ()
 awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 
-awaitAndProcessWebhook :: MonadBackend m => Integer -> m ()
+awaitAndProcessWebhook
+    :: (HasLogFunc env, HasSettings env, HasDB env, HasRedis env)
+    => Integer
+    -> RIO env ()
 awaitAndProcessWebhook = traverse_ processWebhook' <=< awaitWebhook
     where processWebhook' = processWebhook $ ExecRestyler execRestyler
 
 -- brittany-next-binding --columns=85
 
-processJob :: MonadBackend m => Entity Job -> m ()
+processJob
+    :: (HasLogFunc env, HasSettings env, HasDB env) => Entity Job -> RIO env ()
 processJob job@(Entity jobId Job {..}) = do
-    logInfoN
+    logInfo
+        $ fromString
+        $ unpack
         $ "Processing Restyler Job Id "
         <> toPathPiece jobId
         <> ": "
@@ -70,9 +71,9 @@ processJob job@(Entity jobId Job {..}) = do
 jobSkipped :: Applicative f => String -> f (ExitCode, String, String)
 jobSkipped msg = pure (ExitSuccess, "", "Job skipped: " <> msg)
 
-jobFailed :: MonadLogger m => String -> m (ExitCode, String, String)
+jobFailed :: HasLogFunc env => String -> RIO env (ExitCode, String, String)
 jobFailed msg = do
-    logErrorN $ pack msg
+    logError $ fromString msg
     pure (ExitFailure 1, "", msg)
 
 data JobGuardResult
@@ -97,15 +98,15 @@ isNonGitHub = (/= GitHubSVCS) . repoSvcs . entityVal
 -- brittany-disable-next-binding
 
 execRestyler
-    :: MonadBackend m
+    :: (HasLogFunc env, HasSettings env, HasDB env)
     => Entity Repo
     -> Entity Job
-    -> m (ExitCode, String, String)
+    -> RIO env (ExitCode, String, String)
 execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
-    appSettings@AppSettings {..} <- asks backendSettings
+    appSettings@AppSettings {..} <- view settingsL
 
     let debugEnv
-            | appSettings `allowsLevel` LevelDebug = "DEBUG=1"
+            | appSettingsIsDebug appSettings = "DEBUG=1"
             | repoDebugEnabled = "DEBUG=1"
             | otherwise = "DEBUG="
 

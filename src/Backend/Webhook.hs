@@ -14,18 +14,18 @@ import Backend.Import
 import Backend.AcceptedJob
 import Backend.AcceptedWebhook
 import Backend.ExecRestyler
-import Backend.Foundation
 
-enqueueWebhook :: MonadBackend m => ByteString -> m ()
+enqueueWebhook :: (HasLogFunc env, HasRedis env) => ByteString -> RIO env ()
 enqueueWebhook body = do
-    logDebugN "Enqueuing Webhook..."
+    logDebug "Enqueuing Webhook..."
     void $ runRedis $ lpush webhookQueueName [body]
 
-awaitWebhook :: MonadBackend m => Integer -> m (Maybe ByteString)
+awaitWebhook
+    :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe ByteString)
 awaitWebhook timeout = do
-    logDebugN "Awaiting Webhook..."
+    logDebug "Awaiting Webhook..."
     eresult <- runRedis $ brpop [webhookQueueName] timeout
-    logDebugN $ "Popped value: " <> tshow eresult
+    logDebug $ "Popped value: " <> displayShow eresult
     pure $ either (const Nothing) (snd <$>) eresult
 
 webhookQueueName :: ByteString
@@ -36,38 +36,43 @@ data JobNotProcessed
     | JobIgnored IgnoredJob
     | ExecRestylerFailure FailedExecRestyler
 
-processWebhook :: MonadBackend m => ExecRestyler m -> ByteString -> m ()
+processWebhook
+    :: (HasLogFunc env, HasDB env)
+    => ExecRestyler (RIO env)
+    -> ByteString
+    -> RIO env ()
 processWebhook execRestyler body = do
     result <- runExceptT $ processWebhookExceptT execRestyler body
 
     mUpdatedJob <- case result of
         Left (WebhookIgnored reason) -> do
-            logDebugN $ "Webhook ignored: " <> reasonToLogMessage reason
+            logDebug $ "Webhook ignored: " <> fromString
+                (unpack $ reasonToLogMessage reason)
             pure Nothing
         Left (JobIgnored (IgnoredJob job)) -> do
-            logWarnN "Job ignored"
-            logDebugN $ jOut job
+            logWarn "Job ignored"
+            logDebug $ jOut job
             pure $ Just job
         Left (ExecRestylerFailure (FailedExecRestyler job)) -> do
-            logErrorN $ "ExecRestyler failure: " <> jErr job
+            logError $ "ExecRestyler failure: " <> jErr job
             pure $ Just job
         Right (SucceededExecRestyler job) -> do
-            logInfoN "ExecRestyler succeed"
+            logInfo "ExecRestyler succeed"
             pure $ Just job
 
     for_ mUpdatedJob $ runDB . replaceEntity
   where
-    jOut = fromMaybe "" . jobStdout . entityVal
-    jErr = fromMaybe "" . jobStderr . entityVal
+    jOut = fromString . unpack . fromMaybe "" . jobStdout . entityVal
+    jErr = fromString . unpack . fromMaybe "" . jobStderr . entityVal
     replaceEntity (Entity k v) = replace k v
 
 -- brittany-disable-next-binding
 
 processWebhookExceptT
-    :: MonadBackend m
-    => ExecRestyler m
+    :: HasDB env
+    => ExecRestyler (RIO env)
     -> ByteString
-    -> ExceptT JobNotProcessed m SucceededExecRestyler
+    -> ExceptT JobNotProcessed (RIO env) SucceededExecRestyler
 processWebhookExceptT execRestyler =
     withExceptT WebhookIgnored . acceptWebhook
         >=> withExceptT JobIgnored . acceptJob

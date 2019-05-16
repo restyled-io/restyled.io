@@ -55,6 +55,6 @@ getRepoJobR owner name jobId = do
 postRepoJobRetryR :: OwnerName -> RepoName -> JobId -> Handler Html
 postRepoJobRetryR owner name jobId = do
     job <- runDB $ insertJobRetry =<< get404 jobId
-    runBackendHandler $ enqueueRestylerJob job
+    runHandlerRIO $ enqueueRestylerJob job
     setMessage "Job enqueued"
     redirect $ repoP owner name $ jobR $ entityKey job

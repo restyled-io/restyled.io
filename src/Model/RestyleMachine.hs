@@ -1,14 +1,12 @@
+-- | FIXME: this should be in Backend, not Model
 module Model.RestyleMachine
     ( runRestyleMachine
     )
 where
 
-import Prelude
+import RIO
 
-import Control.Monad (unless)
-import Control.Monad.IO.Class
-import Control.Monad.Logger
-import Data.Text (Text, pack, unpack)
+import Data.Text (unpack)
 import qualified Data.Text.IO as T
 import Model
 import System.Directory
@@ -23,23 +21,24 @@ import System.Process (CreateProcess(..), proc, readCreateProcessWithExitCode)
 -- variables (e.g. @DOCKER_HOST@) dictate.
 --
 runRestyleMachine
-    :: (MonadIO m, MonadLogger m)
+    :: HasLogFunc env
     => [RestyleMachine]
     -> FilePath
     -> [String]
-    -> m (ExitCode, String, String)
+    -> RIO env (ExitCode, String, String)
 runRestyleMachine machines cmd args = do
     run <- case machines of
         [] -> do
-            logInfoN "Running restyle with native environment"
+            logInfo "Running restyle with native environment"
             pure $ runProcess Nothing
 
         (machine@RestyleMachine {..} : _) -> do
-            logInfoN
+            logInfo
+                $ fromString
                 $ "Running restyle with environment for "
-                <> restyleMachineName
+                <> unpack restyleMachineName
                 <> " ("
-                <> restyleMachineHost
+                <> unpack restyleMachineHost
                 <> ")"
 
             certPath <- setupCertificatesIfMissing machine
@@ -52,21 +51,21 @@ runRestyleMachine machines cmd args = do
     run cmd args
 
 runProcess
-    :: (MonadLogger m, MonadIO m)
+    :: HasLogFunc env
     => Maybe [(String, String)]
     -> String
     -> [String]
-    -> m (ExitCode, String, String)
+    -> RIO env (ExitCode, String, String)
 runProcess env' cmd args = do
-    logDebugN $ "process: " <> tshow (cmd : args)
-    logDebugN $ "environment: " <> tshow env'
+    logDebug $ "process: " <> displayShow (cmd : args)
+    logDebug $ "environment: " <> displayShow env'
     result <- liftIO
         $ readCreateProcessWithExitCode (proc cmd args) { env = env' } ""
-    logDebugN $ "process result: " <> tshow result
+    logDebug $ "process result: " <> displayShow result
     pure result
 
 setupCertificatesIfMissing
-    :: (MonadIO m, MonadLogger m) => RestyleMachine -> m FilePath
+    :: HasLogFunc env => RestyleMachine -> RIO env FilePath
 setupCertificatesIfMissing RestyleMachine {..} = do
     (certPath, certPathExists) <- liftIO $ do
         home <- getHomeDirectory
@@ -80,7 +79,7 @@ setupCertificatesIfMissing RestyleMachine {..} = do
         (path, ) <$> doesDirectoryExist path
 
     unless certPathExists $ do
-        logInfoN $ "Populating certificates in " <> pack certPath
+        logInfo $ fromString $ "Populating certificates in " <> certPath
         liftIO $ do
             createDirectoryIfMissing True certPath
             T.writeFile (certPath </> "ca.pem") restyleMachineCaCert
@@ -88,6 +87,3 @@ setupCertificatesIfMissing RestyleMachine {..} = do
             T.writeFile (certPath </> "key.pem") restyleMachineKey
 
     pure certPath
-
-tshow :: Show a => a -> Text
-tshow = pack . show

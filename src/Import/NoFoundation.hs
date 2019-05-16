@@ -21,6 +21,12 @@ import Settings.StaticFiles as Import
 import qualified Data.Text.Lazy as TL
 import Formatting (format, (%))
 import Formatting.Formatters (int, plural)
+import RIO (RIO, runRIO)
+
+runHandlerRIO :: RIO env a -> HandlerFor env a
+runHandlerRIO f = do
+    app <- getYesod
+    runRIO app f
 
 fromMaybeM :: Applicative m => m a -> Maybe a -> m a
 fromMaybeM d = maybe d pure

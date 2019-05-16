@@ -10,7 +10,7 @@ where
 
 import Import
 
-import Control.Monad.Logger (liftLoc, runLoggingT)
+import Control.Monad.Logger (liftLoc)
 import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
 import Database.Redis (checkedConnect)
 import Language.Haskell.TH.Syntax (qLocation)
@@ -35,6 +35,9 @@ import Network.Wai.Middleware.RequestLogger
     , mkRequestLogger
     , outputFormat
     )
+import RIO (runRIO)
+import RIO.Logger
+import RIO.Orphans ()
 import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
 import System.Posix.IO (stdOutput)
 import System.Posix.Terminal (queryTerminal)
@@ -62,22 +65,17 @@ makeFoundation :: AppSettings -> IO App
 makeFoundation appSettings = do
     appHttpManager <- getGlobalManager
     appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
+    appLogFunc <- terminalLogFunc $ loggerLogLevel $ appLogLevel appSettings
     appStatic <- (if appMutableStatic appSettings then staticDevel else static)
         appStaticDir
     appRedisConn <- checkedConnect $ appRedisConf appSettings
-
-    let mkFoundation appConnPool = App {..}
-        tempFoundation =
-            mkFoundation $ error "connPool forced in tempFoundation"
-        logFunc = messageLoggerSource tempFoundation appLogger
-
-    pool <- flip runLoggingT logFunc $ createPostgresqlPool
+    appConnPool <- runRIO appLogFunc $ createPostgresqlPool
         (pgConnStr $ appDatabaseConf appSettings)
         (pgPoolSize $ appDatabaseConf appSettings)
 
-    runLoggingT (logInfoN $ "STARTUP{ " <> tshow appSettings <> " }") logFunc
+    runRIO appLogFunc $ logInfoN $ "STARTUP{ " <> tshow appSettings <> " }"
 
-    pure $ mkFoundation pool
+    pure App {..}
 
 makeApplication :: App -> IO Application
 makeApplication foundation = do
@@ -112,9 +110,8 @@ warpSettings foundation =
       setPort (appPort $ appSettings foundation)
     $ setHost (appHost $ appSettings foundation)
     $ setOnException (\_req e ->
-        when (defaultShouldDisplayException e) $ messageLoggerSource
-            foundation
-            (appLogger foundation)
+        when (defaultShouldDisplayException e) $ logFuncLog
+            (appLogFunc foundation)
             $(qLocation >>= liftLoc)
             "yesod"
             LevelError

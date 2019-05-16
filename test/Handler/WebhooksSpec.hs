@@ -21,7 +21,7 @@ spec = withApp $ do
                 setRequestBody body
 
             statusIs 201
-            runBackendTest (awaitWebhook 5)
+            runTestRIO (awaitWebhook 5)
                 `shouldReturn` Just (LB.toStrict body)
 
         -- TODO: We need to add tests on processWebhook to cover these and more:
