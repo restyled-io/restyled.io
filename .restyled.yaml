@@ -19,4 +19,12 @@ restylers:
       include:
         - "**/*.js"
         - "**/*.julius"
-  - hlint
+  - hlint:
+      include:
+        - "**/*.hs"
+
+        # apply-refact can't handle TypeApplications?
+        - "!src/Backend/Application.hs"
+        - "!src/Handler/PrivacyPolicy.hs"
+        - "!src/Handler/Webhooks.hs"
+        - "!src/Model/PlanType.hs"
