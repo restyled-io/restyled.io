@@ -16,6 +16,9 @@ import Data.Aeson (decode, encode)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import qualified Database.Redis as Redis
+import RIO (HasLogFunc(..), LogFunc, lens)
+import RIO.DB hiding (runDB)
+import RIO.Redis
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Auth
@@ -23,7 +26,6 @@ import Yesod.Auth.Dummy
 import Yesod.Auth.OAuth2
 import Yesod.Auth.OAuth2.GitHub
 import Yesod.Auth.OAuth2.GitLab
-import Yesod.Core.Types (Logger)
 import Yesod.Default.Util (addStaticContentExternal)
 
 data App = App
@@ -32,8 +34,24 @@ data App = App
     , appConnPool :: ConnectionPool
     , appRedisConn :: Connection
     , appHttpManager :: Manager
-    , appLogger :: Logger
+    , appLogFunc :: LogFunc
     }
+
+instance HasLogFunc App where
+    logFuncL = lens appLogFunc $ \x y -> x
+        { appLogFunc = y }
+
+instance HasSettings App where
+    settingsL = lens appSettings $ \x y -> x
+        { appSettings = y }
+
+instance HasDB App where
+    dbConnectionPoolL = lens appConnPool $ \x y -> x
+        { appConnPool = y }
+
+instance HasRedis App where
+    redisConnectionL = lens appRedisConn $ \x y -> x
+        { appRedisConn = y }
 
 mkYesodData "App" $(parseRoutesFile "config/routes")
 

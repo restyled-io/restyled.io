@@ -68,7 +68,8 @@ deleteAdminMachineR machineId = do
 getAdminMachineInfoR :: RestyleMachineId -> Handler Html
 getAdminMachineInfoR machineId = do
     machine <- runDB $ get404 machineId
-    (ec', out, err) <- runRestyleMachine [machine] "docker" ["info"]
+    (ec', out, err) <- runHandlerRIO
+        $ runRestyleMachine [machine] "docker" ["info"]
 
     let
         ec = case ec' of
@@ -82,7 +83,7 @@ getAdminMachineInfoR machineId = do
 postAdminMachinePruneR :: RestyleMachineId -> Handler Html
 postAdminMachinePruneR machineId = do
     machine <- runDB $ get404 machineId
-    (ec', out, err) <- runRestyleMachine
+    (ec', out, err) <- runHandlerRIO $ runRestyleMachine
         [machine]
         "docker"
         ["system", "prune", "--all", "--force"]

@@ -6,9 +6,12 @@
 module Settings
     ( OAuthKeys(..)
     , AppSettings(..)
+    , HasSettings(..)
     , loadEnvSettings
     , loadEnvSettingsTest
     , allowsLevel
+    , appSettingsIsDebug
+    , appSettingsLogFunc
     , widgetFile
     , appStaticDir
     , appFavicon
@@ -31,6 +34,7 @@ import qualified Env
 import Language.Haskell.TH.Syntax (Exp, Q)
 import LoadEnv (loadEnvFrom)
 import Network.Wai.Handler.Warp (HostPreference)
+import RIO (Lens', LogFunc)
 import SVCS.GitHub
 import SVCS.GitHub.ApiClient (GitHubToken)
 #if DEVELOPMENT
@@ -105,6 +109,12 @@ instance Show AppSettings where
         showPortID (UnixSocket s) = s
 
         restylerImage = appRestylerImage <> maybe "" (":" <>) appRestylerTag
+
+class HasSettings env where
+    settingsL :: Lens' env AppSettings
+
+instance HasSettings AppSettings where
+    settingsL = id
 
 type EnvParser a = forall e.
     (Env.AsUnset e, Env.AsUnread e, Env.AsEmpty e) => Env.Parser e a
@@ -206,6 +216,12 @@ appRevision =
 
 allowsLevel :: AppSettings -> LogLevel -> Bool
 allowsLevel AppSettings{..} = (>= appLogLevel)
+
+appSettingsIsDebug :: AppSettings -> Bool
+appSettingsIsDebug = (`allowsLevel` LevelDebug)
+
+appSettingsLogFunc :: AppSettings -> LogFunc
+appSettingsLogFunc = error "TODO"
 
 widgetFile :: String -> Q Exp
 widgetFile =

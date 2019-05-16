@@ -7,7 +7,6 @@ where
 
 import Backend.Import
 
-import Backend.Foundation
 import Backend.Marketplace
 import SVCS.GitHub.Webhook (GitHubPayload(..))
 
@@ -18,9 +17,9 @@ data AcceptedWebhook = AcceptedWebhook
     }
 
 acceptWebhook
-    :: MonadBackend m
+    :: HasDB env
     => ByteString
-    -> ExceptT IgnoredWebhookReason m AcceptedWebhook
+    -> ExceptT IgnoredWebhookReason (RIO env) AcceptedWebhook
 acceptWebhook body = do
     payload <-
         fmap unGitHubPayload
