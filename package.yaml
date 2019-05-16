@@ -91,10 +91,12 @@ library:
     - megaparsec
     - monad-logger
     - mtl
+    - path-pieces
     - persistent
     - persistent-postgresql
     - persistent-template
     - process
+    - rio
     - safe-exceptions
     - shakespeare
     - template-haskell

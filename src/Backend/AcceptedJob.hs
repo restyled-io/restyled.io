@@ -8,11 +8,10 @@ module Backend.AcceptedJob
     )
 where
 
-import Import.NoFoundation
+import Backend.Import
 
 import Backend.AcceptedWebhook
 import Backend.Marketplace
-import Control.Monad.Except
 
 data AcceptedJob = AcceptedJob
     { ajRepo :: Entity Repo

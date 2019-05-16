@@ -5,13 +5,10 @@ module Backend.AcceptedWebhook
     )
 where
 
-import Import hiding (runDB)
+import Backend.Import
 
-import Backend.DB
 import Backend.Foundation
 import Backend.Marketplace
-import Control.Monad.Except
-import Data.Aeson
 import SVCS.GitHub.Webhook (GitHubPayload(..))
 
 data AcceptedWebhook = AcceptedWebhook

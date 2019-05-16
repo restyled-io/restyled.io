@@ -12,7 +12,6 @@ where
 
 import Import
 
-import Backend.Foundation (runBackendHandler)
 import Backend.Job
 import Widgets.Job
 import Yesod.Paginator

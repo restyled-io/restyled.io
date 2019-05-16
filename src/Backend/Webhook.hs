@@ -9,14 +9,12 @@ module Backend.Webhook
     )
 where
 
-import Import hiding (runDB, timeout)
+import Backend.Import
 
 import Backend.AcceptedJob
 import Backend.AcceptedWebhook
-import Backend.DB
 import Backend.ExecRestyler
 import Backend.Foundation
-import Control.Monad.Except
 
 enqueueWebhook :: MonadBackend m => ByteString -> m ()
 enqueueWebhook body = do

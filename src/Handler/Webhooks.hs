@@ -5,7 +5,6 @@ where
 
 import Import
 
-import Backend.Foundation
 import Backend.Webhook
 import Data.Conduit.Binary
 
