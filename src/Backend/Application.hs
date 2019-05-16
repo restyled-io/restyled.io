@@ -3,9 +3,8 @@ module Backend.Application
     , awaitAndProcessJob
     ) where
 
-import Import hiding (runDB)
+import Backend.Import
 
-import Backend.DB
 import Backend.ExecRestyler
 import Backend.Foundation
 import Backend.Job
@@ -139,20 +138,20 @@ execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
         eAccessToken
 
 nonGitHubMsg :: Entity Repo -> String
-nonGitHubMsg (Entity _ Repo {..}) = unpack $ unlines
-    [ "Non-GitHub (" <> tshow repoSvcs <> "): " <> path <> "."
+nonGitHubMsg (Entity _ Repo {..}) = unlines
+    [ "Non-GitHub (" <> show repoSvcs <> "): " <> path <> "."
     , "See https://github.com/restyled-io/restyled.io/issues/76"
     ]
-    where path = repoPath repoOwner repoName
+    where path = unpack $ repoPath repoOwner repoName
 
 planLimitation :: MarketplacePlanLimitation -> Entity Repo -> String
-planLimitation MarketplacePlanNotFound (Entity _ Repo {..}) = unpack $ unlines
+planLimitation MarketplacePlanNotFound (Entity _ Repo {..}) = unlines
     [ "No active plan for private repository: " <> path <> "."
     , "Contact support@restyled.io if you would like to discuss a Trial"
     ]
-    where path = repoPath repoOwner repoName
+    where path = unpack $ repoPath repoOwner repoName
 
-planLimitation MarketplacePlanPublicOnly _ = unpack $ unlines @Text
+planLimitation MarketplacePlanPublicOnly _ = unlines
     [ "Your plan does not allow private repositories."
     , "Contact support@restyled.io if you would like to discuss a Trial"
     ]

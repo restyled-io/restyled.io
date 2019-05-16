@@ -2,18 +2,17 @@ module Backend.Foundation
     ( Backend(..)
     , MonadBackend
     , runBackend
-    , runBackendHandler
-    , runBackendApp
     , runBackendLogger
+    , runDB
     , runRedis
     , module Control.Monad.Logger
     , module Database.Redis
     ) where
 
-import Import
+import Backend.Import
 
 import Control.Monad.Logger
-import Database.Persist.Sql (ConnectionPool)
+import Database.Persist.Sql (ConnectionPool, SqlPersistT, runSqlPool)
 import Database.Redis hiding (Desc, decode, runRedis)
 import qualified Database.Redis as Redis
 
@@ -44,27 +43,11 @@ runBackendLogger :: MonadIO m => AppSettings -> LoggingT m a -> m a
 runBackendLogger settings =
     runStdoutLoggingT . filterLogger (const (settings `allowsLevel`))
 
--- | Run a backend action from a Handler (e.g. enqueuing a job)
---
--- Uses the @'App'@'s settings, connections, and logger
---
-runBackendHandler :: ReaderT Backend (LoggingT Handler) a -> Handler a
-runBackendHandler f = do
-    app <- getYesod
-    runBackendApp app f
-
--- | Extracted so @'runBackendTest'@ can use it in tests
-runBackendApp :: App -> ReaderT Backend (LoggingT m) a -> m a
-runBackendApp app@App {..} f = runLoggingT
-    (runReaderT
-        f
-        Backend
-            { backendSettings = appSettings
-            , backendConnPool = appConnPool
-            , backendRedisConn = appRedisConn
-            }
-    )
-    (messageLoggerSource app appLogger)
+-- | Run a @'SqlPersistT'@ action using the backend connection
+runDB :: MonadBackend m => SqlPersistT m a -> m a
+runDB action = do
+    settings <- ask
+    runSqlPool action $ backendConnPool settings
 
 -- | Run a @'Redis'@ action using the backend connection
 runRedis :: MonadBackend m => Redis a -> m a

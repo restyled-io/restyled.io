@@ -4,10 +4,9 @@ module Backend.Job
     , queueName
     ) where
 
-import Import hiding (timeout)
+import Backend.Import
 
 import Backend.Foundation
-import Data.Aeson
 
 awaitRestylerJob :: MonadBackend m => Integer -> m (Maybe (Entity Job))
 awaitRestylerJob timeout = do
@@ -24,7 +23,7 @@ enqueueRestylerJob e@(Entity jid job) = do
         <> toPathPiece jid
         <> ": "
         <> tshow job
-    void $ runRedis $ lpush queueName [toStrict $ encode e]
+    void $ runRedis $ lpush queueName [encodeStrict e]
 
 queueName :: ByteString
 queueName = "restyled:restyler:jobs"

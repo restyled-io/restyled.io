@@ -12,7 +12,7 @@ module TestImport
 where
 
 import Application (makeFoundation, makeLogWare)
-import Backend.Foundation (Backend, runBackendApp, runRedis)
+import Backend.Foundation (Backend, runRedis)
 import Backend.Job (queueName)
 import Backend.Webhook (webhookQueueName)
 import Cache
@@ -33,6 +33,7 @@ import Database.Persist.Sql
     )
 import Database.Redis (del)
 import Foundation as X
+import Import (runBackendApp)
 import Model as X
 import Routes as X
 import Settings (AppSettings(..), loadEnvSettingsTest)
