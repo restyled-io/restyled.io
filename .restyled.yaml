@@ -19,3 +19,4 @@ restylers:
       include:
         - "**/*.js"
         - "**/*.julius"
+  - hlint
