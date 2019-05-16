@@ -11,5 +11,5 @@ import Data.Conduit.Binary
 postWebhooksR :: Handler ()
 postWebhooksR = do
     body <- runConduit $ rawRequestBody .| sinkLbs
-    runBackendHandler $ enqueueWebhook $ toStrict body
+    runHandlerRIO $ enqueueWebhook $ toStrict body
     sendResponseStatus @_ @Text status201 ""

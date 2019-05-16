@@ -10,9 +10,8 @@ where
 
 import Backend.Import
 
-import Backend.Foundation
-import SVCS.GitHub.ApiClient
 import Network.HTTP.Client (parseRequest)
+import SVCS.GitHub.ApiClient
 
 data GitHubMarketplacePlan = GitHubMarketplacePlan
     { ghmpId :: Int
@@ -33,18 +32,19 @@ data GitHubAccount = GitHubAccount
 instance FromJSON GitHubAccount where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
-synchronizeMarketplacePlans :: MonadBackend m => m a
+synchronizeMarketplacePlans
+    :: (HasLogFunc env, HasSettings env, HasDB env) => RIO env a
 synchronizeMarketplacePlans = do
-    handleAny (logWarnN . tshow) runSynchronize
+    handleAny (logWarn . displayShow) runSynchronize
     liftIO $ threadDelay $ 5 * 60 * 1000000
     synchronizeMarketplacePlans
 
-runSynchronize :: MonadBackend m => m ()
+runSynchronize :: (HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
 runSynchronize = do
-    logInfoN "Synchronizing GitHub Marketplace data"
+    logInfo "Synchronizing GitHub Marketplace data"
     plans <- getGitHub $ marketplaceListingPath <> "/plans"
     synchronizedAccountIds <- for plans $ \plan -> do
-        logDebugN $ "Plan: " <> tshow plan
+        logDebug $ "Plan: " <> displayShow plan
         planId <- runDB $ entityKey <$> upsert
             MarketplacePlan
                 { marketplacePlanGithubId = ghmpId plan
@@ -63,7 +63,7 @@ runSynchronize = do
             <> "/accounts"
 
         for accounts $ \account -> do
-            logDebugN $ "Account: " <> tshow account
+            logDebug $ "Account: " <> displayShow account
             runDB $ entityKey <$> upsert
                 MarketplaceAccount
                     { marketplaceAccountGithubId = ghaId account
@@ -72,7 +72,7 @@ runSynchronize = do
                     }
                 [MarketplaceAccountMarketplacePlan =. planId]
 
-    logInfoN "GitHub Marketplace data synchronized"
+    logInfo "GitHub Marketplace data synchronized"
     runDB $ deleteUnsynchronized $ mconcat synchronizedAccountIds
 
 deleteUnsynchronized :: MonadIO m => [MarketplaceAccountId] -> SqlPersistT m ()
@@ -90,9 +90,9 @@ fetchDiscountMarketplacePlan =
     assertJust "Discount Plan must exist"
         =<< selectFirst [MarketplacePlanGithubId ==. 0] []
 
-getGitHub :: (FromJSON a, MonadBackend m) => Text -> m a
+getGitHub :: (FromJSON a, HasSettings env) => Text -> RIO env a
 getGitHub path = do
-    AppSettings {..} <- asks backendSettings
+    AppSettings {..} <- view settingsL
 
     liftIO $ do
         request <- parseRequest $ unpack $ "GET https://api.github.com" <> path

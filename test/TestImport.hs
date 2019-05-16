@@ -5,36 +5,30 @@ module TestImport
     ( YesodSpec
     , runDB
     , withApp
-    , runBackendTest
+    , runTestRIO
     , authenticateAsUser
     , module X
     )
 where
 
 import Application (makeFoundation, makeLogWare)
-import Backend.Foundation (Backend, runRedis)
 import Backend.Job (queueName)
 import Backend.Webhook (webhookQueueName)
 import Cache
 import ClassyPrelude as X hiding (Handler, delete, deleteBy)
 import Control.Monad.Fail (MonadFail(..))
-import Control.Monad.Logger (LoggingT, NoLoggingT)
-import Control.Monad.Trans.Resource (ResourceT)
 import Data.Time as X
 import Database.Persist as X hiding (get)
 import Database.Persist.Sql
-    ( SqlBackend
-    , SqlPersistM
-    , connEscapeName
-    , rawExecute
-    , rawSql
-    , runSqlPersistMPool
-    , unSingle
-    )
+    (SqlBackend, SqlPersistT, connEscapeName, rawExecute, rawSql, unSingle)
 import Database.Redis (del)
 import Foundation as X
-import Import (runBackendApp)
 import Model as X
+import RIO (RIO, runRIO)
+import RIO.DB (HasDB)
+import qualified RIO.DB as DB
+import RIO.Orphans (HasResourceMap(..))
+import RIO.Redis (Redis, runRedis)
 import Routes as X
 import Settings (AppSettings(..), loadEnvSettingsTest)
 import Test.Hspec.Core.Spec (SpecM)
@@ -46,13 +40,16 @@ import Yesod.Test as X hiding (YesodSpec)
 
 type YesodSpec site = SpecM (TestApp site)
 
-instance MonadCache (NoLoggingT (ResourceT IO)) where
+instance MonadCache (RIO App) where
     getCache _ = pure Nothing
     setCache _ _ = pure ()
 
-instance MonadHandler (NoLoggingT (ResourceT IO)) where
-    type HandlerSite (NoLoggingT (ResourceT IO)) = ()
-    type SubHandlerSite (NoLoggingT (ResourceT IO)) = ()
+instance HasResourceMap App where
+    resourceMapL = error "resourceMapL used in test"
+
+instance MonadHandler (RIO App) where
+    type HandlerSite (RIO App) = ()
+    type SubHandlerSite (RIO App) = ()
 
     liftHandler = error "liftHandler used in test"
     liftSubHandler = error "liftSubHandler used in test"
@@ -60,33 +57,29 @@ instance MonadHandler (NoLoggingT (ResourceT IO)) where
 instance MonadFail (SIO s) where
     fail = liftIO . assertFailure
 
-runDB :: SqlPersistM a -> YesodExample App a
-runDB query = do
-    app <- getTestYesod
-    liftIO $ runDBWithApp app query
+runDB :: HasDB env => SqlPersistT (RIO env) a -> YesodExample env a
+runDB = runTestRIO . DB.runDB
 
-runDBWithApp :: App -> SqlPersistM a -> IO a
-runDBWithApp app query = runSqlPersistMPool query (appConnPool app)
-
-runBackendTest :: ReaderT Backend (LoggingT IO) a -> YesodExample App a
-runBackendTest query = do
+runTestRIO :: RIO env a -> YesodExample env a
+runTestRIO action = do
     app <- getTestYesod
-    liftIO $ runBackendApp app query
+    runRIO app action
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
     settings <- loadEnvSettingsTest
     foundation <- makeFoundation settings
-    wipeDB foundation
-    wipeRedis foundation
+    runRIO foundation $ do
+        DB.runDB wipeDB
+        runRedis wipeRedis
     logWare <- liftIO $ makeLogWare foundation
     return (foundation, logWare)
 
 -- This function will truncate all of the tables in your database.
 -- 'withApp' calls it before each test, creating a clean environment for each
 -- spec to run in.
-wipeDB :: App -> IO ()
-wipeDB app = runDBWithApp app $ do
+wipeDB :: MonadIO m => SqlPersistT m ()
+wipeDB = do
     tables <- getTables
     sqlBackend <- ask
 
@@ -94,8 +87,8 @@ wipeDB app = runDBWithApp app $ do
         query = "TRUNCATE TABLE " ++ intercalate ", " escapedTables
     rawExecute query []
 
-wipeRedis :: App -> IO ()
-wipeRedis app = runBackendApp app $ runRedis $ do
+wipeRedis :: Redis ()
+wipeRedis = do
     void $ del [queueName]
     void $ del [webhookQueueName]
 

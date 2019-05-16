@@ -10,8 +10,7 @@ where
 
 import Import
 
-import Control.Monad.Logger (liftLoc, runLoggingT)
-import Database.Persist.Postgresql (createPostgresqlPool, pgConnStr, pgPoolSize)
+import Control.Monad.Logger (liftLoc)
 import Database.Redis (checkedConnect)
 import Language.Haskell.TH.Syntax (qLocation)
 import Network.HTTP.Client.TLS (getGlobalManager)
@@ -35,12 +34,12 @@ import Network.Wai.Middleware.RequestLogger
     , mkRequestLogger
     , outputFormat
     )
+import RIO (logFuncUseColorL, runRIO, view)
+import RIO.DB (createConnectionPool)
+import RIO.Logger
+import RIO.Orphans ()
 import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
-import System.Posix.IO (stdOutput)
-import System.Posix.Terminal (queryTerminal)
 import Yesod.Auth
-import Yesod.Core.Types (loggerSet)
-import Yesod.Default.Config2 (makeYesodLogger)
 
 import Handler.Common
 import Handler.Home
@@ -61,23 +60,16 @@ mkYesodDispatch "App" resourcesApp
 makeFoundation :: AppSettings -> IO App
 makeFoundation appSettings = do
     appHttpManager <- getGlobalManager
-    appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
+    appLogFunc <- terminalLogFunc $ loggerLogLevel $ appLogLevel appSettings
     appStatic <- (if appMutableStatic appSettings then staticDevel else static)
         appStaticDir
     appRedisConn <- checkedConnect $ appRedisConf appSettings
+    appConnPool <- runRIO appLogFunc $ createConnectionPool $ appDatabaseConf
+        appSettings
 
-    let mkFoundation appConnPool = App {..}
-        tempFoundation =
-            mkFoundation $ error "connPool forced in tempFoundation"
-        logFunc = messageLoggerSource tempFoundation appLogger
+    runRIO appLogFunc $ logInfoN $ "STARTUP{ " <> tshow appSettings <> " }"
 
-    pool <- flip runLoggingT logFunc $ createPostgresqlPool
-        (pgConnStr $ appDatabaseConf appSettings)
-        (pgPoolSize $ appDatabaseConf appSettings)
-
-    runLoggingT (logInfoN $ "STARTUP{ " <> tshow appSettings <> " }") logFunc
-
-    pure $ mkFoundation pool
+    pure App {..}
 
 makeApplication :: App -> IO Application
 makeApplication foundation = do
@@ -90,13 +82,14 @@ waiMiddleware = forceSSL . methodOverridePost . defaultMiddlewaresNoLogging
 
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation = do
-    isTTY <- queryTerminal stdOutput
+    useColor <- runRIO foundation $ view logFuncUseColorL
+    loggerSet <- newStdoutLoggerSet defaultBufSize
     mkRequestLogger def
         { outputFormat = if appSettings foundation `allowsLevel` LevelDebug
-            then Detailed isTTY
+            then Detailed useColor
             else Apache apacheIpSource
         , destination = if appSettings foundation `allowsLevel` LevelInfo
-            then Logger $ loggerSet $ appLogger foundation
+            then Logger loggerSet
             else Callback $ \_ -> pure ()
         }
   where
@@ -112,9 +105,8 @@ warpSettings foundation =
       setPort (appPort $ appSettings foundation)
     $ setHost (appHost $ appSettings foundation)
     $ setOnException (\_req e ->
-        when (defaultShouldDisplayException e) $ messageLoggerSource
-            foundation
-            (appLogger foundation)
+        when (defaultShouldDisplayException e) $ logFuncLog
+            (appLogFunc foundation)
             $(qLocation >>= liftLoc)
             "yesod"
             LevelError

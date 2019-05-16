@@ -1,56 +1,46 @@
 module Backend.Foundation
     ( Backend(..)
-    , MonadBackend
-    , runBackend
-    , runBackendLogger
+    , loadBackend
     , runDB
     , runRedis
-    , module Control.Monad.Logger
-    , module Database.Redis
-    ) where
+    )
+where
 
 import Backend.Import
 
-import Control.Monad.Logger
-import Database.Persist.Sql (ConnectionPool, SqlPersistT, runSqlPool)
-import Database.Redis hiding (Desc, decode, runRedis)
-import qualified Database.Redis as Redis
+import Database.Redis (checkedConnect)
+import RIO.Logger
+import RIO.Orphans ()
 
 -- | Like @'App'@ but with no webapp-related bits
 data Backend = Backend
-    { backendSettings :: AppSettings
+    { backendLogFunc :: LogFunc
+    , backendSettings :: AppSettings
     , backendConnPool :: ConnectionPool
     , backendRedisConn :: Connection
     }
 
--- | Constraint synonym for backend actions' requirements
-type MonadBackend m =
-    ( MonadIO m
-    , MonadLogger m
-    , MonadReader Backend m
-    , MonadUnliftIO m
-    )
+instance HasLogFunc Backend where
+    logFuncL = lens backendLogFunc $ \x y -> x
+        { backendLogFunc = y }
 
--- | Run a backend action
---
--- Uses supplied settings and connections, logs to stdout
---
-runBackend :: MonadIO m => Backend -> ReaderT Backend (LoggingT m) a -> m a
-runBackend b@Backend {..} f = runBackendLogger backendSettings $ runReaderT f b
+instance HasSettings Backend where
+    settingsL = lens backendSettings $ \x y -> x
+        { backendSettings = y }
 
--- | Extracted for re-use when building the Postgres connection
-runBackendLogger :: MonadIO m => AppSettings -> LoggingT m a -> m a
-runBackendLogger settings =
-    runStdoutLoggingT . filterLogger (const (settings `allowsLevel`))
+instance HasDB Backend where
+    dbConnectionPoolL = lens backendConnPool $ \x y -> x
+        { backendConnPool = y }
 
--- | Run a @'SqlPersistT'@ action using the backend connection
-runDB :: MonadBackend m => SqlPersistT m a -> m a
-runDB action = do
-    settings <- ask
-    runSqlPool action $ backendConnPool settings
+instance HasRedis Backend where
+    redisConnectionL = lens backendRedisConn $ \x y -> x
+        { backendRedisConn = y }
 
--- | Run a @'Redis'@ action using the backend connection
-runRedis :: MonadBackend m => Redis a -> m a
-runRedis f = do
-    conn <- asks backendRedisConn
-    liftIO $ Redis.runRedis conn f
+loadBackend :: IO Backend
+loadBackend = do
+    settings@AppSettings {..} <- loadEnvSettings
+    logFunc <- terminalLogFunc (loggerLogLevel appLogLevel)
+
+    Backend logFunc settings
+        <$> runRIO logFunc (createConnectionPool appDatabaseConf)
+        <*> checkedConnect appRedisConf

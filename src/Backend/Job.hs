@@ -6,23 +6,23 @@ module Backend.Job
 
 import Backend.Import
 
-import Backend.Foundation
-
-awaitRestylerJob :: MonadBackend m => Integer -> m (Maybe (Entity Job))
+awaitRestylerJob
+    :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe (Entity Job))
 awaitRestylerJob timeout = do
-    logDebugN "Awaiting Restyler Job..."
+    logDebug "Awaiting Restyler Job..."
     eresult <- runRedis $ brpop [queueName] timeout
-    logDebugN $ "Popped value: " <> tshow eresult
+    logDebug $ "Popped value: " <> displayShow eresult
     return $ either (const Nothing) (decodePopped =<<) eresult
     where decodePopped = decodeStrict . snd
 
-enqueueRestylerJob :: MonadBackend m => Entity Job -> m ()
+enqueueRestylerJob :: (HasLogFunc env, HasRedis env) => Entity Job -> RIO env ()
 enqueueRestylerJob e@(Entity jid job) = do
-    logDebugN
+    logDebug
+        $ fromString
         $ "Enqueuing Restyler Job Id "
-        <> toPathPiece jid
+        <> unpack (toPathPiece jid)
         <> ": "
-        <> tshow job
+        <> show job
     void $ runRedis $ lpush queueName [encodeStrict e]
 
 queueName :: ByteString
