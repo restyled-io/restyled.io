@@ -59,6 +59,7 @@ language_extensions:
   - ScopedTypeVariables
   - StandaloneDeriving
   - TupleSections
+  - TypeApplications
   - TypeFamilies
   - TypeSynonymInstances
   - ViewPatterns
