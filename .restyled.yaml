@@ -19,12 +19,19 @@ restylers:
       include:
         - "**/*.js"
         - "**/*.julius"
-  - hlint:
-      include:
-        - "**/*.hs"
-
-        # apply-refact can't handle TypeApplications?
-        - "!src/Backend/Application.hs"
-        - "!src/Handler/PrivacyPolicy.hs"
-        - "!src/Handler/Webhooks.hs"
-        - "!src/Model/PlanType.hs"
+  # Error:
+  #
+  #   refactor: ghcversion.h missing; tried:
+  #   /root/.stack/programs/x86_64-linux/ghc-8.6.3/lib/ghc-8.6.3/base-4.12.0.0/include/ghcversion.h,
+  #   /root/.stack/programs/x86_64-linux/ghc-8.6.3/lib/ghc-8.6.3/integer-gmp-1.0.2.0/include/ghcversion.h,
+  #   /root/.stack/programs/x86_64-linux/ghc-8.6.3/lib/ghc-8.6.3/include/ghcversion.h
+  #
+  # - hlint:
+  #     include:
+  #       - "**/*.hs"
+  #
+  #       # apply-refact can't handle TypeApplications?
+  #       - "!src/Backend/Application.hs"
+  #       - "!src/Handler/PrivacyPolicy.hs"
+  #       - "!src/Handler/Webhooks.hs"
+  #       - "!src/Model/PlanType.hs"
