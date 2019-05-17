@@ -16,7 +16,7 @@ authorizeAdmin
     :: MonadHandler m => AppSettings -> Maybe UserId -> SqlPersistT m AuthResult
 authorizeAdmin _ Nothing = notFound
 authorizeAdmin settings (Just userId) = do
-    user <- fromMaybeM notFound =<< get userId
+    user <- fromMaybeM notFound $ get userId
     authorizeWhen $ userIsAdmin settings user
 
 authorizeRepo

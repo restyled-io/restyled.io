@@ -9,6 +9,7 @@ import Control.Error.Util as Import (hush, hushT, note, noteT, (??))
 import Control.Monad.Except as Import (ExceptT, liftEither, runExceptT)
 import Control.Monad.Logger as Import
 import Control.Monad.Trans.Maybe as Import
+import Control.Monad.Extra as Import (fromMaybeM)
 import Data.Proxy as Import
 import Data.Time as Import
 import Model as Import
@@ -17,6 +18,7 @@ import Model.Repo as Import
 import Model.User as Import
 import Settings as Import
 import Settings.StaticFiles as Import
+import Data.Functor.Syntax as Import ((<$$>))
 
 import qualified Data.Text.Lazy as TL
 import Formatting (format, (%))
@@ -28,19 +30,5 @@ runHandlerRIO f = do
     app <- getYesod
     runRIO app f
 
-fromMaybeM :: Applicative m => m a -> Maybe a -> m a
-fromMaybeM d = maybe d pure
-
-assertJust :: MonadIO m => String -> Maybe a -> m a
-assertJust msg = fromMaybeM (throwString $ "Failed assertion: " <> msg)
-
-infixl 4 <$$>
-
-(<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
-f <$$> a = fmap f <$> a
-
 pluralize :: TL.Text -> TL.Text -> Int -> TL.Text
 pluralize s p n = format (int % " " % plural s p) n n
-
-overEntity :: Entity a -> (a -> a) -> Entity a
-overEntity e f = e { entityVal = f $ entityVal e }
