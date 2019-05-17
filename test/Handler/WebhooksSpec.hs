@@ -21,8 +21,7 @@ spec = withApp $ do
                 setRequestBody body
 
             statusIs 201
-            runTestRIO (awaitWebhook 5)
-                `shouldReturn` Just (LB.toStrict body)
+            runTestRIO (awaitWebhook 5) `shouldReturn` Just (LB.toStrict body)
 
         -- TODO: We need to add tests on processWebhook to cover these and more:
         -- it "creates and enqueues a job record" $ do
