@@ -4,7 +4,6 @@
 module Application
     ( appMain
     , makeFoundation
-    , makeLogWare
     )
 where
 

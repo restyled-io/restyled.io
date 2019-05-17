@@ -11,7 +11,7 @@ module TestImport
     )
 where
 
-import Application (makeFoundation, makeLogWare)
+import Application (makeFoundation)
 import Backend.Job (queueName)
 import Backend.Webhook (webhookQueueName)
 import Cache
@@ -72,8 +72,7 @@ withApp = before $ do
     runRIO foundation $ do
         DB.runDB wipeDB
         runRedis wipeRedis
-    logWare <- liftIO $ makeLogWare foundation
-    return (foundation, logWare)
+    return (foundation, id)
 
 -- This function will truncate all of the tables in your database.
 -- 'withApp' calls it before each test, creating a clean environment for each
