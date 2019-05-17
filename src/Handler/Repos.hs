@@ -46,7 +46,7 @@ getRepoJobsR owner name = do
 
 getRepoJobR :: OwnerName -> RepoName -> JobId -> Handler Html
 getRepoJobR owner name jobId = do
-    job <- runDB $ fromMaybeM notFound =<< getEntity jobId
+    job <- runDB $ fromMaybeM notFound $ getEntity jobId
 
     defaultLayout $ do
         setTitle $ toHtml $ repoPath owner name <> " #" <> toPathPiece jobId

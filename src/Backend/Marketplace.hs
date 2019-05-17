@@ -87,7 +87,7 @@ deleteUnsynchronized synchronizedAccountIds = do
 fetchDiscountMarketplacePlan
     :: MonadIO m => SqlPersistT m (Entity MarketplacePlan)
 fetchDiscountMarketplacePlan =
-    assertJust "Discount Plan must exist"
+    fromJustNoteM "Discount Plan must exist"
         =<< selectFirst [MarketplacePlanGithubId ==. 0] []
 
 getGitHub :: (FromJSON a, HasSettings env) => Text -> RIO env a

@@ -68,12 +68,14 @@ library:
     - bytestring
     - classy-prelude
     - classy-prelude-yesod
+    - composition-extra
     - conduit
     - conduit-extra
     - containers
     - directory
     - envparse
     - errors
+    - extra
     - fast-logger
     - file-embed
     - filepath
