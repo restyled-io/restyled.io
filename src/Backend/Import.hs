@@ -31,13 +31,8 @@ import Settings as X
 import System.Exit as X (ExitCode(..))
 import Web.PathPieces as X
 
-import Data.ByteString.Lazy (toStrict)
-
 fromJustNoteM :: MonadIO m => String -> Maybe a -> m a
 fromJustNoteM msg = fromMaybeM (throwString msg) . pure
-
-encodeStrict :: ToJSON a => a -> ByteString
-encodeStrict = toStrict . encode
 
 overEntity :: Entity a -> (a -> a) -> Entity a
 overEntity e f = e { entityVal = f $ entityVal e }
