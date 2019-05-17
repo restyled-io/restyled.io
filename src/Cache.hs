@@ -3,22 +3,35 @@ module Cache
     , CacheKey(..)
     , withCache
     , caching
-    ) where
+    )
+where
 
-import Prelude
+import RIO hiding (set)
 
+import Control.Error.Util (hush)
 import Control.Monad.Except (ExceptT)
-import Control.Monad.Trans (lift)
 import Data.Aeson
-import Data.Text (Text)
 import qualified Data.Text as T
 import Database.Persist.Sql (SqlPersistT)
+import Database.Redis (expire, get, set)
+import RIO.Handler
+import RIO.Redis
+import Yesod (HandlerFor)
 
 newtype CacheKey = CacheKey Text
 
 class Monad m => MonadCache m where
     getCache :: FromJSON a => CacheKey -> m (Maybe a)
     setCache :: ToJSON a => CacheKey -> a -> m ()
+
+instance HasRedis env => MonadCache (HandlerFor env) where
+    getCache (CacheKey key) = runHandlerRIO $ runRedis $ do
+        eVal <- get $ encodeUtf8 key
+        pure $ decodeStrict =<< join (hush eVal)
+
+    setCache (CacheKey key) obj = runHandlerRIO $ runRedis $ do
+        void $ set (encodeUtf8 key) $ encodeStrict obj
+        void $ expire (encodeUtf8 key) 300
 
 instance MonadCache m => MonadCache (ExceptT e m) where
     getCache = lift . getCache

@@ -10,11 +10,16 @@ module RIO.Redis
     -- | FIXME: encapsulate our own push/pop?
     , lpush
     , brpop
+
+    -- * Convenience
+    , encodeStrict
     )
 where
 
 import RIO
 
+import Data.Aeson (ToJSON, encode)
+import Data.ByteString.Lazy (toStrict)
 import Database.Redis (Connection, Redis, brpop, lpush)
 import qualified Database.Redis as Redis
 
@@ -25,3 +30,6 @@ runRedis :: HasRedis env => Redis a -> RIO env a
 runRedis action = do
     conn <- view redisConnectionL
     liftIO $ Redis.runRedis conn action
+
+encodeStrict :: ToJSON a => a -> ByteString
+encodeStrict = toStrict . encode
