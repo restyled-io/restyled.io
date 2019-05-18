@@ -98,7 +98,6 @@ library:
     - persistent
     - persistent-postgresql
     - persistent-template
-    - process
     - rio
     - rio-orphans
     - safe-exceptions

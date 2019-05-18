@@ -11,11 +11,13 @@ import Backend.Import
 import Database.Redis (checkedConnect)
 import RIO.Logger
 import RIO.Orphans ()
+import RIO.Process
 
 -- | Like @'App'@ but with no webapp-related bits
 data Backend = Backend
     { backendLogFunc :: LogFunc
     , backendSettings :: AppSettings
+    , backendProcessContext :: ProcessContext
     , backendConnPool :: ConnectionPool
     , backendRedisConn :: Connection
     }
@@ -27,6 +29,10 @@ instance HasLogFunc Backend where
 instance HasSettings Backend where
     settingsL = lens backendSettings $ \x y -> x
         { backendSettings = y }
+
+instance HasProcessContext Backend where
+    processContextL = lens backendProcessContext $ \x y -> x
+        { backendProcessContext = y }
 
 instance HasDB Backend where
     dbConnectionPoolL = lens backendConnPool $ \x y -> x
@@ -42,5 +48,6 @@ loadBackend = do
     logFunc <- terminalLogFunc (loggerLogLevel appLogLevel)
 
     Backend logFunc settings
-        <$> runRIO logFunc (createConnectionPool appDatabaseConf)
+        <$> mkDefaultProcessContext
+        <*> runRIO logFunc (createConnectionPool appDatabaseConf)
         <*> checkedConnect appRedisConf
