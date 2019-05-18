@@ -37,6 +37,7 @@ import RIO (logFuncUseColorL, runRIO, view)
 import RIO.DB (createConnectionPool)
 import RIO.Logger
 import RIO.Orphans ()
+import RIO.Process
 import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
 import Yesod.Auth
 
@@ -60,6 +61,7 @@ makeFoundation :: AppSettings -> IO App
 makeFoundation appSettings = do
     appHttpManager <- getGlobalManager
     appLogFunc <- terminalLogFunc $ loggerLogLevel $ appLogLevel appSettings
+    appProcessContext <- mkDefaultProcessContext
     appStatic <- (if appMutableStatic appSettings then staticDevel else static)
         appStaticDir
     appRedisConn <- checkedConnect $ appRedisConf appSettings

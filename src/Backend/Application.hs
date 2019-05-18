@@ -12,6 +12,8 @@ import Backend.Marketplace
 import Backend.Webhook
 import Control.Monad ((<=<))
 import Model.RestyleMachine (runRestyleMachine)
+import RIO.Process
+import RIO.Process.Follow
 import SVCS.GitHub.AccessToken (githubInstallationToken)
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
@@ -30,58 +32,83 @@ backendMain = do
         forever $ awaitAndProcessWebhook 120
 
 awaitAndProcessJob
-    :: (HasLogFunc env, HasSettings env, HasDB env, HasRedis env)
+    :: ( HasLogFunc env
+       , HasProcessContext env
+       , HasSettings env
+       , HasDB env
+       , HasRedis env
+       )
     => Integer
     -> RIO env ()
 awaitAndProcessJob = traverse_ processJob' <=< awaitRestylerJob
     where processJob' = processJob $ ExecRestyler execRestyler
 
 awaitAndProcessWebhook
-    :: (HasLogFunc env, HasSettings env, HasDB env, HasRedis env)
+    :: ( HasLogFunc env
+       , HasProcessContext env
+       , HasSettings env
+       , HasDB env
+       , HasRedis env
+       )
     => Integer
     -> RIO env ()
 awaitAndProcessWebhook = traverse_ processWebhook' <=< awaitWebhook
     where processWebhook' = processWebhook $ ExecRestyler execRestyler
 
--- brittany-disable-next-binding
-
 execRestyler
-    :: (HasLogFunc env, HasSettings env, HasDB env)
+    :: (HasLogFunc env, HasProcessContext env, HasSettings env, HasDB env)
     => Entity Repo
     -> Entity Job
     -> RIO env (ExitCode, String, String)
-execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
-    appSettings@AppSettings {..} <- view settingsL
+execRestyler (Entity _ repo) job = do
+    settings <- view settingsL
+    token <- fromLeftM throwString $ liftIO $ githubInstallationToken
+        (appGitHubAppId settings)
+        (appGitHubAppKey settings)
+        (repoInstallationId repo)
 
-    let debugEnv
-            | appSettingsIsDebug appSettings = "DEBUG=1"
-            | repoDebugEnabled = "DEBUG=1"
-            | otherwise = "DEBUG="
+    let debug = appSettingsIsDebug settings || repoDebugEnabled repo
 
-        jobUrl = appRoot
-            <> "/gh/" <> toPathPiece jobOwner
-            <> "/repos/" <> toPathPiece jobRepo
-            <> "/jobs/" <> toPathPiece jobId
+    machines <-
+        runDB $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
 
-    eAccessToken <- liftIO $ githubInstallationToken
-        appGitHubAppId
-        appGitHubAppKey
-        repoInstallationId
+    captureFollowedProcessWith
+            (captureJobLogLine (entityKey job) "stdout" . pack)
+            (captureJobLogLine (entityKey job) "stderr" . pack)
+        $ runRestyleMachine machines "docker"
+        $ restyleDockerRun settings token job debug
 
-    machines <- runDB
-        $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
+-- brittany-disable-next-binding
 
-    either
-        throwString
-        (\token -> runRestyleMachine machines "docker"
-            [ "run" , "--rm"
-            , "--env" , debugEnv
-            , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
-            , "--volume" , "/tmp:/tmp"
-            , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
-            , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-            , "--job-url" , unpack jobUrl
-            , unpack $ repoPullPath jobOwner jobRepo jobPullRequest
-            ]
-        )
-        eAccessToken
+restyleDockerRun
+    :: AppSettings
+    -> RepoAccessToken
+    -> Entity Job
+    -> Bool -- ^ Debug?
+    -> [String]
+restyleDockerRun AppSettings {..} token (Entity jobId Job {..}) debug =
+    [ "run", "--rm"
+    , "--env", if debug then "DEBUG=1" else "DEBUG="
+    , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
+    , "--volume", "/tmp:/tmp"
+    , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
+    , restylerImage, "--job-url", jobUrl, prSpec
+    ]
+  where
+    restylerImage = appRestylerImage <> maybe "" (":" <>) appRestylerTag
+
+    jobUrl =
+        unpack
+            $ appRoot
+            <> "/gh/"
+            <> toPathPiece jobOwner
+            <> "/repos/"
+            <> toPathPiece jobRepo
+            <> "/jobs/"
+            <> toPathPiece jobId
+
+    prSpec = unpack $ repoPullPath jobOwner jobRepo jobPullRequest
+
+-- TODO: actually capture JobLogLines
+captureJobLogLine :: HasDB env => JobId -> Text -> Text -> RIO env ()
+captureJobLogLine _jobId _stream _content = runDB $ pure ()

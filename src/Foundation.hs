@@ -15,6 +15,7 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import RIO (HasLogFunc(..), LogFunc, lens)
 import RIO.DB hiding (runDB)
+import RIO.Process
 import RIO.Redis
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
@@ -32,11 +33,16 @@ data App = App
     , appRedisConn :: Connection
     , appHttpManager :: Manager
     , appLogFunc :: LogFunc
+    , appProcessContext :: ProcessContext
     }
 
 instance HasLogFunc App where
     logFuncL = lens appLogFunc $ \x y -> x
         { appLogFunc = y }
+
+instance HasProcessContext App where
+    processContextL = lens appProcessContext $ \x y -> x
+        { appProcessContext = y }
 
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x
