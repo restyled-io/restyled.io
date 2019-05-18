@@ -12,6 +12,7 @@ module Handler.Admin.Machines
 import Import
 
 import Model.RestyleMachine (runRestyleMachine)
+import RIO.Process.Follow
 import System.Exit (ExitCode(..))
 
 machineForm :: Form RestyleMachine
@@ -68,8 +69,11 @@ deleteAdminMachineR machineId = do
 getAdminMachineInfoR :: RestyleMachineId -> Handler Html
 getAdminMachineInfoR machineId = do
     machine <- runDB $ get404 machineId
-    (ec', out, err) <- runHandlerRIO
-        $ runRestyleMachine [machine] "docker" ["info"]
+    (ec', out, err) <-
+        runHandlerRIO $ captureFollowedProcess $ runRestyleMachine
+            [machine]
+            "docker"
+            ["info"]
 
     let
         ec = case ec' of
@@ -83,10 +87,11 @@ getAdminMachineInfoR machineId = do
 postAdminMachinePruneR :: RestyleMachineId -> Handler Html
 postAdminMachinePruneR machineId = do
     machine <- runDB $ get404 machineId
-    (ec', out, err) <- runHandlerRIO $ runRestyleMachine
-        [machine]
-        "docker"
-        ["system", "prune", "--all", "--force"]
+    (ec', out, err) <-
+        runHandlerRIO $ captureFollowedProcess $ runRestyleMachine
+            [machine]
+            "docker"
+            ["system", "prune", "--all", "--force"]
 
     let
         ec = case ec' of

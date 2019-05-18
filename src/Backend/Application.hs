@@ -12,6 +12,8 @@ import Backend.Marketplace
 import Backend.Webhook
 import Control.Monad ((<=<))
 import Model.RestyleMachine (runRestyleMachine)
+import RIO.Process
+import RIO.Process.Follow
 import SVCS.GitHub.AccessToken (githubInstallationToken)
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
@@ -31,22 +33,32 @@ backendMain = do
         forever $ awaitAndProcessWebhook 120
 
 awaitAndProcessJob
-    :: (HasLogFunc env, HasSettings env, HasDB env, HasRedis env)
+    :: ( HasLogFunc env
+       , HasProcessContext env
+       , HasSettings env
+       , HasDB env
+       , HasRedis env
+       )
     => Integer
     -> RIO env ()
 awaitAndProcessJob = traverse_ processJob <=< awaitRestylerJob
 
 awaitAndProcessWebhook
-    :: (HasLogFunc env, HasSettings env, HasDB env, HasRedis env)
+    :: ( HasLogFunc env
+       , HasProcessContext env
+       , HasSettings env
+       , HasDB env
+       , HasRedis env
+       )
     => Integer
     -> RIO env ()
 awaitAndProcessWebhook = traverse_ processWebhook' <=< awaitWebhook
     where processWebhook' = processWebhook $ ExecRestyler execRestyler
 
--- brittany-next-binding --columns=85
-
 processJob
-    :: (HasLogFunc env, HasSettings env, HasDB env) => Entity Job -> RIO env ()
+    :: (HasLogFunc env, HasProcessContext env, HasSettings env, HasDB env)
+    => Entity Job
+    -> RIO env ()
 processJob job@(Entity jobId Job {..}) = do
     logInfo
         $ fromString
@@ -98,7 +110,7 @@ isNonGitHub = (/= GitHubSVCS) . repoSvcs . entityVal
 -- brittany-disable-next-binding
 
 execRestyler
-    :: (HasLogFunc env, HasSettings env, HasDB env)
+    :: (HasLogFunc env, HasProcessContext env, HasSettings env, HasDB env)
     => Entity Repo
     -> Entity Job
     -> RIO env (ExitCode, String, String)
@@ -125,18 +137,32 @@ execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
 
     either
         throwString
-        (\token -> runRestyleMachine machines "docker"
-            [ "run" , "--rm"
-            , "--env" , debugEnv
-            , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
-            , "--volume" , "/tmp:/tmp"
-            , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
-            , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-            , "--job-url" , unpack jobUrl
-            , unpack $ repoPullPath jobOwner jobRepo jobPullRequest
-            ]
+        (\token ->
+            captureFollowedProcessWith
+                (captureJobLogLine jobId "stdout" . pack)
+                (captureJobLogLine jobId "stderr" . pack)
+                $ runRestyleMachine machines "docker"
+                    [ "run" , "--rm"
+                    , "--env" , debugEnv
+                    , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
+                    , "--volume" , "/tmp:/tmp"
+                    , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
+                    , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
+                    , "--job-url" , unpack jobUrl
+                    , unpack $ repoPullPath jobOwner jobRepo jobPullRequest
+                    ]
         )
         eAccessToken
+
+captureJobLogLine :: HasDB env => JobId -> Text -> Text -> RIO env ()
+captureJobLogLine _jobId _stream _content = runDB $ pure () -- do
+    -- now <- liftIO getCurrentTime
+    -- insert_ JobLogLine
+    --     { jobLogLineJob = jobId
+    --     , jobLogLineCreatedAt = now
+    --     , jobLogLineStream = stream
+    --     , jobLogLineContent = content
+    --     }
 
 nonGitHubMsg :: Entity Repo -> String
 nonGitHubMsg (Entity _ Repo {..}) = unlines

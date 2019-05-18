@@ -6,14 +6,15 @@ where
 
 import RIO
 
-import Data.Text (unpack)
+import qualified Data.Map as Map
+import Data.Text (pack, unpack)
 import qualified Data.Text.IO as T
 import Model
+import RIO.Process
+import RIO.Process.Follow
 import System.Directory
     (createDirectoryIfMissing, doesDirectoryExist, getHomeDirectory)
-import System.Exit (ExitCode)
 import System.FilePath ((</>))
-import System.Process (CreateProcess(..), proc, readCreateProcessWithExitCode)
 
 -- | Run a process on one of the given @'RestyleMachine'@s
 --
@@ -21,16 +22,18 @@ import System.Process (CreateProcess(..), proc, readCreateProcessWithExitCode)
 -- variables (e.g. @DOCKER_HOST@) dictate.
 --
 runRestyleMachine
-    :: HasLogFunc env
+    :: (HasLogFunc env, HasProcessContext env)
     => [RestyleMachine]
     -> FilePath
     -> [String]
-    -> RIO env (ExitCode, String, String)
-runRestyleMachine machines cmd args = do
-    run <- case machines of
+    -> (String -> RIO env ())
+    -> (String -> RIO env ())
+    -> RIO env ExitCode
+runRestyleMachine machines cmd args fOut fErr = do
+    modEnvVars <- case machines of
         [] -> do
             logInfo "Running restyle with native environment"
-            pure $ runProcess Nothing
+            pure id
 
         (machine@RestyleMachine {..} : _) -> do
             logInfo
@@ -42,27 +45,13 @@ runRestyleMachine machines cmd args = do
                 <> ")"
 
             certPath <- setupCertificatesIfMissing machine
-            pure $ runProcess $ Just
-                [ ("DOCKER_HOST", unpack restyleMachineHost)
-                , ("DOCKER_CERT_PATH", certPath)
+            pure $ \env -> env <> Map.fromList
+                [ ("DOCKER_HOST", restyleMachineHost)
+                , ("DOCKER_CERT_PATH", pack certPath)
                 , ("DOCKER_TLS_VERIFY", "1")
                 ]
 
-    run cmd args
-
-runProcess
-    :: HasLogFunc env
-    => Maybe [(String, String)]
-    -> String
-    -> [String]
-    -> RIO env (ExitCode, String, String)
-runProcess env' cmd args = do
-    logDebug $ "process: " <> displayShow (cmd : args)
-    logDebug $ "environment: " <> displayShow env'
-    result <- liftIO
-        $ readCreateProcessWithExitCode (proc cmd args) { env = env' } ""
-    logDebug $ "process result: " <> displayShow result
-    pure result
+    withModifyEnvVars modEnvVars $ followProcess cmd args fOut fErr
 
 setupCertificatesIfMissing
     :: HasLogFunc env => RestyleMachine -> RIO env FilePath
