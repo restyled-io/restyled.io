@@ -33,5 +33,8 @@ import Web.PathPieces as X
 fromJustNoteM :: MonadIO m => String -> Maybe a -> m a
 fromJustNoteM msg = fromMaybeM (throwString msg) . pure
 
+fromLeftM :: Monad m => (a -> m b) -> m (Either a b) -> m b
+fromLeftM f me = either f pure =<< me
+
 overEntity :: Entity a -> (a -> a) -> Entity a
 overEntity e f = e { entityVal = f $ entityVal e }

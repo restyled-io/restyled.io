@@ -55,52 +55,59 @@ awaitAndProcessWebhook
 awaitAndProcessWebhook = traverse_ processWebhook' <=< awaitWebhook
     where processWebhook' = processWebhook $ ExecRestyler execRestyler
 
--- brittany-disable-next-binding
-
 execRestyler
     :: (HasLogFunc env, HasProcessContext env, HasSettings env, HasDB env)
     => Entity Repo
     -> Entity Job
     -> RIO env (ExitCode, String, String)
-execRestyler (Entity _ Repo {..}) (Entity jobId Job {..}) = do
-    appSettings@AppSettings {..} <- view settingsL
-
-    let debugEnv
-            | appSettingsIsDebug appSettings = "DEBUG=1"
-            | repoDebugEnabled = "DEBUG=1"
-            | otherwise = "DEBUG="
-
-        jobUrl = appRoot
-            <> "/gh/" <> toPathPiece jobOwner
-            <> "/repos/" <> toPathPiece jobRepo
-            <> "/jobs/" <> toPathPiece jobId
-
-    eAccessToken <- liftIO $ githubInstallationToken
-        appGitHubAppId
-        appGitHubAppKey
+execRestyler (Entity _ Repo {..}) job = do
+    settings <- view settingsL
+    token <- fromLeftM throwString $ liftIO $ githubInstallationToken
+        (appGitHubAppId settings)
+        (appGitHubAppKey settings)
         repoInstallationId
 
-    machines <- runDB
-        $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
+    let debug = appSettingsIsDebug settings || repoDebugEnabled
 
-    either
-        throwString
-        (\token ->
-            captureFollowedProcessWith
-                (captureJobLogLine jobId "stdout" . pack)
-                (captureJobLogLine jobId "stderr" . pack)
-                $ runRestyleMachine machines "docker"
-                    [ "run" , "--rm"
-                    , "--env" , debugEnv
-                    , "--env" , "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
-                    , "--volume" , "/tmp:/tmp"
-                    , "--volume" , "/var/run/docker.sock:/var/run/docker.sock"
-                    , appRestylerImage ++ maybe "" (":" ++) appRestylerTag
-                    , "--job-url" , unpack jobUrl
-                    , unpack $ repoPullPath jobOwner jobRepo jobPullRequest
-                    ]
-        )
-        eAccessToken
+    machines <-
+        runDB $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
+
+    captureFollowedProcessWith
+            (captureJobLogLine (entityKey job) "stdout" . pack)
+            (captureJobLogLine (entityKey job) "stderr" . pack)
+        $ runRestyleMachine machines "docker"
+        $ restyleDockerRun settings token job debug
+
+-- brittany-disable-next-binding
+
+restyleDockerRun
+    :: AppSettings
+    -> RepoAccessToken
+    -> Entity Job
+    -> Bool -- ^ Debug?
+    -> [String]
+restyleDockerRun AppSettings {..} token (Entity jobId Job {..}) debug =
+    [ "run", "--rm"
+    , "--env", if debug then "DEBUG=1" else "DEBUG="
+    , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
+    , "--volume", "/tmp:/tmp"
+    , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
+    , restylerImage, "--job-url", jobUrl, prSpec
+    ]
+  where
+    restylerImage = appRestylerImage <> maybe "" (":" <>) appRestylerTag
+
+    jobUrl =
+        unpack
+            $ appRoot
+            <> "/gh/"
+            <> toPathPiece jobOwner
+            <> "/repos/"
+            <> toPathPiece jobRepo
+            <> "/jobs/"
+            <> toPathPiece jobId
+
+    prSpec = unpack $ repoPullPath jobOwner jobRepo jobPullRequest
 
 captureJobLogLine :: HasDB env => JobId -> Text -> Text -> RIO env ()
 captureJobLogLine _jobId _stream _content = runDB $ pure () -- do
