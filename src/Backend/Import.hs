@@ -23,7 +23,6 @@ import Database.Persist.Sql as X (SqlPersistT)
 import Model as X
 import Model.Job as X
 import Model.Repo as X
-import Model.RestyleMachine as X
 import Model.User as X
 import RIO.DB as X
 import RIO.Redis as X

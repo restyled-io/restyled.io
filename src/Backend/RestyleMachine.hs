@@ -1,5 +1,4 @@
--- | FIXME: this should be in Backend, not Model
-module Model.RestyleMachine
+module Backend.RestyleMachine
     ( runRestyleMachine
     )
 where

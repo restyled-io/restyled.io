@@ -11,7 +11,7 @@ module Handler.Admin.Machines
 
 import Import
 
-import Model.RestyleMachine (runRestyleMachine)
+import Backend.RestyleMachine
 import RIO.Process.Follow
 import System.Exit (ExitCode(..))
 
