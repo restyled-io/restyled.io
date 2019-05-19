@@ -60,14 +60,14 @@ execRestyler
     => Entity Repo
     -> Entity Job
     -> RIO env (ExitCode, String, String)
-execRestyler (Entity _ Repo {..}) job = do
+execRestyler (Entity _ repo) job = do
     settings <- view settingsL
     token <- fromLeftM throwString $ liftIO $ githubInstallationToken
         (appGitHubAppId settings)
         (appGitHubAppKey settings)
-        repoInstallationId
+        (repoInstallationId repo)
 
-    let debug = appSettingsIsDebug settings || repoDebugEnabled
+    let debug = appSettingsIsDebug settings || repoDebugEnabled repo
 
     machines <-
         runDB $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
