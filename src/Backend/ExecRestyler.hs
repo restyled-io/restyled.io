@@ -4,6 +4,7 @@ module Backend.ExecRestyler
     , FailedExecRestyler(..)
     , SucceededExecRestyler(..)
     , runExecRestyler
+    , tryExecRestyler
     )
 where
 
@@ -29,14 +30,20 @@ runExecRestyler
     => ExecRestyler m
     -> AcceptedJob
     -> ExceptT FailedExecRestyler m SucceededExecRestyler
-runExecRestyler (ExecRestyler execRestyler) AcceptedJob {..} = do
+runExecRestyler execRestyler aj = do
     now <- liftIO getCurrentTime
-    fmap (success now)
-        $ withExceptT (failure now)
-        $ ExceptT
-        $ tryAny
-        $ execRestyler ajRepo ajJob
+    fmap (success now) $ withExceptT (failure now) $ tryExecRestyler
+        execRestyler
+        aj
   where
-    success now = SucceededExecRestyler . overEntity ajJob . completeJob now
-    failure now =
-        FailedExecRestyler . overEntity ajJob . completeJobErrored now
+    job = ajJob aj
+    success now = SucceededExecRestyler . overEntity job . completeJob now
+    failure now = FailedExecRestyler . overEntity job . completeJobErrored now
+
+tryExecRestyler
+    :: MonadUnliftIO m
+    => ExecRestyler m
+    -> AcceptedJob
+    -> ExceptT SomeException m (ExitCode, String, String)
+tryExecRestyler (ExecRestyler execRestyler) AcceptedJob {..} =
+    ExceptT $ tryAny $ execRestyler ajRepo ajJob
