@@ -110,11 +110,11 @@ restyleDockerRun AppSettings {..} token (Entity jobId Job {..}) debug =
     prSpec = unpack $ repoPullPath jobOwner jobRepo jobPullRequest
 
 captureJobLogLine :: HasDB env => JobId -> Text -> Text -> RIO env ()
-captureJobLogLine _jobId _stream _content = runDB $ pure () -- do
-    -- now <- liftIO getCurrentTime
-    -- insert_ JobLogLine
-    --     { jobLogLineJob = jobId
-    --     , jobLogLineCreatedAt = now
-    --     , jobLogLineStream = stream
-    --     , jobLogLineContent = content
-    --     }
+captureJobLogLine jobId stream content = runDB $ do
+    now <- liftIO getCurrentTime
+    insert_ JobLogLine
+        { jobLogLineJob = jobId
+        , jobLogLineCreatedAt = now
+        , jobLogLineStream = stream
+        , jobLogLineContent = content
+        }
