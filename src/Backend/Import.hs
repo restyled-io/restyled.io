@@ -6,7 +6,7 @@ where
 
 import RIO as X hiding (timeout)
 
-import Control.Error.Util as X (hush, hushT, note, noteT, (??))
+import Control.Error.Util as X (bimapExceptT, hush, hushT, note, noteT, (??))
 import Control.Monad.Except as X
     (ExceptT(..), liftEither, runExceptT, throwError, withExceptT)
 import Control.Monad.Extra as X (fromMaybeM)

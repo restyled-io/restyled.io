@@ -3,6 +3,7 @@ module Model.Job
     , insertJobRetry
     , completeJob
     , completeJobErrored
+    , completeJobErroredS
     , completeJobSkipped
     )
 where
@@ -59,8 +60,11 @@ completeJob now (ec, out, err) job = job
     toInt ExitSuccess = 0
     toInt (ExitFailure i) = i
 
-completeJobErrored :: UTCTime -> SomeException -> Job -> Job
-completeJobErrored now ex = completeJob now (ExitFailure 99, "", show ex)
+completeJobErrored :: UTCTime -> String -> Job -> Job
+completeJobErrored now reason = completeJob now (ExitFailure 99, "", reason)
+
+completeJobErroredS :: Show a => UTCTime -> a -> Job -> Job
+completeJobErroredS now = completeJobErrored now . show
 
 completeJobSkipped :: UTCTime -> String -> Job -> Job
 completeJobSkipped now reason = completeJob now (ExitSuccess, reason, "")

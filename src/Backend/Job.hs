@@ -2,9 +2,15 @@ module Backend.Job
     ( awaitRestylerJob
     , enqueueRestylerJob
     , queueName
+
+    -- * Processing
+    , processJob
     ) where
 
 import Backend.Import
+
+import Backend.AcceptedJob
+import Backend.ExecRestyler
 
 awaitRestylerJob
     :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe (Entity Job))
@@ -27,3 +33,19 @@ enqueueRestylerJob e@(Entity jid job) = do
 
 queueName :: ByteString
 queueName = "restyled:restyler:jobs"
+
+processJob :: HasDB env => ExecRestyler (RIO env) -> Entity Job -> RIO env ()
+processJob execRestyler eJob@(Entity jobId job) = do
+    now <- liftIO getCurrentTime
+
+    let failure = completeJobErrored now
+        success = completeJob now
+
+    result <- runExceptT $ do
+        repo <- noteT "Repo not found" $ MaybeT $ runDB $ fetchRepoForJob job
+        withExceptT show $ tryExecRestyler execRestyler $ AcceptedJob
+            { ajRepo = repo
+            , ajJob = eJob
+            }
+
+    runDB $ replace jobId $ either failure success result job
