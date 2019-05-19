@@ -44,6 +44,14 @@ Job json
 
   deriving Eq Show
 
+JobLogLine json
+  job JobId
+  createdAt UTCTime
+  stream Text
+  content Text
+
+  deriving Eq Show
+
 RestyleMachine
   name Text
   enabled Bool

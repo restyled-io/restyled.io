@@ -65,7 +65,10 @@ INSERT INTO plan (
   'Expired'
 );
 
+-- DELETE dependent job_log_line first
+DELETE FROM job_log_line;
 DELETE FROM job;
+
 INSERT INTO job (
   installation_id, -- (Id Installation)
   owner, -- (Name Owner)
@@ -130,13 +133,47 @@ $$,
   'restyled-io',
   'demo',
   2,
-  NOW(),
-  NOW(),
+  NOW() - ('10 seconds' :: interval),
+  NOW() - ('10 seconds' :: interval),
   NULL,
   NULL,
   NULL,
   NULL
 );
+
+WITH last_job AS (
+  SELECT id FROM job
+    WHERE owner = 'restyled-io'
+      AND repo = 'demo'
+      AND pull_request = 2
+  LIMIT 1
+)
+INSERT INTO job_log_line (
+  job,
+  created_at,
+  stream,
+  content
+)
+SELECT
+  id as job,
+  NOW() - ('10 seconds' :: interval) as created_at,
+  'stdout' as stream,
+  '[Info] restyling the things' as content
+FROM last_job
+UNION
+SELECT
+  id as job,
+  NOW() - ('5 seconds' :: interval) as created_at,
+  'stderr' as stream,
+  '[Warn] unable to restyle' as content
+FROM last_job
+UNION
+SELECT
+  id as job,
+  NOW() - ('4 seconds' :: interval) as created_at,
+  'stderr' as stream,
+  '[Error] restyling failed' as content
+FROM last_job;
 
 -- We don't seed an enabled example because for it to be functional would mean
 -- having secrets in the seeds, and we'd rather not have a non-functional
