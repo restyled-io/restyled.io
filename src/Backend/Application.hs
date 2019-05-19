@@ -9,9 +9,9 @@ import Backend.ExecRestyler
 import Backend.Foundation
 import Backend.Job
 import Backend.Marketplace
+import Backend.RestyleMachine
 import Backend.Webhook
 import Control.Monad ((<=<))
-import Model.RestyleMachine (runRestyleMachine)
 import RIO.Process
 import RIO.Process.Follow
 import SVCS.GitHub.AccessToken (githubInstallationToken)
