@@ -8,6 +8,7 @@ module Model.Repo
 
     -- * Queries
     , fetchReposByOwnerName
+    , fetchRepoForJob
 
     -- * Decorated
     , RepoWithStats(..)
@@ -68,6 +69,11 @@ repoWithStats repo =
 fetchReposByOwnerName :: MonadIO m => OwnerName -> SqlPersistT m [Entity Repo]
 fetchReposByOwnerName owner =
     selectList [RepoOwner ==. owner] [Asc RepoName, LimitTo 10]
+
+fetchRepoForJob :: MonadIO m => Job -> SqlPersistT m (Maybe (Entity Repo))
+fetchRepoForJob Job {..} = selectFirst
+    [RepoSvcs ==. jobSvcs, RepoOwner ==. jobOwner, RepoName ==. jobRepo]
+    []
 
 data IgnoredWebhookReason
     = InvalidJSON String
