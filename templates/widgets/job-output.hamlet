@@ -1,4 +1,4 @@
-$if jobHasLegacyOutput
+$if jobHasCompleteOutput
   $maybe x <- jobStdout job
     $if not (null x)
       <pre>

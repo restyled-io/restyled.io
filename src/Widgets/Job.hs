@@ -62,7 +62,8 @@ jobCard job = do
 
 jobOutput :: Entity Job -> Widget
 jobOutput (Entity jobId job) = $(widgetFile "widgets/job-output")
-    where jobHasLegacyOutput = isJust (jobStdout job) || isJust (jobStderr job)
+  where
+    jobHasCompleteOutput = isJust (jobStdout job) || isJust (jobStderr job)
 
 colorizedLogLine :: Text -> Text -> Widget
 colorizedLogLine stream ln
