@@ -1,7 +1,8 @@
 // Multiple Jobs on one page can totally use the same Output prototype
-if (typeof Output === "undefined") {
+if (typeof Output === "undefined", singleCard) {
   function Output(elem) {
     this.elem = elem;
+    this.singleCard = singleCard;
     this.streamUrl = elem
       .getAttribute("data-stream-url")
       .replace(/http(s?):/, "ws$1:");
@@ -17,11 +18,9 @@ if (typeof Output === "undefined") {
 
     this.elem.innerHTML += text;
 
-    // This assumes you're the only job on the page, which may not be true. We can
-    // consider bringing something like it back if we can know when/if we are.
-    /* if (text != "") { */
-    /*   window.scrollTo(0, document.body.scrollHeight); */
-    /* } */
+    if (this.singleCard && text != "") {
+      window.scrollTo(0, document.body.scrollHeight);
+    }
   };
 
   Output.prototype.connect = function() {
@@ -47,8 +46,9 @@ document.addEventListener("DOMContentLoaded", function() {
   var elem = document.getElementById(
     "logs-job-id-#{rawJS $ toPathPiece jobId}"
   );
+  var cardsCount = document.getElementsByClassName("card").length;
 
   if (elem) {
-    new Output(elem).connect();
+    new Output(elem, cardsCount === 1).connect();
   }
 });
