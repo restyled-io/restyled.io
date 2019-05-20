@@ -133,41 +133,37 @@ form footer input[type="number"] {
   margin-bottom: 6px;
 }
 
-.logs.stdout .prefix { color: #7f9f7f; }
-.logs.stderr .prefix { color: #cc9393; }
+.log-line.stream-stdout .prefix { color: #7f9f7f; }
+.log-line.stream-stderr .prefix { color: #cc9393; }
 
-.logs .prefix {
-  padding-right: 10px;
-}
-
-.logs .prefix:after {
-  color: gray;
-  content: "]";
-}
-.logs .prefix:before {
+.log-line .prefix:before {
   color: gray;
   content: "[";
 }
+.log-line .prefix:after {
+  color: gray;
+  content: "] ";
+}
 
-.logs .level-debug:before {
+.log-line .level-debug:before {
   content: "DEBUG ";
 }
 
-.logs .level-debug {
+.log-line .level-debug {
   color: gray;
 }
 
-.logs .level-info:before {
+.log-line .level-info:before {
   color: #2a77ac; /* N.B. matches strapless .info */
   content: "INFO  ";
 }
 
-.logs .level-warn:before {
+.log-line .level-warn:before {
   color: #efefaf;
   content: "WARN  ";
 }
 
-.logs .level-error:before {
+.log-line .level-error:before {
   color: #cc9393;
   content: "ERROR ";
 }

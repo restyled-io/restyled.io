@@ -27,7 +27,7 @@ $with Entity jobId job <- job
           In progress since
           #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
 
-    ^{jobOutput job}
+    ^{jobOutput $ Entity jobId job}
 
     <aside>
       $if jobIsRetriable job
