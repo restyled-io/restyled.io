@@ -3,6 +3,7 @@
 module Widgets.Job
     ( jobCard
     , jobOutput
+    , colorizedLogLine
 
     -- * Job completion
     -- |
