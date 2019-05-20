@@ -60,11 +60,11 @@ jobCard job = do
 
 -- brittany-disable-next-binding
 
-jobOutput :: Job -> Widget
-jobOutput job = $(widgetFile "widgets/job-output")
+jobOutput :: Entity Job -> Widget
+jobOutput (Entity jobId job) = $(widgetFile "widgets/job-output")
 
-colorizedLogLine :: Text -> Widget
-colorizedLogLine ln
+colorizedLogLine :: Text -> Text -> Widget
+colorizedLogLine stream ln
     | Just message <- T.stripPrefix "[Debug] " ln = logLine "debug" message
     | Just message <- T.stripPrefix "[Info] " ln = logLine "info" message
     | Just message <- T.stripPrefix "[Warn] " ln = logLine "warn" message

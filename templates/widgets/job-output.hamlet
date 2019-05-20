@@ -1,11 +1,11 @@
 $maybe x <- jobStdout job
   $if not (null x)
-    <pre .logs .stdout>
+    <pre>
       $forall ln <- lines x
-        <span .prefix>stdout</span>^{colorizedLogLine ln}
+        ^{colorizedLogLine "stdout" ln}
 
 $maybe x <- jobStderr job
   $if not (null x)
-    <pre .logs .stderr>
+    <pre>
       $forall ln <- lines x
-        <span .prefix>stderr</span>^{colorizedLogLine ln}
+        ^{colorizedLogLine "stderr" ln}
