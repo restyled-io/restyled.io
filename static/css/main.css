@@ -168,6 +168,13 @@ form footer input[type="number"] {
   content: "ERROR ";
 }
 
+.logs-stream {
+  display: none;
+}
+.js .logs-stream {
+  display: block;
+}
+
 .card {
   border-radius: 3px;
   border: 1px solid #999;

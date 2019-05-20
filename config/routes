@@ -24,6 +24,7 @@
     /#JobId RepoJobP:
       / RepoJobR GET
       /retry RepoJobRetryR POST
+      /log RepoJobLogLinesR GET
 
 /admin AdminR GET
 /admin AdminP:

@@ -1,6 +1,14 @@
 module Model.Job
-    ( insertJob
+    (
+    -- * Creating Jobs
+      insertJob
     , insertJobRetry
+
+    -- * Queries
+    , fetchJobIsInProgress
+    , fetchJobLogLines
+
+    -- * Completing Jobs
     , completeJob
     , completeJobErrored
     , completeJobErroredS
@@ -47,6 +55,19 @@ insertJobRetry job = do
         , jobStdout = Nothing
         , jobStderr = Nothing
         }
+
+fetchJobIsInProgress :: MonadIO m => JobId -> SqlPersistT m Bool
+fetchJobIsInProgress jobId =
+    isJust <$> selectFirst [JobId ==. jobId, JobCompletedAt ==. Nothing] []
+
+fetchJobLogLines
+    :: MonadIO m
+    => JobId
+    -> Int -- ^ Offset
+    -> SqlPersistT m [Entity JobLogLine]
+fetchJobLogLines jobId offset = selectList
+    [JobLogLineJob ==. jobId]
+    [Asc JobLogLineCreatedAt, OffsetBy offset]
 
 completeJob :: UTCTime -> (ExitCode, String, String) -> Job -> Job
 completeJob now (ec, out, err) job = job

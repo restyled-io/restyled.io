@@ -1,0 +1,54 @@
+// Multiple Jobs on one page can totally use the same Output prototype
+if (typeof Output === "undefined") {
+  function Output(elem, singleCard) {
+    this.elem = elem;
+    this.singleCard = singleCard;
+    this.streamUrl = elem
+      .getAttribute("data-stream-url")
+      .replace(/http(s?):/, "ws$1:");
+  }
+
+  Output.prototype.append = function(text) {
+    var loaded = this.elem.getAttribute("data-stream-loaded");
+
+    if (loaded === "false" && text !== "") {
+      this.elem.innerHTML = "";
+      this.elem.setAttribute("data-stream-loaded", "true");
+    }
+
+    this.elem.innerHTML += text;
+
+    if (this.singleCard && text != "") {
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  };
+
+  Output.prototype.connect = function() {
+    var self = this,
+      socket = new WebSocket(this.streamUrl);
+
+    socket.onerror = function(data) {
+      console.log("websockets error", data);
+    };
+
+    socket.onmessage = function(data) {
+      self.append(data.data);
+      socket.send("acknowledged");
+    };
+
+    socket.onclose = function(event) {
+      console.log("websocket closed", event);
+    };
+  };
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  var elem = document.getElementById(
+    "logs-job-id-#{rawJS $ toPathPiece jobId}"
+  );
+  var cardsCount = document.getElementsByClassName("card").length;
+
+  if (elem) {
+    new Output(elem, cardsCount === 1).connect();
+  }
+});

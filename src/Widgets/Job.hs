@@ -3,6 +3,7 @@
 module Widgets.Job
     ( jobCard
     , jobOutput
+    , colorizedLogLine
 
     -- * Job completion
     -- |
@@ -19,6 +20,7 @@ import Import
 import qualified Data.Text as T
 import Formatting (format)
 import Formatting.Time (diff)
+import Text.Julius (RawJS(..))
 import Widgets.ContainsURLs
 
 -- | Internal helper for rendering completion state
@@ -58,10 +60,10 @@ jobCard job = do
     now <- liftIO getCurrentTime
     $(widgetFile "widgets/job-card")
 
--- brittany-disable-next-binding
-
 jobOutput :: Entity Job -> Widget
 jobOutput (Entity jobId job) = $(widgetFile "widgets/job-output")
+  where
+    jobHasCompleteOutput = isJust (jobStdout job) || isJust (jobStderr job)
 
 colorizedLogLine :: Text -> Text -> Widget
 colorizedLogLine stream ln

@@ -6,6 +6,7 @@ module Handler.Repos
     , getRepoPullJobsR
     , getRepoJobsR
     , getRepoJobR
+    , getRepoJobLogLinesR
     , postRepoJobRetryR
     )
 where
@@ -13,8 +14,10 @@ where
 import Import
 
 import Backend.Job
+import StreamJobLogLines
 import Widgets.Job
 import Yesod.Paginator
+import Yesod.WebSockets
 
 getRepoR :: OwnerName -> RepoName -> Handler Html
 getRepoR = getRepoJobsR
@@ -51,6 +54,11 @@ getRepoJobR owner name jobId = do
     defaultLayout $ do
         setTitle $ toHtml $ repoPath owner name <> " #" <> toPathPiece jobId
         $(widgetFile "job")
+
+getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler ()
+getRepoJobLogLinesR _owner _name jobId = do
+    void $ runDB $ get404 jobId
+    webSockets $ streamJobLogLines jobId
 
 postRepoJobRetryR :: OwnerName -> RepoName -> JobId -> Handler Html
 postRepoJobRetryR owner name jobId = do
