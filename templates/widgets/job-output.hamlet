@@ -1,13 +1,20 @@
-$maybe x <- jobStdout job
-  $if not (null x)
-    <pre>
-      $forall ln <- lines x
-        ^{colorizedLogLine "stdout" ln}
+$if jobHasLegacyOutput
+  $maybe x <- jobStdout job
+    $if not (null x)
+      <pre>
+        $forall ln <- lines x
+          ^{colorizedLogLine "stdout" ln}
 
-$maybe x <- jobStderr job
-  $if not (null x)
-    <pre>
-      $forall ln <- lines x
-        ^{colorizedLogLine "stderr" ln}
+  $maybe x <- jobStderr job
+    $if not (null x)
+      <pre>
+        $forall ln <- lines x
+          ^{colorizedLogLine "stderr" ln}
 
-<pre #logs-job-id-#{toPathPiece jobId}>
+$else
+  <pre
+    #logs-job-id-#{toPathPiece jobId}
+    data-stream-url=@{repoP (jobOwner job) (jobRepo job) $ jobLogR jobId}
+    data-stream-loaded=false
+    >
+    Fetching job log...

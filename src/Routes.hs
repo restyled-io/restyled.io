@@ -13,6 +13,7 @@ module Routes
     , jobsR
     , jobR
     , jobRetryR
+    , jobLogR
 
     -- * Repos' Pulls' Jobs
     , pullJobsR
@@ -43,6 +44,9 @@ jobR jobId = RepoJobsP $ RepoJobP jobId RepoJobR
 
 jobRetryR :: JobId -> RepoP
 jobRetryR jobId = RepoJobsP $ RepoJobP jobId RepoJobRetryR
+
+jobLogR :: JobId -> RepoP
+jobLogR jobId = RepoJobsP $ RepoJobP jobId RepoJobLogLinesR
 
 pullJobsR :: PullRequestNum -> RepoP
 pullJobsR num = pullP num $ RepoPullJobsP RepoPullJobsR
