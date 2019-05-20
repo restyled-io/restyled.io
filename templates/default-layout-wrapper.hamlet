@@ -12,3 +12,5 @@ $newline always
     ^{pageHead pc}
   <body>
     ^{pageBody pc}
+  <script>
+    document.documentElement.className = "js"

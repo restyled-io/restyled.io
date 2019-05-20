@@ -13,6 +13,7 @@ $if jobHasCompleteOutput
 
 $else
   <pre
+    .logs-stream
     #logs-job-id-#{toPathPiece jobId}
     data-stream-url=@{repoP (jobOwner job) (jobRepo job) $ jobLogR jobId}
     data-stream-loaded=false
