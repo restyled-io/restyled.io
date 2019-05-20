@@ -1,5 +1,5 @@
 // Multiple Jobs on one page can totally use the same Output prototype
-if (typeof Output === "undefined", singleCard) {
+if ((typeof Output === "undefined", singleCard)) {
   function Output(elem) {
     this.elem = elem;
     this.singleCard = singleCard;
