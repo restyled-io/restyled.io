@@ -1,8 +1,7 @@
 -- | Execution of the Restyler process
 module Backend.ExecRestyler
     ( ExecRestyler(..)
-    , FailedExecRestyler(..)
-    , SucceededExecRestyler(..)
+    , ExecRestylerFailed(..)
     , runExecRestyler
     , tryExecRestyler
     )
@@ -20,35 +19,29 @@ newtype ExecRestyler m = ExecRestyler
     { unExecRestyler :: Entity Repo -> Entity Job -> m ExitCode
     }
 
--- | A @'Job'@ already updated from a failed execution
-newtype FailedExecRestyler = FailedExecRestyler
-    { unFailedExecRestyler :: Entity Job
+data ExecRestylerFailed = ExecRestylerFailed
+    { erfException :: SomeException
+    , erfJob :: Entity Job
     }
 
--- | A @'Job'@ already updated from a successful execution
-newtype SucceededExecRestyler = SucceededExecRestyler
-    { unSucceededExecRestyler :: Entity Job
-    }
-
--- | Like @'tryExecRestyler'@ but wrapping the cases in above newtypes
 runExecRestyler
     :: MonadUnliftIO m
     => ExecRestyler m
     -> AcceptedJob
-    -> ExceptT FailedExecRestyler m SucceededExecRestyler
+    -> ExceptT ExecRestylerFailed m (Entity Job)
 runExecRestyler execRestyler aj =
     bimapMExceptT (failure $ ajJob aj) (success $ ajJob aj)
         $ tryExecRestyler execRestyler aj
 
-success :: MonadIO m => Entity Job -> ExitCode -> m SucceededExecRestyler
+success :: MonadIO m => Entity Job -> ExitCode -> m (Entity Job)
 success job ec = do
     now <- liftIO getCurrentTime
-    pure $ SucceededExecRestyler $ overEntity job $ completeJob now ec
+    pure $ overEntity job $ completeJob now ec
 
-failure :: MonadIO m => Entity Job -> SomeException -> m FailedExecRestyler
+failure :: MonadIO m => Entity Job -> SomeException -> m ExecRestylerFailed
 failure job ex = do
     now <- liftIO getCurrentTime
-    pure $ FailedExecRestyler $ overEntity job $ completeJobErroredS now ex
+    pure $ ExecRestylerFailed ex $ overEntity job $ completeJobErroredS now ex
 
 -- | Run the @'ExecRestyler'@ and capture exceptions to @'ExceptT'@
 tryExecRestyler
