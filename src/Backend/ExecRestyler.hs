@@ -36,13 +36,23 @@ runExecRestyler
     => ExecRestyler m
     -> AcceptedJob
     -> ExceptT FailedExecRestyler m SucceededExecRestyler
-runExecRestyler execRestyler aj = do
+runExecRestyler execRestyler aj =
+    bimapMExceptT (failure $ ajJob aj) (success $ ajJob aj)
+        $ tryExecRestyler execRestyler aj
+
+success
+    :: MonadIO m
+    => Entity Job
+    -> (ExitCode, String, String)
+    -> m SucceededExecRestyler
+success job ec = do
     now <- liftIO getCurrentTime
-    bimapExceptT (failure now) (success now) $ tryExecRestyler execRestyler aj
-  where
-    job = ajJob aj
-    success now = SucceededExecRestyler . overEntity job . completeJob now
-    failure now = FailedExecRestyler . overEntity job . completeJobErroredS now
+    pure $ SucceededExecRestyler $ overEntity job $ completeJob now ec
+
+failure :: MonadIO m => Entity Job -> SomeException -> m FailedExecRestyler
+failure job ex = do
+    now <- liftIO getCurrentTime
+    pure $ FailedExecRestyler $ overEntity job $ completeJobErroredS now ex
 
 -- | Run the @'ExecRestyler'@ and capture exceptions to @'ExceptT'@
 tryExecRestyler

@@ -36,16 +36,15 @@ queueName = "restyled:restyler:jobs"
 
 processJob :: HasDB env => ExecRestyler (RIO env) -> Entity Job -> RIO env ()
 processJob execRestyler eJob@(Entity jobId job) = do
-    now <- liftIO getCurrentTime
-
-    let failure = completeJobErrored now
-        success = completeJob now
-
     result <- runExceptT $ do
         repo <- noteT "Repo not found" $ MaybeT $ runDB $ fetchRepoForJob job
         withExceptT show $ tryExecRestyler execRestyler $ AcceptedJob
             { ajRepo = repo
             , ajJob = eJob
             }
+
+    now <- liftIO getCurrentTime
+    let failure = completeJobErrored now
+        success = completeJob now
 
     runDB $ replace jobId $ either failure success result job
