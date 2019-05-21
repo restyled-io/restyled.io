@@ -33,7 +33,7 @@ import Network.Wai.Middleware.RequestLogger
     , mkRequestLogger
     , outputFormat
     )
-import RIO (logFuncUseColorL, runRIO, view)
+import RIO (runRIO)
 import RIO.DB (createConnectionPool)
 import RIO.Logger
 import RIO.Orphans ()
@@ -83,7 +83,7 @@ waiMiddleware = forceSSL . methodOverridePost . defaultMiddlewaresNoLogging
 
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation = do
-    useColor <- runRIO foundation $ view logFuncUseColorL
+    useColor <- terminalUseColor
     loggerSet <- newStdoutLoggerSet defaultBufSize
     mkRequestLogger def
         { outputFormat = if appSettings foundation `allowsLevel` LevelDebug
