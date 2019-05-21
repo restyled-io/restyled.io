@@ -1,21 +1,92 @@
 #!/bin/sh
 #
-# Hit the GitHub API, using an installation token.
+# Hit the GitHub API, using a JWT or Installation Access token.
 #
-# Assumes ../restyler/bin/get-access-token exists.
+# Assumes ../restyler/bin/get-*-token scripts exist.
 #
 ###
 set -e
 
-if [ -z "$1" ]; then
-  echo "usage: gh-api <path>" >&2
-  exit 61
+die_usage() {
+  if [ -n "$*" ]; then
+    echo "$*" >&2
+  fi
+
+  cat >&2 <<'EOM'
+Usage: gh-api [-a APP_ID] [-k KEY_PATH] [-i INSTALLATION_ID] <path> <curl-options...>
+Options:
+
+  -a APP_ID             GitHub App Id, default is production (5851).
+
+  -k KEY_PATH           Path to PEM key for that App. Default is a production
+                        key that's known to exist in my ~/downloads.
+
+  -i INSTALLATION_ID    If given, a JWT token will be used to get an Access
+                        Token for this Installation, which is then used for the
+                        request you're trying to make.
+
+Reference:
+
+  Production:
+
+    App: 5851
+    Key: ~/downloads/restyled-io.2019-05-21.private-key.pem
+    Installation Ids:
+
+  Development
+
+    App: 5355
+    Key: ~/downloads/restyled-io-development.2019-04-04.private-key.pem
+    Installation Ids: 58920 (restyled.io)
+
+EOM
+  exit 64
+}
+
+curl_() {
+  path=$1
+  shift
+
+  curl --silent "$@" \
+    --header "Accept: application/vnd.github.machine-man-preview+json" \
+    --header "User-Agent: Restyled.io" \
+    "https://api.github.com$path"
+}
+
+restyler_bin() {
+  script=$1
+  shift
+
+  (cd ../restyler && ./bin/"$script" "$@")
+}
+
+# Defaults
+app=5851
+key=$HOME/downloads/restyled-io.2019-05-21.private-key.pem
+installation=
+path=
+
+# Options
+while getopts a:k:i: arg; do
+  case "$arg" in
+    a) app=$OPTARG ;;
+    k) key=$OPTARG ;;
+    i) installation=$OPTARG ;;
+    [?]) die_usage ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+path=$1
+
+# Argument validations
+[ -r "$key" ] || die_usage "app-key does not exist (or is not readable)"
+[ -n "$path" ] || die_usage "path required"
+
+if [ -n "$installation" ]; then
+  auth="Token $(restyler_bin get-access-token "$app" "$key" "$installation")"
+else
+  auth="Bearer $(restyler_bin get-jwt-token "$app" "$key")"
 fi
 
-token=$(cd ../restyler && ./bin/get-access-token)
-
-curl \
-  --header "Accept: application/vnd.github.machine-man-preview+json" \
-  --header "Authorization: token $token" \
-  --header "User-Agent: Restyled.io" \
-  "https://api.github.com$1"
+curl_ "$path" -H "Authorization: $auth" "$@"
