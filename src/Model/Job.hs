@@ -92,23 +92,32 @@ fetchJobOutput jobE@(Entity jobId job@Job {..}) =
         (Just _, _, _) -> pure $ JobOutputLegacy job
         (_, _, _) -> pure $ JobOutputInProgress jobE
 
-completeJob :: UTCTime -> (ExitCode, String, String) -> Job -> Job
-completeJob now (ec, out, err) job = job
+completeJob :: UTCTime -> ExitCode -> Job -> Job
+completeJob now ec job = job
     { jobUpdatedAt = now
     , jobCompletedAt = Just now
     , jobExitCode = Just $ toInt ec
-    , jobStdout = Just $ pack out
-    , jobStderr = Just $ pack err
     }
   where
     toInt ExitSuccess = 0
     toInt (ExitFailure i) = i
 
+--------------------------------------------------------------------------------
+-- NB, below here is only useful for artificial failure/skip. Normally, output
+-- is read via job_log_line records.
+--------------------------------------------------------------------------------
+
 completeJobErrored :: UTCTime -> String -> Job -> Job
-completeJobErrored now reason = completeJob now (ExitFailure 99, "", reason)
+completeJobErrored now reason job = (completeJob now (ExitFailure 99) job)
+    { jobStdout = Just ""
+    , jobStderr = Just $ pack reason
+    }
 
 completeJobErroredS :: Show a => UTCTime -> a -> Job -> Job
 completeJobErroredS now = completeJobErrored now . show
 
 completeJobSkipped :: UTCTime -> String -> Job -> Job
-completeJobSkipped now reason = completeJob now (ExitSuccess, reason, "")
+completeJobSkipped now reason job = (completeJob now ExitSuccess job)
+    { jobStdout = Just $ pack reason
+    , jobStderr = Just ""
+    }

@@ -13,7 +13,6 @@ import Backend.RestyleMachine
 import Backend.Webhook
 import Control.Monad ((<=<))
 import RIO.Process
-import RIO.Process.Follow
 import SVCS.GitHub.AccessToken (githubInstallationToken)
 import System.Exit (ExitCode(..))
 import System.IO (BufferMode(..))
@@ -59,7 +58,7 @@ execRestyler
     :: (HasLogFunc env, HasProcessContext env, HasSettings env, HasDB env)
     => Entity Repo
     -> Entity Job
-    -> RIO env (ExitCode, String, String)
+    -> RIO env ExitCode
 execRestyler (Entity _ repo) job = do
     settings <- view settingsL
     token <- fromLeftM throwString $ liftIO $ githubInstallationToken
@@ -72,11 +71,12 @@ execRestyler (Entity _ repo) job = do
     machines <-
         runDB $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
 
-    captureFollowedProcessWith
-            (captureJobLogLine (entityKey job) "stdout" . pack)
-            (captureJobLogLine (entityKey job) "stderr" . pack)
-        $ runRestyleMachine machines "docker"
-        $ restyleDockerRun settings token job debug
+    runRestyleMachine
+        machines
+        "docker"
+        (restyleDockerRun settings token job debug)
+        (captureJobLogLine (entityKey job) "stdout" . pack)
+        (captureJobLogLine (entityKey job) "stderr" . pack)
 
 -- brittany-disable-next-binding
 

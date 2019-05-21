@@ -17,7 +17,7 @@ import Backend.AcceptedJob
 -- TODO: try not to need @'Entity'@s, try not to need @'Repo'@.
 --
 newtype ExecRestyler m = ExecRestyler
-    { unExecRestyler :: Entity Repo -> Entity Job -> m (ExitCode, String, String)
+    { unExecRestyler :: Entity Repo -> Entity Job -> m ExitCode
     }
 
 -- | A @'Job'@ already updated from a failed execution
@@ -40,11 +40,7 @@ runExecRestyler execRestyler aj =
     bimapMExceptT (failure $ ajJob aj) (success $ ajJob aj)
         $ tryExecRestyler execRestyler aj
 
-success
-    :: MonadIO m
-    => Entity Job
-    -> (ExitCode, String, String)
-    -> m SucceededExecRestyler
+success :: MonadIO m => Entity Job -> ExitCode -> m SucceededExecRestyler
 success job ec = do
     now <- liftIO getCurrentTime
     pure $ SucceededExecRestyler $ overEntity job $ completeJob now ec
@@ -59,6 +55,6 @@ tryExecRestyler
     :: MonadUnliftIO m
     => ExecRestyler m
     -> AcceptedJob
-    -> ExceptT SomeException m (ExitCode, String, String)
+    -> ExceptT SomeException m ExitCode
 tryExecRestyler (ExecRestyler execRestyler) AcceptedJob {..} =
     ExceptT $ tryAny $ execRestyler ajRepo ajJob
