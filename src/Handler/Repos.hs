@@ -27,7 +27,7 @@ getRepoPullR = getRepoPullJobsR
 
 getRepoPullJobsR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html
 getRepoPullJobsR owner name num = do
-    pages <- runDB $ selectPaginated
+    pages <- runDB $ traverse attachJobOutput =<< selectPaginated
         5
         [JobOwner ==. owner, JobRepo ==. name, JobPullRequest ==. num]
         [Desc JobCreatedAt]
@@ -38,7 +38,7 @@ getRepoPullJobsR owner name num = do
 
 getRepoJobsR :: OwnerName -> RepoName -> Handler Html
 getRepoJobsR owner name = do
-    pages <- runDB $ selectPaginated
+    pages <- runDB $ traverse attachJobOutput =<< selectPaginated
         5
         [JobOwner ==. owner, JobRepo ==. name]
         [Desc JobCreatedAt]
@@ -49,7 +49,9 @@ getRepoJobsR owner name = do
 
 getRepoJobR :: OwnerName -> RepoName -> JobId -> Handler Html
 getRepoJobR owner name jobId = do
-    job <- runDB $ fromMaybeM notFound $ getEntity jobId
+    jobWithOutput <- runDB $ do
+        job <- fromMaybeM notFound $ getEntity jobId
+        attachJobOutput job
 
     defaultLayout $ do
         setTitle $ toHtml $ repoPath owner name <> " #" <> toPathPiece jobId

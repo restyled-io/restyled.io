@@ -8,6 +8,11 @@ module Model.Job
     , fetchJobIsInProgress
     , fetchJobLogLines
 
+    -- * @'JobOutput'@
+    , JobOutput(..)
+    , attachJobOutput
+    , fetchJobOutput
+
     -- * Completing Jobs
     , completeJob
     , completeJobErrored
@@ -68,6 +73,24 @@ fetchJobLogLines
 fetchJobLogLines jobId offset = selectList
     [JobLogLineJob ==. jobId]
     [Asc JobLogLineCreatedAt, OffsetBy offset]
+
+data JobOutput
+    = JobOutputInProgress (Entity Job)
+    | JobOutputCompleted [Entity JobLogLine]
+    | JobOutputLegacy Job
+
+attachJobOutput
+    :: MonadIO m => Entity Job -> SqlPersistT m (Entity Job, JobOutput)
+attachJobOutput job = (job, ) <$> fetchJobOutput job
+
+fetchJobOutput :: MonadIO m => Entity Job -> SqlPersistT m JobOutput
+fetchJobOutput jobE@(Entity jobId job@Job {..}) =
+    case (jobCompletedAt, jobStdout, jobStderr) of
+        (Just _, Nothing, Nothing) -> JobOutputCompleted <$> selectList
+            [JobLogLineJob ==. jobId]
+            [Asc JobLogLineCreatedAt]
+        (Just _, _, _) -> pure $ JobOutputLegacy job
+        (_, _, _) -> pure $ JobOutputInProgress jobE
 
 completeJob :: UTCTime -> (ExitCode, String, String) -> Job -> Job
 completeJob now (ec, out, err) job = job

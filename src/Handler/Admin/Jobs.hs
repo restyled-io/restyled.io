@@ -13,7 +13,10 @@ import Yesod.Paginator
 
 getAdminJobsR :: Handler Html
 getAdminJobsR = do
-    pages <- runDB $ selectPaginated 5 [] [Desc JobCreatedAt]
+    pages <- runDB $ traverse attachJobOutput =<< selectPaginated
+        5
+        []
+        [Desc JobCreatedAt]
 
     adminLayout $ do
         setTitle "Restyled Admin / Jobs"

@@ -3,7 +3,7 @@
 module Widgets.Job
     ( jobCard
     , jobOutput
-    , colorizedLogLine
+    , colorizedJobLogLine
 
     -- * Job completion
     -- |
@@ -55,15 +55,22 @@ jobCompletion job = case (jobCompletedAt job, jobExitCode job) of
 jobIsRetriable :: Job -> Bool
 jobIsRetriable = (`notElem` [Nothing, Just 0]) . jobExitCode
 
-jobCard :: Entity Job -> Widget
-jobCard job = do
+jobCard :: (Entity Job, JobOutput) -> Widget
+jobCard (Entity jobId job, output) = do
     now <- liftIO getCurrentTime
     $(widgetFile "widgets/job-card")
 
-jobOutput :: Entity Job -> Widget
-jobOutput (Entity jobId job) = $(widgetFile "widgets/job-output")
+jobOutput :: JobOutput -> Widget
+jobOutput output = $(widgetFile "widgets/job-output")
   where
-    jobHasCompleteOutput = isJust (jobStdout job) || isJust (jobStderr job)
+    streamElementId = case output of
+        JobOutputInProgress (Entity jobId _) ->
+            "logs-job-id-" <> toPathPiece jobId
+        _ -> "unused"
+
+colorizedJobLogLine :: Entity JobLogLine -> Widget
+colorizedJobLogLine (Entity _ JobLogLine {..}) =
+    colorizedLogLine jobLogLineStream jobLogLineContent
 
 colorizedLogLine :: Text -> Text -> Widget
 colorizedLogLine stream ln

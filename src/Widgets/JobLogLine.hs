@@ -10,7 +10,6 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Widgets.Job
 
 renderJobLogLine :: Entity JobLogLine -> Handler LT.Text
-renderJobLogLine (Entity _ JobLogLine {..}) = do
-    pc <- widgetToPageContent
-        $ colorizedLogLine jobLogLineStream jobLogLineContent
+renderJobLogLine logLine = do
+    pc <- widgetToPageContent $ colorizedJobLogLine logLine
     renderHtml <$> withUrlRenderer (pageBody pc)

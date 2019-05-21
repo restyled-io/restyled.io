@@ -43,9 +43,7 @@ if (typeof Output === "undefined") {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  var elem = document.getElementById(
-    "logs-job-id-#{rawJS $ toPathPiece jobId}"
-  );
+  var elem = document.getElementById("#{rawJS streamElementId}");
   var cardsCount = document.getElementsByClassName("card").length;
 
   if (elem) {
