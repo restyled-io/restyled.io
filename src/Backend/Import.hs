@@ -6,7 +6,7 @@ where
 
 import RIO as X hiding (timeout)
 
-import Control.Error.Util as X (bimapExceptT, hush, hushT, note, noteT, (??))
+import Control.Error.Util as X (hush, hushT, note, noteT, (??))
 import Control.Monad.Except as X
     (ExceptT(..), liftEither, runExceptT, throwError, withExceptT)
 import Control.Monad.Extra as X (fromMaybeM)
@@ -38,3 +38,10 @@ fromLeftM f me = either f pure =<< me
 
 overEntity :: Entity a -> (a -> a) -> Entity a
 overEntity e f = e { entityVal = f $ entityVal e }
+
+bimapMExceptT
+    :: Monad m => (e -> m f) -> (a -> m b) -> ExceptT e m a -> ExceptT f m b
+bimapMExceptT f g (ExceptT m) = ExceptT $ h =<< m
+  where
+    h (Left e) = Left <$> f e
+    h (Right a) = Right <$> g a
