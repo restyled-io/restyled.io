@@ -15,6 +15,7 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import RIO (HasLogFunc(..), LogFunc, lens)
 import RIO.DB hiding (runDB)
+import RIO.Logger (logFuncLog)
 import RIO.Process
 import RIO.Redis
 import Text.Hamlet (hamletFile)
@@ -115,8 +116,7 @@ instance Yesod App where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
-    shouldLogIO app _source level = return
-        $ appSettings app `allowsLevel` level
+    messageLoggerSource app _logger = logFuncLog $ appLogFunc app
 
     defaultMessageWidget title body = $(widgetFile "default-message-widget")
 
