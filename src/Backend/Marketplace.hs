@@ -77,8 +77,8 @@ runSynchronize = do
                     }
                 [MarketplaceAccountMarketplacePlan =. planId]
 
-    logInfo "GitHub Marketplace data synchronized"
     runDB $ deleteUnsynchronized $ mconcat synchronizedAccountIds
+    logInfo "GitHub Marketplace data synchronized"
 
 deleteUnsynchronized
     :: HasLogFunc env => [MarketplaceAccountId] -> SqlPersistT (RIO env) ()
