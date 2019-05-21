@@ -116,6 +116,10 @@ warpSettings foundation =
 
 appMain :: IO ()
 appMain = do
+    -- Ensure container logs are visible immediately
+    hSetBuffering stdout LineBuffering
+    hSetBuffering stderr LineBuffering
+
     settings <- loadEnvSettings
     foundation <- makeFoundation settings
     app <- makeApplication foundation
