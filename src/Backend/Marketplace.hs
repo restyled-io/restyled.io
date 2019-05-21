@@ -10,6 +10,7 @@ where
 
 import Backend.Import
 
+import GitHub.Data (toPathPart)
 import Network.HTTP.Client (parseRequest)
 import SVCS.GitHub.ApiClient
 
@@ -44,7 +45,6 @@ runSynchronize = do
     logInfo "Synchronizing GitHub Marketplace data"
     plans <- getGitHub $ marketplaceListingPath <> "/plans"
     synchronizedAccountIds <- for plans $ \plan -> do
-        logDebug $ "Plan: " <> displayShow plan
         planId <- runDB $ entityKey <$> upsert
             MarketplacePlan
                 { marketplacePlanGithubId = ghmpId plan
@@ -63,7 +63,12 @@ runSynchronize = do
             <> "/accounts"
 
         for accounts $ \account -> do
-            logDebug $ "Account: " <> displayShow account
+            logInfo
+                $ "Account "
+                <> displayShow (toPathPart $ ghaLogin account)
+                <> " has plan "
+                <> displayShow (ghmpName plan)
+
             runDB $ entityKey <$> upsert
                 MarketplaceAccount
                     { marketplaceAccountGithubId = ghaId account
@@ -75,14 +80,20 @@ runSynchronize = do
     logInfo "GitHub Marketplace data synchronized"
     runDB $ deleteUnsynchronized $ mconcat synchronizedAccountIds
 
-deleteUnsynchronized :: MonadIO m => [MarketplaceAccountId] -> SqlPersistT m ()
+deleteUnsynchronized
+    :: HasLogFunc env => [MarketplaceAccountId] -> SqlPersistT (RIO env) ()
 deleteUnsynchronized synchronizedAccountIds = do
     planId <- entityKey <$> fetchDiscountMarketplacePlan
-
-    deleteWhere
+    unsynchronizedAccounts <- selectList
         [ MarketplaceAccountId /<-. synchronizedAccountIds
         , MarketplaceAccountMarketplacePlan !=. planId
         ]
+        []
+
+    lift $ logInfo $ "Deleting unsynchronized accounts: " <> displayShow
+        (map (marketplaceAccountGithubLogin . entityVal) unsynchronizedAccounts)
+
+    deleteWhere [MarketplaceAccountId <-. map entityKey unsynchronizedAccounts]
 
 fetchDiscountMarketplacePlan
     :: MonadIO m => SqlPersistT m (Entity MarketplacePlan)
