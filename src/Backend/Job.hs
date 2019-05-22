@@ -23,7 +23,7 @@ awaitJob t = do
     pure $ either (const Nothing) (decodeStrict . snd =<<) eresult
 
 processJob :: HasDB env => ExecRestyler (RIO env) -> Entity Job -> RIO env ()
-processJob execRestyler jobE@(Entity jobId job) = do
+processJob execRestyler jobE@(Entity _ job) = do
     result <- runExceptT $ do
         repo <- noteT "Repo not found" $ MaybeT $ runDB $ fetchRepoForJob job
         withExceptT show $ tryExecRestyler execRestyler $ AcceptedJob
@@ -32,7 +32,11 @@ processJob execRestyler jobE@(Entity jobId job) = do
             }
 
     now <- liftIO getCurrentTime
-    let failure = completeJobErrored now
-        success = completeJob now
 
-    runDB $ replace jobId $ either failure success result job
+    let failure :: String -> Entity Job -> Entity Job
+        failure = flip overEntity . completeJobErrored now
+
+        success :: ExitCode -> Entity Job -> Entity Job
+        success = flip overEntity . completeJob now
+
+    runDB $ replaceEntity $ either failure success result jobE
