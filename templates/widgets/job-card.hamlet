@@ -29,7 +29,7 @@
   ^{jobOutput output}
 
   <aside>
-    $if jobIsRetriable job
+    $maybe _ <- jobCompletedAt job
       <form
         method=post
         action=@{repoP (jobOwner job) (jobRepo job) $ jobRetryR jobId}
