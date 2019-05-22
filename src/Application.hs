@@ -29,6 +29,7 @@ import RIO.DB (createConnectionPool)
 import RIO.Logger
 import RIO.Orphans ()
 import RIO.Process
+import Settings.Display
 import Settings.Env
 import Yesod.Auth
 
@@ -62,16 +63,19 @@ appMain = do
 loadApp :: AppSettings -> IO App
 loadApp settings = do
     logFunc <- terminalLogFunc $ loggerLogLevel $ appLogLevel settings
-
-    runRIO logFunc $ logInfoN $ "STARTUP{ " <> tshow settings <> " }"
+    runRIO logFunc $ logInfoN $ pack $ displayAppSettings settings
 
     App settings
-        <$> makeStatic appStaticDir
+        <$> makeStatic (appStaticDir settings)
         <*> runRIO logFunc (createConnectionPool $ appDatabaseConf settings)
         <*> checkedConnect (appRedisConf settings)
         <*> getGlobalManager
         <*> pure logFunc
         <*> mkDefaultProcessContext
+  where
+    makeStatic
+        | appMutableStatic settings = staticDevel
+        | otherwise = static
 
 waiMiddleware :: App -> Middleware
 waiMiddleware app =

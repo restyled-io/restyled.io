@@ -54,6 +54,9 @@ settings =
         <*> switch "AUTH_DUMMY_LOGIN" mempty
         <*> var str "FAVICON" (def "config/favicon.ico")
         <*> switch "DETAILED_REQUEST_LOGGER" mempty
+        <*> switch "MUTABLE_STATIC" mempty
+        <*> var nonempty "STATIC_DIR" (def "static")
+        <*> switch "STUB_MARKETPLACE_LISTING" mempty
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"

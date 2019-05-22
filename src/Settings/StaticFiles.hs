@@ -1,23 +1,12 @@
-{-# LANGUAGE TemplateHaskell #-}
-
--- | Static file references
---
--- To refer to @static\/js\/script.js@:
---
--- > js_script_js
---
--- This is equivalent to:
---
--- @
--- 'StaticFile' ["js", "script.js"] []
--- @
---
 module Settings.StaticFiles
-    ( module Settings.StaticFiles
+    ( staticR
     )
 where
 
-import Settings (appStaticDir)
-import Yesod.Static (staticFiles)
+import Prelude
 
-staticFiles appStaticDir
+import Yesod
+import Yesod.Static
+
+staticR :: FilePath -> Route Static
+staticR _ = StaticRoute ["x", "y"] []

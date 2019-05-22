@@ -74,8 +74,8 @@ instance Yesod App where
         mUser <- maybeAuth
 
         pc <- widgetToPageContent $ do
-            addStylesheet $ StaticR css_strapless_css
-            addStylesheet $ StaticR css_main_css
+            addStylesheet $ StaticR $ staticR "css/strapless.css"
+            addStylesheet $ StaticR $ staticR "css/main.css"
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -107,11 +107,17 @@ instance Yesod App where
         settings <- getsYesod appSettings
         runDB $ authorizeRepo settings owner repo =<< maybeAuthId
 
-    addStaticContent = addStaticContentExternal
-        minifym
-        genFileName
-        appStaticDir
-        (StaticR . flip StaticRoute [])
+    addStaticContent ext mime content = do
+        staticDir <- getsYesod $ appStaticDir . appSettings
+
+        addStaticContentExternal
+            minifym
+            genFileName
+            staticDir
+            (StaticR . flip StaticRoute [])
+            ext
+            mime
+            content
       where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
@@ -137,9 +143,9 @@ adminLayout widget = do
     master <- getYesod
     mmsg <- getMessage
     pc <- widgetToPageContent $ do
-        addStylesheet $ StaticR css_strapless_css
-        addStylesheet $ StaticR css_main_css
-        addStylesheet $ StaticR css_admin_css
+        addStylesheet $ StaticR $ staticR "css/strapless.css"
+        addStylesheet $ StaticR $ staticR "css/main.css"
+        addStylesheet $ StaticR $ staticR "css/admin.css"
         addScriptRemote "https://code.jquery.com/jquery-3.3.1.min.js"
         addScriptRemote "https://underscorejs.org/underscore-min.js"
         $(widgetFile "admin-layout")
