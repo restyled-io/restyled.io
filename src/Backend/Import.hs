@@ -27,6 +27,7 @@ import Model.User as X
 import RIO.DB as X
 import RIO.Redis as X
 import Settings as X
+import Settings.Env as X
 import System.Exit as X (ExitCode(..))
 import Web.PathPieces as X
 

@@ -23,6 +23,7 @@ backendMain = do
     hSetBuffering stdout LineBuffering
     hSetBuffering stderr LineBuffering
 
+    loadEnv
     backend <- loadBackend =<< loadEnvSettings
 
     runRIO backend $ do

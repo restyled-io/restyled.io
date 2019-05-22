@@ -23,6 +23,7 @@ import Database.Persist.Sql
     (SqlBackend, SqlPersistT, connEscapeName, rawExecute, rawSql, unSingle)
 import Database.Redis (del)
 import Foundation as X
+import LoadEnv (loadEnvFrom)
 import Model as X
 import RIO (RIO, runRIO)
 import RIO.DB (HasDB)
@@ -30,7 +31,8 @@ import qualified RIO.DB as DB
 import RIO.Orphans (HasResourceMap(..))
 import RIO.Redis (Redis, runRedis)
 import Routes as X
-import Settings (AppSettings(..), loadEnvSettingsTest)
+import Settings (AppSettings(..))
+import Settings.Env (loadEnvSettings)
 import Test.Hspec.Core.Spec (SpecM)
 import Test.Hspec.Lifted as X
 import Test.HUnit (assertFailure)
@@ -67,7 +69,8 @@ runTestRIO action = do
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
-    settings <- loadEnvSettingsTest
+    loadEnvFrom ".env.test"
+    settings <- loadEnvSettings
     foundation <- loadApp settings
     runRIO foundation $ do
         DB.runDB wipeDB

@@ -159,6 +159,7 @@ tests:
       - hspec
       - hspec-core
       - hspec-expectations-lifted
+      - load-env
       - megaparsec
       - persistent
       - rio

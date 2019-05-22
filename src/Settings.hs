@@ -1,53 +1,47 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-deprecations #-}
-{-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
 
 module Settings
     ( OAuthKeys(..)
+
+    -- * Settings
     , AppSettings(..)
     , HasSettings(..)
-    , loadEnvSettings
-    , loadEnvSettingsTest
-    , allowsLevel
+    , loadEnv
+
+    -- * Compile-time choices
     , appSettingsIsDebug
-    , widgetFile
     , appStaticDir
     , appFavicon
     , appRevision
+    , widgetFile
     , marketplaceListingPath
     , requestLogger
     , makeStatic
     )
 where
 
--- brittany-disable
-
 import ClassyPrelude.Yesod
 
 import qualified Data.ByteString.Char8 as C8
 import Data.FileEmbed (embedFile)
-import qualified Data.Text as T
 import Database.Persist.Postgresql (PostgresConf(..))
-import Database.Redis
-    (ConnectInfo(..), PortID(..), defaultConnectInfo, parseConnectInfo)
+import Database.Redis (ConnectInfo(..), PortID(..))
 import Development.GitRev (gitCommitDate, gitHash)
-import qualified Env
 import Language.Haskell.TH.Syntax (Exp, Q)
 import LoadEnv (loadEnvFrom)
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (HostPreference)
-#if DEVELOPMENT
-import Network.Wai.Middleware.RequestLogger (logStdoutDev)
-#else
-import Network.Wai.Middleware.RequestLogger (logStdout)
-#endif
 import RIO (Lens')
 import SVCS.GitHub
 import SVCS.GitHub.ApiClient (GitHubToken)
+
 #if DEVELOPMENT
+import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Yesod.Default.Util (widgetFileReload)
 #else
+import Network.Wai.Middleware.RequestLogger (logStdout)
 import Yesod.Default.Util (widgetFileNoReload)
 #endif
 
@@ -122,85 +116,26 @@ class HasSettings env where
 instance HasSettings AppSettings where
     settingsL = id
 
-type EnvParser a = forall e.
-    (Env.AsUnset e, Env.AsUnread e, Env.AsEmpty e) => Env.Parser e a
-
-loadEnvSettings :: IO AppSettings
-loadEnvSettings =
+loadEnv :: IO ()
+loadEnv =
 #if DEVELOPMENT
-    loadEnvSettingsDev
-#else
-    Env.parse id envSettings
-#endif
-
-loadEnvSettingsDev :: IO AppSettings
-loadEnvSettingsDev = do
     loadEnvFrom ".env.development"
-    Env.parse id envSettings
-
-loadEnvSettingsTest :: IO AppSettings
-loadEnvSettingsTest = do
-    loadEnvFrom ".env.test"
-    Env.parse id envSettings
-
-envSettings :: EnvParser AppSettings
-envSettings = AppSettings
-    <$> envDatabaseConfig
-    <*> envRedisConfig
-    <*> Env.var Env.str "APPROOT" (Env.def "http://localhost:3000")
-    <*> Env.var Env.str "HOST" (Env.def "*4")
-    <*> Env.var Env.auto "PORT" (Env.def 3000)
-    <*> envLogLevel
-    <*> pure "Patrick Brisbin 2018-2019"
-    <*> (mkGitHubAppId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
-    <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
-    <*> (liftA2 OAuthKeys
-        <$> optional (Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_ID" mempty)
-        <*> optional (Env.var Env.nonempty "GITHUB_OAUTH_CLIENT_SECRET" mempty))
-    <*> Env.var Env.nonempty "GITHUB_RATE_LIMIT_TOKEN" mempty
-    <*> (liftA2 OAuthKeys
-        <$> optional (Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_ID" mempty)
-        <*> optional (Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_SECRET" mempty))
-    <*> Env.var Env.str "RESTYLER_IMAGE" (Env.def "restyled/restyler")
-    <*> optional (Env.var Env.str "RESTYLER_TAG" mempty)
-    <*> (map pack <$> Env.var (Env.splitOn ',') "ADMIN_EMAILS" (Env.def []))
-#if DOCKERIZED
-    -- Don't even look for this setting if building the deployment image. We
-    -- would need to both forget the compilation flag and accidentally set the
-    -- ENV switch on production. Defense in depth.
-    <*> pure False
 #else
-    <*> Env.switch "AUTH_DUMMY_LOGIN" mempty
+    pure ()
 #endif
 
-envDatabaseConfig :: EnvParser PostgresConf
-envDatabaseConfig = PostgresConf
-    <$> Env.var Env.nonempty "DATABASE_URL" (Env.def defaultDatabaseURL)
-    <*> Env.var Env.auto "PGPOOLSIZE" (Env.def 10)
-  where
-    defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
+allowsLevel :: AppSettings -> LogLevel -> Bool
+allowsLevel AppSettings {..} = (>= appLogLevel)
 
-envRedisConfig :: EnvParser ConnectInfo
-envRedisConfig = Env.var (envReadEither parseConnectInfo) "REDIS_URL" (Env.def defaultConnectInfo)
-
-envReadEither :: Env.AsUnread e => (String -> Either String a) -> Env.Reader e a
-envReadEither f = first Env.unread . f
-
-envLogLevel :: EnvParser LogLevel
-envLogLevel = toLogLevel <$> Env.var Env.str "LOG_LEVEL" (Env.def "info")
-  where
-    toLogLevel :: Text -> LogLevel
-    toLogLevel t = case T.toLower t of
-        "debug" -> LevelDebug
-        "info" -> LevelInfo
-        "warn" -> LevelWarn
-        "error" -> LevelError
-        _ -> LevelOther t
+appSettingsIsDebug :: AppSettings -> Bool
+appSettingsIsDebug = (`allowsLevel` LevelDebug)
 
 -- This value is needed in a pure context, and so can't read from ENV. It also
 -- doesn't differ between environments, so we might as well harcode it.
 appStaticDir :: FilePath
 appStaticDir = "static"
+
+-- brittany-disable-next-binding
 
 appFavicon :: ByteString
 appFavicon =
@@ -209,6 +144,8 @@ appFavicon =
 #else
     $(embedFile "config/favicon.ico")
 #endif
+
+-- brittany-disable-next-binding
 
 -- | Application revision
 --
@@ -223,11 +160,7 @@ appRevision =
     $(gitHash) <> " - " <> $(gitCommitDate)
 #endif
 
-allowsLevel :: AppSettings -> LogLevel -> Bool
-allowsLevel AppSettings{..} = (>= appLogLevel)
-
-appSettingsIsDebug :: AppSettings -> Bool
-appSettingsIsDebug = (`allowsLevel` LevelDebug)
+-- brittany-disable-next-binding
 
 widgetFile :: String -> Q Exp
 widgetFile =
@@ -238,6 +171,8 @@ widgetFile =
 #endif
     def
 
+-- brittany-disable-next-binding
+
 marketplaceListingPath :: Text
 marketplaceListingPath =
 #if DEVELOPMENT
@@ -246,6 +181,8 @@ marketplaceListingPath =
     "/marketplace_listing"
 #endif
 
+-- brittany-disable-next-binding
+
 requestLogger :: Middleware
 requestLogger =
 #if DEVELOPMENT
@@ -253,6 +190,8 @@ requestLogger =
 #else
     logStdout
 #endif
+
+-- brittany-disable-next-binding
 
 makeStatic :: FilePath -> IO Static
 makeStatic =

@@ -28,7 +28,7 @@ import RIO.DB (createConnectionPool)
 import RIO.Logger
 import RIO.Orphans ()
 import RIO.Process
-import Settings (requestLogger)
+import Settings.Env
 import Yesod.Auth
 
 import Handler.Common
@@ -53,6 +53,7 @@ appMain = do
     hSetBuffering stdout LineBuffering
     hSetBuffering stderr LineBuffering
 
+    loadEnv
     app <- loadApp =<< loadEnvSettings
     runSettings (warpSettings app) . waiMiddleware =<< toWaiAppPlain app
 
