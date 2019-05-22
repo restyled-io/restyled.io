@@ -67,15 +67,13 @@ execRestyler (Entity _ repo) job = do
         (appGitHubAppKey settings)
         (repoInstallationId repo)
 
-    let debug = appSettingsIsDebug settings || repoDebugEnabled repo
-
     machines <-
         runDB $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
 
     runRestyleMachine
         machines
         "docker"
-        (restyleDockerRun settings token job debug)
+        (restyleDockerRun settings token job $ repoIsDebug settings repo)
         (captureJobLogLine (entityKey job) "stdout" . pack)
         (captureJobLogLine (entityKey job) "stderr" . pack)
 

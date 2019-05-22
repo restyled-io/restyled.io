@@ -5,7 +5,6 @@ module Settings
 
     -- * Runtime @'AppSettings'@
     , AppSettings(..)
-    , appSettingsIsDebug
     , HasSettings(..)
 
     -- * Compile-time settings
@@ -63,9 +62,6 @@ data AppSettings = AppSettings
     , appStaticDir :: FilePath
     , appStubMarketplaceListing :: Bool
     }
-
-appSettingsIsDebug :: AppSettings -> Bool
-appSettingsIsDebug = (>= LevelDebug) . appLogLevel
 
 class HasSettings env where
     settingsL :: Lens' env AppSettings

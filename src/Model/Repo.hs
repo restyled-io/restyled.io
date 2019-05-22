@@ -5,6 +5,7 @@ module Model.Repo
     -- * Virtual attributes
       repoPath
     , repoPullPath
+    , repoIsDebug
 
     -- * Queries
     , fetchReposByOwnerName
@@ -23,9 +24,11 @@ where
 
 import ClassyPrelude
 
+import Control.Monad.Logger (LogLevel(..))
 import Database.Persist
 import Database.Persist.Sql (SqlPersistT)
 import Model
+import Settings
 import Yesod.Core (toPathPiece)
 
 -- | Make a nicely-formatted @:owner\/:name@
@@ -37,6 +40,10 @@ repoPath owner name = toPathPiece owner <> "/" <> toPathPiece name
 
 repoPullPath :: OwnerName -> RepoName -> PullRequestNum -> Text
 repoPullPath owner name num = repoPath owner name <> "#" <> toPathPiece num
+
+repoIsDebug :: AppSettings -> Repo -> Bool
+repoIsDebug AppSettings {..} Repo {..} =
+    appLogLevel == LevelDebug || repoDebugEnabled
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
