@@ -42,10 +42,9 @@ instance HasRedis Backend where
     redisConnectionL = lens backendRedisConn $ \x y -> x
         { backendRedisConn = y }
 
-loadBackend :: IO Backend
-loadBackend = do
-    settings@AppSettings {..} <- loadEnvSettings
-    logFunc <- terminalLogFunc (loggerLogLevel appLogLevel)
+loadBackend :: AppSettings -> IO Backend
+loadBackend settings@AppSettings {..} = do
+    logFunc <- terminalLogFunc $ loggerLogLevel appLogLevel
 
     Backend logFunc settings
         <$> mkDefaultProcessContext

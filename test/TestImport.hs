@@ -11,7 +11,7 @@ module TestImport
     )
 where
 
-import Application (makeFoundation)
+import Application (loadApp)
 import Backend.Job (queueName)
 import Backend.Webhook (webhookQueueName)
 import Cache
@@ -68,7 +68,7 @@ runTestRIO action = do
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
     settings <- loadEnvSettingsTest
-    foundation <- makeFoundation settings
+    foundation <- loadApp settings
     runRIO foundation $ do
         DB.runDB wipeDB
         runRedis wipeRedis

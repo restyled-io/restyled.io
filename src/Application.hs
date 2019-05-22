@@ -3,15 +3,13 @@
 
 module Application
     ( appMain
-    , makeFoundation
+    , loadApp
     )
 where
 
 import Import
 
-import Control.Monad.Logger (liftLoc)
 import Database.Redis (checkedConnect)
-import Language.Haskell.TH.Syntax (qLocation)
 import Network.HTTP.Client.TLS (getGlobalManager)
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
@@ -25,20 +23,12 @@ import Network.Wai.Handler.Warp
     )
 import Network.Wai.Middleware.ForceSSL
 import Network.Wai.Middleware.MethodOverridePost
-import Network.Wai.Middleware.RequestLogger
-    ( Destination(Callback, Logger)
-    , IPAddrSource(..)
-    , OutputFormat(..)
-    , destination
-    , mkRequestLogger
-    , outputFormat
-    )
 import RIO (runRIO)
 import RIO.DB (createConnectionPool)
 import RIO.Logger
 import RIO.Orphans ()
 import RIO.Process
-import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet, toLogStr)
+import Settings (requestLogger)
 import Yesod.Auth
 
 import Handler.Common
@@ -57,71 +47,44 @@ import Handler.Admin.Repos
 
 mkYesodDispatch "App" resourcesApp
 
-makeFoundation :: AppSettings -> IO App
-makeFoundation appSettings = do
-    appHttpManager <- getGlobalManager
-    appLogFunc <- terminalLogFunc $ loggerLogLevel $ appLogLevel appSettings
-    appProcessContext <- mkDefaultProcessContext
-    appStatic <- (if appMutableStatic appSettings then staticDevel else static)
-        appStaticDir
-    appRedisConn <- checkedConnect $ appRedisConf appSettings
-    appConnPool <- runRIO appLogFunc $ createConnectionPool $ appDatabaseConf
-        appSettings
-
-    runRIO appLogFunc $ logInfoN $ "STARTUP{ " <> tshow appSettings <> " }"
-
-    pure App {..}
-
-makeApplication :: App -> IO Application
-makeApplication foundation = do
-    logWare <- makeLogWare foundation
-    appPlain <- toWaiAppPlain foundation
-    pure $ logWare $ waiMiddleware appPlain
-
-waiMiddleware :: Middleware
-waiMiddleware = forceSSL . methodOverridePost . defaultMiddlewaresNoLogging
-
-makeLogWare :: App -> IO Middleware
-makeLogWare foundation = do
-    useColor <- terminalUseColor
-    loggerSet <- newStdoutLoggerSet defaultBufSize
-    mkRequestLogger def
-        { outputFormat = if appSettings foundation `allowsLevel` LevelDebug
-            then Detailed useColor
-            else Apache apacheIpSource
-        , destination = if appSettings foundation `allowsLevel` LevelInfo
-            then Logger loggerSet
-            else Callback $ \_ -> pure ()
-        }
-  where
-    apacheIpSource = if appIpFromHeader $ appSettings foundation
-        then FromFallback
-        else FromSocket
-
--- brittany-disable-next-binding
-
--- | Warp settings for the given foundation value.
-warpSettings :: App -> Settings
-warpSettings foundation =
-      setPort (appPort $ appSettings foundation)
-    $ setHost (appHost $ appSettings foundation)
-    $ setOnException (\_req e ->
-        when (defaultShouldDisplayException e) $ logFuncLog
-            (appLogFunc foundation)
-            $(qLocation >>= liftLoc)
-            "yesod"
-            LevelError
-            (toLogStr $ "Exception from Warp: " ++ show e))
-      defaultSettings
-
 appMain :: IO ()
 appMain = do
     -- Ensure container logs are visible immediately
     hSetBuffering stdout LineBuffering
     hSetBuffering stderr LineBuffering
 
-    settings <- loadEnvSettings
-    foundation <- makeFoundation settings
-    app <- makeApplication foundation
+    app <- loadApp =<< loadEnvSettings
+    runSettings (warpSettings app) . waiMiddleware =<< toWaiAppPlain app
 
-    runSettings (warpSettings foundation) app
+loadApp :: AppSettings -> IO App
+loadApp settings = do
+    logFunc <- terminalLogFunc $ loggerLogLevel $ appLogLevel settings
+
+    runRIO logFunc $ logInfoN $ "STARTUP{ " <> tshow settings <> " }"
+
+    let mkStatic = if appMutableStatic settings then staticDevel else static
+    App settings
+        <$> mkStatic appStaticDir
+        <*> runRIO logFunc (createConnectionPool $ appDatabaseConf settings)
+        <*> checkedConnect (appRedisConf settings)
+        <*> getGlobalManager
+        <*> pure logFunc
+        <*> mkDefaultProcessContext
+
+waiMiddleware :: Middleware
+waiMiddleware =
+    forceSSL . methodOverridePost . requestLogger . defaultMiddlewaresNoLogging
+
+warpSettings :: App -> Settings
+warpSettings app =
+    setPort (appPort $ appSettings app)
+        . setHost (appHost $ appSettings app)
+        . setOnException onWarpException
+        $ defaultSettings
+  where
+    onWarpException _req ex =
+        when (defaultShouldDisplayException ex)
+            $ runRIO app
+            $ logErrorN
+            $ "Warp exception: "
+            <> tshow ex

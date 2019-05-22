@@ -23,7 +23,7 @@ backendMain = do
     hSetBuffering stdout LineBuffering
     hSetBuffering stderr LineBuffering
 
-    backend <- loadBackend
+    backend <- loadBackend =<< loadEnvSettings
 
     runRIO backend $ do
         void $ async synchronizeMarketplacePlans

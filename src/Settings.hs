@@ -16,6 +16,7 @@ module Settings
     , appFavicon
     , appRevision
     , marketplaceListingPath
+    , requestLogger
     )
 where
 
@@ -32,7 +33,13 @@ import Development.GitRev (gitCommitDate, gitHash)
 import qualified Env
 import Language.Haskell.TH.Syntax (Exp, Q)
 import LoadEnv (loadEnvFrom)
+import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (HostPreference)
+#if DEVELOPMENT
+import Network.Wai.Middleware.RequestLogger (logStdoutDev)
+#else
+import Network.Wai.Middleware.RequestLogger (logStdout)
+#endif
 import RIO (Lens')
 import SVCS.GitHub
 import SVCS.GitHub.ApiClient (GitHubToken)
@@ -234,4 +241,12 @@ marketplaceListingPath =
     "/marketplace_listing/stubbed"
 #else
     "/marketplace_listing"
+#endif
+
+requestLogger :: Middleware
+requestLogger =
+#if DEVELOPMENT
+    logStdoutDev
+#else
+    logStdout
 #endif
