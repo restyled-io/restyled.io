@@ -17,6 +17,7 @@ module Settings
     , appRevision
     , marketplaceListingPath
     , requestLogger
+    , makeStatic
     )
 where
 
@@ -62,7 +63,6 @@ data AppSettings = AppSettings
     , appPort :: Int
     , appIpFromHeader :: Bool
     , appLogLevel :: LogLevel
-    , appMutableStatic :: Bool
     , appCopyright :: Text
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
@@ -149,7 +149,6 @@ envSettings = AppSettings
     <*> Env.var Env.auto "PORT" (Env.def 3000)
     <*> Env.switch "IP_FROM_HEADER" mempty
     <*> envLogLevel
-    <*> Env.switch "MUTABLE_STATIC" mempty
     <*> pure "Patrick Brisbin 2018-2019"
     <*> (mkGitHubAppId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
     <*> Env.var Env.nonempty "GITHUB_APP_KEY" mempty
@@ -249,4 +248,12 @@ requestLogger =
     logStdoutDev
 #else
     logStdout
+#endif
+
+makeStatic :: FilePath -> IO Static
+makeStatic =
+#if DEVELOPMENT
+    staticDevel
+#else
+    static
 #endif

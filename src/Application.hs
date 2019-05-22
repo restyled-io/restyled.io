@@ -62,9 +62,8 @@ loadApp settings = do
 
     runRIO logFunc $ logInfoN $ "STARTUP{ " <> tshow settings <> " }"
 
-    let mkStatic = if appMutableStatic settings then staticDevel else static
     App settings
-        <$> mkStatic appStaticDir
+        <$> makeStatic appStaticDir
         <*> runRIO logFunc (createConnectionPool $ appDatabaseConf settings)
         <*> checkedConnect (appRedisConf settings)
         <*> getGlobalManager

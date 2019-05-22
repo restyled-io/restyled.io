@@ -60,7 +60,6 @@ emptySettings = AppSettings
     , appPort = 0
     , appIpFromHeader = False
     , appLogLevel = error "unused"
-    , appMutableStatic = False
     , appCopyright = ""
     , appGitHubAppId = error "unused"
     , appGitHubAppKey = error "unused"
