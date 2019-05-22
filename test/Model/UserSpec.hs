@@ -58,7 +58,6 @@ emptySettings = AppSettings
     , appRoot = error "unused"
     , appHost = error "unused"
     , appPort = 0
-    , appIpFromHeader = False
     , appLogLevel = error "unused"
     , appCopyright = ""
     , appGitHubAppId = error "unused"

@@ -61,7 +61,6 @@ data AppSettings = AppSettings
     , appRoot :: Text
     , appHost :: HostPreference
     , appPort :: Int
-    , appIpFromHeader :: Bool
     , appLogLevel :: LogLevel
     , appCopyright :: Text
     , appGitHubAppId :: GitHubAppId
@@ -147,7 +146,6 @@ envSettings = AppSettings
     <*> Env.var Env.str "APPROOT" (Env.def "http://localhost:3000")
     <*> Env.var Env.str "HOST" (Env.def "*4")
     <*> Env.var Env.auto "PORT" (Env.def 3000)
-    <*> Env.switch "IP_FROM_HEADER" mempty
     <*> envLogLevel
     <*> pure "Patrick Brisbin 2018-2019"
     <*> (mkGitHubAppId <$> Env.var Env.auto "GITHUB_APP_ID" mempty)
