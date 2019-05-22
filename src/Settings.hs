@@ -29,7 +29,8 @@ import qualified Data.ByteString.Char8 as C8
 import Data.FileEmbed (embedFile)
 import qualified Data.Text as T
 import Database.Persist.Postgresql (PostgresConf(..))
-import Database.Redis (ConnectInfo(..), PortID(..), parseConnectInfo)
+import Database.Redis
+    (ConnectInfo(..), PortID(..), defaultConnectInfo, parseConnectInfo)
 import Development.GitRev (gitCommitDate, gitHash)
 import qualified Env
 import Language.Haskell.TH.Syntax (Exp, Q)
@@ -124,20 +125,23 @@ instance HasSettings AppSettings where
 type EnvParser a = forall e.
     (Env.AsUnset e, Env.AsUnread e, Env.AsEmpty e) => Env.Parser e a
 
-
 loadEnvSettings :: IO AppSettings
-loadEnvSettings = do
+loadEnvSettings =
 #if DEVELOPMENT
-    loadEnvFrom ".env.development"
+    loadEnvSettingsDev
+#else
+    Env.parse id envSettings
 #endif
+
+loadEnvSettingsDev :: IO AppSettings
+loadEnvSettingsDev = do
+    loadEnvFrom ".env.development"
     Env.parse id envSettings
 
 loadEnvSettingsTest :: IO AppSettings
 loadEnvSettingsTest = do
     loadEnvFrom ".env.test"
     Env.parse id envSettings
-
-{-# ANN loadEnvSettings ("HLint: ignore Redundant do" :: String) #-}
 
 envSettings :: EnvParser AppSettings
 envSettings = AppSettings
@@ -159,7 +163,7 @@ envSettings = AppSettings
         <*> optional (Env.var Env.nonempty "GITLAB_OAUTH_CLIENT_SECRET" mempty))
     <*> Env.var Env.str "RESTYLER_IMAGE" (Env.def "restyled/restyler")
     <*> optional (Env.var Env.str "RESTYLER_TAG" mempty)
-    <*> (map T.strip . T.splitOn "," <$> Env.var Env.str "ADMIN_EMAILS" (Env.def ""))
+    <*> (map pack <$> Env.var (Env.splitOn ',') "ADMIN_EMAILS" (Env.def []))
 #if DOCKERIZED
     -- Don't even look for this setting if building the deployment image. We
     -- would need to both forget the compilation flag and accidentally set the
@@ -177,8 +181,10 @@ envDatabaseConfig = PostgresConf
     defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 envRedisConfig :: EnvParser ConnectInfo
-envRedisConfig = either error id . parseConnectInfo
-    <$> Env.var Env.nonempty "REDIS_URL" (Env.def "redis://localhost:6379")
+envRedisConfig = Env.var (envReadEither parseConnectInfo) "REDIS_URL" (Env.def defaultConnectInfo)
+
+envReadEither :: Env.AsUnread e => (String -> Either String a) -> Env.Reader e a
+envReadEither f = first Env.unread . f
 
 envLogLevel :: EnvParser LogLevel
 envLogLevel = toLogLevel <$> Env.var Env.str "LOG_LEVEL" (Env.def "info")
