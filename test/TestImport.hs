@@ -70,8 +70,7 @@ runTestRIO action = do
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
     loadEnvFrom ".env.test"
-    settings <- loadEnvSettings
-    foundation <- loadApp settings
+    foundation <- loadApp =<< loadEnvSettings
     runRIO foundation $ do
         DB.runDB wipeDB
         runRedis wipeRedis
