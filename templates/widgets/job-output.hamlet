@@ -1,11 +1,27 @@
-$maybe x <- jobStdout job
-  $if not (null x)
-    <pre .logs .stdout>
-      $forall ln <- lines x
-        <span .prefix>stdout</span>^{colorizedLogLine ln}
+$case output
+  $of JobOutputInProgress (Entity jobId job)
+    <pre
+      .logs-stream
+      ##{streamElementId}
+      data-stream-url=@{repoP (jobOwner job) (jobRepo job) $ jobLogR jobId}
+      data-stream-loaded=false
+      >
+      Fetching job log...
 
-$maybe x <- jobStderr job
-  $if not (null x)
-    <pre .logs .stderr>
-      $forall ln <- lines x
-        <span .prefix>stderr</span>^{colorizedLogLine ln}
+  $of JobOutputCompleted logLines
+    <pre>
+      $forall logLine <- logLines
+        ^{colorizedJobLogLine logLine}
+
+  $of JobOutputLegacy job
+    $maybe x <- jobStdout job
+      $if not (null x)
+        <pre>
+          $forall ln <- lines x
+            ^{colorizedLogLine "stdout" ln}
+
+    $maybe x <- jobStderr job
+      $if not (null x)
+        <pre>
+          $forall ln <- lines x
+            ^{colorizedLogLine "stderr" ln}

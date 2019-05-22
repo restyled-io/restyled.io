@@ -5,6 +5,8 @@ module Backend.AcceptedJob
     ( AcceptedJob(..)
     , acceptJob
     , IgnoredJob(..)
+    , IgnoredJobReason(..)
+    , ignoredJobReasonToLogMessage
     )
 where
 
@@ -18,8 +20,9 @@ data AcceptedJob = AcceptedJob
     , ajJob :: Entity Job
     }
 
-newtype IgnoredJob = IgnoredJob
-    { unIgnoredJob :: Entity Job
+data IgnoredJob = IgnoredJob
+    { ijReason :: IgnoredJobReason
+    , ijJob :: Entity Job
     }
 
 -- | Given an Accepted webhook, accept or ignore that Job
@@ -38,7 +41,7 @@ ignoreJob
 ignoreJob job reason = do
     now <- liftIO getCurrentTime
     throwError
-        $ IgnoredJob
+        $ IgnoredJob reason
         $ overEntity job
         $ completeJobSkipped now
         $ toIgnoredJobStdout reason
@@ -46,6 +49,13 @@ ignoreJob job reason = do
 data IgnoredJobReason
     = NonGitHubRepo Repo
     | PlanLimitation Repo MarketplacePlanLimitation
+
+ignoredJobReasonToLogMessage :: IgnoredJobReason -> String
+ignoredJobReasonToLogMessage = \case
+    NonGitHubRepo _ -> "Non-GitHub repository"
+    PlanLimitation _ MarketplacePlanNotFound -> "No Marketplace Plan"
+    PlanLimitation _ MarketplacePlanPublicOnly ->
+        "Public-only Marketplace Plan"
 
 toIgnoredJobStdout :: IgnoredJobReason -> String
 toIgnoredJobStdout = unlines . \case

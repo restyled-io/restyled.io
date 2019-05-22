@@ -4,6 +4,7 @@ module RIO.Logger
     (
     -- * Building @'LogFunc'@
       terminalLogFunc
+    , terminalUseColor
     , simpleLogFunc
 
     -- * Interfacing with @"Control.Monad.Logger"@ types

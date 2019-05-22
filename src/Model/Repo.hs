@@ -81,12 +81,13 @@ data IgnoredWebhookReason
     | IgnoredEventType Text
     | OwnPullRequest Text
 
-reasonToLogMessage :: IgnoredWebhookReason -> Text
+reasonToLogMessage :: IgnoredWebhookReason -> String
 reasonToLogMessage = \case
-    InvalidJSON errs -> "invalid JSON: " <> pack errs
-    IgnoredAction action -> "ignored action: " <> tshow action
-    IgnoredEventType event -> "ignored event: " <> tshow event
-    OwnPullRequest author -> "PR appears to be our own, author=" <> author
+    InvalidJSON errs -> "invalid JSON: " <> errs
+    IgnoredAction action -> "ignored action: " <> show action
+    IgnoredEventType event -> "ignored event: " <> show event
+    OwnPullRequest author ->
+        "PR appears to be our own, author=" <> unpack author
 
 initializeFromWebhook
     :: MonadIO m

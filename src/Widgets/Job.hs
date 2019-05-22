@@ -3,6 +3,7 @@
 module Widgets.Job
     ( jobCard
     , jobOutput
+    , colorizedJobLogLine
 
     -- * Job completion
     -- |
@@ -19,6 +20,7 @@ import Import
 import qualified Data.Text as T
 import Formatting (format)
 import Formatting.Time (diff)
+import Text.Julius (RawJS(..))
 import Widgets.ContainsURLs
 
 -- | Internal helper for rendering completion state
@@ -53,18 +55,25 @@ jobCompletion job = case (jobCompletedAt job, jobExitCode job) of
 jobIsRetriable :: Job -> Bool
 jobIsRetriable = (`notElem` [Nothing, Just 0]) . jobExitCode
 
-jobCard :: Entity Job -> Widget
-jobCard job = do
+jobCard :: (Entity Job, JobOutput) -> Widget
+jobCard (Entity jobId job, output) = do
     now <- liftIO getCurrentTime
     $(widgetFile "widgets/job-card")
 
--- brittany-disable-next-binding
+jobOutput :: JobOutput -> Widget
+jobOutput output = $(widgetFile "widgets/job-output")
+  where
+    streamElementId = case output of
+        JobOutputInProgress (Entity jobId _) ->
+            "logs-job-id-" <> toPathPiece jobId
+        _ -> "unused"
 
-jobOutput :: Job -> Widget
-jobOutput job = $(widgetFile "widgets/job-output")
+colorizedJobLogLine :: Entity JobLogLine -> Widget
+colorizedJobLogLine (Entity _ JobLogLine {..}) =
+    colorizedLogLine jobLogLineStream jobLogLineContent
 
-colorizedLogLine :: Text -> Widget
-colorizedLogLine ln
+colorizedLogLine :: Text -> Text -> Widget
+colorizedLogLine stream ln
     | Just message <- T.stripPrefix "[Debug] " ln = logLine "debug" message
     | Just message <- T.stripPrefix "[Info] " ln = logLine "info" message
     | Just message <- T.stripPrefix "[Warn] " ln = logLine "warn" message

@@ -64,6 +64,7 @@ library:
     - aeson
     - aeson-casing
     - ansi-terminal
+    - blaze-html
     - blaze-markup
     - bytestring
     - classy-prelude
@@ -112,6 +113,7 @@ library:
     - wai-extra
     - wai-logger
     - warp
+    - websockets
     - yesod
     - yesod-auth
     - yesod-auth-oauth2
@@ -119,6 +121,7 @@ library:
     - yesod-form
     - yesod-static
     - yesod-paginator >= 1.1.0.2
+    - yesod-websockets
   source-dirs: src
 
 executables:

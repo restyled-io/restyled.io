@@ -1,0 +1,14 @@
+# vim: ft=yaml
+Description: Create job_log_line table
+Created: 2019-05-19 20:06:58.846537179 UTC
+Depends: create-job
+Apply: |
+  CREATE TABLE job_log_line (
+    id SERIAL PRIMARY KEY,
+    job integer NOT NULL REFERENCES job(id),
+    created_at timestamp with time zone NOT NULL,
+    stream text NOT NULL,
+    content text NOT NULL
+  )
+Revert: |
+  DROP TABLE job_log_line;

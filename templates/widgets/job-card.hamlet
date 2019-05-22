@@ -1,38 +1,37 @@
-$with Entity jobId job <- job
-  <div .card>
-    <header>
-      <a .permalink href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>permalink
-      #{toPathPiece $ jobOwner job}
-      /
-      <a href=@{repoP (jobOwner job) (jobRepo job) $ jobsR}>
-        #{toPathPiece $ jobRepo job}
-      <a href=@{repoP (jobOwner job) (jobRepo job) $ pullJobsR $ jobPullRequest job}>
-        ##{toPathPiece $ jobPullRequest job}
+<div .card>
+  <header>
+    <a .permalink href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>permalink
+    #{toPathPiece $ jobOwner job}
+    /
+    <a href=@{repoP (jobOwner job) (jobRepo job) $ jobsR}>
+      #{toPathPiece $ jobRepo job}
+    <a href=@{repoP (jobOwner job) (jobRepo job) $ pullJobsR $ jobPullRequest job}>
+      ##{toPathPiece $ jobPullRequest job}
 
-    <p>
-      $case jobCompletion job
-        $of Success completedAt
-          <span .green>
-            <i .fas .fa-check-circle>
-          Succeeded
-          #{format (diff True) $ diffUTCTime completedAt now}
-          (took #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt})
-        $of Failure completedAt _exitCode
-          <span .red>
-            <i .fas .fa-times-circle>
-          Failed
-          #{format (diff True) $ diffUTCTime completedAt now}
-          (took #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt})
-        $of InProgress
-          In progress since
-          #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
+  <p>
+    $case jobCompletion job
+      $of Success completedAt
+        <span .green>
+          <i .fas .fa-check-circle>
+        Succeeded
+        #{format (diff True) $ diffUTCTime completedAt now}
+        (took #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt})
+      $of Failure completedAt _exitCode
+        <span .red>
+          <i .fas .fa-times-circle>
+        Failed
+        #{format (diff True) $ diffUTCTime completedAt now}
+        (took #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt})
+      $of InProgress
+        In progress since
+        #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
 
-    ^{jobOutput job}
+  ^{jobOutput output}
 
-    <aside>
-      $if jobIsRetriable job
-        <form
-          method=post
-          action=@{repoP (jobOwner job) (jobRepo job) $ jobRetryR jobId}
-          >
-          <button .action>Retry job
+  <aside>
+    $if jobIsRetriable job
+      <form
+        method=post
+        action=@{repoP (jobOwner job) (jobRepo job) $ jobRetryR jobId}
+        >
+        <button .action>Retry job

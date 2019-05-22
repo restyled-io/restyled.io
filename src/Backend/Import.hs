@@ -6,7 +6,7 @@ where
 
 import RIO as X hiding (timeout)
 
-import Control.Error.Util as X (hush, hushT, note, noteT, (??))
+import Control.Error.Util as X (exceptT, hush, hushT, note, noteT, (??))
 import Control.Monad.Except as X
     (ExceptT(..), liftEither, runExceptT, throwError, withExceptT)
 import Control.Monad.Extra as X (fromMaybeM)
@@ -19,7 +19,7 @@ import Data.Proxy as X
 import Data.Text as X (Text, pack, unpack)
 import Data.Time as X
 import Database.Persist as X
-import Database.Persist.Sql as X (SqlPersistT)
+import Database.Persist.Sql as X (SqlBackend, SqlPersistT)
 import Model as X
 import Model.Job as X
 import Model.Repo as X
@@ -38,6 +38,12 @@ fromLeftM f me = either f pure =<< me
 
 overEntity :: Entity a -> (a -> a) -> Entity a
 overEntity e f = e { entityVal = f $ entityVal e }
+
+replaceEntity
+    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
+    => Entity a
+    -> SqlPersistT m ()
+replaceEntity (Entity k v) = replace k v
 
 bimapMExceptT
     :: Monad m => (e -> m f) -> (a -> m b) -> ExceptT e m a -> ExceptT f m b
