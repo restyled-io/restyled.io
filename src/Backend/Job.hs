@@ -5,7 +5,8 @@ module Backend.Job
 
     -- * Processing
     , processJob
-    ) where
+    )
+where
 
 import Backend.Import
 
@@ -14,9 +15,9 @@ import Backend.ExecRestyler
 
 awaitRestylerJob
     :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe (Entity Job))
-awaitRestylerJob timeout = do
+awaitRestylerJob t = do
     logDebug "Awaiting Restyler Job..."
-    eresult <- runRedis $ brpop [queueName] timeout
+    eresult <- runRedis $ brpop [queueName] t
     logDebug $ "Popped value: " <> displayShow eresult
     return $ either (const Nothing) (decodePopped =<<) eresult
     where decodePopped = decodeStrict . snd

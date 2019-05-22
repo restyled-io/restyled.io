@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Model.Repo
+module Models.Repo
     (
     -- * Virtual attributes
       repoPath
@@ -22,14 +22,11 @@ module Model.Repo
     )
 where
 
-import ClassyPrelude
+import Restyled.Prelude
 
-import Control.Monad.Logger (LogLevel(..))
-import Database.Persist
-import Database.Persist.Sql (SqlPersistT)
-import Model
+import qualified Data.Text as T
+import Models.DB
 import Settings
-import Yesod.Core (toPathPiece)
 
 -- | Make a nicely-formatted @:owner\/:name@
 --
@@ -125,8 +122,8 @@ findOrCreateRepo Payload {..} = do
 
 isActualAuthor :: Text -> Bool
 isActualAuthor author
-    | "restyled-io" `isPrefixOf` author = False
-    | "[bot]" `isSuffixOf` author = False
+    | "restyled-io" `T.isPrefixOf` author = False
+    | "[bot]" `T.isSuffixOf` author = False
     | otherwise = True
 
 -- | Events that should enqueue a Restyler job

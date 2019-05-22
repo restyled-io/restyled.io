@@ -13,9 +13,10 @@ where
 
 import Import hiding (some, try)
 
-import Data.Char (isSpace)
+import Foundation
 import Text.Megaparsec
 import Text.Megaparsec.Char
+import Yesod
 
 data ContentPart
     = ContentPart Text

@@ -4,13 +4,12 @@ module Authorization
     )
 where
 
-import Import.NoFoundation
+import Restyled.Prelude
 
 import Cache
-import Control.Monad.Except
-import Data.Either (fromRight)
-import SVCS.GitHub.AccessToken
-import SVCS.GitHub.Collaborator
+import Models
+import Settings
+import Yesod
 
 authorizeAdmin
     :: MonadHandler m => AppSettings -> Maybe UserId -> SqlPersistT m AuthResult

@@ -8,11 +8,6 @@ where
 
 import Backend.Import
 
-import Database.Redis (checkedConnect)
-import RIO.Logger
-import RIO.Orphans ()
-import RIO.Process
-
 -- | Like @'App'@ but with no webapp-related bits
 data Backend = Backend
     { backendLogFunc :: LogFunc
@@ -44,7 +39,7 @@ instance HasRedis Backend where
 
 loadBackend :: AppSettings -> IO Backend
 loadBackend settings@AppSettings {..} = do
-    logFunc <- terminalLogFunc $ loggerLogLevel appLogLevel
+    logFunc <- terminalLogFunc appLogLevel
 
     Backend logFunc settings
         <$> mkDefaultProcessContext

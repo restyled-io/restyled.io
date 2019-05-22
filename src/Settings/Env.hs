@@ -3,20 +3,18 @@ module Settings.Env
     )
 where
 
-import Prelude
+import Restyled.Prelude hiding (Reader)
 
-import Control.Applicative (liftA2)
-import Control.Monad.Logger (LogLevel(..))
-import Data.Bifunctor (first)
-import Data.ByteString (ByteString)
-import Data.Char (toLower)
-import Data.Text (Text, pack)
+-- import Control.Applicative (liftA2)
+-- import Control.Monad.Logger (LogLevel(..))
+-- import Data.ByteString (ByteString)
+-- import Data.Char (toLower)
+-- import Data.Text (Text, pack)
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo, defaultConnectInfo, parseConnectInfo)
 import Env hiding (Parser, splitOn)
 import qualified Env
 import Settings
-import SVCS.GitHub.ApiClient (GitHubAppId, mkGitHubAppId)
 
 loadEnvSettings :: IO AppSettings
 loadEnvSettings = parse id settings

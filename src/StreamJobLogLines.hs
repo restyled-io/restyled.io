@@ -5,10 +5,10 @@ where
 
 import Import
 
-import Control.Concurrent (threadDelay)
-import Network.WebSockets (Connection, ConnectionException, WebSocketsData)
+import Foundation
 import qualified Network.WebSockets as WS
 import Widgets.JobLogLine
+import Yesod
 import Yesod.WebSockets hiding (sendClose)
 
 streamJobLogLines :: JobId -> WebSocketsT Handler ()
@@ -38,15 +38,17 @@ streamJobLogLines jobId = handle ignoreConnectionException $ go 0
                 logDebugN "Closing websocket: Job not in progress"
                 sendClose @_ @Text "Job finished"
 
-ignoreConnectionException :: Applicative f => ConnectionException -> f ()
+ignoreConnectionException :: Applicative f => WS.ConnectionException -> f ()
 ignoreConnectionException _ = pure ()
 
-sendTextDataAck :: (MonadIO m, WebSocketsData a) => a -> WebSocketsT m Text
+sendTextDataAck :: (MonadIO m, WS.WebSocketsData a) => a -> WebSocketsT m Text
 sendTextDataAck a = sendTextData a *> receiveData
 
 -- | <https://github.com/yesodweb/yesod/issues/1599>
 sendClose
-    :: (MonadIO m, WebSocketsData a, MonadReader Connection m) => a -> m ()
+    :: (MonadIO m, WS.WebSocketsData a, MonadReader WS.Connection m)
+    => a
+    -> m ()
 sendClose x = do
     conn <- ask
     liftIO $ WS.sendClose conn x

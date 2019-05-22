@@ -9,6 +9,8 @@ import Import
 
 import Backend.Marketplace (isPrivateRepoPlan)
 import Data.List (nub)
+import Foundation
+import Yesod
 import Yesod.Paginator
 
 data MarketplacePlanWithAccounts = MarketplacePlanWithAccounts

@@ -1,4 +1,4 @@
-module Model.Job
+module Models.Job
     (
     -- * Creating Jobs
       insertJob
@@ -21,11 +21,9 @@ module Model.Job
     )
 where
 
-import ClassyPrelude
+import Restyled.Prelude
 
-import Database.Persist
-import Database.Persist.Sql (SqlPersistT)
-import Model
+import Models.DB
 import System.Exit (ExitCode(..))
 
 insertJob

@@ -20,6 +20,8 @@ import Import
 import qualified Data.Text as T
 import Formatting (format)
 import Formatting.Time (diff)
+import Foundation
+import Routes
 import Text.Julius (RawJS(..))
 import Widgets.ContainsURLs
 

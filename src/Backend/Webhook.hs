@@ -23,9 +23,9 @@ enqueueWebhook body = do
 
 awaitWebhook
     :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe ByteString)
-awaitWebhook timeout = do
+awaitWebhook t = do
     logDebug "Awaiting Webhook..."
-    eresult <- runRedis $ brpop [webhookQueueName] timeout
+    eresult <- runRedis $ brpop [webhookQueueName] t
     logDebug $ "Popped value: " <> displayShow eresult
     pure $ either (const Nothing) (snd <$>) eresult
 

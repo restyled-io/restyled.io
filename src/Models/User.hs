@@ -1,4 +1,4 @@
-module Model.User
+module Models.User
     (
     -- * Virtual properties
       userIsAdmin
@@ -9,13 +9,9 @@ module Model.User
     )
 where
 
-import ClassyPrelude
+import Restyled.Prelude
 
-import Control.Error.Util (hoistMaybe)
-import Control.Monad.Trans.Maybe
-import Database.Persist
-import Database.Persist.Sql (SqlPersistT)
-import Model
+import Models.DB
 import Settings
 
 userIsAdmin :: AppSettings -> User -> Bool

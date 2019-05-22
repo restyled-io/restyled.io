@@ -5,10 +5,7 @@ where
 
 import TestImport
 
-import Model.User
 import qualified Prelude as Unsafe
-import Settings
-import Test.QuickCheck
 
 data AdminSettings = AdminSettings
     { asAppSettings :: AppSettings

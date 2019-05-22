@@ -3,13 +3,8 @@ module Widgets.ContainsURLsSpec
     )
 where
 
-import Prelude
+import TestImport
 
-import Control.Monad (replicateM)
-import Data.Char (isSpace)
-import Data.Text (Text, pack)
-import Test.Hspec
-import Test.QuickCheck
 import Text.Megaparsec (errorBundlePretty, parse)
 import Widgets.ContainsURLs
 

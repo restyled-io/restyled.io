@@ -3,36 +3,17 @@
 
 module Application
     ( appMain
-    , loadApp
     )
 where
 
 import Import
 
-import Database.Redis (checkedConnect)
-import Network.HTTP.Client.TLS (getGlobalManager)
-import Network.Wai (Middleware)
-import Network.Wai.Handler.Warp
-    ( Settings
-    , defaultSettings
-    , defaultShouldDisplayException
-    , runSettings
-    , setHost
-    , setOnException
-    , setPort
-    )
-import Network.Wai.Middleware.ForceSSL
-import Network.Wai.Middleware.MethodOverridePost
-import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
-import RIO (runRIO)
-import RIO.DB (createConnectionPool)
-import RIO.Logger
-import RIO.Orphans ()
-import RIO.Process
-import Settings.Display
-import Settings.Env
-import Yesod.Auth
-
+import Foundation
+import Handler.Admin
+import Handler.Admin.Jobs
+import Handler.Admin.Machines
+import Handler.Admin.Marketplace
+import Handler.Admin.Repos
 import Handler.Common
 import Handler.Home
 import Handler.PrivacyPolicy
@@ -40,42 +21,25 @@ import Handler.Profile
 import Handler.Repos
 import Handler.Thanks
 import Handler.Webhooks
-
-import Handler.Admin
-import Handler.Admin.Jobs
-import Handler.Admin.Machines
-import Handler.Admin.Marketplace
-import Handler.Admin.Repos
+import Network.Wai (Middleware)
+import Network.Wai.Handler.Warp
+import Network.Wai.Middleware.ForceSSL
+import Network.Wai.Middleware.MethodOverridePost
+import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
+import Yesod
+import Yesod.Auth
 
 mkYesodDispatch "App" resourcesApp
 
 appMain :: IO ()
 appMain = do
-    -- Ensure container logs are visible immediately
-    hSetBuffering stdout LineBuffering
-    hSetBuffering stderr LineBuffering
+    setLineBuffering
 
     loadEnv
     app <- loadApp =<< loadEnvSettings
 
-    runSettings (warpSettings app) . waiMiddleware app =<< toWaiAppPlain app
-
-loadApp :: AppSettings -> IO App
-loadApp settings = do
-    logFunc <- terminalLogFunc $ loggerLogLevel $ appLogLevel settings
-    runRIO logFunc $ logInfoN $ pack $ displayAppSettings settings
-
-    App settings
-        <$> makeStatic (appStaticDir settings)
-        <*> runRIO logFunc (createConnectionPool $ appDatabaseConf settings)
-        <*> checkedConnect (appRedisConf settings)
-        <*> getGlobalManager
-        <*> pure logFunc
-        <*> mkDefaultProcessContext
-  where
-    makeStatic
-        | appMutableStatic settings = staticDevel
-        | otherwise = static
+    waiApp <- waiMiddleware app <$> toWaiAppPlain app
+    runSettings (warpSettings app) waiApp
 
 waiMiddleware :: App -> Middleware
 waiMiddleware app =
@@ -87,12 +51,11 @@ waiMiddleware app =
 
 warpSettings :: App -> Settings
 warpSettings app =
-    setPort (appPort $ appSettings app)
-        . setHost (appHost $ appSettings app)
-        . setOnException onWarpException
-        $ defaultSettings
+    setHost host . setPort port . setOnException onEx $ defaultSettings
   where
-    onWarpException _req ex =
+    port = appPort $ appSettings app
+    host = appHost $ appSettings app
+    onEx _req ex =
         when (defaultShouldDisplayException ex)
             $ runRIO app
             $ logErrorN

@@ -10,10 +10,6 @@ where
 
 import Backend.Import
 
-import GitHub.Data (toPathPart)
-import Network.HTTP.Client (parseRequest)
-import SVCS.GitHub.ApiClient
-
 data GitHubMarketplacePlan = GitHubMarketplacePlan
     { ghmpId :: Int
     , ghmpName :: Text
@@ -64,7 +60,7 @@ runSynchronize = do
         for accounts $ \account -> do
             logInfo
                 $ "Account "
-                <> displayShow (toPathPart $ ghaLogin account)
+                <> displayShow (toPathPiece $ ghaLogin account)
                 <> " has plan "
                 <> displayShow (ghmpName plan)
 

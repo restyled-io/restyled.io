@@ -7,11 +7,8 @@ module Api.Error
     )
 where
 
-import Prelude
+import Restyled.Prelude
 
-import Data.Aeson
-import Data.Semigroup ((<>))
-import Data.Text (Text)
 import Network.HTTP.Types.Status
 import Yesod.Core (MonadHandler)
 import Yesod.Core.Handler (sendStatusJSON)

@@ -5,9 +5,8 @@ module Settings.Display
     )
 where
 
-import Prelude
+import Restyled.Prelude
 
-import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as C8
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..), PortID(..))

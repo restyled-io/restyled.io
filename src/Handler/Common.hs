@@ -13,7 +13,8 @@ import Import
 import qualified Data.ByteString.Char8 as C8
 import Data.FileEmbed (embedFile)
 import Development.GitRev (gitCommitDate, gitHash)
-
+import Foundation
+import Yesod
 
 getRevisionR :: Handler TypedContent
 getRevisionR = pure . TypedContent typePlain $ toContent appRevision

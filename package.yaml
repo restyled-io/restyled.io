@@ -73,6 +73,7 @@ library:
     - conduit
     - conduit-extra
     - containers
+    - data-default
     - directory
     - envparse
     - errors
@@ -155,6 +156,7 @@ tests:
       - QuickCheck
       - bytestring
       - classy-prelude
+      - filepath
       - hedis
       - hspec
       - hspec-core

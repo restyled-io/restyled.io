@@ -1,8 +1,12 @@
 module Handler.PrivacyPolicy
     ( getPrivacyPolicyR
-    ) where
+    )
+where
 
 import Import
+
+import Foundation
+import Yesod
 
 getPrivacyPolicyR :: Handler Html
 getPrivacyPolicyR = redirect @_ @Text

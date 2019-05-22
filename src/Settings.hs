@@ -2,10 +2,12 @@
 
 module Settings
     ( OAuthKeys(..)
+    , addOAuth2Plugin
 
     -- * Runtime @'AppSettings'@
     , AppSettings(..)
     , HasSettings(..)
+    , addAuthBackDoor
 
     -- * Compile-time settings
     , loadEnv
@@ -13,16 +15,16 @@ module Settings
     )
 where
 
-import ClassyPrelude.Yesod
+import Restyled.Prelude
 
+import Data.Default (def)
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..))
 import Language.Haskell.TH.Syntax (Exp, Q)
 import LoadEnv (loadEnvFrom)
 import Network.Wai.Handler.Warp (HostPreference)
-import RIO (Lens')
-import SVCS.GitHub
-import SVCS.GitHub.ApiClient (GitHubToken)
+import Yesod.Auth
+import Yesod.Auth.Dummy
 
 #if DEVELOPMENT
 import Yesod.Default.Util (widgetFileReload)
@@ -34,6 +36,14 @@ data OAuthKeys = OAuthKeys
     { oauthKeysClientId :: Text
     , oauthKeysClientSecret :: Text
     }
+
+addOAuth2Plugin
+    :: (Text -> Text -> AuthPlugin app)
+    -> Maybe OAuthKeys
+    -> [AuthPlugin app]
+    -> [AuthPlugin app]
+addOAuth2Plugin mkPlugin = maybe id $ \OAuthKeys {..} ->
+    (<> [mkPlugin oauthKeysClientId oauthKeysClientSecret])
 
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
@@ -64,6 +74,11 @@ class HasSettings env where
 
 instance HasSettings AppSettings where
     settingsL = id
+
+addAuthBackDoor
+    :: YesodAuth app => AppSettings -> [AuthPlugin app] -> [AuthPlugin app]
+addAuthBackDoor AppSettings {..} =
+    if appAllowDummyAuth then (authDummy :) else id
 
 -- brittany-disable-next-binding
 

@@ -6,16 +6,10 @@ module Cache
     )
 where
 
-import RIO hiding (set)
+import Restyled.Prelude hiding (get, set)
 
-import Control.Error.Util (hush)
-import Control.Monad.Except (ExceptT)
-import Data.Aeson
 import qualified Data.Text as T
-import Database.Persist.Sql (SqlPersistT)
 import Database.Redis (expire, get, set)
-import RIO.Handler
-import RIO.Redis
 import Yesod (HandlerFor)
 
 newtype CacheKey = CacheKey Text

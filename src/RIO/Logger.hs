@@ -8,7 +8,6 @@ module RIO.Logger
     , simpleLogFunc
 
     -- * Interfacing with @"Control.Monad.Logger"@ types
-    , loggerLogLevel
     , logFuncLog
     )
 where
@@ -82,12 +81,3 @@ logFuncLog
     -> IO ()
 logFuncLog lf loc source level msg =
     runRIO lf $ Logger.monadLoggerLog loc source level msg
-
--- | Translate a @'LogLevel'@ from @"Control.Monad.Logger"@s
-loggerLogLevel :: Logger.LogLevel -> LogLevel
-loggerLogLevel = \case
-    Logger.LevelDebug -> LevelDebug
-    Logger.LevelInfo -> LevelInfo
-    Logger.LevelWarn -> LevelWarn
-    Logger.LevelError -> LevelError
-    Logger.LevelOther x -> LevelOther x

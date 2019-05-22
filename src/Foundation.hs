@@ -6,36 +6,30 @@ module Foundation
     )
 where
 
-import Import.NoFoundation
+import Import
 
 import Api.Error
 import Authentication
 import Authorization
 import Data.Text (splitOn)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Database.Redis (Connection)
-import RIO (HasLogFunc(..), LogFunc, lens)
-import RIO.DB hiding (runDB)
-import RIO.Logger (logFuncLog)
-import RIO.Process
-import RIO.Redis
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
+import Yesod
 import Yesod.Auth
-import Yesod.Auth.Dummy
 import Yesod.Auth.OAuth2
 import Yesod.Auth.OAuth2.GitHub
 import Yesod.Auth.OAuth2.GitLab
 import Yesod.Default.Util (addStaticContentExternal)
+import Yesod.Static
 
 data App = App
-    { appSettings :: AppSettings
-    , appStatic :: Static
+    { appLogFunc :: LogFunc
+    , appSettings :: AppSettings
+    , appProcessContext :: ProcessContext
     , appConnPool :: ConnectionPool
     , appRedisConn :: Connection
-    , appHttpManager :: Manager
-    , appLogFunc :: LogFunc
-    , appProcessContext :: ProcessContext
+    , appStatic :: Static
     }
 
 instance HasLogFunc App where
@@ -57,6 +51,21 @@ instance HasDB App where
 instance HasRedis App where
     redisConnectionL = lens appRedisConn $ \x y -> x
         { appRedisConn = y }
+
+loadApp :: AppSettings -> IO App
+loadApp settings = do
+    logFunc <- terminalLogFunc $ appLogLevel settings
+    runRIO logFunc $ logInfoN $ pack $ displayAppSettings settings
+
+    App logFunc settings
+        <$> mkDefaultProcessContext
+        <*> runRIO logFunc (createConnectionPool $ appDatabaseConf settings)
+        <*> checkedConnect (appRedisConf settings)
+        <*> makeStatic (appStaticDir settings)
+  where
+    makeStatic
+        | appMutableStatic settings = staticDevel
+        | otherwise = static
 
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
@@ -186,18 +195,6 @@ instance YesodAuth App where
         . addOAuth2Plugin oauth2GitHub (appGitHubOAuthKeys appSettings)
         $ []
 
-addOAuth2Plugin
-    :: (Text -> Text -> AuthPlugin App)
-    -> Maybe OAuthKeys
-    -> [AuthPlugin App]
-    -> [AuthPlugin App]
-addOAuth2Plugin mkPlugin = maybe id $ \OAuthKeys {..} ->
-    (<> [mkPlugin oauthKeysClientId oauthKeysClientSecret])
-
-addAuthBackDoor :: AppSettings -> [AuthPlugin App] -> [AuthPlugin App]
-addAuthBackDoor AppSettings {..} =
-    if appAllowDummyAuth then (authDummy :) else id
-
 instance YesodAuthPersist App
 
 instance YesodPersist App where
@@ -210,6 +207,3 @@ instance YesodPersistRunner App where
 
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage
-
-instance HasHttpManager App where
-    getHttpManager = appHttpManager

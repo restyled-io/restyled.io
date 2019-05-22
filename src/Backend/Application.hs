@@ -1,7 +1,7 @@
 module Backend.Application
     ( backendMain
-    , awaitAndProcessJob
-    ) where
+    )
+where
 
 import Backend.Import
 
@@ -11,17 +11,10 @@ import Backend.Job
 import Backend.Marketplace
 import Backend.RestyleMachine
 import Backend.Webhook
-import Control.Monad ((<=<))
-import RIO.Process
-import SVCS.GitHub.AccessToken (githubInstallationToken)
-import System.Exit (ExitCode(..))
-import System.IO (BufferMode(..))
 
 backendMain :: IO ()
 backendMain = do
-    -- Ensure container logs are visible immediately
-    hSetBuffering stdout LineBuffering
-    hSetBuffering stderr LineBuffering
+    setLineBuffering
 
     loadEnv
     backend <- loadBackend =<< loadEnvSettings

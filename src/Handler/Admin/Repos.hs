@@ -10,7 +10,10 @@ where
 import Import
 
 import Admin.RepoSearch
+import Foundation
+import Routes
 import Widgets.Repo
+import Yesod
 import Yesod.Paginator
 
 getAdminReposR :: Handler Html

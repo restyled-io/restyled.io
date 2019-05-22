@@ -8,6 +8,7 @@ import TestImport
 import Backend.Webhook
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.Lazy.Char8 as L8
+import System.FilePath ((</>))
 
 spec :: Spec
 spec = withApp $ do
