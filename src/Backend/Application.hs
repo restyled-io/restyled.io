@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Backend.Application
     ( backendMain
     )
@@ -41,15 +43,32 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
         (appGitHubAppKey settings)
         (repoInstallationId repo)
 
-    machines <-
-        runDB $ entityVal <$$> selectList [RestyleMachineEnabled ==. True] []
+    let capture stream = captureJobLogLine (entityKey job) stream . pack
 
-    runRestyleMachine
-        machines
+    runRestyle <- runDB $ do
+        mMachine <- fetchRestyleMachine
+
+        case mMachine of
+            Nothing -> do
+                capture "system" "Running on local Docker host"
+                pure followProcess
+            Just machine -> do
+                capture "system" $ "Running on " <> displayMachine machine
+                pure $ runRestyleMachine machine
+
+    ec <- runRestyle
         "docker"
         (restyleDockerRun settings token job $ repoIsDebug settings repo)
-        (captureJobLogLine (entityKey job) "stdout" . pack)
-        (captureJobLogLine (entityKey job) "stderr" . pack)
+        (runDB . capture "stdout")
+        (runDB . capture "stderr")
+
+    ec <$ runDB (capture "system" $ "Restyler exited " <> displayExitCode ec)
+  where
+    displayExitCode = \case
+        ExitSuccess -> "0"
+        ExitFailure c -> show c
+
+    displayMachine = unpack . restyleMachineHost
 
 -- brittany-disable-next-binding
 

@@ -72,7 +72,7 @@ getAdminMachineInfoR machineId = do
     machine <- runDB $ get404 machineId
     (ec', out, err) <-
         runHandlerRIO $ captureFollowedProcess $ runRestyleMachine
-            [machine]
+            machine
             "docker"
             ["info"]
 
@@ -90,7 +90,7 @@ postAdminMachinePruneR machineId = do
     machine <- runDB $ get404 machineId
     (ec', out, err) <-
         runHandlerRIO $ captureFollowedProcess $ runRestyleMachine
-            [machine]
+            machine
             "docker"
             ["system", "prune", "--all", "--force"]
 

@@ -90,8 +90,8 @@ fetchJobOutput jobE@(Entity jobId job@Job {..}) =
         (Just _, _, _) -> pure $ JobOutputLegacy job
         (_, _, _) -> pure $ JobOutputInProgress jobE
 
-captureJobLogLine :: HasDB env => JobId -> Text -> Text -> RIO env ()
-captureJobLogLine jobId stream content = runDB $ do
+captureJobLogLine :: MonadIO m => JobId -> Text -> Text -> SqlPersistT m ()
+captureJobLogLine jobId stream content = do
     now <- liftIO getCurrentTime
     insert_ JobLogLine
         { jobLogLineJob = jobId

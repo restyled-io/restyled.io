@@ -1,5 +1,8 @@
+{-# LANGUAGE QuasiQuotes #-}
+
 module Backend.RestyleMachine
-    ( runRestyleMachine
+    ( fetchRestyleMachine
+    , runRestyleMachine
     )
 where
 
@@ -7,46 +10,45 @@ import Backend.Import
 
 import qualified Data.Map as Map
 import qualified Data.Text.IO as T
+import Database.Persist.Sql (rawSql)
 import System.Directory
     (createDirectoryIfMissing, doesDirectoryExist, getHomeDirectory)
 import System.FilePath ((</>))
+import Text.Shakespeare.Text (st)
 
--- | Run a process on one of the given @'RestyleMachine'@s
---
--- If the list is empty, the process is run wherever the global environment
--- variables (e.g. @DOCKER_HOST@) dictate.
---
+-- brittany-disable-next-binding
+
+-- | Select a @'RestyleMachine'@ from the enabled set
+fetchRestyleMachine :: MonadIO m => SqlPersistT m (Maybe RestyleMachine)
+fetchRestyleMachine =
+    headMaybe . map entityVal <$> rawSql [st|
+        SELECT ??
+        FROM restyle_machine
+        WHERE enabled = t
+        ORDER BY RANDOM ()
+        LIMIT 1
+    |] []
+
+-- | Run a process on a @'RestyleMachine'@s
 runRestyleMachine
     :: (HasLogFunc env, HasProcessContext env)
-    => [RestyleMachine]
+    => RestyleMachine
     -> FilePath
     -> [String]
     -> (String -> RIO env ())
     -> (String -> RIO env ())
     -> RIO env ExitCode
-runRestyleMachine machines cmd args fOut fErr = do
-    modEnvVars <- case machines of
-        [] -> do
-            logInfo "Running restyle with native environment"
-            pure id
-
-        (machine@RestyleMachine {..} : _) -> do
-            logInfo
-                $ fromString
-                $ "Running restyle with environment for "
-                <> unpack restyleMachineName
-                <> " ("
-                <> unpack restyleMachineHost
-                <> ")"
-
-            certPath <- setupCertificatesIfMissing machine
-            pure $ \env -> env <> Map.fromList
-                [ ("DOCKER_HOST", restyleMachineHost)
+runRestyleMachine machine cmd args fOut fErr = do
+    certPath <- setupCertificatesIfMissing machine
+    withModifyEnvVars
+            (append
+                [ ("DOCKER_HOST", restyleMachineHost machine)
                 , ("DOCKER_CERT_PATH", pack certPath)
                 , ("DOCKER_TLS_VERIFY", "1")
                 ]
-
-    withModifyEnvVars modEnvVars $ followProcess cmd args fOut fErr
+            )
+        $ followProcess cmd args fOut fErr
+    where append envs env = env <> Map.fromList envs
 
 setupCertificatesIfMissing
     :: HasLogFunc env => RestyleMachine -> RIO env FilePath
