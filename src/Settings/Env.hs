@@ -52,6 +52,7 @@ settings =
         <*> optional (var str "RESTYLER_TAG" mempty)
         <*> var (splitOn ',') "ADMIN_EMAILS" (def [])
         <*> switch "AUTH_DUMMY_LOGIN" mempty
+        <*> var str "FAVICON" (def "config/favicon.ico")
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"

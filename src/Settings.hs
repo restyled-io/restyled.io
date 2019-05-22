@@ -13,7 +13,6 @@ module Settings
     -- * Compile-time choices
     , appSettingsIsDebug
     , appStaticDir
-    , appFavicon
     , appRevision
     , widgetFile
     , marketplaceListingPath
@@ -25,7 +24,6 @@ where
 import ClassyPrelude.Yesod
 
 import qualified Data.ByteString.Char8 as C8
-import Data.FileEmbed (embedFile)
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..), PortID(..))
 import Development.GitRev (gitCommitDate, gitHash)
@@ -71,6 +69,7 @@ data AppSettings = AppSettings
     -- taken only from GitHub credentials, and will only be present there if
     -- verified with GitHub.
     , appAllowDummyAuth :: Bool
+    , appFavicon :: FilePath
     }
 
 instance Show AppSettings where
@@ -137,13 +136,13 @@ appStaticDir = "static"
 
 -- brittany-disable-next-binding
 
-appFavicon :: ByteString
-appFavicon =
-#if DEVELOPMENT
-    $(embedFile "config/favicon-dev.ico")
-#else
-    $(embedFile "config/favicon.ico")
-#endif
+-- appFavicon :: ByteString
+-- appFavicon =
+-- #if DEVELOPMENT
+--     $(embedFile "config/favicon-dev.ico")
+-- #else
+--     $(embedFile "config/favicon.ico")
+-- #endif
 
 -- brittany-disable-next-binding
 
