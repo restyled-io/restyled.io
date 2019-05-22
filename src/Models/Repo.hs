@@ -84,6 +84,7 @@ data IgnoredWebhookReason
     | IgnoredAction PullRequestEventType
     | IgnoredEventType Text
     | OwnPullRequest Text
+    | RepoNotFound OwnerName RepoName
 
 reasonToLogMessage :: IgnoredWebhookReason -> String
 reasonToLogMessage = \case
@@ -92,6 +93,8 @@ reasonToLogMessage = \case
     IgnoredEventType event -> "ignored event: " <> show event
     OwnPullRequest author ->
         "PR appears to be our own, author=" <> unpack author
+    RepoNotFound owner name ->
+        "Repo not found: " <> unpack (repoPath owner name)
 
 initializeFromWebhook
     :: MonadIO m

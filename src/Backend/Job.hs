@@ -8,8 +8,10 @@ where
 
 import Backend.Import
 
-import Backend.AcceptedJob
+import Backend.AcceptedWebhook
 import Backend.ExecRestyler
+import Backend.Marketplace
+import Backend.Webhook
 
 queueName :: ByteString
 queueName = "restyled:restyler:jobs"
@@ -22,21 +24,22 @@ awaitJob t = do
     eresult <- runRedis $ brpop [queueName] t
     pure $ either (const Nothing) (decodeStrict . snd =<<) eresult
 
-processJob :: HasDB env => ExecRestyler (RIO env) -> Entity Job -> RIO env ()
-processJob execRestyler jobE@(Entity _ job) = do
-    result <- runExceptT $ do
-        repo <- noteT "Repo not found" $ MaybeT $ runDB $ fetchRepoForJob job
-        withExceptT show $ tryExecRestyler execRestyler $ AcceptedJob
-            { ajRepo = repo
-            , ajJob = jobE
-            }
+processJob
+    :: (HasLogFunc env, HasDB env)
+    => ExecRestyler (RIO env)
+    -> Entity Job
+    -> RIO env ()
+processJob execRestyler job = processWebhookFrom execRestyler $ do
+    repo <- fetchRepoForAcceptedWebhook $ entityVal job
+    allows <- lift $ runDB $ marketplacePlanAllows repo
 
-    now <- liftIO getCurrentTime
+    pure AcceptedWebhook
+        { awRepo = repo
+        , awJob = job
+        , awMarketplaceAllows = allows
+        }
 
-    let failure :: String -> Entity Job -> Entity Job
-        failure = flip overEntity . completeJobErrored now
-
-        success :: ExitCode -> Entity Job -> Entity Job
-        success = flip overEntity . completeJob now
-
-    runDB $ replaceEntity $ either failure success result jobE
+fetchRepoForAcceptedWebhook
+    :: HasDB env => Job -> ExceptT IgnoredWebhookReason (RIO env) (Entity Repo)
+fetchRepoForAcceptedWebhook job@Job {..} =
+    noteT (RepoNotFound jobOwner jobRepo) $ MaybeT $ runDB $ fetchRepoForJob job

@@ -5,6 +5,7 @@ module Backend.Webhook
     , enqueueWebhook
     , awaitWebhook
     , processWebhook
+    , processWebhookFrom
     )
 where
 
@@ -35,9 +36,16 @@ processWebhook
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
-processWebhook execRestyler body = do
+processWebhook execRestyler = processWebhookFrom execRestyler . acceptWebhook
+
+processWebhookFrom
+    :: (HasLogFunc env, HasDB env)
+    => ExecRestyler (RIO env)
+    -> ExceptT IgnoredWebhookReason (RIO env) AcceptedWebhook
+    -> RIO env ()
+processWebhookFrom execRestyler getWebhook = do
     mUpdatedJob <- exceptT fromFailure (pure . pure) $ do
-        webhook <- withExceptT WebhookIgnored $ acceptWebhook body
+        webhook <- withExceptT WebhookIgnored getWebhook
         job <- withExceptT JobIgnored $ acceptJob webhook
         withExceptT ExecRestylerFailure $ runExecRestyler execRestyler job
 
