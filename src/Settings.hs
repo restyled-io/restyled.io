@@ -16,7 +16,6 @@ module Settings
     , appRevision
     , widgetFile
     , marketplaceListingPath
-    , requestLogger
     , makeStatic
     )
 where
@@ -29,17 +28,14 @@ import Database.Redis (ConnectInfo(..), PortID(..))
 import Development.GitRev (gitCommitDate, gitHash)
 import Language.Haskell.TH.Syntax (Exp, Q)
 import LoadEnv (loadEnvFrom)
-import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (HostPreference)
 import RIO (Lens')
 import SVCS.GitHub
 import SVCS.GitHub.ApiClient (GitHubToken)
 
 #if DEVELOPMENT
-import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Yesod.Default.Util (widgetFileReload)
 #else
-import Network.Wai.Middleware.RequestLogger (logStdout)
 import Yesod.Default.Util (widgetFileNoReload)
 #endif
 
@@ -70,6 +66,7 @@ data AppSettings = AppSettings
     -- verified with GitHub.
     , appAllowDummyAuth :: Bool
     , appFavicon :: FilePath
+    , appDetailedRequestLogger :: Bool
     }
 
 instance Show AppSettings where
@@ -182,13 +179,13 @@ marketplaceListingPath =
 
 -- brittany-disable-next-binding
 
-requestLogger :: Middleware
-requestLogger =
-#if DEVELOPMENT
-    logStdoutDev
-#else
-    logStdout
-#endif
+-- requestLogger :: Middleware
+-- requestLogger =
+-- #if DEVELOPMENT
+--     logStdoutDev
+-- #else
+--     logStdout
+-- #endif
 
 -- brittany-disable-next-binding
 

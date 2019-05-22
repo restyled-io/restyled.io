@@ -23,6 +23,7 @@ import Network.Wai.Handler.Warp
     )
 import Network.Wai.Middleware.ForceSSL
 import Network.Wai.Middleware.MethodOverridePost
+import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import RIO (runRIO)
 import RIO.DB (createConnectionPool)
 import RIO.Logger
@@ -55,7 +56,8 @@ appMain = do
 
     loadEnv
     app <- loadApp =<< loadEnvSettings
-    runSettings (warpSettings app) . waiMiddleware =<< toWaiAppPlain app
+
+    runSettings (warpSettings app) . waiMiddleware app =<< toWaiAppPlain app
 
 loadApp :: AppSettings -> IO App
 loadApp settings = do
@@ -71,9 +73,13 @@ loadApp settings = do
         <*> pure logFunc
         <*> mkDefaultProcessContext
 
-waiMiddleware :: Middleware
-waiMiddleware =
+waiMiddleware :: App -> Middleware
+waiMiddleware app =
     forceSSL . methodOverridePost . requestLogger . defaultMiddlewaresNoLogging
+  where
+    requestLogger
+        | appDetailedRequestLogger (appSettings app) = logStdoutDev
+        | otherwise = logStdout
 
 warpSettings :: App -> Settings
 warpSettings app =
