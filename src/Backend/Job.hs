@@ -1,6 +1,6 @@
 module Backend.Job
-    ( awaitRestylerJob
-    , enqueueRestylerJob
+    ( awaitJob
+    , enqueueJob
     , queueName
 
     -- * Processing
@@ -13,17 +13,17 @@ import Backend.Import
 import Backend.AcceptedJob
 import Backend.ExecRestyler
 
-awaitRestylerJob
+awaitJob
     :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe (Entity Job))
-awaitRestylerJob t = do
+awaitJob t = do
     logDebug "Awaiting Restyler Job..."
     eresult <- runRedis $ brpop [queueName] t
     logDebug $ "Popped value: " <> displayShow eresult
     return $ either (const Nothing) (decodePopped =<<) eresult
     where decodePopped = decodeStrict . snd
 
-enqueueRestylerJob :: (HasLogFunc env, HasRedis env) => Entity Job -> RIO env ()
-enqueueRestylerJob e@(Entity jid job) = do
+enqueueJob :: (HasLogFunc env, HasRedis env) => Entity Job -> RIO env ()
+enqueueJob e@(Entity jid job) = do
     logDebug
         $ fromString
         $ "Enqueuing Restyler Job Id "

@@ -20,40 +20,25 @@ backendMain = do
     backend <- loadBackend =<< loadEnvSettings
 
     runRIO backend $ do
-        void $ async synchronizeMarketplacePlans
-        void $ async $ forever $ awaitAndProcessJob 120
-        forever $ awaitAndProcessWebhook 120
+        asyncs <- sequence
+            [ async synchronizeMarketplacePlans
+            , async $ runQueue (awaitJob 120) $ processJob execRestyler
+            , async $ runQueue (awaitWebhook 120) $ processWebhook execRestyler
+            ]
 
-awaitAndProcessJob
-    :: ( HasLogFunc env
-       , HasProcessContext env
-       , HasSettings env
-       , HasDB env
-       , HasRedis env
-       )
-    => Integer
-    -> RIO env ()
-awaitAndProcessJob = traverse_ processJob' <=< awaitRestylerJob
-    where processJob' = processJob $ ExecRestyler execRestyler
+        void $ waitAny asyncs
 
-awaitAndProcessWebhook
-    :: ( HasLogFunc env
-       , HasProcessContext env
-       , HasSettings env
-       , HasDB env
-       , HasRedis env
-       )
-    => Integer
-    -> RIO env ()
-awaitAndProcessWebhook = traverse_ processWebhook' <=< awaitWebhook
-    where processWebhook' = processWebhook $ ExecRestyler execRestyler
+runQueue :: Monad m => m (Maybe a) -> (a -> m ()) -> m b
+runQueue awaitItem processItem = forever $ traverse_ processItem =<< awaitItem
+
+-- something awaitJob process = forever $ do
+--     mJob <- awaitJob 120
+--     traverse_ process mJob
 
 execRestyler
     :: (HasLogFunc env, HasProcessContext env, HasSettings env, HasDB env)
-    => Entity Repo
-    -> Entity Job
-    -> RIO env ExitCode
-execRestyler (Entity _ repo) job = do
+    => ExecRestyler (RIO env)
+execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
     settings <- view settingsL
     token <- fromLeftM throwString $ liftIO $ githubInstallationToken
         (appGitHubAppId settings)
