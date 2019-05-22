@@ -1,11 +1,9 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Backend.Webhook
-    ( enqueueWebhook
+    ( webhookQueueName
+    , enqueueWebhook
     , awaitWebhook
-    , webhookQueueName
-
-    -- * Processing
     , processWebhook
     )
 where
@@ -16,21 +14,16 @@ import Backend.AcceptedJob
 import Backend.AcceptedWebhook
 import Backend.ExecRestyler
 
-enqueueWebhook :: (HasLogFunc env, HasRedis env) => ByteString -> RIO env ()
-enqueueWebhook body = do
-    logDebug "Enqueuing Webhook..."
-    void $ runRedis $ lpush webhookQueueName [body]
-
-awaitWebhook
-    :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe ByteString)
-awaitWebhook t = do
-    logDebug "Awaiting Webhook..."
-    eresult <- runRedis $ brpop [webhookQueueName] t
-    logDebug $ "Popped value: " <> displayShow eresult
-    pure $ either (const Nothing) (snd <$>) eresult
-
 webhookQueueName :: ByteString
 webhookQueueName = "restyled:hooks:webhooks"
+
+enqueueWebhook :: HasRedis env => ByteString -> RIO env ()
+enqueueWebhook = void . runRedis . lpush webhookQueueName . pure
+
+awaitWebhook :: HasRedis env => Integer -> RIO env (Maybe ByteString)
+awaitWebhook t = do
+    eresult <- runRedis $ brpop [webhookQueueName] t
+    pure $ either (const Nothing) (snd <$>) eresult
 
 data JobNotProcessed
     = WebhookIgnored IgnoredWebhookReason
@@ -60,6 +53,6 @@ fromFailure = \case
         $ "Job ignored: " <> ignoredJobReasonToLogMessage reason
     ExecRestylerFailure (ExecRestylerFailed ex job) -> logReturn (Just job)
         $ "Exec failure: " <> show ex
-  where
-    logReturn :: HasLogFunc env => Maybe a -> String -> RIO env (Maybe a)
-    logReturn x msg = x <$ logWarn (fromString msg)
+
+logReturn :: HasLogFunc env => Maybe a -> String -> RIO env (Maybe a)
+logReturn x msg = x <$ logWarn (fromString msg)

@@ -31,10 +31,6 @@ backendMain = do
 runQueue :: Monad m => m (Maybe a) -> (a -> m ()) -> m b
 runQueue awaitItem processItem = forever $ traverse_ processItem =<< awaitItem
 
--- something awaitJob process = forever $ do
---     mJob <- awaitJob 120
---     traverse_ process mJob
-
 execRestyler
     :: (HasLogFunc env, HasProcessContext env, HasSettings env, HasDB env)
     => ExecRestyler (RIO env)
@@ -85,13 +81,3 @@ restyleDockerRun AppSettings {..} token (Entity jobId Job {..}) debug =
             <> toPathPiece jobId
 
     prSpec = unpack $ repoPullPath jobOwner jobRepo jobPullRequest
-
-captureJobLogLine :: HasDB env => JobId -> Text -> Text -> RIO env ()
-captureJobLogLine jobId stream content = runDB $ do
-    now <- liftIO getCurrentTime
-    insert_ JobLogLine
-        { jobLogLineJob = jobId
-        , jobLogLineCreatedAt = now
-        , jobLogLineStream = stream
-        , jobLogLineContent = content
-        }

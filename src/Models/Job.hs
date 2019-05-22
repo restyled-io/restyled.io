@@ -12,6 +12,7 @@ module Models.Job
     , JobOutput(..)
     , attachJobOutput
     , fetchJobOutput
+    , captureJobLogLine
 
     -- * Completing Jobs
     , completeJob
@@ -24,7 +25,6 @@ where
 import Restyled.Prelude
 
 import Models.DB
-import System.Exit (ExitCode(..))
 
 insertJob
     :: MonadIO m => Entity Repo -> PullRequestNum -> SqlPersistT m (Entity Job)
@@ -89,6 +89,16 @@ fetchJobOutput jobE@(Entity jobId job@Job {..}) =
             [Asc JobLogLineCreatedAt]
         (Just _, _, _) -> pure $ JobOutputLegacy job
         (_, _, _) -> pure $ JobOutputInProgress jobE
+
+captureJobLogLine :: HasDB env => JobId -> Text -> Text -> RIO env ()
+captureJobLogLine jobId stream content = runDB $ do
+    now <- liftIO getCurrentTime
+    insert_ JobLogLine
+        { jobLogLineJob = jobId
+        , jobLogLineCreatedAt = now
+        , jobLogLineStream = stream
+        , jobLogLineContent = content
+        }
 
 completeJob :: UTCTime -> ExitCode -> Job -> Job
 completeJob now ec job = job

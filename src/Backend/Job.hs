@@ -1,9 +1,7 @@
 module Backend.Job
-    ( awaitJob
+    ( queueName
     , enqueueJob
-    , queueName
-
-    -- * Processing
+    , awaitJob
     , processJob
     )
 where
@@ -13,35 +11,24 @@ import Backend.Import
 import Backend.AcceptedJob
 import Backend.ExecRestyler
 
-awaitJob
-    :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe (Entity Job))
-awaitJob t = do
-    logDebug "Awaiting Restyler Job..."
-    eresult <- runRedis $ brpop [queueName] t
-    logDebug $ "Popped value: " <> displayShow eresult
-    return $ either (const Nothing) (decodePopped =<<) eresult
-    where decodePopped = decodeStrict . snd
-
-enqueueJob :: (HasLogFunc env, HasRedis env) => Entity Job -> RIO env ()
-enqueueJob e@(Entity jid job) = do
-    logDebug
-        $ fromString
-        $ "Enqueuing Restyler Job Id "
-        <> unpack (toPathPiece jid)
-        <> ": "
-        <> show job
-    void $ runRedis $ lpush queueName [encodeStrict e]
-
 queueName :: ByteString
 queueName = "restyled:restyler:jobs"
 
+enqueueJob :: HasRedis env => Entity Job -> RIO env ()
+enqueueJob = void . runRedis . lpush queueName . pure . encodeStrict
+
+awaitJob :: HasRedis env => Integer -> RIO env (Maybe (Entity Job))
+awaitJob t = do
+    eresult <- runRedis $ brpop [queueName] t
+    pure $ either (const Nothing) (decodeStrict . snd =<<) eresult
+
 processJob :: HasDB env => ExecRestyler (RIO env) -> Entity Job -> RIO env ()
-processJob execRestyler eJob@(Entity jobId job) = do
+processJob execRestyler jobE@(Entity jobId job) = do
     result <- runExceptT $ do
         repo <- noteT "Repo not found" $ MaybeT $ runDB $ fetchRepoForJob job
         withExceptT show $ tryExecRestyler execRestyler $ AcceptedJob
             { ajRepo = repo
-            , ajJob = eJob
+            , ajJob = jobE
             }
 
     now <- liftIO getCurrentTime
