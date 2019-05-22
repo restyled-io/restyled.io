@@ -1,16 +1,7 @@
 ---
 restylers:
   - stylish-haskell
-  - brittany:
-      include:
-        - "**/*.hs"
-
-        # CPP, HsSpliceE, etc
-        - "!src/Application.hs"
-        - "!src/Settings.hs"
-        - "!src/Widgets/Job.hs"
-        - "!src/Widgets/Repo.hs"
-        - "!test/TestImport.hs"
+  - brittany
   - prettier:
       # Explicitly set parser so it works on .julius
       arguments:
