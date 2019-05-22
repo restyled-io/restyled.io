@@ -11,6 +11,7 @@ import Import.NoFoundation
 import Api.Error
 import Authentication
 import Authorization
+import Data.Text (splitOn)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Redis (Connection)
 import RIO (HasLogFunc(..), LogFunc, lens)
@@ -74,8 +75,8 @@ instance Yesod App where
         mUser <- maybeAuth
 
         pc <- widgetToPageContent $ do
-            addStylesheet $ StaticR $ staticR "css/strapless.css"
-            addStylesheet $ StaticR $ staticR "css/main.css"
+            addStylesheet $ staticR "css/strapless.css"
+            addStylesheet $ staticR "css/main.css"
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -143,13 +144,22 @@ adminLayout widget = do
     master <- getYesod
     mmsg <- getMessage
     pc <- widgetToPageContent $ do
-        addStylesheet $ StaticR $ staticR "css/strapless.css"
-        addStylesheet $ StaticR $ staticR "css/main.css"
-        addStylesheet $ StaticR $ staticR "css/admin.css"
+        addStylesheet $ staticR "css/strapless.css"
+        addStylesheet $ staticR "css/main.css"
+        addStylesheet $ staticR "css/admin.css"
         addScriptRemote "https://code.jquery.com/jquery-3.3.1.min.js"
         addScriptRemote "https://underscorejs.org/underscore-min.js"
         $(widgetFile "admin-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+
+-- | Route to a Static file at a given path
+--
+-- This removes the type-safety of the TH-defined functions, but makes we don't
+-- need compile-time knowledge of our static-directory, and there is value with
+-- keeping all possible settings entirely runtime-defined.
+--
+staticR :: FilePath -> Route App
+staticR path = StaticR $ StaticRoute (splitOn "/" $ pack path) []
 
 instance YesodAuth App where
     type AuthId App = UserId

@@ -19,7 +19,6 @@ import Model.Repo as Import
 import Model.User as Import
 import RIO.Handler as Import
 import Settings as Import
-import Settings.StaticFiles as Import
 
 import qualified Data.Text.Lazy as TL
 import Formatting (format, (%))

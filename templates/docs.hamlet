@@ -32,7 +32,7 @@
     attention:
 
   <p>
-    <img src=@{StaticR img_docs_minor_commented_png}>
+    <img src=@{staticR img_docs_minor_commented_png}>
 
   <p>
     If you want to adopt the restyled version, just merge that Pull Request into
