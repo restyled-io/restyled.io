@@ -51,10 +51,6 @@ data AppSettings = AppSettings
     , appRestylerImage :: String
     , appRestylerTag :: Maybe String
     , appAdmins :: [Text]
-    -- ^ +SECURITY_NOTE+ This relies on the fact that there is no authentication
-    -- method available where users can enter an email themselves. Emails are
-    -- taken only from GitHub credentials, and will only be present there if
-    -- verified with GitHub.
     , appAllowDummyAuth :: Bool
     , appFavicon :: FilePath
     , appDetailedRequestLogger :: Bool
