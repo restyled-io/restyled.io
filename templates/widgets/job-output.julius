@@ -38,6 +38,10 @@ if (typeof Output === "undefined") {
 
     socket.onclose = function(event) {
       console.log("websocket closed", event);
+
+      if (event.reason === "Job finished") {
+        window.location.reload();
+      }
     };
   };
 }
