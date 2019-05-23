@@ -10,6 +10,6 @@ restylers:
       include:
         - "**/*.js"
         - "**/*.julius"
-   - hlint:
-       include:
-         - "**/*.hs"
+  - hlint:
+      include:
+        - "**/*.hs"
