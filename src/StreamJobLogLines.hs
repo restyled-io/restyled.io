@@ -20,16 +20,15 @@ streamJobLogLines jobId = handle ignoreConnectionException $ go 0
         -- client has closed their tab
         void $ sendTextDataAck @_ @Text ""
 
-        -- Super naive throttle
-        liftIO $ threadDelay $ 1 * 1000000
-        logLines <- lift $ runDB $ fetchJobLogLines jobId offset
+        (isInProgress, logLines) <-
+            lift
+            $ runDB
+            $ (,)
+            <$> fetchJobIsInProgress jobId
+            <*> fetchJobLogLines jobId offset
 
-        for_ logLines $ \logLine -> do
-            logDebugN "Sending JobLogLine"
-            html <- lift $ renderJobLogLine logLine
-            void $ sendTextDataAck html
-
-        isInProgress <- lift $ runDB $ fetchJobIsInProgress jobId
+        htmls <- traverse (lift . renderJobLogLine) logLines
+        void $ sendTextDataAck $ mconcat htmls
 
         -- Always recurse if in progress or we're still streaming lines
         if isInProgress || not (null logLines)
