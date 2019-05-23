@@ -13,3 +13,11 @@ restylers:
   - hlint:
       include:
         - "**/*.hs"
+
+        # apply-refact cannot handle TypeApplications
+        - "!src/Handler/PrivacyPolicy.hs"
+        - "!src/Handler/Webhooks.hs"
+        - "!src/StreamJobLogLines.hs"
+
+        # apply-refact cannot handle something here
+        - "!src/Settings/Env.hs"
