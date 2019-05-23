@@ -21,12 +21,12 @@ import Data.Default (def)
 import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..))
 import Language.Haskell.TH.Syntax (Exp, Q)
-import LoadEnv (loadEnvFrom)
 import Network.Wai.Handler.Warp (HostPreference)
 import Yesod.Auth
 import Yesod.Auth.Dummy
 
 #if DEVELOPMENT
+import LoadEnv (loadEnvFrom)
 import Yesod.Default.Util (widgetFileReload)
 #else
 import Yesod.Default.Util (widgetFileNoReload)
