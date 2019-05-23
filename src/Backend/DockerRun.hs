@@ -9,19 +9,15 @@ import Backend.Import
 dockerRunArgs
     :: AppSettings -> RepoAccessToken -> Repo -> Entity Job -> [String]
 dockerRunArgs settings token repo job =
-    ["run", "--rm"]
-        <> restylerEnv settings token repo
-        <> restylerVolumes
-        <> [restylerImage settings]
-        <> restylerArgs settings job
+    ["run", "--rm"] <> restylerEnv settings token repo <> restyler settings job
 
 -- | @'dockerRunArgsLogged'@ but without possibly-secret @--env@ arguments
 dockerRunArgsLogged :: AppSettings -> Entity Job -> [String]
-dockerRunArgsLogged settings job =
-    ["run", "--rm"]
-        <> restylerVolumes
-        <> [restylerImage settings]
-        <> restylerArgs settings job
+dockerRunArgsLogged settings job = ["run", "--rm"] <> restyler settings job
+
+restyler :: AppSettings -> Entity Job -> [String]
+restyler settings job =
+    restylerVolumes <> [restylerImage settings] <> restylerArgs settings job
 
 -- brittany-disable-next-binding
 
