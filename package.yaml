@@ -67,14 +67,11 @@ library:
     - blaze-html
     - blaze-markup
     - bytestring
-    - classy-prelude
-    - classy-prelude-yesod
     - composition-extra
     - conduit
     - conduit-extra
     - containers
     - data-default
-    - directory
     - envparse
     - errors
     - extra
@@ -87,7 +84,6 @@ library:
     - hedis
     - hjsmin
     - http-client
-    - http-client-tls
     - http-conduit
     - http-types
     - hoauth2
@@ -112,7 +108,6 @@ library:
     - vector
     - wai
     - wai-extra
-    - wai-logger
     - warp
     - websockets
     - yesod
@@ -155,7 +150,6 @@ tests:
       - HUnit
       - QuickCheck
       - bytestring
-      - classy-prelude
       - filepath
       - hedis
       - hspec
