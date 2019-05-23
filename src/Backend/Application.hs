@@ -39,15 +39,13 @@ execRestyler
     => ExecRestyler (RIO env)
 execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
     settings <- view settingsL
-    token <- fromLeftM throwString $ liftIO $ githubInstallationToken
-        (appGitHubAppId settings)
-        (appGitHubAppKey settings)
-        (repoInstallationId repo)
+    token <- repoInstallationToken settings repo
 
     let capture stream = captureJobLogLine (entityKey job) stream . pack
 
     runRestyle <- runDB $ do
         capture "system" $ unwords $ "docker" : dockerRunArgsLogged settings job
+
         fetchRestyleMachine >>= \case
             Nothing -> do
                 capture "system" "Running on local Docker host"
@@ -63,6 +61,13 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
         (runDB . capture "stderr")
 
     ec <$ runDB (capture "system" $ "Restyler exited " <> displayExitCode ec)
+
+repoInstallationToken :: MonadIO m => AppSettings -> Repo -> m RepoAccessToken
+repoInstallationToken AppSettings {..} Repo {..} =
+    fromLeftM throwString $ liftIO $ githubInstallationToken
+        appGitHubAppId
+        appGitHubAppKey
+        repoInstallationId
 
 displayExitCode :: ExitCode -> String
 displayExitCode = \case
