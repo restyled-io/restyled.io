@@ -4,9 +4,9 @@
 module Backend.AcceptedJob
     ( AcceptedJob(..)
     , acceptJob
-    , IgnoredJob(..)
     , IgnoredJobReason(..)
     , ignoredJobReasonToLogMessage
+    , ignoredJobReasonToJobLogLine
     )
 where
 
@@ -15,40 +15,25 @@ import Backend.Import
 import Backend.AcceptedWebhook
 import Backend.Marketplace
 
+data IgnoredJobReason
+    = NonGitHubRepo Repo
+    | PlanLimitation Repo MarketplacePlanLimitation
+
 data AcceptedJob = AcceptedJob
     { ajRepo :: Entity Repo
     , ajJob :: Entity Job
     }
 
-data IgnoredJob = IgnoredJob
-    { ijReason :: IgnoredJobReason
-    , ijJob :: Entity Job
-    }
-
 -- | Given an Accepted webhook, accept or ignore that Job
-acceptJob :: MonadIO m => AcceptedWebhook -> ExceptT IgnoredJob m AcceptedJob
+acceptJob
+    :: MonadIO m => AcceptedWebhook -> ExceptT IgnoredJobReason m AcceptedJob
 acceptJob AcceptedWebhook {..} = do
-    when (repoSvcs repo /= GitHubSVCS) $ ignoreJob awJob $ NonGitHubRepo repo
-    whenMarketplacePlanForbids allows $ ignoreJob awJob . PlanLimitation repo
+    when (repoSvcs repo /= GitHubSVCS) $ throwError $ NonGitHubRepo repo
+    whenMarketplacePlanForbids allows $ throwError . PlanLimitation repo
     pure $ AcceptedJob awRepo awJob
   where
     repo = entityVal awRepo
     allows = awMarketplaceAllows
-
--- | Ignore the given @'Job'@ with reason
-ignoreJob
-    :: MonadIO m => Entity Job -> IgnoredJobReason -> ExceptT IgnoredJob m a
-ignoreJob job reason = do
-    now <- liftIO getCurrentTime
-    throwError
-        $ IgnoredJob reason
-        $ overEntity job
-        $ completeJobSkipped now
-        $ toIgnoredJobStdout reason
-
-data IgnoredJobReason
-    = NonGitHubRepo Repo
-    | PlanLimitation Repo MarketplacePlanLimitation
 
 ignoredJobReasonToLogMessage :: IgnoredJobReason -> String
 ignoredJobReasonToLogMessage = \case
@@ -57,8 +42,8 @@ ignoredJobReasonToLogMessage = \case
     PlanLimitation _ MarketplacePlanPublicOnly ->
         "Public-only Marketplace Plan"
 
-toIgnoredJobStdout :: IgnoredJobReason -> String
-toIgnoredJobStdout = unlines . \case
+ignoredJobReasonToJobLogLine :: IgnoredJobReason -> String
+ignoredJobReasonToJobLogLine = unlines . \case
     NonGitHubRepo repo ->
         [ "Non-GitHub (" <> show (repoSvcs repo) <> "): " <> path repo <> "."
         , "See https://github.com/restyled-io/restyled.io/issues/76"

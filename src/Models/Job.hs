@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Models.Job
     (
     -- * Creating Jobs
@@ -15,10 +17,9 @@ module Models.Job
     , captureJobLogLine
 
     -- * Completing Jobs
-    , completeJob
-    , completeJobErrored
-    , completeJobErroredS
     , completeJobSkipped
+    , completeJobErrored
+    , completeJob
     )
 where
 
@@ -100,32 +101,26 @@ captureJobLogLine jobId stream content = do
         , jobLogLineContent = content
         }
 
-completeJob :: UTCTime -> ExitCode -> Job -> Job
-completeJob now ec job = job
-    { jobUpdatedAt = now
-    , jobCompletedAt = Just now
-    , jobExitCode = Just $ toInt ec
-    }
-  where
-    toInt ExitSuccess = 0
-    toInt (ExitFailure i) = i
+completeJobSkipped :: MonadIO m => String -> Entity Job -> SqlPersistT m ()
+completeJobSkipped reason job = do
+    captureJobLogLine (entityKey job) "system" $ pack reason
+    completeJob ExitSuccess job
 
---------------------------------------------------------------------------------
--- NB, below here is only useful for artificial failure/skip. Normally, output
--- is read via job_log_line records.
---------------------------------------------------------------------------------
+completeJobErrored :: MonadIO m => String -> Entity Job -> SqlPersistT m ()
+completeJobErrored reason job = do
+    captureJobLogLine (entityKey job) "system" $ pack reason
+    completeJob (ExitFailure 99) job
 
-completeJobErrored :: UTCTime -> String -> Job -> Job
-completeJobErrored now reason job = (completeJob now (ExitFailure 99) job)
-    { jobStdout = Just ""
-    , jobStderr = Just $ pack reason
-    }
+completeJob :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m ()
+completeJob ec job = do
+    now <- liftIO getCurrentTime
+    replaceEntity $ overEntity job $ \j -> j
+        { jobUpdatedAt = now
+        , jobCompletedAt = Just now
+        , jobExitCode = Just $ exitCode ec
+        }
 
-completeJobErroredS :: Show a => UTCTime -> a -> Job -> Job
-completeJobErroredS now = completeJobErrored now . show
-
-completeJobSkipped :: UTCTime -> String -> Job -> Job
-completeJobSkipped now reason job = (completeJob now ExitSuccess job)
-    { jobStdout = Just $ pack reason
-    , jobStderr = Just ""
-    }
+exitCode :: ExitCode -> Int
+exitCode = \case
+    ExitSuccess -> 0
+    ExitFailure i -> i
