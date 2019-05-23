@@ -1,4 +1,4 @@
-module Model.UserSpec
+module Models.UserSpec
     ( spec
     )
 where
