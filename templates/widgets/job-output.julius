@@ -18,7 +18,7 @@ if (typeof Output === "undefined") {
 
     this.elem.innerHTML += html;
 
-    if (this.singleCard && html != "") {
+    if (this.singleCard && html !== "") {
       window.scrollTo(0, document.body.scrollHeight);
     }
   };
