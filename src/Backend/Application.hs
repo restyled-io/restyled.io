@@ -63,12 +63,14 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
         (runDB . capture "stderr")
 
     ec <$ runDB (capture "system" $ "Restyler exited " <> displayExitCode ec)
-  where
-    displayExitCode = \case
-        ExitSuccess -> "0"
-        ExitFailure c -> show c
 
-    displayMachine = unpack . restyleMachineHost
+displayExitCode :: ExitCode -> String
+displayExitCode = \case
+    ExitSuccess -> "0"
+    ExitFailure c -> show c
+
+displayMachine :: RestyleMachine -> String
+displayMachine = unpack . restyleMachineHost
 
 -- brittany-disable-next-binding
 

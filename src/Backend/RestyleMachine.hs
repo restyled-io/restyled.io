@@ -8,10 +8,9 @@ where
 
 import Backend.Import
 
-import qualified Data.Map as Map
 import qualified Data.Text.IO as T
 import Database.Persist.Sql (rawSql)
-import System.Directory
+import RIO.Directory
     (createDirectoryIfMissing, doesDirectoryExist, getHomeDirectory)
 import System.FilePath ((</>))
 import Text.Shakespeare.Text (st)
@@ -24,10 +23,10 @@ fetchRestyleMachine =
     headMaybe . map entityVal <$> rawSql [st|
         SELECT ??
         FROM restyle_machine
-        WHERE enabled = t
+        WHERE restyle_machine.enabled = ?
         ORDER BY RANDOM ()
         LIMIT 1
-    |] []
+    |] [PersistBool True]
 
 -- | Run a process on a @'RestyleMachine'@s
 runRestyleMachine
@@ -39,37 +38,27 @@ runRestyleMachine
     -> (String -> RIO env ())
     -> RIO env ExitCode
 runRestyleMachine machine cmd args fOut fErr = do
-    certPath <- setupCertificatesIfMissing machine
-    withModifyEnvVars
-            (append
-                [ ("DOCKER_HOST", restyleMachineHost machine)
-                , ("DOCKER_CERT_PATH", pack certPath)
-                , ("DOCKER_TLS_VERIFY", "1")
-                ]
-            )
+    certPath <- restyleMachineCertPath machine
+    setupCertificatesIfMissing machine certPath
+
+    withExtraEnvVars
+            [ ("DOCKER_HOST", restyleMachineHost machine)
+            , ("DOCKER_CERT_PATH", pack certPath)
+            , ("DOCKER_TLS_VERIFY", "1")
+            ]
         $ followProcess cmd args fOut fErr
-    where append envs env = env <> Map.fromList envs
 
-setupCertificatesIfMissing
-    :: HasLogFunc env => RestyleMachine -> RIO env FilePath
-setupCertificatesIfMissing RestyleMachine {..} = do
-    (certPath, certPathExists) <- liftIO $ do
-        home <- getHomeDirectory
-        let
-            path =
-                home
-                    </> ".docker"
-                    </> "restyled"
-                    </> "cert"
-                    </> unpack restyleMachineName
-        (path, ) <$> doesDirectoryExist path
-
-    unless certPathExists $ do
-        logInfo $ fromString $ "Populating certificates in " <> certPath
+setupCertificatesIfMissing :: RestyleMachine -> FilePath -> RIO env ()
+setupCertificatesIfMissing RestyleMachine {..} certPath =
+    unlessM (doesDirectoryExist certPath) $ do
+        createDirectoryIfMissing True certPath
         liftIO $ do
-            createDirectoryIfMissing True certPath
             T.writeFile (certPath </> "ca.pem") restyleMachineCaCert
             T.writeFile (certPath </> "cert.pem") restyleMachineCert
             T.writeFile (certPath </> "key.pem") restyleMachineKey
 
-    pure certPath
+restyleMachineCertPath :: MonadIO m => RestyleMachine -> m FilePath
+restyleMachineCertPath RestyleMachine {..} = do
+    home <- getHomeDirectory
+    pure $ home </> ".docker" </> "restyled" </> "cert" </> name
+    where name = unpack restyleMachineName
