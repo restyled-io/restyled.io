@@ -7,6 +7,7 @@ where
 
 import Backend.Import
 
+import Backend.DockerRun
 import Backend.ExecRestyler
 import Backend.Foundation
 import Backend.Job
@@ -46,9 +47,8 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
     let capture stream = captureJobLogLine (entityKey job) stream . pack
 
     runRestyle <- runDB $ do
-        mMachine <- fetchRestyleMachine
-
-        case mMachine of
+        capture "system" $ unwords $ "docker" : dockerRunArgsLogged settings job
+        fetchRestyleMachine >>= \case
             Nothing -> do
                 capture "system" "Running on local Docker host"
                 pure followProcess
@@ -58,7 +58,7 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
 
     ec <- runRestyle
         "docker"
-        (restyleDockerRun settings token job $ repoIsDebug settings repo)
+        (dockerRunArgs settings token repo job)
         (runDB . capture "stdout")
         (runDB . capture "stderr")
 
@@ -71,34 +71,3 @@ displayExitCode = \case
 
 displayMachine :: RestyleMachine -> String
 displayMachine = unpack . restyleMachineHost
-
--- brittany-disable-next-binding
-
-restyleDockerRun
-    :: AppSettings
-    -> RepoAccessToken
-    -> Entity Job
-    -> Bool -- ^ Debug?
-    -> [String]
-restyleDockerRun AppSettings {..} token (Entity jobId Job {..}) debug =
-    [ "run", "--rm"
-    , "--env", if debug then "DEBUG=1" else "DEBUG="
-    , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
-    , "--volume", "/tmp:/tmp"
-    , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
-    , restylerImage, "--job-url", jobUrl, prSpec
-    ]
-  where
-    restylerImage = appRestylerImage <> maybe "" (":" <>) appRestylerTag
-
-    jobUrl =
-        unpack
-            $ appRoot
-            <> "/gh/"
-            <> toPathPiece jobOwner
-            <> "/repos/"
-            <> toPathPiece jobRepo
-            <> "/jobs/"
-            <> toPathPiece jobId
-
-    prSpec = unpack $ repoPullPath jobOwner jobRepo jobPullRequest
