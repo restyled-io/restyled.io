@@ -10,10 +10,6 @@ where
 
 import Backend.Import
 
-import GitHub.Data (toPathPart)
-import Network.HTTP.Client (parseRequest)
-import SVCS.GitHub.ApiClient
-
 data GitHubMarketplacePlan = GitHubMarketplacePlan
     { ghmpId :: Int
     , ghmpName :: Text
@@ -43,7 +39,7 @@ synchronizeMarketplacePlans = do
 runSynchronize :: (HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
 runSynchronize = do
     logInfo "Synchronizing GitHub Marketplace data"
-    plans <- getGitHub $ marketplaceListingPath <> "/plans"
+    plans <- getGitHubMarketplaceListing "/plans"
     synchronizedAccountIds <- for plans $ \plan -> do
         planId <- runDB $ entityKey <$> upsert
             MarketplacePlan
@@ -56,16 +52,15 @@ runSynchronize = do
             ]
 
         accounts <-
-            getGitHub
-            $ marketplaceListingPath
-            <> "/plans/"
+            getGitHubMarketplaceListing
+            $ "/plans/"
             <> toPathPiece (ghmpId plan)
             <> "/accounts"
 
         for accounts $ \account -> do
             logInfo
                 $ "Account "
-                <> displayShow (toPathPart $ ghaLogin account)
+                <> displayShow (toPathPiece $ ghaLogin account)
                 <> " has plan "
                 <> displayShow (ghmpName plan)
 
@@ -101,9 +96,16 @@ fetchDiscountMarketplacePlan =
     fromJustNoteM "Discount Plan must exist"
         =<< selectFirst [MarketplacePlanGithubId ==. 0] []
 
-getGitHub :: (FromJSON a, HasSettings env) => Text -> RIO env a
-getGitHub path = do
+getGitHubMarketplaceListing
+    :: (FromJSON a, HasSettings env) => Text -> RIO env a
+getGitHubMarketplaceListing path' = do
     AppSettings {..} <- view settingsL
+
+    let prefix = if appStubMarketplaceListing
+            then "/marketplace_listing/stubbed"
+            else "/marketplace_listing"
+
+        path = prefix <> path'
 
     liftIO $ do
         request <- parseRequest $ unpack $ "GET https://api.github.com" <> path

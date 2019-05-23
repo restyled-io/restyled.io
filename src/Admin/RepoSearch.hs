@@ -7,8 +7,8 @@ where
 
 import Import
 
-import Data.Aeson
-import Data.Aeson.Casing
+import Foundation
+import Yesod
 
 data SearchResults
     = SearchResults

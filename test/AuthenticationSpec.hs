@@ -5,9 +5,10 @@ module AuthenticationSpec
     )
 where
 
-import TestImport hiding (isUserError)
+import TestImport
 
 import Authentication
+import qualified Data.Text as T
 import Yesod.Auth
 import Yesod.Auth.Message (defaultMessage)
 
@@ -81,7 +82,7 @@ spec = withApp $ do
 
         context "with OAuth2 data in credsExtra" $ do
             let userResponse :: Text
-                userResponse = unlines
+                userResponse = T.unlines
                     [ "{"
                     , "  \"id\": 1,"
                     , "  \"email\": \"me@example.com\","

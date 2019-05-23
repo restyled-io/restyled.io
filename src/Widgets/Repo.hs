@@ -9,6 +9,8 @@ import Import
 
 import Formatting (format)
 import Formatting.Time (diff)
+import Foundation
+import Routes
 import Widgets.Job
 
 repoCard :: RepoWithStats -> Widget

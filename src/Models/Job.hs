@@ -1,4 +1,6 @@
-module Model.Job
+{-# LANGUAGE LambdaCase #-}
+
+module Models.Job
     (
     -- * Creating Jobs
       insertJob
@@ -12,21 +14,18 @@ module Model.Job
     , JobOutput(..)
     , attachJobOutput
     , fetchJobOutput
+    , captureJobLogLine
 
     -- * Completing Jobs
-    , completeJob
-    , completeJobErrored
-    , completeJobErroredS
     , completeJobSkipped
+    , completeJobErrored
+    , completeJob
     )
 where
 
-import ClassyPrelude
+import Restyled.Prelude
 
-import Database.Persist
-import Database.Persist.Sql (SqlPersistT)
-import Model
-import System.Exit (ExitCode(..))
+import Models.DB
 
 insertJob
     :: MonadIO m => Entity Repo -> PullRequestNum -> SqlPersistT m (Entity Job)
@@ -92,32 +91,36 @@ fetchJobOutput jobE@(Entity jobId job@Job {..}) =
         (Just _, _, _) -> pure $ JobOutputLegacy job
         (_, _, _) -> pure $ JobOutputInProgress jobE
 
-completeJob :: UTCTime -> ExitCode -> Job -> Job
-completeJob now ec job = job
-    { jobUpdatedAt = now
-    , jobCompletedAt = Just now
-    , jobExitCode = Just $ toInt ec
-    }
-  where
-    toInt ExitSuccess = 0
-    toInt (ExitFailure i) = i
+captureJobLogLine :: MonadIO m => JobId -> Text -> Text -> SqlPersistT m ()
+captureJobLogLine jobId stream content = do
+    now <- liftIO getCurrentTime
+    insert_ JobLogLine
+        { jobLogLineJob = jobId
+        , jobLogLineCreatedAt = now
+        , jobLogLineStream = stream
+        , jobLogLineContent = content
+        }
 
---------------------------------------------------------------------------------
--- NB, below here is only useful for artificial failure/skip. Normally, output
--- is read via job_log_line records.
---------------------------------------------------------------------------------
+completeJobSkipped :: MonadIO m => String -> Entity Job -> SqlPersistT m ()
+completeJobSkipped reason job = do
+    captureJobLogLine (entityKey job) "system" $ pack reason
+    completeJob ExitSuccess job
 
-completeJobErrored :: UTCTime -> String -> Job -> Job
-completeJobErrored now reason job = (completeJob now (ExitFailure 99) job)
-    { jobStdout = Just ""
-    , jobStderr = Just $ pack reason
-    }
+completeJobErrored :: MonadIO m => String -> Entity Job -> SqlPersistT m ()
+completeJobErrored reason job = do
+    captureJobLogLine (entityKey job) "system" $ pack reason
+    completeJob (ExitFailure 99) job
 
-completeJobErroredS :: Show a => UTCTime -> a -> Job -> Job
-completeJobErroredS now = completeJobErrored now . show
+completeJob :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m ()
+completeJob ec job = do
+    now <- liftIO getCurrentTime
+    replaceEntity $ overEntity job $ \j -> j
+        { jobUpdatedAt = now
+        , jobCompletedAt = Just now
+        , jobExitCode = Just $ exitCode ec
+        }
 
-completeJobSkipped :: UTCTime -> String -> Job -> Job
-completeJobSkipped now reason job = (completeJob now ExitSuccess job)
-    { jobStdout = Just $ pack reason
-    , jobStderr = Just ""
-    }
+exitCode :: ExitCode -> Int
+exitCode = \case
+    ExitSuccess -> 0
+    ExitFailure i -> i

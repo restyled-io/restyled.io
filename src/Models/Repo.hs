@@ -1,10 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Model.Repo
+module Models.Repo
     (
     -- * Virtual attributes
       repoPath
     , repoPullPath
+    , repoIsDebug
 
     -- * Queries
     , fetchReposByOwnerName
@@ -21,12 +22,11 @@ module Model.Repo
     )
 where
 
-import ClassyPrelude
+import Restyled.Prelude
 
-import Database.Persist
-import Database.Persist.Sql (SqlPersistT)
-import Model
-import Yesod.Core (toPathPiece)
+import qualified Data.Text as T
+import Models.DB
+import Settings
 
 -- | Make a nicely-formatted @:owner\/:name@
 --
@@ -37,6 +37,10 @@ repoPath owner name = toPathPiece owner <> "/" <> toPathPiece name
 
 repoPullPath :: OwnerName -> RepoName -> PullRequestNum -> Text
 repoPullPath owner name num = repoPath owner name <> "#" <> toPathPiece num
+
+repoIsDebug :: AppSettings -> Repo -> Bool
+repoIsDebug AppSettings {..} Repo {..} =
+    appLogLevel == LevelDebug || repoDebugEnabled
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo
@@ -80,6 +84,7 @@ data IgnoredWebhookReason
     | IgnoredAction PullRequestEventType
     | IgnoredEventType Text
     | OwnPullRequest Text
+    | RepoNotFound OwnerName RepoName
 
 reasonToLogMessage :: IgnoredWebhookReason -> String
 reasonToLogMessage = \case
@@ -88,6 +93,8 @@ reasonToLogMessage = \case
     IgnoredEventType event -> "ignored event: " <> show event
     OwnPullRequest author ->
         "PR appears to be our own, author=" <> unpack author
+    RepoNotFound owner name ->
+        "Repo not found: " <> unpack (repoPath owner name)
 
 initializeFromWebhook
     :: MonadIO m
@@ -118,8 +125,8 @@ findOrCreateRepo Payload {..} = do
 
 isActualAuthor :: Text -> Bool
 isActualAuthor author
-    | "restyled-io" `isPrefixOf` author = False
-    | "[bot]" `isSuffixOf` author = False
+    | "restyled-io" `T.isPrefixOf` author = False
+    | "[bot]" `T.isSuffixOf` author = False
     | otherwise = True
 
 -- | Events that should enqueue a Restyler job

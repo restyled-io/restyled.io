@@ -1,5 +1,6 @@
 module SVCS.GitLab
     ( module X
-    ) where
+    )
+where
 
 import SVCS.GitLab.Webhook as X

@@ -15,13 +15,13 @@ $case output
 
   $of JobOutputLegacy job
     $maybe x <- jobStdout job
-      $if not (null x)
+      $if not (T.null x)
         <pre>
-          $forall ln <- lines x
+          $forall ln <- T.lines x
             ^{colorizedLogLine "stdout" ln}
 
     $maybe x <- jobStderr job
-      $if not (null x)
+      $if not (T.null x)
         <pre>
-          $forall ln <- lines x
+          $forall ln <- T.lines x
             ^{colorizedLogLine "stderr" ln}

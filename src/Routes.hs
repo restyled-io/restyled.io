@@ -20,9 +20,10 @@ module Routes
     )
 where
 
-import Import.NoFoundation
+import Import
 
 import Foundation
+import Yesod
 
 repoP :: OwnerName -> RepoName -> RepoP -> Route App
 repoP = RepoP

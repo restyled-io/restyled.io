@@ -1,12 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Backend.Webhook
-    ( enqueueWebhook
+    ( webhookQueueName
+    , enqueueWebhook
     , awaitWebhook
-    , webhookQueueName
-
-    -- * Processing
     , processWebhook
+    , processWebhookFrom
     )
 where
 
@@ -16,50 +15,75 @@ import Backend.AcceptedJob
 import Backend.AcceptedWebhook
 import Backend.ExecRestyler
 
-enqueueWebhook :: (HasLogFunc env, HasRedis env) => ByteString -> RIO env ()
-enqueueWebhook body = do
-    logDebug "Enqueuing Webhook..."
-    void $ runRedis $ lpush webhookQueueName [body]
-
-awaitWebhook
-    :: (HasLogFunc env, HasRedis env) => Integer -> RIO env (Maybe ByteString)
-awaitWebhook timeout = do
-    logDebug "Awaiting Webhook..."
-    eresult <- runRedis $ brpop [webhookQueueName] timeout
-    logDebug $ "Popped value: " <> displayShow eresult
-    pure $ either (const Nothing) (snd <$>) eresult
-
 webhookQueueName :: ByteString
 webhookQueueName = "restyled:hooks:webhooks"
 
+enqueueWebhook :: HasRedis env => ByteString -> RIO env ()
+enqueueWebhook = void . runRedis . lpush webhookQueueName . pure
+
+awaitWebhook :: HasRedis env => Integer -> RIO env (Maybe ByteString)
+awaitWebhook t = do
+    eresult <- runRedis $ brpop [webhookQueueName] t
+    pure $ either (const Nothing) (snd <$>) eresult
+
 data JobNotProcessed
     = WebhookIgnored IgnoredWebhookReason
-    | JobIgnored IgnoredJob
-    | ExecRestylerFailure ExecRestylerFailed
+    | JobIgnored (Entity Job) IgnoredJobReason
+    | ExecRestylerFailure (Entity Job) SomeException
+
+data JobProcessed = ExecRestylerSuccess (Entity Job) ExitCode
 
 processWebhook
     :: (HasLogFunc env, HasDB env)
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
-processWebhook execRestyler body = do
-    mUpdatedJob <- exceptT fromFailure (pure . pure) $ do
-        webhook <- withExceptT WebhookIgnored $ acceptWebhook body
-        job <- withExceptT JobIgnored $ acceptJob webhook
-        withExceptT ExecRestylerFailure $ runExecRestyler execRestyler job
+processWebhook execRestyler = processWebhookFrom execRestyler . acceptWebhook
 
-    for_ mUpdatedJob $ runDB . replaceEntity
+processWebhookFrom
+    :: (HasLogFunc env, HasDB env)
+    => ExecRestyler (RIO env)
+    -> ExceptT IgnoredWebhookReason (RIO env) AcceptedWebhook
+    -> RIO env ()
+processWebhookFrom execRestyler =
+    exceptT fromNotProcessed fromProcessed . processWebhookFromT execRestyler
 
--- brittany-disable-next-binding
+processWebhookFromT
+    :: ExecRestyler (RIO env)
+    -> ExceptT IgnoredWebhookReason (RIO env) AcceptedWebhook
+    -> ExceptT JobNotProcessed (RIO env) JobProcessed
+processWebhookFromT execRestyler getWebhook =
+    withExceptT WebhookIgnored getWebhook
+        >>= acceptWebhookJob
+        >>= restyleAcceptedJob execRestyler
 
-fromFailure :: HasLogFunc env => JobNotProcessed -> RIO env (Maybe (Entity Job))
-fromFailure = \case
-    WebhookIgnored reason -> logReturn Nothing
-        $ "Webhook ignored: " <> reasonToLogMessage reason
-    JobIgnored (IgnoredJob reason job) -> logReturn (Just job)
-        $ "Job ignored: " <> ignoredJobReasonToLogMessage reason
-    ExecRestylerFailure (ExecRestylerFailed ex job) -> logReturn (Just job)
-        $ "Exec failure: " <> show ex
-  where
-    logReturn :: HasLogFunc env => Maybe a -> String -> RIO env (Maybe a)
-    logReturn x msg = x <$ logWarn (fromString msg)
+acceptWebhookJob
+    :: AcceptedWebhook -> ExceptT JobNotProcessed (RIO env) AcceptedJob
+acceptWebhookJob webhook@AcceptedWebhook {..} =
+    withExceptT (JobIgnored awJob) $ acceptJob webhook
+
+restyleAcceptedJob
+    :: ExecRestyler (RIO env)
+    -> AcceptedJob
+    -> ExceptT JobNotProcessed (RIO env) JobProcessed
+restyleAcceptedJob execRestyler job@AcceptedJob {..} =
+    withExceptT (ExecRestylerFailure ajJob)
+        $ ExecRestylerSuccess ajJob
+        <$> tryExecRestyler execRestyler job
+
+fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
+fromNotProcessed = \case
+    WebhookIgnored reason ->
+        logWarn $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason
+    JobIgnored job reason -> do
+        logWarn
+            $ fromString
+            $ "Job ignored: "
+            <> ignoredJobReasonToLogMessage reason
+        runDB $ completeJobSkipped (ignoredJobReasonToJobLogLine reason) job
+    ExecRestylerFailure job ex -> do
+        logError $ "Exec failure: " <> displayShow ex
+        runDB $ completeJobErrored (show ex) job
+
+fromProcessed :: HasDB env => JobProcessed -> RIO env ()
+fromProcessed (ExecRestylerSuccess job ec) = runDB $ completeJob ec job

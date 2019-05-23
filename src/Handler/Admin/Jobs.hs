@@ -8,7 +8,9 @@ where
 
 import Import
 
+import Foundation
 import Widgets.Job
+import Yesod
 import Yesod.Paginator
 
 getAdminJobsR :: Handler Html

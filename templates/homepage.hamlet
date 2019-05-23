@@ -34,14 +34,14 @@
     it's been <i>restyled</i>:
 
   <p>
-    <img src=@{StaticR img_docs_minor_commented_png}>
+    <img src=@{staticR "img/docs/minor-commented.png"}>
 
   <section .how-it-works-highlight>
     <p>
       You'll also get a blocking status on your Pull Request.
 
     <p>
-      <img src=@{StaticR img_docs_differences_status_png}>
+      <img src=@{staticR "img/docs/differences-status.png"}>
 
     <p>
       <small>
@@ -52,23 +52,23 @@
     Review the differences in the restyled Pull Request:
 
   <p>
-    <img src=@{StaticR img_docs_minor_restyled_png}>
+    <img src=@{staticR "img/docs/minor-restyled.png"}>
 
   <p>
     And, if you like, merge them back into yours.
 
   <p>
-    <img src=@{StaticR img_docs_merge_button_png}>
+    <img src=@{staticR "img/docs/merge-button.png"}>
 
   <section .how-it-works-highlight>
     <p>
       If we ever run into trouble, you'll be able to see why:
 
     <p>
-      <img src=@{StaticR img_docs_error_status_png}>
+      <img src=@{staticR "img/docs/error-status.png"}>
 
     <p>
-      <img src=@{StaticR img_docs_error_details_png}>
+      <img src=@{staticR "img/docs/error-details.png"}>
 
     <p>
       <small>
@@ -79,7 +79,7 @@
     Once you've fixed things up, you'll get an updated status.
 
   <p>
-    <img src=@{StaticR img_docs_green_status_png}>
+    <img src=@{staticR "img/docs/green-status.png"}>
 
 <section .action>
   <h2>Try it free

@@ -13,6 +13,9 @@ module SVCS.GitHub.ApiClient
     -- * Request builders
     , githubGET
     , githubPOST
+
+    -- * Re-export
+    , parseRequest
     )
 where
 

@@ -3,10 +3,13 @@
 module Handler.Thanks
     ( getThanksGitHubR
     , getThanksGitHubSetupR
-    ) where
+    )
+where
 
 import Import
 
+import Foundation
+import Yesod
 import Yesod.Auth.OAuth2
 
 -- brittany-disable-next-binding

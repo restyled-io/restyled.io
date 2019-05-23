@@ -5,7 +5,7 @@
 - package:
   - name: restyled
   - section:
-    - name: exe:restyled.io
+    - name: library
     - message:
-      - name: Module not compiled
-      - module: DevelMain
+      - name: Redundant build-depends entry
+      - depends: load-env

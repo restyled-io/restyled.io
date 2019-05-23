@@ -8,17 +8,17 @@ if (typeof Output === "undefined") {
       .replace(/http(s?):/, "ws$1:");
   }
 
-  Output.prototype.append = function(text) {
+  Output.prototype.append = function(html) {
     var loaded = this.elem.getAttribute("data-stream-loaded");
 
-    if (loaded === "false" && text !== "") {
+    if (loaded === "false" && html !== "") {
       this.elem.innerHTML = "";
       this.elem.setAttribute("data-stream-loaded", "true");
     }
 
-    this.elem.innerHTML += text;
+    this.elem.innerHTML += html;
 
-    if (this.singleCard && text != "") {
+    if (this.singleCard && html !== "") {
       window.scrollTo(0, document.body.scrollHeight);
     }
   };
@@ -38,6 +38,10 @@ if (typeof Output === "undefined") {
 
     socket.onclose = function(event) {
       console.log("websocket closed", event);
+
+      if (event.reason === "Job finished") {
+        window.location.reload();
+      }
     };
   };
 }

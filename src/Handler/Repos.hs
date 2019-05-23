@@ -14,8 +14,11 @@ where
 import Import
 
 import Backend.Job
+import Foundation
+import Routes
 import StreamJobLogLines
 import Widgets.Job
+import Yesod
 import Yesod.Paginator
 import Yesod.WebSockets
 
@@ -65,6 +68,6 @@ getRepoJobLogLinesR _owner _name jobId = do
 postRepoJobRetryR :: OwnerName -> RepoName -> JobId -> Handler Html
 postRepoJobRetryR owner name jobId = do
     job <- runDB $ insertJobRetry =<< get404 jobId
-    runHandlerRIO $ enqueueRestylerJob job
+    runHandlerRIO $ enqueueJob job
     setMessage "Job enqueued"
     redirect $ repoP owner name $ jobR $ entityKey job

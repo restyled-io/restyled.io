@@ -7,10 +7,9 @@ where
 
 import Import
 
-import Data.Aeson
-import Data.Aeson.Casing
-import GitHub.Data (toPathPart)
-import SVCS.GitHub.ApiClient
+import Foundation
+import Routes
+import Yesod
 import Yesod.Auth
 
 data Org = Org

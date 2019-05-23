@@ -6,35 +6,30 @@ module Foundation
     )
 where
 
-import Import.NoFoundation
+import Import
 
 import Api.Error
 import Authentication
 import Authorization
+import Data.Text (splitOn)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Database.Redis (Connection)
-import RIO (HasLogFunc(..), LogFunc, lens)
-import RIO.DB hiding (runDB)
-import RIO.Logger (logFuncLog)
-import RIO.Process
-import RIO.Redis
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
+import Yesod
 import Yesod.Auth
-import Yesod.Auth.Dummy
 import Yesod.Auth.OAuth2
 import Yesod.Auth.OAuth2.GitHub
 import Yesod.Auth.OAuth2.GitLab
 import Yesod.Default.Util (addStaticContentExternal)
+import Yesod.Static
 
 data App = App
-    { appSettings :: AppSettings
-    , appStatic :: Static
+    { appLogFunc :: LogFunc
+    , appSettings :: AppSettings
+    , appProcessContext :: ProcessContext
     , appConnPool :: ConnectionPool
     , appRedisConn :: Connection
-    , appHttpManager :: Manager
-    , appLogFunc :: LogFunc
-    , appProcessContext :: ProcessContext
+    , appStatic :: Static
     }
 
 instance HasLogFunc App where
@@ -57,6 +52,21 @@ instance HasRedis App where
     redisConnectionL = lens appRedisConn $ \x y -> x
         { appRedisConn = y }
 
+loadApp :: AppSettings -> IO App
+loadApp settings = do
+    logFunc <- terminalLogFunc $ appLogLevel settings
+    runRIO logFunc $ logInfoN $ pack $ displayAppSettings settings
+
+    App logFunc settings
+        <$> mkDefaultProcessContext
+        <*> runRIO logFunc (createConnectionPool $ appDatabaseConf settings)
+        <*> checkedConnect (appRedisConf settings)
+        <*> makeStatic (appStaticDir settings)
+  where
+    makeStatic
+        | appMutableStatic settings = staticDevel
+        | otherwise = static
+
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
 type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
@@ -74,8 +84,8 @@ instance Yesod App where
         mUser <- maybeAuth
 
         pc <- widgetToPageContent $ do
-            addStylesheet $ StaticR css_strapless_css
-            addStylesheet $ StaticR css_main_css
+            addStylesheet $ staticR "css/strapless.css"
+            addStylesheet $ staticR "css/main.css"
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -107,11 +117,17 @@ instance Yesod App where
         settings <- getsYesod appSettings
         runDB $ authorizeRepo settings owner repo =<< maybeAuthId
 
-    addStaticContent = addStaticContentExternal
-        minifym
-        genFileName
-        appStaticDir
-        (StaticR . flip StaticRoute [])
+    addStaticContent ext mime content = do
+        staticDir <- getsYesod $ appStaticDir . appSettings
+
+        addStaticContentExternal
+            minifym
+            genFileName
+            staticDir
+            (StaticR . flip StaticRoute [])
+            ext
+            mime
+            content
       where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
@@ -137,13 +153,22 @@ adminLayout widget = do
     master <- getYesod
     mmsg <- getMessage
     pc <- widgetToPageContent $ do
-        addStylesheet $ StaticR css_strapless_css
-        addStylesheet $ StaticR css_main_css
-        addStylesheet $ StaticR css_admin_css
+        addStylesheet $ staticR "css/strapless.css"
+        addStylesheet $ staticR "css/main.css"
+        addStylesheet $ staticR "css/admin.css"
         addScriptRemote "https://code.jquery.com/jquery-3.3.1.min.js"
         addScriptRemote "https://underscorejs.org/underscore-min.js"
         $(widgetFile "admin-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+
+-- | Route to a Static file at a given path
+--
+-- This removes the type-safety of the TH-defined functions, but makes we don't
+-- need compile-time knowledge of our static-directory, and there is value with
+-- keeping all possible settings entirely runtime-defined.
+--
+staticR :: FilePath -> Route App
+staticR path = StaticR $ StaticRoute (splitOn "/" $ pack path) []
 
 instance YesodAuth App where
     type AuthId App = UserId
@@ -170,18 +195,6 @@ instance YesodAuth App where
         . addOAuth2Plugin oauth2GitHub (appGitHubOAuthKeys appSettings)
         $ []
 
-addOAuth2Plugin
-    :: (Text -> Text -> AuthPlugin App)
-    -> Maybe OAuthKeys
-    -> [AuthPlugin App]
-    -> [AuthPlugin App]
-addOAuth2Plugin mkPlugin = maybe id $ \OAuthKeys {..} ->
-    (<> [mkPlugin oauthKeysClientId oauthKeysClientSecret])
-
-addAuthBackDoor :: AppSettings -> [AuthPlugin App] -> [AuthPlugin App]
-addAuthBackDoor AppSettings {..} =
-    if appAllowDummyAuth then (authDummy :) else id
-
 instance YesodAuthPersist App
 
 instance YesodPersist App where
@@ -194,6 +207,3 @@ instance YesodPersistRunner App where
 
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage
-
-instance HasHttpManager App where
-    getHttpManager = appHttpManager

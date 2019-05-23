@@ -11,29 +11,29 @@ module TestImport
     )
 where
 
-import Application (makeFoundation)
+import Restyled.Prelude as X hiding (Handler, get, runDB)
+
+import Application as X ()
 import Backend.Job (queueName)
 import Backend.Webhook (webhookQueueName)
 import Cache
-import ClassyPrelude as X hiding (Handler, delete, deleteBy)
 import Control.Monad.Fail (MonadFail(..))
-import Data.Time as X
-import Database.Persist as X hiding (get)
+import qualified Data.Text as T
 import Database.Persist.Sql
     (SqlBackend, SqlPersistT, connEscapeName, rawExecute, rawSql, unSingle)
 import Database.Redis (del)
 import Foundation as X
-import Model as X
-import RIO (RIO, runRIO)
-import RIO.DB (HasDB)
+import LoadEnv (loadEnvFrom)
+import Models as X
 import qualified RIO.DB as DB
 import RIO.Orphans (HasResourceMap(..))
-import RIO.Redis (Redis, runRedis)
 import Routes as X
-import Settings (AppSettings(..), loadEnvSettingsTest)
+import Settings as X (AppSettings(..))
+import Settings.Env (loadEnvSettings)
 import Test.Hspec.Core.Spec (SpecM)
 import Test.Hspec.Lifted as X
 import Test.HUnit (assertFailure)
+import Test.QuickCheck as X
 import Text.Shakespeare.Text (st)
 import Yesod.Core (MonadHandler(..))
 import Yesod.Test as X hiding (YesodSpec)
@@ -67,8 +67,8 @@ runTestRIO action = do
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
-    settings <- loadEnvSettingsTest
-    foundation <- makeFoundation settings
+    loadEnvFrom ".env.test"
+    foundation <- loadApp =<< loadEnvSettings
     runRIO foundation $ do
         DB.runDB wipeDB
         runRedis wipeRedis
@@ -83,7 +83,7 @@ wipeDB = do
     sqlBackend <- ask
 
     let escapedTables = map (connEscapeName sqlBackend . DBName) tables
-        query = "TRUNCATE TABLE " ++ intercalate ", " escapedTables
+        query = "TRUNCATE TABLE " <> T.intercalate ", " escapedTables
     rawExecute query []
 
 wipeRedis :: Redis ()
@@ -121,4 +121,4 @@ authenticateAs (Entity _ u) = do
 authPage :: Text -> YesodExample App Text
 authPage page = do
     testRoot <- fmap (appRoot . appSettings) getTestYesod
-    return $ testRoot ++ "/auth/page" ++ page
+    return $ testRoot <> "/auth/page" <> page

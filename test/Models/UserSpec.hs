@@ -1,14 +1,11 @@
-module Model.UserSpec
+module Models.UserSpec
     ( spec
     )
 where
 
 import TestImport
 
-import Model.User
 import qualified Prelude as Unsafe
-import Settings
-import Test.QuickCheck
 
 data AdminSettings = AdminSettings
     { asAppSettings :: AppSettings
@@ -18,7 +15,19 @@ data AdminSettings = AdminSettings
     , asSomeOtherEmail :: Text
     -- ^ A random email /not/ in said list
     }
-    deriving Show
+
+instance Show AdminSettings where
+    show AdminSettings {..} = unlines
+        [ "AdminSettings"
+        , "  { asAppSettings ="
+        , "    AppSettings"
+        , "      { appAdmins = " <> show (appAdmins asAppSettings)
+        , "      , ..."
+        , "      }"
+        , "  , asSomeAdminEmail = " <> show asSomeAdminEmail
+        , "  , asSomeOtherEmail = " <> show asSomeOtherEmail
+        , "  }"
+        ]
 
 instance Arbitrary AdminSettings where
     arbitrary = do
@@ -58,9 +67,7 @@ emptySettings = AppSettings
     , appRoot = error "unused"
     , appHost = error "unused"
     , appPort = 0
-    , appIpFromHeader = False
     , appLogLevel = error "unused"
-    , appMutableStatic = False
     , appCopyright = ""
     , appGitHubAppId = error "unused"
     , appGitHubAppKey = error "unused"
@@ -70,7 +77,12 @@ emptySettings = AppSettings
     , appRestylerImage = ""
     , appRestylerTag = Nothing
     , appAdmins = []
-    , appAllowDummyAuth = False
+    , appAllowDummyAuth = error "unused"
+    , appFavicon = error "unused"
+    , appDetailedRequestLogger = False
+    , appMutableStatic = False
+    , appStaticDir = error "unused"
+    , appStubMarketplaceListing = True
     }
 
 userWithEmail :: Text -> User

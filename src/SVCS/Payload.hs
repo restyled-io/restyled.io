@@ -1,10 +1,12 @@
 module SVCS.Payload
     ( Payload(..)
     , PullRequestEventType(..)
-    ) where
+    )
+where
 
-import ClassyPrelude
+import Prelude
 
+import Data.Text (Text)
 import GitHub.Data.PullRequests (PullRequestEventType(..))
 import SVCS.Names
 

@@ -2,11 +2,15 @@ module RIO.Process.Follow
     ( followProcess
     , captureFollowedProcess
     , captureFollowedProcessWith
+
+    -- * Minor @"RIO.Process"@ extensions
+    , withExtraEnvVars
     )
 where
 
 import RIO
 
+import qualified Data.Map as Map
 import RIO.Process
 import System.IO (hGetLine)
 import System.IO.Error (isEOFError)
@@ -85,3 +89,10 @@ captureFollowedProcessWith fOut fErr follow = do
 
 actAndAppend :: MonadIO m => IORef [a] -> (a -> m ()) -> a -> m ()
 actAndAppend ref f x = f x <* atomicModifyIORef' ref (\xs -> (xs <> [x], ()))
+
+withExtraEnvVars
+    :: (HasProcessContext env, MonadReader env m, MonadIO m)
+    => [(Text, Text)]
+    -> m a
+    -> m a
+withExtraEnvVars envs = withModifyEnvVars (<> Map.fromList envs)

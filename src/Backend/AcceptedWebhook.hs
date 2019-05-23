@@ -8,7 +8,6 @@ where
 import Backend.Import
 
 import Backend.Marketplace
-import SVCS.GitHub.Webhook (GitHubPayload(..))
 
 data AcceptedWebhook = AcceptedWebhook
     { awRepo :: Entity Repo
