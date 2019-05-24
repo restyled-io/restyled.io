@@ -115,8 +115,9 @@ library:
     - yesod-auth-oauth2
     - yesod-core
     - yesod-form
-    - yesod-static
     - yesod-paginator >= 1.1.0.2
+    - yesod-persistent
+    - yesod-static
     - yesod-websockets
   source-dirs: src
 
@@ -168,12 +169,11 @@ tests:
       - hspec-expectations-lifted
       - load-env
       - megaparsec
+      - monad-logger
       - persistent
       - rio
-      - rio-orphans
       - shakespeare
       - text
       - time
       - yesod-auth
-      - yesod-core
       - yesod-test

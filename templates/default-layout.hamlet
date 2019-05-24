@@ -5,7 +5,7 @@
 
     <ul>
       $maybe Entity _ user <- mUser
-        $if userIsAdmin (appSettings master) user
+        $if userIsAdmin (master ^. settingsL) user
           <li>
             <a href=@{AdminR}>Admin
         <li>
@@ -25,7 +25,7 @@ $maybe msg <- mmsg
 <footer>
   <section>
     <small>
-      © #{appCopyright $ appSettings master}
+      © #{appCopyright $ master ^. settingsL}
       |
       <a href=https://github.com/restyled-io/restyled.io>source
       |

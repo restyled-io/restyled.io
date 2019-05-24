@@ -23,8 +23,7 @@ module Restyled.Prelude
     )
 where
 
-
-import RIO as X hiding (first, second)
+import RIO as X hiding (Handler, first, second)
 
 import Control.Error.Util as X
     (exceptT, hoistMaybe, hush, hushT, note, noteT, (??))
@@ -46,7 +45,6 @@ import Data.Time as X
 import Database.Persist as X
 import Database.Persist.Sql as X (SqlBackend, SqlPersistT)
 import RIO.DB as X
-import RIO.Handler as X
 import RIO.List as X (headMaybe)
 import RIO.Logger as X
 import RIO.Process as X

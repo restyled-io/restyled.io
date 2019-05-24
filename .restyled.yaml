@@ -15,9 +15,9 @@ restylers:
         - "**/*.hs"
 
         # apply-refact cannot handle TypeApplications
-        - "!src/Handler/PrivacyPolicy.hs"
-        - "!src/Handler/Webhooks.hs"
-        - "!src/StreamJobLogLines.hs"
+        - "!src/Restyled/Handlers/PrivacyPolicy.hs"
+        - "!src/Restyled/Handlers/Webhooks.hs"
+        - "!src/Restyled/StreamJobLogLines.hs"
 
         # apply-refact cannot handle something here
-        - "!src/Settings/Env.hs"
+        - "!src/Restyled/Env.hs"

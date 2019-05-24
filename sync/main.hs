@@ -1,15 +1,16 @@
 module Main (main) where
 
-import Backend.Import
+import Restyled.Prelude
 
-import Backend.Foundation
-import Backend.Marketplace (runSynchronize)
 import LoadEnv
+import Restyled.Backend.Foundation
+import Restyled.Backend.Marketplace (runSynchronize)
+import Restyled.Settings
 
 main :: IO ()
 main = do
     setLineBuffering
 
     loadEnvFrom ".env.sync"
-    backend <- loadBackend =<< loadEnvSettings
+    backend <- loadBackend =<< loadSettings
     runRIO backend runSynchronize

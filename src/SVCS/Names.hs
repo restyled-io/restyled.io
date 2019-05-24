@@ -45,7 +45,7 @@ import GitHub.Data.Apps
 import GitHub.Data.Installations
 import Text.Blaze (ToMarkup(..))
 import Text.Read hiding (String)
-import Yesod.Core (PathPiece(..))
+import Web.PathPieces
 
 type OwnerName = Name Owner
 type RepoName = Name Repo
