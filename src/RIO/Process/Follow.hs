@@ -17,16 +17,20 @@ import System.IO.Error (isEOFError)
 
 -- | Run a process and execute an action on each line of output
 followProcess
-    :: (HasLogFunc env, HasProcessContext env)
+    :: ( HasLogFunc env
+       , HasProcessContext env
+       , MonadReader env m
+       , MonadUnliftIO m
+       )
     => FilePath
     -- ^ Command
     -> [String]
     -- ^ Arguments
-    -> (String -> RIO env ())
+    -> (String -> m ())
     -- ^ Called with each line of @stdout@
-    -> (String -> RIO env ())
+    -> (String -> m ())
     -- ^ Called with each line of @stderr@
-    -> RIO env ExitCode
+    -> m ExitCode
 followProcess cmd args fOut fErr =
     proc cmd args $ \pc -> withProcess (setPipes pc) $ \p -> do
         aOut <- async $ followPipe (getStdout p) fOut
@@ -55,12 +59,13 @@ followPipe hdl act = loop `catch` handleEOF
 -- defined for @'followProcess'@ because of some other use-case.
 --
 captureFollowedProcess
-    :: ((String -> RIO env ()) -> (String -> RIO env ()) -> RIO env ExitCode)
-    -> RIO env (ExitCode, String, String)
+    :: MonadIO m
+    => ((String -> m ()) -> (String -> m ()) -> m ExitCode)
+    -> m (ExitCode, String, String)
 captureFollowedProcess = captureFollowedProcessWith ignore ignore
-  where
-    ignore :: String -> RIO env ()
-    ignore _ = pure ()
+
+ignore :: Applicative f => a -> f ()
+ignore _ = pure ()
 
 -- | Take a @'followProcess'@ and act on and capture its output to a value
 --
@@ -68,16 +73,14 @@ captureFollowedProcess = captureFollowedProcessWith ignore ignore
 -- the output streams as they happen.
 --
 captureFollowedProcessWith
-    :: (String -> RIO env ())
+    :: MonadIO m
+    => (String -> m ())
     -- ^ Action for @stdout@
-    -> (String -> RIO env ())
+    -> (String -> m ())
     -- ^ Action for @stderr@
-    -> ( (String -> RIO env ())
-       -> (String -> RIO env ())
-       -> RIO env ExitCode
-       )
+    -> ((String -> m ()) -> (String -> m ()) -> m ExitCode)
     -- ^ @'followProcess'@-like
-    -> RIO env (ExitCode, String, String)
+    -> m (ExitCode, String, String)
 captureFollowedProcessWith fOut fErr follow = do
     outRef <- newIORef []
     errRef <- newIORef []

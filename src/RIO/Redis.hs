@@ -27,7 +27,7 @@ import qualified Database.Redis as Redis
 class HasRedis env where
     redisConnectionL :: Lens' env Connection
 
-runRedis :: HasRedis env => Redis a -> RIO env a
+runRedis :: (HasRedis env, MonadReader env m, MonadIO m) => Redis a -> m a
 runRedis action = do
     conn <- view redisConnectionL
     liftIO $ Redis.runRedis conn action

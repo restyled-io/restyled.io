@@ -20,4 +20,4 @@ $maybe msg <- mmsg
 
 <footer>
   <section>
-    <small>#{appCopyright $ appSettings master}
+    <small>#{appCopyright $ master ^. settingsL}

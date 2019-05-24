@@ -21,7 +21,8 @@ import RIO.Orphans ()
 class HasDB env where
     dbConnectionPoolL :: Lens' env ConnectionPool
 
-runDB :: HasDB env => SqlPersistT (RIO env) a -> RIO env a
+runDB
+    :: (HasDB env, MonadReader env m, MonadUnliftIO m) => SqlPersistT m a -> m a
 runDB action = do
     pool <- view dbConnectionPoolL
     runSqlPool action pool
