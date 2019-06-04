@@ -62,13 +62,13 @@ runSynchronize = do
                     <> "&per_page=100"
 
             getAccounts acc page = do
-                accounts <- getAccountsPage 0
+                accounts <- getAccountsPage page
 
                 if null accounts
                     then pure acc
                     else (acc <>) <$> getAccountsPage (page + 1)
 
-        accounts <- getAccounts [] 0
+        accounts <- getAccounts [] 1
 
         for accounts $ \account -> do
             logInfo
