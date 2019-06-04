@@ -66,7 +66,7 @@ runSynchronize = do
 
                 if null accounts
                     then pure acc
-                    else (acc <>) <$> getAccountsPage (page + 1)
+                    else getAccounts (acc <> accounts) $ page + 1
 
         accounts <- getAccounts [] 1
 
