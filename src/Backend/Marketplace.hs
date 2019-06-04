@@ -39,7 +39,7 @@ synchronizeMarketplacePlans = do
 runSynchronize :: (HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
 runSynchronize = do
     logInfo "Synchronizing GitHub Marketplace data"
-    plans <- getGitHubMarketplaceListing "/plans"
+    plans <- getGitHubMarketplaceListing "/plans" -- assumes no need to paginate
     synchronizedAccountIds <- for plans $ \plan -> do
         planId <- runDB $ entityKey <$> upsert
             MarketplacePlan
@@ -51,11 +51,24 @@ runSynchronize = do
             , MarketplacePlanDescription =. ghmpDescription plan
             ]
 
-        accounts <-
-            getGitHubMarketplaceListing
-            $ "/plans/"
-            <> toPathPiece (ghmpId plan)
-            <> "/accounts"
+        -- FIXME: proper pagination by creating GitHub.Endpoints.Marketplace
+        let getAccountsPage page =
+                getGitHubMarketplaceListing
+                    $ "/plans/"
+                    <> toPathPiece (ghmpId plan)
+                    <> "/accounts"
+                    <> "?page="
+                    <> tshow @Int page
+                    <> "&per_page=100"
+
+            getAccounts acc page = do
+                accounts <- getAccountsPage 0
+
+                if null accounts
+                    then pure acc
+                    else (acc <>) <$> getAccountsPage (page + 1)
+
+        accounts <- getAccounts [] 0
 
         for accounts $ \account -> do
             logInfo
