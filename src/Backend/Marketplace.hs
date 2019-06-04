@@ -68,7 +68,11 @@ runSynchronize = do
                     then pure acc
                     else getAccounts (acc <> accounts) $ page + 1
 
-        accounts <- getAccounts [] 1
+        -- HEAVY SIGH. The stubbed API returns data on every page, so we have to
+        -- make sure we don't let our naive pagination (which runs till it gets
+        -- an empty page) loop forever.
+        isStubbed <- appStubMarketplaceListing <$> view settingsL
+        accounts <- if isStubbed then getAccountsPage 1 else getAccounts [] 1
 
         for accounts $ \account -> do
             logInfo
