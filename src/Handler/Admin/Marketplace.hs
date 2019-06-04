@@ -52,7 +52,7 @@ marketplacePlanWithAccountsOwners =
     map (marketplaceAccountGithubOwner . entityVal) . concatMap mpwaAccounts
 
 marketplaceAccountGithubOwner :: MarketplaceAccount -> OwnerName
-marketplaceAccountGithubOwner = userToOwnerName . marketplaceAccountGithubLogin
+marketplaceAccountGithubOwner = nameToName . marketplaceAccountGithubLogin
 
 accountsList :: [OwnerName] -> Widget
 accountsList owners = $(widgetFile "admin/marketplace/accounts-list")

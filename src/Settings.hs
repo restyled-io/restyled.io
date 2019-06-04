@@ -56,7 +56,7 @@ data AppSettings = AppSettings
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
     , appGitHubOAuthKeys :: Maybe OAuthKeys
-    , appGitHubRateLimitToken :: GitHubToken
+    , appGitHubRateLimitToken :: ByteString
     , appGitLabOAuthKeys :: Maybe OAuthKeys
     , appRestylerImage :: String
     , appRestylerTag :: Maybe String

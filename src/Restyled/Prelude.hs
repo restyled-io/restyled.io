@@ -3,6 +3,7 @@ module Restyled.Prelude
     -- * Errors
       fromJustNoteM
     , fromLeftM
+    , untryIO
 
     -- * Persist
     , overEntity
@@ -44,7 +45,6 @@ import Data.Text as X (Text, pack, unpack)
 import Data.Time as X
 import Database.Persist as X
 import Database.Persist.Sql as X (SqlBackend, SqlPersistT)
-import GitHub.Data as X (toPathPart)
 import RIO.DB as X
 import RIO.Handler as X
 import RIO.List as X (headMaybe)
@@ -68,6 +68,13 @@ fromJustNoteM msg = fromMaybeM (throwString msg) . pure
 
 fromLeftM :: Monad m => (a -> m b) -> m (Either a b) -> m b
 fromLeftM f me = either f pure =<< me
+
+-- | Take an @'IO' ('Either' e a)@ and eliminate via @'throwIO'@
+--
+-- This effectively reverses @'try'@.
+--
+untryIO :: (MonadIO m, Exception e) => IO (Either e a) -> m a
+untryIO = fromLeftM throwIO . liftIO
 
 overEntity :: Entity a -> (a -> a) -> Entity a
 overEntity e f = e { entityVal = f $ entityVal e }

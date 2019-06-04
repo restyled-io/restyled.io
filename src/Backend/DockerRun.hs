@@ -6,8 +6,7 @@ where
 
 import Backend.Import
 
-dockerRunArgs
-    :: AppSettings -> RepoAccessToken -> Repo -> Entity Job -> [String]
+dockerRunArgs :: AppSettings -> AccessToken -> Repo -> Entity Job -> [String]
 dockerRunArgs settings token repo job =
     ["run", "--rm"] <> restylerEnv settings token repo <> restyler settings job
 
@@ -21,10 +20,10 @@ restyler settings job =
 
 -- brittany-disable-next-binding
 
-restylerEnv :: AppSettings -> RepoAccessToken -> Repo -> [String]
+restylerEnv :: AppSettings -> AccessToken -> Repo -> [String]
 restylerEnv settings token repo =
     [ "--env", "DEBUG=" <> if repoIsDebug settings repo then "1" else ""
-    , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack (unRepoAccessToken token)
+    , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack (atToken token)
     ]
 
 -- brittany-disable-next-binding

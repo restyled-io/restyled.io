@@ -62,12 +62,10 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
 
     ec <$ runDB (capture "system" $ "Restyler exited " <> displayExitCode ec)
 
-repoInstallationToken :: MonadIO m => AppSettings -> Repo -> m RepoAccessToken
-repoInstallationToken AppSettings {..} Repo {..} =
-    fromLeftM throwString $ liftIO $ githubInstallationToken
-        appGitHubAppId
-        appGitHubAppKey
-        repoInstallationId
+repoInstallationToken :: MonadIO m => AppSettings -> Repo -> m AccessToken
+repoInstallationToken AppSettings {..} Repo {..} = do
+    auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
+    untryIO $ accessTokenFor auth repoInstallationId
 
 displayExitCode :: ExitCode -> String
 displayExitCode = \case

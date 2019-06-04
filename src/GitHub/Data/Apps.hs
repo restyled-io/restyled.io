@@ -1,20 +1,17 @@
 module GitHub.Data.Apps
     ( App
-    , Installation(..)
+    , AppKey
+    , unAppKey
     )
 where
 
 import Prelude
 
-import Data.Aeson
-import GitHub.Data
+import Data.String
 
+-- | Empty type, but allows for @'Id' 'App'@
 data App
 
-newtype Installation = Installation
-    { installationId :: Id Installation
-    }
-
-instance FromJSON Installation where
-    parseJSON = withObject "Installation" $ \o ->
-        Installation <$> o .: "id"
+-- | RSA key content in PEM format, for authorizing via JWT
+newtype AppKey = AppKey { unAppKey :: String }
+    deriving newtype IsString
