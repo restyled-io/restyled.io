@@ -7,20 +7,11 @@ where
 
 import Import
 
+import qualified Data.Vector as V
 import Foundation
 import Routes
 import Yesod
 import Yesod.Auth
-
-data Org = Org
-    { orgId :: GitHubUserId
-    , orgLogin :: GitHubUserName
-    , orgAvatarUrl :: Text
-    }
-    deriving Generic
-
-instance FromJSON Org where
-    parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
 getProfileR :: Handler Html
 getProfileR = do
@@ -34,22 +25,17 @@ getProfileR = do
         setTitle "Profile"
         $(widgetFile "profile")
 
-requestUserOrgs :: User -> Handler [Org]
+requestUserOrgs :: User -> Handler [SimpleOrganization]
 requestUserOrgs = maybe (pure []) requestUserNameOrgs . userGithubUsername
 
-requestUserNameOrgs :: GitHubUserName -> Handler [Org]
+requestUserNameOrgs :: GitHubUserName -> Handler [SimpleOrganization]
 requestUserNameOrgs username = do
-    settings <- getsYesod appSettings
-    requestOrgs settings username `catchAny` \ex -> do
-        logWarnN $ tshow ex
-        pure []
+    auth <- getsYesod $ Just . OAuth . appGitHubRateLimitToken . appSettings
+    result <- liftIO $ publicOrganizationsFor' auth username
 
-requestOrgs :: MonadIO m => AppSettings -> GitHubUserName -> m [Org]
-requestOrgs AppSettings {..} username = liftIO $ do
-    request <- githubGET $ "/users/" <> toPathPart username <> "/orgs"
-    -- TODO: https://github.community/t5/GitHub-API-Development-and/How-to-list-a-user-s-organizations/m-p/20864#M1208
-    -- requestJWT appGitHubAppId appGitHubAppKey request
-    requestToken appGitHubRateLimitToken request
+    case result of
+        Left err -> [] <$ logWarnN (tshow err)
+        Right orgs -> pure $ V.toList orgs
 
 data GitHubIdentity = GitHubIdentity
     { ghiUserName :: GitHubUserName
@@ -58,18 +44,25 @@ data GitHubIdentity = GitHubIdentity
     , ghiMarketplacePlan :: Maybe MarketplacePlan
     }
 
-fetchGitHubIdentityForOrg :: MonadIO m => Org -> SqlPersistT m GitHubIdentity
-fetchGitHubIdentityForOrg Org {..} =
+fetchGitHubIdentityForOrg
+    :: MonadIO m => SimpleOrganization -> SqlPersistT m GitHubIdentity
+fetchGitHubIdentityForOrg SimpleOrganization {..} =
     GitHubIdentity orgLogin orgAvatarUrl
-        <$> fetchReposByOwnerName (userToOwnerName orgLogin)
+        <$> fetchReposByOwnerName (nameToName orgLogin)
         <*> fetchMarketplacePlanByLogin orgLogin
+  where
+    orgLogin :: GitHubUserName
+    orgLogin = nameToName simpleOrganizationLogin
+
+    orgAvatarUrl :: Text
+    orgAvatarUrl = getUrl simpleOrganizationAvatarUrl
 
 fetchGitHubIdentityForUser
     :: MonadIO m => User -> SqlPersistT m (Maybe GitHubIdentity)
 fetchGitHubIdentityForUser user@User {..} =
     for mDetails $ \(githubId, githubUsername) ->
         GitHubIdentity githubUsername (avatarUrl githubId)
-            <$> fetchReposByOwnerName (userToOwnerName githubUsername)
+            <$> fetchReposByOwnerName (nameToName githubUsername)
             <*> fetchMarketplacePlanForUser user
   where
     mDetails = (,) <$> userGithubUserId <*> userGithubUsername

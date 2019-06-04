@@ -10,24 +10,9 @@ where
 
 import Backend.Import
 
-data GitHubMarketplacePlan = GitHubMarketplacePlan
-    { ghmpId :: Int
-    , ghmpName :: Text
-    , ghmpDescription :: Text
-    }
-    deriving (Show, Generic)
-
-instance FromJSON GitHubMarketplacePlan where
-    parseJSON = genericParseJSON $ aesonPrefix snakeCase
-
-data GitHubAccount = GitHubAccount
-    { ghaId :: GitHubUserId
-    , ghaLogin :: GitHubUserName
-    }
-    deriving (Show, Generic)
-
-instance FromJSON GitHubAccount where
-    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+import qualified Data.Vector as V
+import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
+import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
 
 synchronizeMarketplacePlans
     :: (HasLogFunc env, HasSettings env, HasDB env) => RIO env a
@@ -38,59 +23,50 @@ synchronizeMarketplacePlans = do
 
 runSynchronize :: (HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
 runSynchronize = do
+    AppSettings {..} <- view settingsL
+    let useStubbed = appStubMarketplaceListing
+
     logInfo "Synchronizing GitHub Marketplace data"
-    plans <- getGitHubMarketplaceListing "/plans" -- assumes no need to paginate
+    auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
+    plans <- untryIO $ GH.marketplaceListingPlans auth useStubbed
+
     synchronizedAccountIds <- for plans $ \plan -> do
-        planId <- runDB $ entityKey <$> upsert
-            MarketplacePlan
-                { marketplacePlanGithubId = ghmpId plan
-                , marketplacePlanName = ghmpName plan
-                , marketplacePlanDescription = ghmpDescription plan
-                }
-            [ MarketplacePlanName =. ghmpName plan
-            , MarketplacePlanDescription =. ghmpDescription plan
-            ]
+        planId <- runDB $ synchronizePlan plan
 
-        -- FIXME: proper pagination by creating GitHub.Endpoints.Marketplace
-        let getAccountsPage page =
-                getGitHubMarketplaceListing
-                    $ "/plans/"
-                    <> toPathPiece (ghmpId plan)
-                    <> "/accounts"
-                    <> "?page="
-                    <> tshow @Int page
-                    <> "&per_page=100"
+        accounts <-
+            untryIO
+            $ GH.marketplaceListingPlanAccounts auth useStubbed
+            $ GH.marketplacePlanId plan
 
-            getAccounts acc page = do
-                accounts <- getAccountsPage page
+        traverse (runDB . synchronizeAccount planId) accounts
 
-                if null accounts
-                    then pure acc
-                    else getAccounts (acc <> accounts) $ page + 1
-
-        -- HEAVY SIGH. The stubbed API returns data on every page, so we have to
-        -- make sure we don't let our naive pagination (which runs till it gets
-        -- an empty page) loop forever.
-        isStubbed <- appStubMarketplaceListing <$> view settingsL
-        accounts <- if isStubbed then getAccountsPage 1 else getAccounts [] 1
-
-        for accounts $ \account -> do
-            logInfo
-                $ "Account "
-                <> displayShow (toPathPiece $ ghaLogin account)
-                <> " has plan "
-                <> displayShow (ghmpName plan)
-
-            runDB $ entityKey <$> upsert
-                MarketplaceAccount
-                    { marketplaceAccountGithubId = ghaId account
-                    , marketplaceAccountGithubLogin = ghaLogin account
-                    , marketplaceAccountMarketplacePlan = planId
-                    }
-                [MarketplaceAccountMarketplacePlan =. planId]
-
-    runDB $ deleteUnsynchronized $ mconcat synchronizedAccountIds
+    runDB $ deleteUnsynchronized $ vconcat synchronizedAccountIds
     logInfo "GitHub Marketplace data synchronized"
+
+synchronizePlan
+    :: MonadIO m => GH.MarketplacePlan -> SqlPersistT m MarketplacePlanId
+synchronizePlan plan = entityKey <$> upsert
+    MarketplacePlan
+        { marketplacePlanGithubId = untagId $ GH.marketplacePlanId plan
+        , marketplacePlanName = GH.marketplacePlanName plan
+        , marketplacePlanDescription = GH.marketplacePlanDescription plan
+        }
+    [ MarketplacePlanName =. GH.marketplacePlanName plan
+    , MarketplacePlanDescription =. GH.marketplacePlanDescription plan
+    ]
+
+synchronizeAccount
+    :: MonadIO m
+    => MarketplacePlanId
+    -> GH.MarketplaceAccount
+    -> SqlPersistT m MarketplaceAccountId
+synchronizeAccount planId account = entityKey <$> upsert
+    MarketplaceAccount
+        { marketplaceAccountGithubId = GH.marketplaceAccountId account
+        , marketplaceAccountGithubLogin = GH.marketplaceAccountLogin account
+        , marketplaceAccountMarketplacePlan = planId
+        }
+    [MarketplaceAccountMarketplacePlan =. planId]
 
 deleteUnsynchronized
     :: HasLogFunc env => [MarketplaceAccountId] -> SqlPersistT (RIO env) ()
@@ -113,21 +89,6 @@ fetchDiscountMarketplacePlan =
     fromJustNoteM "Discount Plan must exist"
         =<< selectFirst [MarketplacePlanGithubId ==. 0] []
 
-getGitHubMarketplaceListing
-    :: (FromJSON a, HasSettings env) => Text -> RIO env a
-getGitHubMarketplaceListing path' = do
-    AppSettings {..} <- view settingsL
-
-    let prefix = if appStubMarketplaceListing
-            then "/marketplace_listing/stubbed"
-            else "/marketplace_listing"
-
-        path = prefix <> path'
-
-    liftIO $ do
-        request <- parseRequest $ unpack $ "GET https://api.github.com" <> path
-        requestJWT appGitHubAppId appGitHubAppKey request
-
 data MarketplacePlanAllows
     = MarketplacePlanAllows
     | MarketplacePlanForbids MarketplacePlanLimitation
@@ -140,7 +101,7 @@ data MarketplacePlanLimitation
 marketplacePlanAllows
     :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
 marketplacePlanAllows (Entity _ Repo {..}) = do
-    mPlan <- fetchMarketplacePlanByLogin $ ownerToUserName repoOwner
+    mPlan <- fetchMarketplacePlanByLogin $ nameToName repoOwner
 
     pure $ case (repoIsPrivate, mPlan) of
         (False, _) -> MarketplacePlanAllows
@@ -166,3 +127,6 @@ privateRepoPlanGitHubIds =
     [ 0 -- Manually-managed "Friends & Family" plan
     , 2178 -- Temporary "Early Adopter" plan
     ]
+
+vconcat :: Vector (Vector a) -> [a]
+vconcat = V.toList . V.concat . V.toList

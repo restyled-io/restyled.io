@@ -2,21 +2,33 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module SVCS.Names
-    ( OwnerName
-    , mkOwnerName
+    ( nameToName
+
+    -- * Single-word aliases, for use in models and routes
+    , OwnerName
     , RepoName
-    , mkRepoName
     , InstallationId
-    , PullRequestNum
+
+    -- * Disambiguate from our own types
+    , GitHubAuth
+    , GitHubAppId
+    , GitHubAppKey
     , GitHubUserId
     , GitHubUserName
-    , userToOwnerName
-    , ownerToUserName
+
+    -- * Deprecated
+    -- ** Compatibility from when @github@ introduced @'IssueNumber'@
+    , PullRequestNum
+
+    -- ** GitLab
     , GitLabUserId
     , GitLabUserName
-    , RepoAccessToken(..)
     , RepoSVCS(..)
     , showRepoSVCS
+
+    -- ** Abortive attempt to encapsulate
+    , mkOwnerName
+    , mkRepoName
     )
 where
 
@@ -30,6 +42,7 @@ import Data.Text (Text, unpack)
 import Database.Persist.Sql
 import GitHub.Data
 import GitHub.Data.Apps
+import GitHub.Data.Installations
 import Text.Blaze (ToMarkup(..))
 import Text.Read hiding (String)
 import Yesod.Core (PathPiece(..))
@@ -38,22 +51,21 @@ type OwnerName = Name Owner
 type RepoName = Name Repo
 type InstallationId = Id Installation
 
+type GitHubAuth = Auth
+
+type GitHubAppId = Id App
+type GitHubAppKey = AppKey
+
 type GitHubUserId = Id User
 type GitHubUserName = Name User
 
 type PullRequestNum = IssueNumber
 
-userToOwnerName :: GitHubUserName -> OwnerName
-userToOwnerName = mkName Proxy . untagName
+nameToName :: Name a -> Name b
+nameToName = mkName Proxy . untagName
 
-ownerToUserName :: OwnerName -> GitHubUserName
-ownerToUserName = mkName Proxy . untagName
-
--- TODO: newtype for actual safety
 type GitLabUserId = Id User
 type GitLabUserName = Name User
-
-newtype RepoAccessToken = RepoAccessToken { unRepoAccessToken :: Text }
 
 data RepoSVCS = GitHubSVCS | GitLabSVCS
     deriving (Eq, Ord, Read, Show, Enum, Bounded)

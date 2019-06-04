@@ -46,12 +46,19 @@ authorizePrivateRepo
 authorizePrivateRepo settings@AppSettings {..} Repo {..} user@User {..} = do
     result <- runExceptT $ do
         username <- userGithubUsername ?? "User has no GitHub Username"
-        caching (cacheKey username) $ do
-            token <- ExceptT $ liftIO $ githubInstallationToken
+        caching (cacheKey username) $ withExceptT show $ do
+            auth <- ExceptT $ liftIO $ githubAuthInstallation
                 appGitHubAppId
                 appGitHubAppKey
                 repoInstallationId
-            githubCollaboratorCanRead token repoOwner repoName username
+
+            permissions <- ExceptT $ liftIO $ collaboratorPermissions
+                auth
+                repoOwner
+                repoName
+                username
+
+            pure $ collaboratorCanRead permissions
 
     let isAdmin = userIsAdmin settings user
 

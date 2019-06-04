@@ -1,10 +1,16 @@
 ---
-resolver: lts-13.21
+resolver: lts-13.24
 extra-deps:
   - envparse-0.4.1@sha256:989902e6368532548f61de1fa245ad2b39176cddd8743b20071af519a709ce30
-  - github-0.21@sha256:9d88c84e308723e314069f91c70c0f3fdad6d18976f185f1ae672ce8eee30547
+  - github-0.22@sha256:13f09e904248a40dd173c08f2859d0dfda178a7c27f88df20b70a0d5a7614757
   - jwt-0.10.0@sha256:d14551b0c357424fb9441ec9a7a9d5b90b13f805fcc9327ba49db548cd64fc29
   - yesod-paginator-1.1.0.2@sha256:f21d30b5a02e23a5ff65461cef6a1ca1c6c26700b8fa4013d5114c3291d7a9ed
+
+  # for github-0.22
+  - binary-instances-1@sha256:e7768b92f34bc40cc5cabecc5c143dee6ab4bcb5eb441d58e15a0b000d64940b
+  - binary-orphans-1.0.1@sha256:74d9a8e2c8c4dc8e11c9028ef103b930fc62f3943e45b1629f39114f2bfb5abb
+  - time-compat-1.9.2.2@sha256:9998dc1b77b5067572ab708e94750f1061152f342e92ad1aba38aae63581174d
+  - unordered-containers-0.2.10.0@sha256:5e9b095a9283d9e2f064fec73a81a6b6ea0b7fda3f219a8175785d2d2a3de204
 
   # for dbmigrations-postgresql
   - HDBC-postgresql-2.3.2.6@sha256:6e1636b0414ae7b028a01f1a90cf3e28c14f1df7867cf2615d5357d9abcd6279

@@ -83,7 +83,6 @@ library:
     - gitrev
     - hedis
     - hjsmin
-    - http-client
     - http-conduit
     - http-types
     - hoauth2
@@ -100,6 +99,7 @@ library:
     - rio-orphans
     - safe-exceptions
     - shakespeare
+    - tagged
     - template-haskell
     - text
     - time

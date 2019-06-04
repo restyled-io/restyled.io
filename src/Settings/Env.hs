@@ -71,7 +71,7 @@ logLevel x = case map toLower x of
     _ -> Right $ LevelOther $ pack x
 
 githubAppId :: AsUnread e => Reader e GitHubAppId
-githubAppId = fmap mkGitHubAppId . auto
+githubAppId = fmap (mkId Proxy) . auto
 
 splitOn :: Char -> Reader e [Text]
 splitOn c = fmap (map pack) . Env.splitOn c
