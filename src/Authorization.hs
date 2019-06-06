@@ -61,17 +61,18 @@ authorizePrivateRepo settings@AppSettings {..} Repo {..} user@User {..} = do
             pure $ collaboratorCanRead permissions
 
     let isAdmin = userIsAdmin settings user
+        (granted, reason, mErr) = resolveAuth isAdmin result
 
-    logInfoN
-        $ "Authorization result for "
-        <> repoPath repoOwner repoName
-        <> " for "
-        <> maybe "<unknown>" toPathPiece userGithubUsername
-        <> ": "
-        <> tshow result
-        <> if isAdmin then " (granting via Admin)" else ""
+    logInfoN $ mconcat
+        [ "AUTHORIZE"
+        , " user=" <> maybe "<unknown>" toPathPiece userGithubUsername
+        , " repo=" <> repoPath repoOwner repoName
+        , " granted=" <> tshow granted
+        , " reason=" <> tshow reason
+        , " error=" <> maybe "" tshow mErr
+        ]
 
-    authorizeWhen $ isAdmin || fromRight False result
+    authorizeWhen granted
   where
     cacheKey username =
         [ "auth"
@@ -81,6 +82,17 @@ authorizePrivateRepo settings@AppSettings {..} Repo {..} user@User {..} = do
         , toPathPiece repoName
         , toPathPiece username
         ]
+
+-- brittany-disable-next-binding
+-- Context-sensitive alignment helps visually verify the cases
+
+resolveAuth :: Bool -> Either String Bool -> (Bool, Text, Maybe String)
+resolveAuth True  (Right True)  = (True,  "admin+collaborator", Nothing)
+resolveAuth True  (Right False) = (True,  "admin",              Nothing)
+resolveAuth True  (Left  err)   = (True,  "admin",              Just err)
+resolveAuth False (Right True)  = (True,  "collaborator",       Nothing)
+resolveAuth False (Right False) = (False, "non-collaborator",   Nothing)
+resolveAuth False (Left  err)   = (False, "error",              Just err)
 
 authorizeWhen :: MonadHandler m => Bool -> m AuthResult
 authorizeWhen True = pure Authorized
