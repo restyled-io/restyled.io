@@ -1,4 +1,4 @@
-all: setup setup.lint setup.tools db.setup build lint test
+all: setup setup.lint setup.tools db.setup build lint test db.seed
 
 .PHONY: db.drop
 db.drop:
@@ -15,13 +15,12 @@ db.migrate:
 	db/migrate dev upgrade
 	db/migrate test upgrade
 
-# N.B. db.seed clears seeded tables
 .PHONY: db.seed
 db.seed:
-	PGPASSWORD=password psql --user postgres --host localhost restyled < db/seeds.sql
+	./bin/restyled.io-dev seed-db
 
 .PHONY: db.setup
-db.setup: db.create db.migrate db.seed
+db.setup: db.create db.migrate
 
 .PHONY: db.reset
 db.reset: db.drop db.setup
