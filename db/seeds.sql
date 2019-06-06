@@ -112,7 +112,7 @@ $$
   -- Successful
   58920,
   'restyled-io',
-  'demo',
+  'ops',
   1,
   NOW() - ('300 seconds' :: interval),
   NOW() - ('42 seconds' :: interval),
