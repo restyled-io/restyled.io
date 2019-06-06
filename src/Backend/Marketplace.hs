@@ -1,10 +1,17 @@
 module Backend.Marketplace
-    ( synchronizeMarketplacePlans
-    , MarketplacePlanAllows(..)
-    , MarketplacePlanLimitation(..)
+    (
+    -- * Checking purchased features
+      MarketplacePlanAllows(..)
     , marketplacePlanAllows
+    , MarketplacePlanLimitation(..)
     , whenMarketplacePlanForbids
     , isPrivateRepoPlan
+
+    -- * Main loop
+    , synchronizeMarketplacePlans
+
+    -- * One iteration
+    , runSynchronize
     )
 where
 

@@ -141,6 +141,17 @@ executables:
     dependencies:
       - restyled
 
+  restyled.io-sync:
+    main: main.hs
+    source-dirs: sync
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-T
+    dependencies:
+      - load-env
+      - restyled
+
 tests:
   test:
     main: Spec.hs
