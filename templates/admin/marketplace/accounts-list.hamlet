@@ -1,8 +1,13 @@
-$if null owners
-  <p>
-    <em>No accounts
-$else
-  <p>#{pluralize "account" "acounts" $ length owners}
-    <ul>
-      $forall owner <- owners
-        <li>#{owner}
+<section>
+  $maybe description <- mDescription
+    <p>
+      <em>#{description}
+  $if null owners
+    <p>
+      <em>No accounts
+  $else
+    <details>
+      <summary>#{pluralize "account" "accounts" $ length owners}
+      <ul>
+        $forall owner <- owners
+          <li>#{owner}
