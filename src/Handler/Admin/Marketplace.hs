@@ -11,28 +11,30 @@ import Backend.Marketplace (isPrivateRepoPlan)
 import Data.List (nub)
 import Foundation
 import Yesod
-import Yesod.Paginator
 
 data MarketplacePlanWithAccounts = MarketplacePlanWithAccounts
     { mpwaPlan :: Entity MarketplacePlan
     , mpwaAccounts :: [Entity MarketplaceAccount]
     }
 
+mpwaDescription :: MarketplacePlanWithAccounts -> Text
+mpwaDescription = marketplacePlanDescription . entityVal . mpwaPlan
+
+mpwaOwnerNames :: MarketplacePlanWithAccounts -> [OwnerName]
+mpwaOwnerNames = map (accountOwner . entityVal) . mpwaAccounts
+    where accountOwner = nameToName . marketplaceAccountGithubLogin
+
 getAdminMarketplaceR :: Handler Html
 getAdminMarketplaceR = do
-    (pages, noPlanRepoOwners) <- runDB $ do
-        plans <- selectPaginated 5 [] [Asc MarketplacePlanGithubId]
-        pages <- for plans $ \plan ->
+    (plans, noPlanRepoOwners) <- runDB $ do
+        plans' <- selectList [] [Asc MarketplacePlanGithubId]
+        plans <- for plans' $ \plan ->
             MarketplacePlanWithAccounts plan <$> selectList
                 [MarketplaceAccountMarketplacePlan ==. entityKey plan]
                 [Asc MarketplaceAccountGithubId]
 
-        let
-            planOwners =
-                marketplacePlanWithAccountsOwners $ pageItems $ pagesCurrent
-                    pages
-
-        (pages, ) <$> fetchUniqueRepoOwnersExcept planOwners
+        let planOwners = concatMap mpwaOwnerNames plans
+        (plans, ) <$> fetchUniqueRepoOwnersExcept planOwners
 
     adminLayout $ do
         setTitle "Admin - Marketplace"
@@ -46,13 +48,8 @@ fetchUniqueRepoOwnersExcept exceptOwners = do
         [Asc RepoOwner]
     pure $ nub owners
 
-marketplacePlanWithAccountsOwners
-    :: [MarketplacePlanWithAccounts] -> [OwnerName]
-marketplacePlanWithAccountsOwners =
-    map (marketplaceAccountGithubOwner . entityVal) . concatMap mpwaAccounts
+-- brittany-disable-next-binding
 
-marketplaceAccountGithubOwner :: MarketplaceAccount -> OwnerName
-marketplaceAccountGithubOwner = nameToName . marketplaceAccountGithubLogin
-
-accountsList :: [OwnerName] -> Widget
-accountsList owners = $(widgetFile "admin/marketplace/accounts-list")
+accountsList :: Maybe Text -> [OwnerName] -> Widget
+accountsList mDescription owners =
+    $(widgetFile "admin/marketplace/accounts-list")
