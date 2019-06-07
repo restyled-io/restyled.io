@@ -10,7 +10,7 @@
 
         #{restyleMachineName machine} (#{restyleMachineHost machine})
 
-      <div>
+      <section>
         <details>
           <summary>Certificate Authority
           <pre>
