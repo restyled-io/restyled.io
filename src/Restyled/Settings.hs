@@ -12,7 +12,6 @@ module Restyled.Settings
     , addAuthBackDoor
 
     -- * Compile-time settings
-    , loadEnv
     , widgetFile
     )
 where
@@ -29,7 +28,6 @@ import Restyled.Yesod hiding (LogLevel(..))
 import Yesod.Auth.Dummy
 
 #if DEVELOPMENT
-import LoadEnv (loadEnvFrom)
 import Yesod.Default.Util (widgetFileReload)
 #else
 import Yesod.Default.Util (widgetFileNoReload)
@@ -120,16 +118,6 @@ loadSettings =
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
-
--- brittany-disable-next-binding
-
-loadEnv :: IO ()
-loadEnv =
-#if DEVELOPMENT
-    loadEnvFrom ".env.development"
-#else
-    pure ()
-#endif
 
 -- brittany-disable-next-binding
 

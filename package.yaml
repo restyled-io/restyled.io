@@ -91,6 +91,7 @@ library:
     - megaparsec
     - monad-logger
     - mtl
+    - optparse-applicative
     - path-pieces
     - persistent
     - persistent-postgresql
@@ -125,26 +126,6 @@ executables:
   restyled.io:
     main: main.hs
     source-dirs: app
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-T
-    dependencies:
-      - restyled
-
-  restyled.io-backend:
-    main: main.hs
-    source-dirs: backend
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-T
-    dependencies:
-      - restyled
-
-  restyled.io-sync:
-    main: main.hs
-    source-dirs: sync
     ghc-options:
       - -threaded
       - -rtsopts

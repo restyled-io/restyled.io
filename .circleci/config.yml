@@ -91,12 +91,12 @@ jobs:
 
             cat >Dockerfile.web <<EOM
             FROM ${release_image}:${release_tag}
-            CMD ["/app/restyled.io"]
+            CMD ["/app/restyled.io", "web"]
             EOM
 
             cat >Dockerfile.backend <<EOM
             FROM ${release_image}:${release_tag}
-            CMD ["/app/restyled.io-backend"]
+            CMD ["/app/restyled.io", "backend"]
             EOM
 
             heroku container:login

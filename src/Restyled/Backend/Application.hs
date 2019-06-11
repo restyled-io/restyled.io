@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Restyled.Backend.Application
-    ( backendMain
+    ( runBackend
     )
 where
 
@@ -9,7 +9,6 @@ import Restyled.Prelude
 
 import Restyled.Backend.DockerRun
 import Restyled.Backend.ExecRestyler
-import Restyled.Backend.Foundation
 import Restyled.Backend.Job
 import Restyled.Backend.Marketplace
 import Restyled.Backend.RestyleMachine
@@ -17,21 +16,22 @@ import Restyled.Backend.Webhook
 import Restyled.Models
 import Restyled.Settings
 
-backendMain :: IO ()
-backendMain = do
-    setLineBuffering
+runBackend
+    :: ( HasLogFunc env
+       , HasSettings env
+       , HasDB env
+       , HasRedis env
+       , HasProcessContext env
+       )
+    => RIO env ()
+runBackend = do
+    asyncs <- sequence
+        [ async synchronizeMarketplacePlans
+        , async $ runQueue (awaitJob 120) $ processJob execRestyler
+        , async $ runQueue (awaitWebhook 120) $ processWebhook execRestyler
+        ]
 
-    loadEnv
-    backend <- loadBackend =<< loadSettings
-
-    runRIO backend $ do
-        asyncs <- sequence
-            [ async synchronizeMarketplacePlans
-            , async $ runQueue (awaitJob 120) $ processJob execRestyler
-            , async $ runQueue (awaitWebhook 120) $ processWebhook execRestyler
-            ]
-
-        void $ waitAny asyncs
+    void $ waitAny asyncs
 
 runQueue :: Monad m => m (Maybe a) -> (a -> m ()) -> m b
 runQueue awaitItem processItem = forever $ traverse_ processItem =<< awaitItem
