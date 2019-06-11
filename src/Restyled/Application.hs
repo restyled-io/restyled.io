@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Restyled.Application
-    ( appMain
+    ( runWaiApp
     )
 where
 
@@ -13,7 +13,6 @@ import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.ForceSSL
 import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
-import Restyled.Backend.Foundation
 import Restyled.Foundation
 import Restyled.Handlers.Admin
 import Restyled.Handlers.Admin.Jobs
@@ -32,13 +31,8 @@ import Restyled.Yesod
 
 mkYesodDispatch "App" resourcesApp
 
-appMain :: IO ()
-appMain = do
-    setLineBuffering
-
-    loadEnv
-    app <- loadApp =<< loadBackend =<< loadSettings
-
+runWaiApp :: App -> IO ()
+runWaiApp app = do
     waiApp <- waiMiddleware app <$> toWaiAppPlain app
     runSettings (warpSettings app) waiApp
 

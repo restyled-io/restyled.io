@@ -17,8 +17,6 @@ RUN stack install --dependencies-only
 COPY app /src/app
 COPY src /src/src
 COPY templates /src/templates
-COPY backend /src/backend
-COPY sync /src/sync
 
 COPY config /src/config
 COPY static /src/static
@@ -38,8 +36,6 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY --from=builder /root/.local/bin/restyled.io /app/restyled.io
-COPY --from=builder /root/.local/bin/restyled.io-backend /app/restyled.io-backend
-COPY --from=builder /root/.local/bin/restyled.io-sync /app/restyled.io-sync
 COPY --from=builder /src/config /app/config
 COPY --from=builder /src/static /app/static
 
@@ -66,4 +62,4 @@ USER app
 
 COPY docker/files /
 ENTRYPOINT ["/entrypoint"]
-CMD ["/app/restyled.io"]
+CMD ["/app/restyled.io", "--help"]

@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Execute the restyled.io binary, loading .env.development. This really just
+# helps the long-line in Makefile's watch target.
+#
+###
+exec stack exec restyled.io -- --env-file .env.development "$@"
