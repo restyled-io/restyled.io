@@ -19,6 +19,9 @@ module Restyled.Models.Repo
     , IgnoredWebhookReason(..)
     , reasonToLogMessage
     , initializeFromWebhook
+
+    -- * Helpers useful to other modules
+    , upsertRepo
     )
 where
 
@@ -117,11 +120,15 @@ findOrCreateRepo Payload {..} = do
             , repoDebugEnabled = False
             }
 
-    upsert
-        repo
-        [ RepoInstallationId =. repoInstallationId repo
-        , RepoIsPrivate =. repoIsPrivate repo
-        ]
+    upsertRepo repo
+
+upsertRepo :: MonadIO m => Repo -> SqlPersistT m (Entity Repo)
+upsertRepo repo@Repo {..} = upsert
+    repo
+    [ RepoInstallationId =. repoInstallationId
+    , RepoIsPrivate =. repoIsPrivate
+    , RepoDebugEnabled =. repoDebugEnabled
+    ]
 
 isActualAuthor :: Text -> Bool
 isActualAuthor author
