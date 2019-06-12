@@ -5,6 +5,9 @@ module Restyled.Backend.Marketplace
     , marketplacePlanAllows
     , MarketplacePlanLimitation(..)
     , whenMarketplacePlanForbids
+
+    -- * Helpers useful outside this module
+    , fetchDiscountMarketplacePlan
     , isPrivateRepoPlan
 
     -- * Main loop
@@ -102,9 +105,17 @@ deleteUnsynchronized synchronizedAccountIds = do
 
 fetchDiscountMarketplacePlan
     :: MonadIO m => SqlPersistT m (Entity MarketplacePlan)
-fetchDiscountMarketplacePlan =
-    fromJustNoteM "Discount Plan must exist"
-        =<< selectFirst [MarketplacePlanGithubId ==. 0] []
+fetchDiscountMarketplacePlan = upsert
+    plan
+    [ MarketplacePlanName =. marketplacePlanName
+    , MarketplacePlanDescription =. marketplacePlanDescription
+    ]
+  where
+    plan@MarketplacePlan {..} = MarketplacePlan
+        { marketplacePlanGithubId = 0
+        , marketplacePlanName = "Friends & Family"
+        , marketplacePlanDescription = "Manually managed discount plan"
+        }
 
 data MarketplacePlanAllows
     = MarketplacePlanAllows
