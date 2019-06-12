@@ -154,6 +154,7 @@ privateRepoPlanGitHubIds :: [Int]
 privateRepoPlanGitHubIds =
     [ 0 -- Manually-managed "Friends & Family" plan
     , 2178 -- Temporary "Early Adopter" plan
+    , 2553 -- Real "Pro" plan
     ]
 
 vconcat :: Vector (Vector a) -> [a]
