@@ -109,18 +109,14 @@ initializeFromWebhook payload@Payload {..}
     | otherwise = Right <$> findOrCreateRepo payload
 
 findOrCreateRepo :: MonadIO m => Payload -> SqlPersistT m (Entity Repo)
-findOrCreateRepo Payload {..} = do
-    let
-        repo = Repo
-            { repoSvcs = pSVCS
-            , repoOwner = pOwnerName
-            , repoName = pRepoName
-            , repoInstallationId = pInstallationId
-            , repoIsPrivate = pRepoIsPrivate
-            , repoDebugEnabled = False
-            }
-
-    upsertRepo repo
+findOrCreateRepo Payload {..} = upsertRepo Repo
+    { repoSvcs = pSVCS
+    , repoOwner = pOwnerName
+    , repoName = pRepoName
+    , repoInstallationId = pInstallationId
+    , repoIsPrivate = pRepoIsPrivate
+    , repoDebugEnabled = False
+    }
 
 upsertRepo :: MonadIO m => Repo -> SqlPersistT m (Entity Repo)
 upsertRepo repo@Repo {..} = upsert
