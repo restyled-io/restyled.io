@@ -51,11 +51,11 @@ ignoredJobReasonToJobLogLine = unlines . \case
         ]
     PlanLimitation repo MarketplacePlanNotFound ->
         [ "No active plan for private repository: " <> path repo <> "."
-        , "Contact support@restyled.io if you would like to discuss a Trial"
+        , "Purchase a plan at https://github.com/marketplace/restyled-io"
         ]
     PlanLimitation _ MarketplacePlanPublicOnly ->
         [ "Your plan does not allow private repositories."
-        , "Contact support@restyled.io if you would like to discuss a Trial"
+        , "Upgrade your plan at https://github.com/marketplace/restyled-io"
         ]
   where
     path :: Repo -> String
