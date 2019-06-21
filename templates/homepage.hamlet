@@ -82,16 +82,10 @@
     <img src=@{staticR "img/docs/green-status.png"}>
 
 <section .action>
-  <h2>Try it free
-  <p>
-    Run Restyled on public or private repositories completely free through our
-    <em>Early Adopters
-    plan in the
-    <a href="https://github.com/marketplace/restyled-io">GitHub Marketplace</a>.
-
-  <p>
-    Purchasers of this plan get to keep it forever, but it will only be
-    available for a limited time.
+  <h2>Ready to try?
+  <p .centered .large>
+    <a .button href="https://github.com/marketplace/restyled-io">
+      Install from GitHub Marketplace
 
 <section>
   <h2>Open Source
@@ -100,4 +94,4 @@
     <strong>All
     code used to operate Restyled.io can be found in our 
     <a href=http://github.com/restyled-io>GitHub Org</a>.
-    The product, if launched, would be free to use for open source, forever.
+    The product will be free to use for open source, forever.

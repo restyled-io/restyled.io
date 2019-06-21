@@ -37,6 +37,10 @@ form .errors {
   font-weight: bold;
 }
 
+.large {
+  font-size: 120%;
+}
+
 .centered {
   text-align: center;
 }
