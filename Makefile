@@ -74,7 +74,8 @@ build:
 .PHONY: lint
 lint:
 	stack exec $(STACK_ARGUMENTS) hlint app src test
-	stack exec $(STACK_ARGUMENTS) weeder .
+	# Weeder doesn't work with stack-2.0 :(
+	# stack exec $(STACK_ARGUMENTS) weeder .
 
 .PHONY: test
 test:
