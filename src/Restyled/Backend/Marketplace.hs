@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Restyled.Backend.Marketplace
     (
     -- * Checking purchased features
@@ -146,16 +148,31 @@ whenMarketplacePlanForbids
 whenMarketplacePlanForbids MarketplacePlanAllows _ = pure ()
 whenMarketplacePlanForbids (MarketplacePlanForbids limitation) f = f limitation
 
+data PrivateRepoAllowance
+    = PrivateRepoAllowanceNone
+    | PrivateRepoAllowanceUnlimited
+    | PrivateRepoAllowanceLimited Natural
+
+privateRepoAllowance :: Int -> PrivateRepoAllowance
+privateRepoAllowance = \case
+    -- Manually-managed "Friends & Family" plan
+    0 -> PrivateRepoAllowanceUnlimited
+    -- Temporary "Early Adopter" plan
+    2178 -> PrivateRepoAllowanceUnlimited
+    -- "Unlimited" private repo plan
+    2553 -> PrivateRepoAllowanceUnlimited
+    -- TODO: "Solo" private repo plan
+    9999 -> PrivateRepoAllowanceLimited 1
+
+    -- All other plans
+    _ -> PrivateRepoAllowanceNone
+
 isPrivateRepoPlan :: MarketplacePlan -> Bool
 isPrivateRepoPlan MarketplacePlan {..} =
-    marketplacePlanGithubId `elem` privateRepoPlanGitHubIds
-
-privateRepoPlanGitHubIds :: [Int]
-privateRepoPlanGitHubIds =
-    [ 0 -- Manually-managed "Friends & Family" plan
-    , 2178 -- Temporary "Early Adopter" plan
-    , 2553 -- "Unlimited" private repo plan
-    ]
+    case privateRepoAllowance marketplacePlanGithubId of
+        PrivateRepoAllowanceNone -> False
+        PrivateRepoAllowanceUnlimited -> True
+        PrivateRepoAllowanceLimited _ -> True
 
 vconcat :: Vector (Vector a) -> [a]
 vconcat = V.toList . V.concat . V.toList
