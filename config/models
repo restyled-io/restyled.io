@@ -79,3 +79,11 @@ MarketplaceAccount
 
   UniqueMarketplaceAccount githubId githubLogin
   deriving Eq Show
+
+MarketplaceEnabledRepo
+  marketplacePlan MarketplacePlanId
+  marketplaceAccount MarketplaceAccountId
+  repo RepoId
+
+  UniqueMarketplaceEnabledRepo marketplacePlan marketplaceAccount repo
+  deriving Eq Show
