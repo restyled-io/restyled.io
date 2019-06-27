@@ -205,8 +205,8 @@ privateRepoAllowance = \case
     2178 -> PrivateRepoAllowanceUnlimited
     -- "Unlimited" private repo plan
     2553 -> PrivateRepoAllowanceUnlimited
-    -- TODO: "Solo" private repo plan
-    9999 -> PrivateRepoAllowanceLimited 1
+    -- "Solo", single private repo plan
+    2695 -> PrivateRepoAllowanceLimited 1
 
     -- All other plans
     _ -> PrivateRepoAllowanceNone

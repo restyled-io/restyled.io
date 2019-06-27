@@ -36,7 +36,7 @@ spec = withApp $ do
             shouldForbid repo MarketplacePlanPublicOnly
 
         it "limits repos on a limited plan" $ runDB $ do
-            insertAccountOnPlan "restyled-io" 9999
+            insertAccountOnPlan "restyled-io" 2695
             privateRepo1 <- insertRepo "restyled-io" "restyled.io" True
             privateRepo2 <- insertRepo "restyled-io" "restyler" True
             ossRepo <- insertRepo "restyled-io" "demo" False
