@@ -22,6 +22,7 @@ where
 
 import Restyled.Prelude
 
+import Data.List (genericLength)
 import Restyled.Models
 import Restyled.Settings
 
@@ -122,24 +123,66 @@ fetchDiscountMarketplacePlan = upsert
 data MarketplacePlanAllows
     = MarketplacePlanAllows
     | MarketplacePlanForbids MarketplacePlanLimitation
+    deriving (Eq, Show)
 
 data MarketplacePlanLimitation
     = MarketplacePlanNotFound
     | MarketplacePlanPublicOnly
     | MarketplacePlanMaxRepos
+    deriving (Eq, Show)
 
--- | Current, naive @'MarketplacePlan'@ limitations
 marketplacePlanAllows
     :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
-marketplacePlanAllows (Entity _ Repo {..}) = do
-    mPlan <- fetchMarketplacePlanByLogin $ nameToName repoOwner
+marketplacePlanAllows repo@(Entity _ Repo {..})
+    | repoIsPrivate = marketplacePlanAllowsPrivate repo
+    | otherwise = pure MarketplacePlanAllows
 
-    pure $ case (repoIsPrivate, mPlan) of
-        (False, _) -> MarketplacePlanAllows
-        (True, Nothing) -> MarketplacePlanForbids MarketplacePlanNotFound
-        (True, Just plan)
-            | isPrivateRepoPlan plan -> MarketplacePlanAllows
-            | otherwise -> MarketplacePlanForbids MarketplacePlanPublicOnly
+marketplacePlanAllowsPrivate
+    :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
+marketplacePlanAllowsPrivate (Entity repoId Repo {..}) =
+    fromMaybeM planNotFound $ runMaybeT $ do
+        Entity accountId MarketplaceAccount {..} <- selectFirstT
+            [MarketplaceAccountGithubLogin ==. nameToName repoOwner]
+            []
+        Entity planId MarketplacePlan {..} <- getEntityT
+            marketplaceAccountMarketplacePlan
+
+        lift $ case privateRepoAllowance marketplacePlanGithubId of
+            PrivateRepoAllowanceNone ->
+                pure $ MarketplacePlanForbids MarketplacePlanPublicOnly
+            PrivateRepoAllowanceUnlimited -> pure MarketplacePlanAllows
+            PrivateRepoAllowanceLimited limit -> do
+                result <- enableMarketplaceRepo planId accountId repoId limit
+                pure $ if result
+                    then MarketplacePlanAllows
+                    else MarketplacePlanForbids MarketplacePlanMaxRepos
+  where
+    planNotFound :: Applicative f => f MarketplacePlanAllows
+    planNotFound = pure $ MarketplacePlanForbids MarketplacePlanNotFound
+
+enableMarketplaceRepo
+    :: MonadIO m
+    => MarketplacePlanId
+    -> MarketplaceAccountId
+    -> RepoId
+    -> Natural
+    -> SqlPersistT m Bool
+enableMarketplaceRepo planId accountId repoId limit = do
+    repos <- selectList
+        [ MarketplaceEnabledRepoMarketplacePlan ==. planId
+        , MarketplaceEnabledRepoMarketplaceAccount ==. accountId
+        ]
+        []
+    checkEnabledRepos $ map (marketplaceEnabledRepoRepo . entityVal) repos
+  where
+    checkEnabledRepos enabledRepoIds
+        | repoId `elem` enabledRepoIds = pure True
+        | genericLength enabledRepoIds >= limit = pure False
+        | otherwise = True <$ insert MarketplaceEnabledRepo
+            { marketplaceEnabledRepoMarketplacePlan = planId
+            , marketplaceEnabledRepoMarketplaceAccount = accountId
+            , marketplaceEnabledRepoRepo = repoId
+            }
 
 whenMarketplacePlanForbids
     :: Applicative f
