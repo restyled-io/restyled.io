@@ -8,6 +8,10 @@ module Restyled.Prelude
     -- * Persist
     , overEntity
     , replaceEntity
+    , selectFirstT
+    , getT
+    , getEntityT
+    , getByT
 
     -- * ExceptT
     , bimapMExceptT
@@ -82,6 +86,31 @@ replaceEntity
     => Entity a
     -> SqlPersistT m ()
 replaceEntity (Entity k v) = replace k v
+
+selectFirstT
+    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
+    => [Filter a]
+    -> [SelectOpt a]
+    -> MaybeT (SqlPersistT m) (Entity a)
+selectFirstT x = MaybeT . selectFirst x
+
+getT
+    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
+    => Key a
+    -> MaybeT (SqlPersistT m) a
+getT = MaybeT . get
+
+getEntityT
+    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
+    => Key a
+    -> MaybeT (SqlPersistT m) (Entity a)
+getEntityT = MaybeT . getEntity
+
+getByT
+    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
+    => Unique a
+    -> MaybeT (SqlPersistT m) (Entity a)
+getByT = MaybeT . getBy
 
 bimapMExceptT
     :: Monad m => (e -> m f) -> (a -> m b) -> ExceptT e m a -> ExceptT f m b
