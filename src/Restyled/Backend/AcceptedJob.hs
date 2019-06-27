@@ -42,6 +42,7 @@ ignoredJobReasonToLogMessage = \case
     PlanLimitation _ MarketplacePlanNotFound -> "No Marketplace Plan"
     PlanLimitation _ MarketplacePlanPublicOnly ->
         "Public-only Marketplace Plan"
+    PlanLimitation _ MarketplacePlanMaxRepos -> "Maximum private repos in use"
 
 ignoredJobReasonToJobLogLine :: IgnoredJobReason -> String
 ignoredJobReasonToJobLogLine = unlines . \case
@@ -55,6 +56,10 @@ ignoredJobReasonToJobLogLine = unlines . \case
         ]
     PlanLimitation _ MarketplacePlanPublicOnly ->
         [ "Your plan does not allow private repositories."
+        , "Upgrade your plan at https://github.com/marketplace/restyled-io"
+        ]
+    PlanLimitation _ MarketplacePlanMaxRepos ->
+        [ "You've reached the limit for private repositories on this plan."
         , "Upgrade your plan at https://github.com/marketplace/restyled-io"
         ]
   where
