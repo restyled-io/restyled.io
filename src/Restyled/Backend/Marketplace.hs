@@ -126,6 +126,7 @@ data MarketplacePlanAllows
 data MarketplacePlanLimitation
     = MarketplacePlanNotFound
     | MarketplacePlanPublicOnly
+    | MarketplacePlanMaxRepos
 
 -- | Current, naive @'MarketplacePlan'@ limitations
 marketplacePlanAllows
