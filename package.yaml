@@ -99,6 +99,7 @@ library:
     - rio
     - rio-orphans
     - safe-exceptions
+    - semigroups
     - shakespeare
     - tagged
     - template-haskell

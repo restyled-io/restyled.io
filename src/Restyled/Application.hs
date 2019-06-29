@@ -18,6 +18,7 @@ import Restyled.Handlers.Admin
 import Restyled.Handlers.Admin.Jobs
 import Restyled.Handlers.Admin.Machines
 import Restyled.Handlers.Admin.Marketplace
+import Restyled.Handlers.Admin.Metrics
 import Restyled.Handlers.Admin.Repos
 import Restyled.Handlers.Common
 import Restyled.Handlers.Home

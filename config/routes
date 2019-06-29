@@ -40,3 +40,4 @@
     !/#RestyleMachineId/info AdminMachineInfoR GET
     !/#RestyleMachineId/prune AdminMachinePruneR POST
   /marketplace AdminMarketplaceR GET
+  /metrics AdminMetricsR GET

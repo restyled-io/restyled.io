@@ -1,0 +1,10 @@
+<section #jobs-today>
+  <h3>Jobs Today
+  <div .chart>
+  <div .controls>
+    <p .centered>
+      <a .prev href=#prev>Previous
+      <strong .from>
+      to
+      <strong .to>
+      <a .next href=#next>Next
