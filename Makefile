@@ -52,7 +52,7 @@ setup.lint:
 setup.tools:
 	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
 	  fast-tags \
-	  stylish-haskell
+	  stylish-haskell-0.9.2.2
 	@# Need to install brittany from an old resolver and copy it into the
 	@# current resolver's compiler-bin
 	stack --resolver lts-12.26 build --copy-compiler-tool brittany
