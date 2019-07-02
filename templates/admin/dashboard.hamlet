@@ -1,6 +1,4 @@
-<section #jobs-today>
-  <h3>Jobs Today
-  <div .chart>
+<section #jobs>
   <div .controls>
     <p .centered>
       <a .prev href=#prev>Previous
@@ -8,3 +6,5 @@
       to
       <strong .to>
       <a .next href=#next>Next
+  <div .chart>
+  <div .table>

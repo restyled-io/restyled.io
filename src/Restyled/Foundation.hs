@@ -155,6 +155,8 @@ adminLayout widget = do
             "https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.1/c3.min.js"
         addScriptRemote
             "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
+        addScriptRemote
+            "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"
         $(widgetFile "admin-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
