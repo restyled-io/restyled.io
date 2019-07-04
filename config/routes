@@ -12,7 +12,6 @@
 
 /profile ProfileR GET
 
--- TODO: /repos/#RepoSVCS/#OwnerName/#RepoName/...
 /gh/#OwnerName/repos/#RepoName RepoP:
   / RepoR GET
   /pulls/#PullRequestNum RepoPullP:
