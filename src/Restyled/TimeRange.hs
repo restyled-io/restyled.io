@@ -2,6 +2,7 @@ module Restyled.TimeRange
     ( TimeRange
     , requiredTimeRange
     , rawSqlWithTimeRange
+    , selectListWithTimeRange
     )
 where
 
@@ -15,11 +16,6 @@ data TimeRange = TimeRange
     , tmTo :: UTCTime
     }
 
-rawSqlWithTimeRange
-    :: (RawSql a, MonadIO m) => TimeRange -> Text -> SqlPersistT m [a]
-rawSqlWithTimeRange TimeRange {..} =
-    flip rawSql [PersistUTCTime tmFrom, PersistUTCTime tmTo]
-
 -- brittany-disable-next-binding
 
 requiredTimeRange
@@ -30,3 +26,16 @@ requiredTimeRange
 requiredTimeRange = runInputGet $ TimeRange
     <$> ireq epochField "from"
     <*> ireq epochField "to"
+
+rawSqlWithTimeRange
+    :: (RawSql a, MonadIO m) => TimeRange -> Text -> SqlPersistT m [a]
+rawSqlWithTimeRange TimeRange {..} =
+    flip rawSql [PersistUTCTime tmFrom, PersistUTCTime tmTo]
+
+selectListWithTimeRange
+    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
+    => EntityField a (Maybe UTCTime)
+    -> TimeRange
+    -> SqlPersistT m [Entity a]
+selectListWithTimeRange field TimeRange {..} =
+    selectList [field >=. Just tmFrom, field <=. Just tmTo] [Desc field]

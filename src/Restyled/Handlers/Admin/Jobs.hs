@@ -8,6 +8,7 @@ import Restyled.Prelude hiding (to)
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Routes
+import Restyled.TimeRange
 import Restyled.Yesod
 
 data JobSummary = JobSummary (Route App -> Text) (Entity Job)
@@ -22,13 +23,7 @@ instance ToJSON JobSummary where
 
 getAdminJobsR :: Handler Value
 getAdminJobsR = do
-    (from, to) <- runInputGet $ (,) <$> ireq epochField "from" <*> ireq
-        epochField
-        "to"
-
-    jobs <- runDB $ selectList
-        [JobCompletedAt >=. Just from, JobCompletedAt <=. Just to]
-        [Desc JobCompletedAt]
-
+    range <- requiredTimeRange
+    jobs <- runDB $ selectListWithTimeRange JobCompletedAt range
     urlRender <- getUrlRender
     sendResponse $ toJSON $ map (JobSummary urlRender) jobs
