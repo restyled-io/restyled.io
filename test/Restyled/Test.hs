@@ -5,7 +5,11 @@ module Restyled.Test
     ( YesodSpec
     , runDB
     , withApp
-    , authenticateAsUser
+    , getWith
+    , authenticateAsAdmin
+    , authenticateAs
+    , getTestAppAdmins
+    , getBody
     , module X
     )
 where
@@ -14,11 +18,15 @@ import Restyled.Prelude as X hiding (get, runDB)
 
 import Control.Monad.Fail (MonadFail(..))
 import Control.Monad.Logger (MonadLogger(..), toLogStr)
+import qualified Data.ByteString.Lazy as LBS
+import Data.List.NonEmpty (NonEmpty)
+import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
 import Database.Persist.Sql
     (SqlBackend, SqlPersistT, connEscapeName, rawExecute, rawSql, unSingle)
 import Database.Redis (del)
 import LoadEnv (loadEnvFrom)
+import Network.Wai.Test (SResponse(..))
 import Restyled.Application as X ()
 import Restyled.Backend.Foundation (loadBackend)
 import Restyled.Backend.Job (queueName)
@@ -34,6 +42,7 @@ import Test.Hspec.Lifted as X
 import Test.HUnit (assertFailure)
 import Test.QuickCheck as X
 import Text.Shakespeare.Text (st)
+import Yesod.Core (RedirectUrl)
 import Yesod.Test as X hiding (YesodSpec)
 
 type YesodSpec site = SpecM (TestApp site)
@@ -94,23 +103,53 @@ getTables = map unSingle <$> rawSql
           AND table_name <> 'installed_migrations';
     |] []
 
--- | Insert and authenticate as the given user
---
--- N.B. Only use this once (for a given @'User'@) per spec.
---
-authenticateAsUser :: User -> YesodExample App ()
-authenticateAsUser = authenticateAs <=< runDB . insertEntity
+-- | @GET@ with the given queyr parameters
+getWith :: (RedirectUrl App url) => [(Text, Text)] -> url -> YesodExample App ()
+getWith params route = request $ do
+    setUrl route
+    traverse_ (uncurry addGetParam) params
 
-authenticateAs :: Entity User -> YesodExample App ()
-authenticateAs (Entity _ u) = do
-    dummyLogin <- authPage "/dummy"
+authenticateAsAdmin :: YesodExample App ()
+authenticateAsAdmin = authenticateAs . NE.head =<< getTestAppAdmins
+
+-- | Authenticate as the given Email
+--
+-- Ensures the dummy Plugin, and the email is treated as Ident. A @'User'@ is
+-- inserted unless one exists already.
+--
+authenticateAs :: Text -> YesodExample App ()
+authenticateAs email = do
+    void $ runDB $ upsert
+        User
+            { userEmail = Just email
+            , userGithubUserId = Nothing
+            , userGithubUsername = Nothing
+            , userGitlabUserId = Nothing
+            , userGitlabUsername = Nothing
+            , userGitlabAccessToken = Nothing
+            , userGitlabRefreshToken = Nothing
+            , userCredsIdent = email
+            , userCredsPlugin = "dummy"
+            }
+        []
+
+    testRoot <- getTestRoot
 
     request $ do
         setMethod "POST"
-        addPostParam "ident" $ userCredsIdent u
-        setUrl dummyLogin
+        addPostParam "ident" email
+        setUrl $ testRoot <> "/auth/page/dummy"
 
-authPage :: Text -> YesodExample App Text
-authPage page = do
-    testRoot <- fmap (appRoot . view settingsL) getTestYesod
-    return $ testRoot <> "/auth/page" <> page
+getTestRoot :: YesodExample App Text
+getTestRoot = appRoot . view settingsL <$> getTestYesod
+
+getTestAppAdmins :: YesodExample App (NonEmpty Text)
+getTestAppAdmins = fromMaybeM
+    (expectationFailure' "Tests require configured Admins")
+    (NE.nonEmpty . appAdmins . view settingsL <$> getTestYesod)
+
+getBody :: YesodExample site LBS.ByteString
+getBody = withResponse $ pure . simpleBody
+
+expectationFailure' :: String -> YesodExample App a
+expectationFailure' msg = expectationFailure msg >> error "never here"
