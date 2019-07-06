@@ -7,13 +7,13 @@ module Restyled.Metrics
     )
 where
 
-import Restyled.Prelude hiding (count, to)
+import Restyled.Prelude hiding (count)
 
-import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Semigroup (Sum(..))
 import Data.Semigroup.Generic
-import Database.Persist.Sql (Single(..), rawSql)
+import Database.Persist.Sql (Single(..))
+import Restyled.TimeRange
 import Text.Shakespeare.Text (st)
 
 data JobMetrics = JobMetrics
@@ -34,47 +34,57 @@ data JobMetricsByHour = JobMetricsByHour
 instance ToJSON JobMetricsByHour  where
     toJSON (JobMetricsByHour epoch JobMetrics {..}) = object
         [ "Date" .= epoch
-        , "Succeeded" .= getSum jmSucceeded
-        , "Failed" .= getSum jmFailed
-        , "Unfinished" .= getSum jmUnfinished
+        , succeeded .= getSum jmSucceeded
+        , failed .= getSum jmFailed
+        , unfinished .= getSum jmUnfinished
         ]
 
 -- brittany-disable-next-binding
 
 fetchJobMetricsByHour
     :: MonadIO m
-    => UTCTime -- ^ From
-    -> UTCTime -- ^ To
+    => TimeRange
     -> SqlPersistT m [JobMetricsByHour]
-fetchJobMetricsByHour from to =
-    fromRows <$> rawSql
+fetchJobMetricsByHour range =
+    fromRows <$> rawSqlWithTimeRange range
         [st|
             SELECT
-                extract(epoch from
-                    date_trunc('hour', COALESCE(completed_at, created_at))
-                ) AS epoch,
+                extract(epoch from date_trunc('hour', #{dateField})),
                 CASE
-                    WHEN exit_code IS NULL THEN 'Unfinished'
-                    WHEN exit_code = 0 THEN 'Succeeded'
-                    ELSE 'Failed'
-                END AS status,
-                COUNT(*) AS count
+                    WHEN exit_code IS NULL THEN '#{unfinished}'
+                    WHEN exit_code = 0 THEN '#{succeeded}'
+                    ELSE '#{failed}'
+                END,
+                COUNT(*)
             FROM job
-            WHERE COALESCE(completed_at, created_at) >= '#{show from}'
-              AND COALESCE(completed_at, created_at) <= '#{show to}'
+            WHERE #{dateField} >= ?
+              AND #{dateField} <= ?
             GROUP BY (1, 2)
         |]
-        []
+  where
+    dateField :: Text
+    dateField = "COALESCE(completed_at, created_at)"
 
 fromRows :: [(Single Int, Single Text, Single Int)] -> [JobMetricsByHour]
-fromRows = fromMap . Map.fromListWith (<>) . map fromRow
-  where
-    fromRow :: (Single Int, Single Text, Single Int) -> (Int, JobMetrics)
-    fromRow (Single epoch, Single status, Single count) = case status of
-        "Succeeded" -> (epoch, JobMetrics (Sum count) 0 0)
-        "Failed" -> (epoch, JobMetrics 0 (Sum count) 0)
-        "Unfinished" -> (epoch, JobMetrics 0 0 (Sum count))
-        _ -> (epoch, JobMetrics 0 0 0)
+fromRows =
+    map (uncurry JobMetricsByHour)
+        . Map.toList
+        . Map.fromListWith (<>)
+        . map fromRow
 
-    fromMap :: Map Int JobMetrics -> [JobMetricsByHour]
-    fromMap = map (uncurry JobMetricsByHour) . Map.toList
+fromRow :: (Single Int, Single Text, Single Int) -> (Int, JobMetrics)
+fromRow (Single epoch, Single status, Single count)
+    | status == succeeded = (epoch, JobMetrics (Sum count) 0 0)
+    | status == failed = (epoch, JobMetrics 0 (Sum count) 0)
+    | status == unfinished = (epoch, JobMetrics 0 0 (Sum count))
+    | otherwise = (epoch, JobMetrics 0 0 0)
+
+-- | Avoid typo-bugs by using this anywhere the textual value is needed
+succeeded :: Text
+succeeded = "Succeeded"
+
+failed :: Text
+failed = "Failed"
+
+unfinished :: Text
+unfinished = "Unfinished"
