@@ -39,6 +39,7 @@ import Control.Monad.Trans.Maybe as X
 import Data.Aeson as X hiding (Result(..))
 import Data.Aeson.Casing as X
 import Data.Bifunctor as X (first, second)
+import Data.Bitraversable as X (bimapM)
 import Data.ByteString as X (ByteString)
 import Data.Char as X (isSpace, toLower)
 import Data.Either as X (fromLeft, fromRight)
