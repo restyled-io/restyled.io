@@ -17,7 +17,7 @@ spec = withApp $ do
             statusIs 404
 
         it "404s for un-authorized users" $ do
-            authenticateAs "normie@restyled.io"
+            void $ authenticateAs "normie@restyled.io"
 
             getAdmin
 
@@ -27,7 +27,7 @@ spec = withApp $ do
             emails <- getTestAppAdmins
 
             for_ emails $ \email -> do
-                authenticateAs email
+                void $ authenticateAs email
 
                 getAdmin
 

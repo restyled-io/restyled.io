@@ -13,7 +13,7 @@ spec :: Spec
 spec = withApp $ do
     describe "GET /admin/metrics" $ do
         it "requires TimeRange parameters" $ do
-            authenticateAsAdmin
+            void authenticateAsAdmin
 
             get $ AdminP AdminMetricsR
             statusIs 400
@@ -42,7 +42,7 @@ spec = withApp $ do
                 _beyondRange <- insert $ jobAt t5 $ Just (t5, 0)
                 pure ()
 
-            authenticateAsAdmin
+            void authenticateAsAdmin
             getWith (toTimeRangeParams t2 t4) $ AdminP AdminMetricsR
 
             statusIs 200
