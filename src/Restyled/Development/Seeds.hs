@@ -80,7 +80,6 @@ seedDB = do
           )
         , ("stdout", "Setting status of no differences for 686fe0a")
         , ("stdout", "No style differences found")
-        , ("system", "Restyler exited 0")
         ]
 
     seedJob
