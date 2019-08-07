@@ -47,10 +47,11 @@ if (typeof Output === "undefined") {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  var elem = document.getElementById("#{rawJS streamElementId}");
-  var cardsCount = document.getElementsByClassName("card").length;
+  var cards = document.getElementsByClassName("card")
+  var singleCard = cards.length === 1;
+  var stream = document.getElementById("#{rawJS streamElementId}");
 
-  if (elem) {
-    new Output(elem, cardsCount === 1).connect();
+  if (stream) {
+    new Output(stream, singleCard).connect();
   }
 });
