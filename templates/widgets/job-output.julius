@@ -46,6 +46,46 @@ if (typeof Output === "undefined") {
   };
 }
 
+if (typeof ErrorFocuser === "undefined") {
+  function ErrorFocuser(elem) {
+    this.elem = elem;
+  }
+
+  ErrorFocuser.prototype.focus = function () {
+    this.scrollTo(this.findContent());
+  }
+
+  ErrorFocuser.prototype.findContent = function() {
+    var contents = this.elem.getElementsByClassName("content");
+    var content
+
+    for (var i = 0; i < contents.length; i++) {
+      content = contents[i];
+
+      if (content && content.textContent.startsWith("We had trouble ")) {
+        return content;
+      }
+    }
+  }
+
+  // Brittle assumptions:
+  //
+  // - We have 100px of stream stuff to scroll-x past
+  // - The pre to scroll is exactly parent-of-parent of content
+  //
+  ErrorFocuser.prototype.scrollTo = function (content) {
+    if (!content) {
+      return
+    }
+
+    var navHeight = 48;
+    var contentTop = content.offsetTop - navHeight;
+    var pre = content.parentElement.parentElement; // Brittle!
+    pre.scrollTo({ top: 0, left: 100, behavior: "smooth" });
+    window.scrollTo({ top: contentTop, left: 0, behavior: "smooth" });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   var cards = document.getElementsByClassName("card")
   var singleCard = cards.length === 1;
@@ -53,5 +93,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   if (stream) {
     new Output(stream, singleCard).connect();
+  }
+
+  if (singleCard) {
+    new ErrorFocuser(cards[0]).focus();
   }
 });

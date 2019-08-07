@@ -1,5 +1,5 @@
 $newline never
 <div .log-line .stream-#{stream}>
   <span .prefix>#{stream}
-  <span .level-#{level}>
+  <span .level-#{level} .content>
     ^{renderWithURLs message}
