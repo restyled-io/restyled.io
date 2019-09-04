@@ -13,10 +13,10 @@ seedDB :: MonadIO m => SqlPersistT m ()
 seedDB = do
     now <- liftIO getCurrentTime
 
-    Entity _ demo <- upsertRepo (restyledRepo "demo")
-    Entity _ restyled <- upsertRepo (restyledRepo "restyled.io")
-    Entity _ restyler <- upsertRepo (restyledRepo "restyler")
-    Entity _ _ops <- upsertRepo ((restyledRepo "ops") { repoIsPrivate = True })
+    Entity _ demo <- upsertRepo $ restyledRepo "demo"
+    Entity _ restyled <- upsertRepo $ restyledRepo "restyled.io"
+    Entity _ restyler <- upsertRepo $ restyledRepo "restyler"
+    Entity _ _ops <- upsertRepo $ restyledRepoPrivate "ops"
 
     -- We don't seed an enabled example because for it to be functional would
     -- mean having secrets in the seeds, and we'd rather not have a
@@ -32,82 +32,9 @@ seedDB = do
             }
         []
 
-    seedJob
-        demo
-        1
-        now
-        (Just 127)
-        [ ("stderr", "From https://github.com/restyled.io/demo")
-        , ("stderr", " * [new branch]      release/1 -> release/1")
-        , ("stderr", "Switched to a new branch 'trim-fixes'")
-        , ( "stdout"
-          , "Branch 'trim-fixes' set up to track remote branch 'trim-fixes' from 'origin'."
-          )
-        , ("stdout", "Restyling restyled.io/demo#1")
-        , ("stdout", "Restyled PR does not exist")
-        , ("stderr", "Switched to a new branch 'elevator-trim-fixes-restyled'")
-        , ("stderr", "Process unsuccessful (ExitFailure 127)")
-        , ("stderr", "Command: docker")
-        , ("stderr", "Arguments: [--rm, --net=none, ...]")
-        , ("stderr", "")
-        , ("stderr", "")
-        , ("stderr", "  docker: command not found")
-        , ("stderr", "    1:some/stack")
-        , ("stderr", "    75:trace/there")
-        , ("stderr", "")
-        , ("stderr", "Please see https://google.com")
-        , ("stderr", "")
-        , ("stderr", "Please see")
-        , ("stderr", "")
-        , ("stderr", "  - https://google.com")
-        , ("stderr", "  - https://google.com")
-        , ("stderr", "  - https://google.com")
-        ]
-
-    seedJob
-        restyled
-        1
-        now
-        (Just 0)
-        [ ( "stdout"
-          , "Branch 'lucky/ela-skills-debugger' set up to track remote branch 'lucky/ela-skills-debugger' from 'origin'."
-          )
-        , ("stderr", "Switched to a new branch 'lucky/ela-skills-debugger'")
-        , ("stdout", "Restyling freckle/megarepo#8616")
-        , ("stdout", "Restyled PR does not exist")
-        , ( "stderr"
-          , "Switched to a new branch 'lucky/ela-skills-debugger-restyled'"
-          )
-        , ("stdout", "Setting status of no differences for 686fe0a")
-        , ("stdout", "No style differences found")
-        ]
-
-    seedJob
-        restyler
-        1
-        now
-        Nothing
-        [ ("stderr", "Switched to a new branch 'issue#87'")
-        , ( "stdout"
-          , "Branch 'issue#87' set up to track remote branch 'issue#87' from 'origin'."
-          )
-        , ("stdout", "Restyling restyled-io/restyler#88")
-        , ("stdout", "Restyled PR does not exist")
-        , ("stderr", "Switched to a new branch 'issue#87-restyled'")
-        , ( "stdout"
-          , "Restyling \"app/Http/Controllers/Store.php\" via \"php-cs-fixer\""
-          )
-        , ("stderr", "Loaded config default from \"/code/.php_cs\".")
-        , ( "stderr"
-          , "Paths from configuration file have been overridden by paths provided as command arguments."
-          )
-        , ("stdout", "")
-        , ("stdout", "Fixed all files in 0.010 seconds, 10.000 MB memory used")
-        , ( "stdout"
-          , "Restyling \"app/Models/Example.php\" via \"php-cs-fixer\""
-          )
-        ]
-
+    seedJob demo 1 now (Just 127) invalidArgumentOutput
+    seedJob restyled 1 now (Just 0) noDifferencesOutput
+    seedJob restyler 1 now Nothing restylingOutput
     seedJob restyler 2 now (Just 10) configErrorOutput1
 
     Entity discountPlanId _ <- fetchDiscountMarketplacePlan
@@ -129,6 +56,9 @@ restyledRepo name = Repo
     , repoIsPrivate = False
     , repoDebugEnabled = True
     }
+
+restyledRepoPrivate :: RepoName -> Repo
+restyledRepoPrivate name = (restyledRepo name) { repoIsPrivate = True }
 
 seedJob
     :: MonadIO m
@@ -190,7 +120,66 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
 secondsFrom :: UTCTime -> [UTCTime]
 secondsFrom t0 = let t1 = addUTCTime 1 t0 in t1 : secondsFrom t1
 
--- brittany-next-binding --columns=500
+-- brittany-next-binding --columns=250
+
+restylingOutput :: [(Text, Text)]
+restylingOutput =
+    [ ("stderr", "Switched to a new branch 'issue#87'")
+    , ("stdout", "Branch 'issue#87' set up to track remote branch 'issue#87' from 'origin'.")
+    , ("stdout", "Restyling restyled-io/restyler#88")
+    , ("stdout", "Restyled PR does not exist")
+    , ("stderr", "Switched to a new branch 'issue#87-restyled'")
+    , ("stdout", "Restyling \"app/Http/Controllers/Store.php\" via \"php-cs-fixer\"")
+    , ("stderr", "Loaded config default from \"/code/.php_cs\".")
+    , ("stderr", "Paths from configuration file have been overridden by paths provided as command arguments.")
+    , ("stdout", "")
+    , ("stdout", "Fixed all files in 0.010 seconds, 10.000 MB memory used")
+    , ("stdout", "Restyling \"app/Models/Example.php\" via \"php-cs-fixer\"")
+    ]
+
+-- brittany-next-binding --columns=250
+
+noDifferencesOutput :: [(Text, Text)]
+noDifferencesOutput =
+    [ ("stdout", "Branch 'lucky/ela-skills-debugger' set up to track remote branch 'lucky/ela-skills-debugger' from 'origin'.")
+    , ("stderr", "Switched to a new branch 'lucky/ela-skills-debugger'")
+    , ("stdout", "Restyling freckle/megarepo#8616")
+    , ("stdout", "Restyled PR does not exist")
+    , ("stderr", "Switched to a new branch 'lucky/ela-skills-debugger-restyled'")
+    , ("stdout", "Setting status of no differences for 686fe0a")
+    , ("stdout", "No style differences found")
+    ]
+
+-- brittany-next-binding --columns=250
+
+invalidArgumentOutput :: [(Text, Text)]
+invalidArgumentOutput =
+    [ ("stderr", "From https://github.com/restyled.io/demo")
+    , ("stderr", " * [new branch]      release/1 -> release/1")
+    , ("stderr", "Switched to a new branch 'trim-fixes'")
+    , ("stdout", "Branch 'trim-fixes' set up to track remote branch 'trim-fixes' from 'origin'.")
+    , ("stdout", "Restyling restyled.io/demo#1")
+    , ("stdout", "Restyled PR does not exist")
+    , ("stderr", "Switched to a new branch 'elevator-trim-fixes-restyled'")
+    , ("stderr", "Process unsuccessful (ExitFailure 127)")
+    , ("stderr", "Command: docker")
+    , ("stderr", "Arguments: [--rm, --net=none, ...]")
+    , ("stderr", "")
+    , ("stderr", "")
+    , ("stderr", "  docker: command not found")
+    , ("stderr", "    1:some/stack")
+    , ("stderr", "    75:trace/there")
+    , ("stderr", "")
+    , ("stderr", "Please see https://google.com")
+    , ("stderr", "")
+    , ("stderr", "Please see")
+    , ("stderr", "")
+    , ("stderr", "  - https://google.com")
+    , ("stderr", "  - https://google.com")
+    , ("stderr", "  - https://google.com")
+    ]
+
+-- brittany-next-binding --columns=250
 
 configErrorOutput1 :: [(Text, Text)]
 configErrorOutput1 =
