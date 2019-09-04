@@ -2,8 +2,8 @@ all: setup setup.lint setup.tools db.setup build lint test db.seed
 
 .PHONY: db.drop
 db.drop:
-	PGPASSWORD=password dropdb --user postgres --host localhost restyled
-	PGPASSWORD=password dropdb --user postgres --host localhost restyled_test
+	PGPASSWORD=password dropdb --if-exists --user postgres --host localhost restyled
+	PGPASSWORD=password dropdb --if-exists --user postgres --host localhost restyled_test
 
 .PHONY: db.create
 db.create:
