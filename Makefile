@@ -1,4 +1,8 @@
-all: setup setup.lint setup.tools db.setup build lint test db.seed
+# Bring system up to date after a pull
+update: setup setup.lint setup.tools db.migrate build lint test
+
+# Initialize from a fresh clone
+bootstrap: setup setup.lint setup.tools db.setup build lint test db.seed
 
 .PHONY: db.drop
 db.drop:

@@ -10,19 +10,13 @@ Website and backend for Restyled, https://restyled.io.
    docker-compose up -d
    ```
 
-1. Create and seed the database, install dependencies:
+1. Initialize dependencies, the database, build, lint and test:
 
    ```console
-   make db.create db.migrate db.seed setup setup.lint setup.tools
+   make boostrap
    ```
 
-1. Build, test, and lint the application:
-
-   ```console
-   make
-   ```
-
-   From here, you can use any `stack`-based development and testing work-flow.
+From here, you can use any `stack`-based development and testing work-flow.
 
 ## Fully-functional Website
 
