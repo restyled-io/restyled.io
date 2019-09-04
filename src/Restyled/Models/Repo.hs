@@ -86,7 +86,7 @@ data IgnoredWebhookReason
     = InvalidJSON String
     | IgnoredAction PullRequestEventType
     | IgnoredEventType Text
-    | OwnPullRequest Text
+    | BotPullRequest Text
     | RepoNotFound OwnerName RepoName
 
 reasonToLogMessage :: IgnoredWebhookReason -> String
@@ -94,8 +94,8 @@ reasonToLogMessage = \case
     InvalidJSON errs -> "invalid JSON: " <> errs
     IgnoredAction action -> "ignored action: " <> show action
     IgnoredEventType event -> "ignored event: " <> show event
-    OwnPullRequest author ->
-        "PR appears to be our own, author=" <> unpack author
+    BotPullRequest author ->
+        "PR appears to bot-created, author=" <> unpack author
     RepoNotFound owner name ->
         "Repo not found: " <> unpack (repoPath owner name)
 
@@ -105,7 +105,7 @@ initializeFromWebhook
     -> SqlPersistT m (Either IgnoredWebhookReason (Entity Repo))
 initializeFromWebhook payload@Payload {..}
     | pAction `notElem` enqueueEvents = pure $ Left $ IgnoredAction pAction
-    | not $ isActualAuthor pAuthor = pure $ Left $ OwnPullRequest pAuthor
+    | not $ isActualAuthor pAuthor = pure $ Left $ BotPullRequest pAuthor
     | otherwise = Right <$> findOrCreateRepo payload
 
 findOrCreateRepo :: MonadIO m => Payload -> SqlPersistT m (Entity Repo)
