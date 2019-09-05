@@ -43,11 +43,27 @@ requestUserNameOrgs username = caching (githubOrgsCacheKey username) $ do
         Left err -> [] <$ logWarnN (tshow err)
         Right orgs -> pure $ GitHubOrg <$> V.toList orgs
 
+data MarketplaceData = MarketplaceData
+    { mdPlan :: Entity MarketplacePlan
+    , _mdAccount :: Entity MarketplaceAccount
+    , _mdEnabledRepoIds :: [RepoId]
+    }
+
+fetchMarketplaceData
+    :: MonadIO m => GitHubUserName -> SqlPersistT m (Maybe MarketplaceData)
+fetchMarketplaceData login = runMaybeT $ do
+    account <- fetchMarketplaceAccountForLoginT login
+    plan <- getEntityT $ marketplaceAccountMarketplacePlan $ entityVal account
+    fmap (MarketplaceData plan account)
+        $ lift
+        $ fetchMarketplaceEnabledRepoIds (entityKey plan)
+        $ entityKey account
+
 data GitHubIdentity = GitHubIdentity
     { ghiUserName :: GitHubUserName
     , ghiAvatarUrl :: Text -- ^ TODO: newtype?
     , ghiKnownRepos :: [Entity Repo]
-    , ghiMarketplacePlan :: Maybe MarketplacePlan
+    , ghiMarketplaceData :: Maybe MarketplaceData
     }
 
 fetchGitHubIdentityForOrg
@@ -55,7 +71,7 @@ fetchGitHubIdentityForOrg
 fetchGitHubIdentityForOrg (GitHubOrg SimpleOrganization {..}) =
     GitHubIdentity orgLogin orgAvatarUrl
         <$> fetchReposByOwnerName (nameToName orgLogin)
-        <*> fetchMarketplacePlanByLogin orgLogin
+        <*> fetchMarketplaceData (nameToName orgLogin)
   where
     orgLogin :: GitHubUserName
     orgLogin = nameToName simpleOrganizationLogin
@@ -65,11 +81,11 @@ fetchGitHubIdentityForOrg (GitHubOrg SimpleOrganization {..}) =
 
 fetchGitHubIdentityForUser
     :: MonadIO m => User -> SqlPersistT m (Maybe GitHubIdentity)
-fetchGitHubIdentityForUser user@User {..} =
+fetchGitHubIdentityForUser User {..} =
     for mDetails $ \(githubId, githubUsername) ->
         GitHubIdentity githubUsername (avatarUrl githubId)
             <$> fetchReposByOwnerName (nameToName githubUsername)
-            <*> fetchMarketplacePlanForUser user
+            <*> fetchMarketplaceData (nameToName githubUsername)
   where
     mDetails = (,) <$> userGithubUserId <*> userGithubUsername
     avatarUrl gid =

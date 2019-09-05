@@ -4,8 +4,8 @@ module Restyled.Models.User
       userIsAdmin
 
     -- * Data access
-    , fetchMarketplacePlanForUser
-    , fetchMarketplacePlanByLogin
+    , fetchMarketplaceAccountForUserT
+    , fetchMarketplaceAccountForLoginT
     )
 where
 
@@ -17,16 +17,16 @@ import Restyled.Settings
 userIsAdmin :: AppSettings -> User -> Bool
 userIsAdmin AppSettings {..} = maybe False (`elem` appAdmins) . userEmail
 
-fetchMarketplacePlanForUser
-    :: MonadIO m => User -> SqlPersistT m (Maybe MarketplacePlan)
-fetchMarketplacePlanForUser User {..} = runMaybeT $ do
+fetchMarketplaceAccountForUserT
+    :: MonadIO m => User -> MaybeT (SqlPersistT m) (Entity MarketplaceAccount)
+fetchMarketplaceAccountForUserT User {..} = do
     githubId <- hoistMaybe userGithubUserId
     githubLogin <- hoistMaybe userGithubUsername
-    account <- getByT $ UniqueMarketplaceAccount githubId githubLogin
-    getT $ marketplaceAccountMarketplacePlan $ entityVal account
+    getByT $ UniqueMarketplaceAccount githubId githubLogin
 
-fetchMarketplacePlanByLogin
-    :: MonadIO m => GitHubUserName -> SqlPersistT m (Maybe MarketplacePlan)
-fetchMarketplacePlanByLogin username = runMaybeT $ do
-    account <- selectFirstT [MarketplaceAccountGithubLogin ==. username] []
-    getT $ marketplaceAccountMarketplacePlan $ entityVal account
+fetchMarketplaceAccountForLoginT
+    :: MonadIO m
+    => GitHubUserName
+    -> MaybeT (SqlPersistT m) (Entity MarketplaceAccount)
+fetchMarketplaceAccountForLoginT username =
+    selectFirstT [MarketplaceAccountGithubLogin ==. username] []

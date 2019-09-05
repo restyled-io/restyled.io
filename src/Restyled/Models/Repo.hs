@@ -10,6 +10,8 @@ module Restyled.Models.Repo
     -- * Queries
     , fetchReposByOwnerName
     , fetchRepoForJob
+    , fetchMarketplaceAccountForRepoT
+    , fetchMarketplaceEnabledRepoIds
 
     -- * Decorated
     , RepoWithStats(..)
@@ -81,6 +83,25 @@ fetchRepoForJob :: MonadIO m => Job -> SqlPersistT m (Maybe (Entity Repo))
 fetchRepoForJob Job {..} = selectFirst
     [RepoSvcs ==. jobSvcs, RepoOwner ==. jobOwner, RepoName ==. jobRepo]
     []
+
+fetchMarketplaceAccountForRepoT
+    :: MonadIO m => Repo -> MaybeT (SqlPersistT m) (Entity MarketplaceAccount)
+fetchMarketplaceAccountForRepoT Repo {..} =
+    selectFirstT [MarketplaceAccountGithubLogin ==. nameToName repoOwner] []
+
+fetchMarketplaceEnabledRepoIds
+    :: MonadIO m
+    => MarketplacePlanId
+    -> MarketplaceAccountId
+    -> SqlPersistT m [RepoId]
+fetchMarketplaceEnabledRepoIds planId accountId =
+    marketplaceEnabledRepoRepo
+        . entityVal
+        <$$> selectList
+                 [ MarketplaceEnabledRepoMarketplacePlan ==. planId
+                 , MarketplaceEnabledRepoMarketplaceAccount ==. accountId
+                 ]
+                 []
 
 data IgnoredWebhookReason
     = InvalidJSON String
