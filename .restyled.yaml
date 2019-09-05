@@ -21,3 +21,6 @@ restylers:
 
         # apply-refact cannot handle something here
         - "!src/Restyled/Env.hs"
+
+        # apply-refact cannot handle forall
+        - "!test/Restyled/Test/Yesod.hs"
