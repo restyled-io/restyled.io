@@ -145,6 +145,7 @@ tests:
       - QuickCheck
       - bytestring
       - filepath
+      - github
       - hedis
       - hspec
       - hspec-core

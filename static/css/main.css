@@ -208,6 +208,11 @@ details {
   margin-right: auto;
 }
 
+.profile-repo {
+  height: 4em;
+  padding: 1em;
+}
+
 ul.pagination {
   margin: 2em auto;
 }

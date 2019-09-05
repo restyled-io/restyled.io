@@ -16,7 +16,8 @@
     <p>
       <em>No known Repositories
   $else
-    $forall Entity _ repo <- ghiKnownRepos
-      <p>
-        <a href=@{repoR (repoOwner repo) (repoName repo)}>
-          #{repoPath (repoOwner repo) (repoName repo)}
+    $forall Entity repoId repo <- ghiKnownRepos
+      <div .profile-repo .profile-repo-#{toPathPiece repoId}>
+        <p>
+          <a href=@{repoR (repoOwner repo) (repoName repo)}>
+            #{repoPath (repoOwner repo) (repoName repo)}
