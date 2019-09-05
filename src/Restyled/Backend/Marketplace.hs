@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Restyled.Backend.Marketplace
     (
     -- * Checking purchased features
@@ -22,8 +20,8 @@ where
 
 import Restyled.Prelude
 
-import Data.List (genericLength)
 import Restyled.Models
+import Restyled.PrivateRepoAllowance
 import Restyled.Settings
 
 import qualified Data.Vector as V
@@ -140,50 +138,16 @@ marketplacePlanAllows repo@(Entity _ Repo {..})
 
 marketplacePlanAllowsPrivate
     :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
-marketplacePlanAllowsPrivate (Entity repoId Repo {..}) =
-    fromMaybeM planNotFound $ runMaybeT $ do
-        Entity accountId MarketplaceAccount {..} <- selectFirstT
-            [MarketplaceAccountGithubLogin ==. nameToName repoOwner]
-            []
-        Entity planId MarketplacePlan {..} <- getEntityT
-            marketplaceAccountMarketplacePlan
+marketplacePlanAllowsPrivate repo = do
+    mEnabled <- enableMarketplaceRepo repo
 
-        lift $ case privateRepoAllowance marketplacePlanGithubId of
-            PrivateRepoAllowanceNone ->
-                pure $ MarketplacePlanForbids MarketplacePlanPublicOnly
-            PrivateRepoAllowanceUnlimited -> pure MarketplacePlanAllows
-            PrivateRepoAllowanceLimited limit -> do
-                result <- enableMarketplaceRepo planId accountId repoId limit
-                pure $ if result
-                    then MarketplacePlanAllows
-                    else MarketplacePlanForbids MarketplacePlanMaxRepos
-  where
-    planNotFound :: Applicative f => f MarketplacePlanAllows
-    planNotFound = pure $ MarketplacePlanForbids MarketplacePlanNotFound
-
-enableMarketplaceRepo
-    :: MonadIO m
-    => MarketplacePlanId
-    -> MarketplaceAccountId
-    -> RepoId
-    -> Natural
-    -> SqlPersistT m Bool
-enableMarketplaceRepo planId accountId repoId limit = do
-    repos <- selectList
-        [ MarketplaceEnabledRepoMarketplacePlan ==. planId
-        , MarketplaceEnabledRepoMarketplaceAccount ==. accountId
-        ]
-        []
-    checkEnabledRepos $ map (marketplaceEnabledRepoRepo . entityVal) repos
-  where
-    checkEnabledRepos enabledRepoIds
-        | repoId `elem` enabledRepoIds = pure True
-        | genericLength enabledRepoIds >= limit = pure False
-        | otherwise = True <$ insert MarketplaceEnabledRepo
-            { marketplaceEnabledRepoMarketplacePlan = planId
-            , marketplaceEnabledRepoMarketplaceAccount = accountId
-            , marketplaceEnabledRepoRepo = repoId
-            }
+    pure $ case mEnabled of
+        Nothing -> MarketplacePlanForbids MarketplacePlanNotFound
+        Just PrivateRepoEnabled -> MarketplacePlanAllows
+        Just PrivateRepoNotAllowed ->
+            MarketplacePlanForbids MarketplacePlanPublicOnly
+        Just PrivateRepoLimited ->
+            MarketplacePlanForbids MarketplacePlanMaxRepos
 
 whenMarketplacePlanForbids
     :: Applicative f
@@ -192,25 +156,6 @@ whenMarketplacePlanForbids
     -> f ()
 whenMarketplacePlanForbids MarketplacePlanAllows _ = pure ()
 whenMarketplacePlanForbids (MarketplacePlanForbids limitation) f = f limitation
-
-data PrivateRepoAllowance
-    = PrivateRepoAllowanceNone
-    | PrivateRepoAllowanceUnlimited
-    | PrivateRepoAllowanceLimited Natural
-
-privateRepoAllowance :: Int -> PrivateRepoAllowance
-privateRepoAllowance = \case
-    -- Manually-managed "Friends & Family" plan
-    0 -> PrivateRepoAllowanceUnlimited
-    -- Temporary "Early Adopter" plan
-    2178 -> PrivateRepoAllowanceUnlimited
-    -- "Unlimited" private repo plan
-    2553 -> PrivateRepoAllowanceUnlimited
-    -- "Solo", single private repo plan
-    2695 -> PrivateRepoAllowanceLimited 1
-
-    -- All other plans
-    _ -> PrivateRepoAllowanceNone
 
 isPrivateRepoPlan :: MarketplacePlan -> Bool
 isPrivateRepoPlan MarketplacePlan {..} =
