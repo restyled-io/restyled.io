@@ -15,6 +15,7 @@ import qualified Data.Vector as V
 import Restyled.Cache
 import Restyled.Foundation
 import Restyled.Models
+import Restyled.PrivateRepoAllowance
 import Restyled.Routes
 import Restyled.Settings
 import Restyled.Yesod
@@ -45,8 +46,8 @@ requestUserNameOrgs username = caching (githubOrgsCacheKey username) $ do
 
 data MarketplaceData = MarketplaceData
     { mdPlan :: Entity MarketplacePlan
-    , _mdAccount :: Entity MarketplaceAccount
-    , _mdEnabledRepoIds :: [RepoId]
+    , mdAccount :: Entity MarketplaceAccount
+    , mdEnabledRepoIds :: [RepoId]
     }
 
 fetchMarketplaceData
@@ -94,8 +95,29 @@ fetchGitHubIdentityForUser User {..} =
 -- brittany-disable-next-binding
 
 githubIdentityCard :: GitHubIdentity -> Widget
-githubIdentityCard GitHubIdentity {..} =
+githubIdentityCard identity@GitHubIdentity {..} =
     $(widgetFile "profile/github-identity-card")
+  where
+    claimR Repo {..} = RepoP repoOwner repoName $ RepoMarketplaceP RepoMarketplaceClaimR
+
+data MarketplaceAction
+    = EnablePrivateRepo
+    | DisablePrivateRepo
+
+getMarketplaceAction :: GitHubIdentity -> Entity Repo -> Maybe MarketplaceAction
+getMarketplaceAction GitHubIdentity {..} (Entity repoId Repo {..}) = do
+    MarketplaceData {..} <- ghiMarketplaceData
+    guard $ repoIsPrivate && isLimitedPlan mdPlan
+    pure $ if repoId `notElem` mdEnabledRepoIds
+        then EnablePrivateRepo
+        else DisablePrivateRepo
+
+isLimitedPlan :: Entity MarketplacePlan -> Bool
+isLimitedPlan (Entity _ MarketplacePlan {..}) =
+    case privateRepoAllowance marketplacePlanGithubId of
+        PrivateRepoAllowanceNone -> False
+        PrivateRepoAllowanceUnlimited -> False
+        PrivateRepoAllowanceLimited _ -> True
 
 -- | Wrapper for JSON instances for caching
 newtype GitHubOrg = GitHubOrg SimpleOrganization
