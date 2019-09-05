@@ -18,6 +18,17 @@
   $else
     $forall Entity repoId repo <- ghiKnownRepos
       <div .profile-repo .profile-repo-#{toPathPiece repoId}>
+        <aside>
+          $maybe action <- getMarketplaceAction identity $ Entity repoId repo
+            $case action
+              $of EnablePrivateRepo
+                <form method=post action=@{claimR repo}>
+                  <button .enable type=submit>Enable
+              $of DisablePrivateRepo
+                <form method=post action=@{claimR repo}>
+                  <input type=hidden name=_method value=DELETE />
+                  <button .disable type=submit>Disable
+
         <p>
           <a href=@{repoR (repoOwner repo) (repoName repo)}>
             #{repoPath (repoOwner repo) (repoName repo)}
