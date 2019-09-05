@@ -27,6 +27,7 @@ import Prelude
 import Data.Aeson
 import Data.Aeson.Types (typeMismatch)
 import Data.Text.Encoding (encodeUtf8)
+import GHC.Stack
 import GitHub.Auth
 import GitHub.Data
 import GitHub.Data.Apps
@@ -58,7 +59,11 @@ instance FromJSON GitHubPayload where
     parseJSON v = typeMismatch "PullRequestEvent" v
 
 githubAuthInstallation
-    :: Id App -> AppKey -> Id Installation -> IO (Either Error Auth)
+    :: HasCallStack
+    => Id App
+    -> AppKey
+    -> Id Installation
+    -> IO (Either Error Auth)
 githubAuthInstallation appId appKey installationId = do
     auth <- authJWTMax appId appKey
     etoken <- accessTokenFor auth installationId

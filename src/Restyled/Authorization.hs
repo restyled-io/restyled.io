@@ -19,7 +19,7 @@ authorizeAdmin settings (Just userId) = do
     authorizeWhen $ userIsAdmin settings user
 
 authorizeRepo
-    :: (MonadCache m, MonadHandler m)
+    :: (HasCallStack, MonadCache m, MonadHandler m)
     => AppSettings
     -> OwnerName
     -> RepoName
@@ -38,7 +38,7 @@ authorizeRepo settings owner name mUserId = do
 
 -- | Authorize if the @'User'@ is a Collaborator according to GitHub
 authorizePrivateRepo
-    :: (MonadCache m, MonadHandler m)
+    :: (HasCallStack, MonadCache m, MonadHandler m)
     => AppSettings
     -> Repo
     -> User

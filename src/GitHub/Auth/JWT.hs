@@ -13,6 +13,7 @@ import Data.ByteString (ByteString)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
+import GHC.Stack
 import GitHub.Auth (AuthMethod(..))
 import GitHub.Data
 import GitHub.Data.Apps
@@ -28,7 +29,7 @@ instance AuthMethod AuthJWT where
     setAuthRequest (AuthJWT token) =
         addRequestHeader hAuthorization $ "bearer " <> token
 
-authJWT :: NominalDiffTime -> Id App -> AppKey -> IO AuthJWT
+authJWT :: HasCallStack => NominalDiffTime -> Id App -> AppKey -> IO AuthJWT
 authJWT expires githubAppId appKey = do
     now <- getCurrentTime
     signer <- maybe (throwString "Invalid RSA data") pure
@@ -49,7 +50,7 @@ authJWT expires githubAppId appKey = do
 -- in the future" error, which I assume is due to clocks skew, so we treat 9
 -- minutes as the real maximum.
 --
-authJWTMax :: Id App -> AppKey -> IO AuthJWT
+authJWTMax :: HasCallStack => Id App -> AppKey -> IO AuthJWT
 authJWTMax = authJWT $ 9 * 60
 
 numericDate :: UTCTime -> Maybe JWT.NumericDate
