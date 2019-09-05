@@ -1,6 +1,9 @@
 module Restyled.Authorization
     ( authorizeAdmin
     , authorizeRepo
+
+    -- * Exported for re-use in tests
+    , authRepoCacheKey
     )
 where
 
@@ -43,45 +46,47 @@ authorizePrivateRepo
     -> Repo
     -> User
     -> SqlPersistT m AuthResult
-authorizePrivateRepo settings@AppSettings {..} Repo {..} user@User {..} = do
-    result <- runExceptT $ do
-        username <- userGithubUsername ?? "User has no GitHub Username"
-        caching (cacheKey username) $ withExceptT show $ do
-            auth <- ExceptT $ liftIO $ githubAuthInstallation
-                appGitHubAppId
-                appGitHubAppKey
-                repoInstallationId
+authorizePrivateRepo settings@AppSettings {..} repo@Repo {..} user@User {..} =
+    do
+        result <- runExceptT $ do
+            username <- userGithubUsername ?? "User has no GitHub Username"
+            caching (authRepoCacheKey repo username) $ withExceptT show $ do
+                auth <- ExceptT $ liftIO $ githubAuthInstallation
+                    appGitHubAppId
+                    appGitHubAppKey
+                    repoInstallationId
 
-            permissions <- ExceptT $ liftIO $ collaboratorPermissions
-                auth
-                repoOwner
-                repoName
-                username
+                permissions <- ExceptT $ liftIO $ collaboratorPermissions
+                    auth
+                    repoOwner
+                    repoName
+                    username
 
-            pure $ collaboratorCanRead permissions
+                pure $ collaboratorCanRead permissions
 
-    let isAdmin = userIsAdmin settings user
-        (granted, reason, mErr) = resolveAuth isAdmin result
+        let isAdmin = userIsAdmin settings user
+            (granted, reason, mErr) = resolveAuth isAdmin result
 
-    logInfoN $ mconcat
-        [ "AUTHORIZE"
-        , " user=" <> maybe "<unknown>" toPathPiece userGithubUsername
-        , " repo=" <> repoPath repoOwner repoName
-        , " granted=" <> tshow granted
-        , " reason=" <> tshow reason
-        , " error=" <> maybe "" tshow mErr
-        ]
+        logInfoN $ mconcat
+            [ "AUTHORIZE"
+            , " user=" <> maybe "<unknown>" toPathPiece userGithubUsername
+            , " repo=" <> repoPath repoOwner repoName
+            , " granted=" <> tshow granted
+            , " reason=" <> tshow reason
+            , " error=" <> maybe "" tshow mErr
+            ]
 
-    authorizeWhen granted
-  where
-    cacheKey username =
-        [ "auth"
-        , "repo"
-        , toPathPiece repoSvcs
-        , toPathPiece repoOwner
-        , toPathPiece repoName
-        , toPathPiece username
-        ]
+        authorizeWhen granted
+
+authRepoCacheKey :: Repo -> GitHubUserName -> [Text]
+authRepoCacheKey Repo {..} username =
+    [ "auth"
+    , "repo"
+    , toPathPiece repoSvcs
+    , toPathPiece repoOwner
+    , toPathPiece repoName
+    , toPathPiece username
+    ]
 
 -- brittany-disable-next-binding
 -- Context-sensitive alignment helps visually verify the cases

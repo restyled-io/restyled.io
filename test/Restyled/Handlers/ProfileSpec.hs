@@ -6,7 +6,7 @@ where
 import Restyled.Test
 
 import qualified GitHub.Data as GH
-import Restyled.Handlers.Profile (GitHubOrg(..))
+import Restyled.Handlers.Profile (GitHubOrg(..), githubOrgsCacheKey)
 
 spec :: Spec
 spec = withApp $ do
@@ -47,9 +47,9 @@ spec = withApp $ do
 
 cacheGitHubOrgs
     :: MonadCache m => GH.Name GH.User -> [GH.Name GH.Organization] -> m ()
-cacheGitHubOrgs user = setCache cacheKey . map toGitHubOrg
+cacheGitHubOrgs user = setCache (cacheKey $ githubOrgsCacheKey user)
+    . map toGitHubOrg
   where
-    cacheKey = CacheKey $ "profile.orgs." <> toPathPart user
     toGitHubOrg login = GitHubOrg GH.SimpleOrganization
         { GH.simpleOrganizationId = 99
         , GH.simpleOrganizationLogin = login
