@@ -213,6 +213,10 @@ details {
   padding: 1em;
 }
 
+.profile-repo aside {
+  float: right;
+}
+
 ul.pagination {
   margin: 2em auto;
 }
