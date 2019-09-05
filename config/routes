@@ -25,6 +25,9 @@
       /retry RepoJobRetryR POST
       /log RepoJobLogLinesR GET
 
+  /marketplace RepoMarketplaceP:
+    /claim RepoMarketplaceClaimR POST DELETE
+
 /admin AdminR GET
 /admin AdminP:
   /jobs AdminJobsP:
