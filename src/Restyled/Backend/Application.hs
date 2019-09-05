@@ -17,7 +17,8 @@ import Restyled.Models
 import Restyled.Settings
 
 runBackend
-    :: ( HasLogFunc env
+    :: ( HasCallStack
+       , HasLogFunc env
        , HasSettings env
        , HasDB env
        , HasRedis env
@@ -37,7 +38,12 @@ runQueue :: Monad m => m (Maybe a) -> (a -> m ()) -> m b
 runQueue awaitItem processItem = forever $ traverse_ processItem =<< awaitItem
 
 execRestyler
-    :: (HasLogFunc env, HasProcessContext env, HasSettings env, HasDB env)
+    :: ( HasCallStack
+       , HasLogFunc env
+       , HasProcessContext env
+       , HasSettings env
+       , HasDB env
+       )
     => ExecRestyler (RIO env)
 execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
     settings <- view settingsL
@@ -64,7 +70,8 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
 
     ec <$ runDB (capture "system" $ "Restyler exited " <> displayExitCode ec)
 
-repoInstallationToken :: MonadIO m => AppSettings -> Repo -> m AccessToken
+repoInstallationToken
+    :: (HasCallStack, MonadIO m) => AppSettings -> Repo -> m AccessToken
 repoInstallationToken AppSettings {..} Repo {..} = do
     auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
     untryIO $ accessTokenFor auth repoInstallationId

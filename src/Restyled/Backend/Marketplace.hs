@@ -31,13 +31,14 @@ import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
 
 synchronizeMarketplacePlans
-    :: (HasLogFunc env, HasSettings env, HasDB env) => RIO env a
+    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env a
 synchronizeMarketplacePlans = do
     handleAny (logWarn . displayShow) runSynchronize
     liftIO $ threadDelay $ 5 * 60 * 1000000
     synchronizeMarketplacePlans
 
-runSynchronize :: (HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
+runSynchronize
+    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
 runSynchronize = do
     AppSettings {..} <- view settingsL
     let useStubbed = appStubMarketplaceListing
