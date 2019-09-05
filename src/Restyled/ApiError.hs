@@ -43,10 +43,8 @@ apiErrorResponse = \case
         }
 
 instance ToJSON ApiErrorResponse where
-    toJSON ApiErrorResponse{..} = object
-        [ "error" .= aerName
-        , "message" .= aerMessage
-        ]
+    toJSON ApiErrorResponse {..} =
+        object ["error" .= aerName, "message" .= aerMessage]
 
 -- | Immediately send a response for the given @'ApiError'@
 --
