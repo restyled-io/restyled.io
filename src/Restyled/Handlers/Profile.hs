@@ -126,7 +126,7 @@ githubOrgsCacheKey :: GitHubUserName -> [Text]
 githubOrgsCacheKey username = ["profile", "orgs", toPathPart username]
 
 instance ToJSON GitHubOrg where
-    toJSON (GitHubOrg SimpleOrganization{..}) = object
+    toJSON (GitHubOrg SimpleOrganization {..}) = object
         [ "id" .= simpleOrganizationId
         , "login" .= simpleOrganizationLogin
         , "url" .= simpleOrganizationUrl
@@ -139,4 +139,4 @@ instance FromJSON GitHubOrg where
         simpleOrganizationLogin <- o .: "login"
         simpleOrganizationUrl <- o .: "url"
         simpleOrganizationAvatarUrl <- o .: "avatarUrl"
-        pure $ GitHubOrg SimpleOrganization{..}
+        pure $ GitHubOrg SimpleOrganization { .. }
