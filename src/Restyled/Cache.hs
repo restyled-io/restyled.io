@@ -3,6 +3,10 @@ module Restyled.Cache
     , CacheKey(..)
     , withCache
     , caching
+
+    -- * For use in concrete Reader instances
+    , getCache'
+    , setCache'
     )
 where
 
@@ -13,19 +17,29 @@ import Database.Redis (expire, get, set)
 import Restyled.Yesod
 
 newtype CacheKey = CacheKey Text
+    deriving stock Eq
+    deriving newtype (Show, Hashable)
 
 class Monad m => MonadCache m where
     getCache :: FromJSON a => CacheKey -> m (Maybe a)
     setCache :: ToJSON a => CacheKey -> a -> m ()
 
-instance HasRedis env => MonadCache (HandlerFor env) where
-    getCache (CacheKey key) = runRedis $ do
-        eVal <- get $ encodeUtf8 key
-        pure $ decodeStrict =<< join (hush eVal)
+getCache'
+    :: (MonadIO m, MonadReader env m, HasRedis env, FromJSON a)
+    => CacheKey
+    -> m (Maybe a)
+getCache' (CacheKey key) = runRedis $ do
+    eVal <- get $ encodeUtf8 key
+    pure $ decodeStrict =<< join (hush eVal)
 
-    setCache (CacheKey key) obj = runRedis $ do
-        void $ set (encodeUtf8 key) $ encodeStrict obj
-        void $ expire (encodeUtf8 key) 300
+setCache'
+    :: (ToJSON a, HasRedis env, MonadReader env m, MonadIO m)
+    => CacheKey
+    -> a
+    -> m ()
+setCache' (CacheKey key) obj = runRedis $ do
+    void $ set (encodeUtf8 key) $ encodeStrict obj
+    void $ expire (encodeUtf8 key) 300
 
 instance MonadCache m => MonadCache (ExceptT e m) where
     getCache = lift . getCache
@@ -34,6 +48,10 @@ instance MonadCache m => MonadCache (ExceptT e m) where
 instance MonadCache m => MonadCache (SqlPersistT m) where
     getCache = lift . getCache
     setCache k = lift . setCache k
+
+instance HasRedis env => MonadCache (HandlerFor env) where
+    getCache = getCache'
+    setCache = setCache'
 
 -- | Cache a value-producing action at the given key
 --

@@ -1,5 +1,4 @@
 {-# LANGUAGE QuasiQuotes #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Restyled.Test
     ( withApp
@@ -11,11 +10,13 @@ where
 import Restyled.Application as X ()
 import Restyled.Foundation as X
 import Restyled.Models as X
-import Restyled.Prelude as X hiding (get, runDB)
+import Restyled.Prelude as X hiding (fieldLens, get, runDB)
 import Restyled.Routes as X
 import Restyled.Settings as X
 import Restyled.Test.Authentication as X
 import Restyled.Test.Expectations as X
+import Restyled.Test.Factories as X
+import Restyled.Test.Lens as X
 import Restyled.Test.Yesod as X
 import Test.QuickCheck as X
 
@@ -27,13 +28,8 @@ import LoadEnv (loadEnvFrom)
 import Restyled.Backend.Foundation (loadBackend)
 import Restyled.Backend.Job (queueName)
 import Restyled.Backend.Webhook (webhookQueueName)
-import Restyled.Cache
 import qualified RIO.DB as RIO
 import Text.Shakespeare.Text (st)
-
-instance MonadCache (YesodExample site) where
-    getCache _ = pure Nothing
-    setCache _ _ = pure ()
 
 -- | A monomorphic alias just to avoid annotations in specs
 runDB :: HasDB env => SqlPersistT (YesodExample env) a -> YesodExample env a

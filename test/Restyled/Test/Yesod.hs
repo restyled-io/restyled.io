@@ -15,6 +15,7 @@ import Control.Monad.Fail (MonadFail(..))
 import Control.Monad.Logger (MonadLogger(..), toLogStr)
 import qualified Data.ByteString.Lazy as LBS
 import Network.Wai.Test (SResponse(..))
+import Restyled.Cache as X
 import Restyled.Test.Expectations
 import Test.Hspec.Core.Spec (SpecM)
 import Yesod.Core
@@ -30,6 +31,10 @@ instance HasLogFunc site => MonadLogger (YesodExample site) where
 instance MonadReader site (SIO (YesodExampleData site)) where
     ask = getTestYesod
     local _ _ = expectationFailure "local cannot be used in a test"
+
+instance HasRedis site => MonadCache (SIO (YesodExampleData site)) where
+    getCache = getCache'
+    setCache = setCache'
 
 instance MonadFail (SIO s) where
     fail = expectationFailure

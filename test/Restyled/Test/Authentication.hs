@@ -1,5 +1,6 @@
 module Restyled.Test.Authentication
     ( authenticateAs
+    , authenticateAsWith
     , authenticateAsAdmin
     , getTestAppAdmins
     )
@@ -21,9 +22,12 @@ import Restyled.Test.Yesod
 -- inserted unless one exists already.
 --
 authenticateAs :: Text -> YesodExample App (Entity User)
-authenticateAs email = do
+authenticateAs = flip authenticateAsWith id
+
+authenticateAsWith :: Text -> (User -> User) -> YesodExample App (Entity User)
+authenticateAsWith email edit = do
     user <- runDB $ upsert
-        User
+        (edit User
             { userEmail = Just email
             , userGithubUserId = Nothing
             , userGithubUsername = Nothing
@@ -34,6 +38,7 @@ authenticateAs email = do
             , userCredsIdent = email
             , userCredsPlugin = "dummy"
             }
+        )
         []
 
     testRoot <- getTestRoot
