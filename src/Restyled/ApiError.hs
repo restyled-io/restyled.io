@@ -15,6 +15,7 @@ import Restyled.Yesod
 data ApiError
     = ApiError Text -- ^ Generic message
     | ApiErrorNotFound Bool -- ^ Was the user logged in?
+    | ApiErrorBadRequest Text -- ^ Message
 
 data ApiErrorResponse = ApiErrorResponse
     { aerName :: Text
@@ -35,12 +36,15 @@ apiErrorResponse = \case
         , aerMessage = "Page not found"
             <> if isLoggedIn then "" else " (you may need to log in)" <> "."
         }
+    ApiErrorBadRequest message -> ApiErrorResponse
+        { aerName = "BadRequest"
+        , aerStatus = status400
+        , aerMessage = message
+        }
 
 instance ToJSON ApiErrorResponse where
-    toJSON ApiErrorResponse{..} = object
-        [ "error" .= aerName
-        , "message" .= aerMessage
-        ]
+    toJSON ApiErrorResponse {..} =
+        object ["error" .= aerName, "message" .= aerMessage]
 
 -- | Immediately send a response for the given @'ApiError'@
 --
