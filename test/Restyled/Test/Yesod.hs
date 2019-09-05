@@ -33,8 +33,8 @@ instance MonadReader site (SIO (YesodExampleData site)) where
     local _ _ = expectationFailure "local cannot be used in a test"
 
 instance HasRedis site => MonadCache (SIO (YesodExampleData site)) where
-    getCache = getCache'
-    setCache = setCache'
+    getCache = getCacheRedis
+    setCache = setCacheRedis
 
 instance MonadFail (SIO s) where
     fail = expectationFailure

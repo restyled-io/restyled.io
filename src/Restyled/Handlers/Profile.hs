@@ -5,6 +5,7 @@ module Restyled.Handlers.Profile
 
     -- * Exported for use in tests
     , GitHubOrg(..)
+    , githubOrgsCacheKey
     )
 where
 
@@ -34,14 +35,13 @@ requestUserOrgs :: User -> Handler [GitHubOrg]
 requestUserOrgs = maybe (pure []) requestUserNameOrgs . userGithubUsername
 
 requestUserNameOrgs :: GitHubUserName -> Handler [GitHubOrg]
-requestUserNameOrgs username = caching cacheKey $ do
+requestUserNameOrgs username = caching (githubOrgsCacheKey username) $ do
     auth <- getsYesod $ Just . OAuth . appGitHubRateLimitToken . view settingsL
     result <- liftIO $ publicOrganizationsFor' auth username
 
     case result of
         Left err -> [] <$ logWarnN (tshow err)
         Right orgs -> pure $ GitHubOrg <$> V.toList orgs
-    where cacheKey = ["profile", "orgs", toPathPart username]
 
 data GitHubIdentity = GitHubIdentity
     { ghiUserName :: GitHubUserName
@@ -83,6 +83,9 @@ githubIdentityCard GitHubIdentity {..} =
 
 -- | Wrapper for JSON instances for caching
 newtype GitHubOrg = GitHubOrg SimpleOrganization
+
+githubOrgsCacheKey :: GitHubUserName -> [Text]
+githubOrgsCacheKey username = ["profile", "orgs", toPathPart username]
 
 instance ToJSON GitHubOrg where
     toJSON (GitHubOrg SimpleOrganization{..}) = object
