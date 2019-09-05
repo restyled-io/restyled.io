@@ -1,7 +1,8 @@
 ---
 restylers:
   - stylish-haskell
-  - brittany
+  - brittany:
+      image: restyled/restyler-brittany:v0.12.0.0
   - prettier:
       # Explicitly set parser so it works on .julius
       arguments:
