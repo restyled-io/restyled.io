@@ -107,7 +107,7 @@ data IgnoredWebhookReason
     = InvalidJSON String
     | IgnoredAction PullRequestEventType
     | IgnoredEventType Text
-    | BotPullRequest Text
+    | RestyledBotPullRequest Text
     | RepoNotFound OwnerName RepoName
 
 reasonToLogMessage :: IgnoredWebhookReason -> String
@@ -115,8 +115,8 @@ reasonToLogMessage = \case
     InvalidJSON errs -> "invalid JSON: " <> errs
     IgnoredAction action -> "ignored action: " <> show action
     IgnoredEventType event -> "ignored event: " <> show event
-    BotPullRequest author ->
-        "PR appears to bot-created, author=" <> unpack author
+    RestyledBotPullRequest author ->
+        "PR created by Restyled bot, " <> unpack author
     RepoNotFound owner name ->
         "Repo not found: " <> unpack (repoPath owner name)
 
@@ -126,7 +126,7 @@ initializeFromWebhook
     -> SqlPersistT m (Either IgnoredWebhookReason (Entity Repo))
 initializeFromWebhook payload@Payload {..}
     | pAction `notElem` enqueueEvents = pure $ Left $ IgnoredAction pAction
-    | not $ isActualAuthor pAuthor = pure $ Left $ BotPullRequest pAuthor
+    | isRestyledBot pAuthor = pure $ Left $ RestyledBotPullRequest pAuthor
     | otherwise = Right <$> findOrCreateRepo payload
 
 findOrCreateRepo :: MonadIO m => Payload -> SqlPersistT m (Entity Repo)
@@ -147,11 +147,10 @@ upsertRepo repo@Repo {..} = upsert
     , RepoDebugEnabled =. repoDebugEnabled
     ]
 
-isActualAuthor :: Text -> Bool
-isActualAuthor author
-    | "restyled-io" `T.isPrefixOf` author = False
-    | "[bot]" `T.isSuffixOf` author = False
-    | otherwise = True
+-- | Matches on @restyled-io(-{env})[bot]@.
+isRestyledBot :: Text -> Bool
+isRestyledBot =
+    (&&) <$> ("restyled-io" `T.isPrefixOf`) <*> ("[bot]" `T.isSuffixOf`)
 
 -- | Events that should enqueue a Restyler job
 --
