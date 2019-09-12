@@ -1,23 +1,41 @@
 #!/bin/sh
 #
-# Example:
+# Examples:
 #
-#   bin/create-machine ... \
-#     --driver amazonec2 \
-#     --amazonec2-instance-type t2.micro \
-#     --amazonec2-monitoring
+#   # Default instance-type (t2.micro) and root-size (16GB)
+#   bin/create-machine restyled-prod-X
+#
+#   # Specify instance-type
+#   bin/create-machine restyled-prod-X t2.medium
+#
+#   # Specify instance-type and root-size (in GB)
+#   bin/create-machine restyled-prod-X t1.micro 32
 #
 ###
 set -e
 
 if [ -z "$1" ]; then
-  echo "usage: replace-machine <name> [create-option...]" >&2
+  echo "usage: create-machine <name> [instance-type] [root-size]" >&2
   exit 64
 fi
 
 machine_name=$1
-shift
+instance_type=${2:-t2.micro}
+root_size=${3:-16}
 
 printf 'Creating new docker machine (%s)\n' "$machine_name"
-docker-machine create "$@" "$machine_name"
+docker-machine create \
+  --driver amazonec2 \
+  --amazonec2-root-size "$root_size" \
+  --amazonec2-instance-type "$instance_type" \
+  --amazonec2-monitoring \
+  "$machine_name"
+
+echo 'Adding cron.weekly entry for docker prune'
+docker-machine ssh "$machine_name" 'sudo tee /etc/cron.weekly/prune.sh' <<'EOM'
+#!/bin/sh
+exec docker system prune --all --force
+EOM
+docker-machine ssh "$machine_name" 'sudo chmod +x /etc/cron.weekly/prune.sh'
+
 bin/show-machine "$machine_name"
