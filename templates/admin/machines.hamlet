@@ -33,9 +33,20 @@
         <form
           method=post
           action=@{AdminP $ AdminMachinesP $ AdminMachinePruneR machineId}
-          onsubmit="return confirm('Are you sure?');"
           >
-          <input .warning type=submit value="Prune" />
+          <input type=submit value="Prune" />
+
+        <form
+          method=post
+          action=@{AdminP $ AdminMachinesP $ AdminMachineR machineId}
+          >
+          <input type=hidden name=_method value=PATCH />
+          $if restyleMachineEnabled machine
+            <input type=hidden name=enabled value=false />
+            <input type=submit value="Disable" />
+          $else
+            <input type=hidden name=enabled value=true />
+            <input type=submit value="Enable" />
 
         <form
           method=post

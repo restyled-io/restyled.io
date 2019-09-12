@@ -4,6 +4,7 @@ module Restyled.Handlers.Admin.Machines
     ( getAdminMachinesR
     , getAdminMachinesNewR
     , postAdminMachinesR
+    , patchAdminMachineR
     , deleteAdminMachineR
     , getAdminMachineInfoR
     , postAdminMachinePruneR
@@ -60,6 +61,15 @@ postAdminMachinesR = do
             adminLayout $ do
                 setTitle "Restyled Amin / New Machine"
                 $(widgetFile "admin/machines/new")
+
+patchAdminMachineR :: RestyleMachineId -> Handler Html
+patchAdminMachineR machineId = do
+    enabled <- runInputPost $ ireq boolField "enabled"
+    runDB $ do
+        void $ get404 machineId
+        update machineId [RestyleMachineEnabled =. enabled]
+    setMessage $ "Machine " <> if enabled then "enabled" else "disabled"
+    redirect $ AdminP $ AdminMachinesP AdminMachinesR
 
 deleteAdminMachineR :: RestyleMachineId -> Handler Html
 deleteAdminMachineR machineId = do
