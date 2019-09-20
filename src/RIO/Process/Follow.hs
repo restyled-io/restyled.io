@@ -31,8 +31,8 @@ followProcess
     -> (String -> m ())
     -- ^ Called with each line of @stderr@
     -> m ExitCode
-followProcess cmd args fOut fErr =
-    proc cmd args $ \pc -> withProcess (setPipes pc) $ \p -> do
+followProcess cmd args fOut fErr = proc cmd args $ \pc ->
+    withProcess (setPipes pc) $ \p -> do
         aOut <- async $ followPipe (getStdout p) fOut
         aErr <- async $ followPipe (getStderr p) fErr
         ec <- waitExitCode p
