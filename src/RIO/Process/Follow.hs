@@ -98,4 +98,4 @@ withExtraEnvVars
     => [(Text, Text)]
     -> m a
     -> m a
-withExtraEnvVars envs = withModifyEnvVars (<> Map.fromList envs)
+withExtraEnvVars envs = withModifyEnvVars $ Map.union (Map.fromList envs)
