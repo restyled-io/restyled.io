@@ -77,7 +77,9 @@ build:
 
 .PHONY: lint
 lint:
-	stack exec $(STACK_ARGUMENTS) hlint app src test
+	find app src test -name '*.hs' \
+	  -not -name 'Foundation.hs' \
+	  -exec stack exec $(STACK_ARGUMENTS) hlint {} +
 	# Weeder doesn't work with stack-2.0 :(
 	# stack exec $(STACK_ARGUMENTS) weeder .
 
