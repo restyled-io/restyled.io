@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -fno-warn-deprecations #-}
-
 module Restyled.Settings.Display
     ( displayAppSettings
     )
@@ -43,7 +41,6 @@ displayRedisURL ConnInfo {..} = "redis://" <> user <> rest
         ]
 
 displayPortID :: PortID -> String
-displayPortID (Service s) = s
 displayPortID (PortNumber p) = show p
 displayPortID (UnixSocket s) = s
 

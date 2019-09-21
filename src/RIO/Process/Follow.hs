@@ -44,7 +44,7 @@ followProcess
     -> (String -> m ()) -- ^ Called with each line of @stderr@
     -> ProcessConfig stdin stdout stderr
     -> m ExitCode
-followProcess fOut fErr pc = withProcess (setPipes pc) $ \p -> do
+followProcess fOut fErr pc = withProcessWait (setPipes pc) $ \p -> do
     aOut <- async $ followPipe (getStdout p) fOut
     aErr <- async $ followPipe (getStderr p) fErr
     ec <- waitExitCode p
