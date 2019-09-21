@@ -11,6 +11,8 @@ import Data.Tagged (Tagged(..))
 import GitHub.Data
 import GitHub.Request
 
+-- brittany-disable-next-binding
+
 -- | @'Request'@-like synonym for using @machine-man-preview+json@
 type PreviewRequest k a = GenRequest ('MtPreview MachineManPreviewJson) k a
 

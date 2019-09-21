@@ -15,6 +15,5 @@ data AccessToken = AccessToken
     }
 
 instance FromJSON AccessToken where
-    parseJSON = withObject "GitHub.AccessToken" $ \o -> AccessToken
-        <$> o .: "token"
-        <*> o .: "expires_at"
+    parseJSON = withObject "GitHub.AccessToken"
+        $ \o -> AccessToken <$> o .: "token" <*> o .: "expires_at"

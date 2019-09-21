@@ -14,7 +14,7 @@ import Restyled.Yesod
 data JobSummary = JobSummary (Route App -> Text) (Entity Job)
 
 instance ToJSON JobSummary where
-    toJSON (JobSummary urlRender (Entity jobId Job{..})) = object
+    toJSON (JobSummary urlRender (Entity jobId Job {..})) = object
         [ "created" .= jobCreatedAt
         , "repoPull" .= repoPullPath jobOwner jobRepo jobPullRequest
         , "exitCode" .= jobExitCode

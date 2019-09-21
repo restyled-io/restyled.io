@@ -20,24 +20,22 @@ data Backend = Backend
     }
 
 instance HasLogFunc Backend where
-    logFuncL = lens backendLogFunc $ \x y -> x
-        { backendLogFunc = y }
+    logFuncL = lens backendLogFunc $ \x y -> x { backendLogFunc = y }
 
 instance HasSettings Backend where
-    settingsL = lens backendSettings $ \x y -> x
-        { backendSettings = y }
+    settingsL = lens backendSettings $ \x y -> x { backendSettings = y }
 
 instance HasProcessContext Backend where
-    processContextL = lens backendProcessContext $ \x y -> x
-        { backendProcessContext = y }
+    processContextL =
+        lens backendProcessContext $ \x y -> x { backendProcessContext = y }
 
 instance HasDB Backend where
-    dbConnectionPoolL = lens backendConnPool $ \x y -> x
-        { backendConnPool = y }
+    dbConnectionPoolL =
+        lens backendConnPool $ \x y -> x { backendConnPool = y }
 
 instance HasRedis Backend where
-    redisConnectionL = lens backendRedisConn $ \x y -> x
-        { backendRedisConn = y }
+    redisConnectionL =
+        lens backendRedisConn $ \x y -> x { backendRedisConn = y }
 
 loadBackend :: AppSettings -> IO Backend
 loadBackend settings@AppSettings {..} = do

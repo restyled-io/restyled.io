@@ -36,7 +36,7 @@ searchRepos limit q = runDB $ do
         then count $ searchFilters q
         else pure $ length repos
 
-    pure SearchResults {srRepos = repos, srTotal = total}
+    pure SearchResults { srRepos = repos, srTotal = total }
 
 searchFilters :: Text -> [Filter Repo]
 searchFilters q = [RepoOwner `ilike` q] ||. [RepoName `ilike` q]

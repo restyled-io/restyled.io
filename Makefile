@@ -55,14 +55,9 @@ setup.lint:
 .PHONY: setup.tools
 setup.tools:
 	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
+	  brittany \
 	  fast-tags \
 	  stylish-haskell
-	@# Need to install brittany from an old resolver and copy it into the
-	@# current resolver's compiler-bin
-	stack --resolver lts-12.26 build --copy-compiler-tool brittany
-	ln -sf \
-	  "$$(stack --resolver lts-12.26 path --compiler-tools-bin)"/brittany \
-	  "$$(stack path --compiler-tools-bin)"/brittany
 
 .PHONY: setup.ngrok
 setup.ngrok:
