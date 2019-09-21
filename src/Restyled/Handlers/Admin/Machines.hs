@@ -13,6 +13,7 @@ where
 
 import Restyled.Prelude
 
+import qualified Data.Text.Lazy.Encoding as TL
 import Restyled.Backend.RestyleMachine
 import Restyled.Foundation
 import Restyled.Models
@@ -82,10 +83,11 @@ deleteAdminMachineR machineId = do
 getAdminMachineInfoR :: RestyleMachineId -> Handler Html
 getAdminMachineInfoR machineId = do
     machine <- runDB $ get404 machineId
-    (ec', out, err) <- captureFollowedProcess
-        $ runRestyleMachine machine "docker" ["info"]
+    (ec', out', err') <- withRestyleMachineEnv machine
+        $ proc "docker" ["info"] readProcess
 
-    let
+    let out = TL.decodeUtf8 out'
+        err = TL.decodeUtf8 err'
         ec = case ec' of
             ExitSuccess -> "0"
             ExitFailure n -> show n
@@ -97,12 +99,11 @@ getAdminMachineInfoR machineId = do
 postAdminMachinePruneR :: RestyleMachineId -> Handler Html
 postAdminMachinePruneR machineId = do
     machine <- runDB $ get404 machineId
-    (ec', out, err) <- captureFollowedProcess $ runRestyleMachine
-        machine
-        "docker"
-        ["system", "prune", "--all", "--force"]
+    (ec', out', err') <- withRestyleMachineEnv machine
+        $ proc "docker" ["system", "prune", "--all", "--force"] readProcess
 
-    let
+    let out = TL.decodeUtf8 out'
+        err = TL.decodeUtf8 err'
         ec = case ec' of
             ExitSuccess -> "0"
             ExitFailure n -> show n

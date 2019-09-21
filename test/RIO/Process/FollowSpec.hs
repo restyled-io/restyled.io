@@ -11,20 +11,20 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-    describe "withExtraEnvVars" $ do
-        it "appends extra ENV vars to the Process Context" $ do
-            output <-
-                withProcessContextNoLogging
-                $ withExtraEnvVars [("FOO", "1")]
-                $ proc "sh" ["-c", "echo $FOO"] readProcessStdout_
+    describe "followProcess" $ do
+        it "captures output in the order it was generated" $ do
+            ref <- newIORef ([] :: [(String, String)])
 
-            output `shouldBe` "1\n"
+            let capture stream content = atomicModifyIORef' ref
+                    $ \x -> (x <> [(stream, content)], ())
+                script = "echo x; sleep 0.1; echo y >&2; sleep 0.1; echo z"
 
-        it "overrides ENV vars that already exist" $ do
-            output <-
-                withProcessContextNoLogging
-                $ withExtraEnvVars [("FOO", "1")]
-                $ withExtraEnvVars [("FOO", "2")]
-                $ proc "sh" ["-c", "echo $FOO"] readProcessStdout_
+            void
+                $ withProcessContextNoLogging
+                $ proc "sh" ["-c", script]
+                $ followProcess (capture "stdout") (capture "stderr")
 
-            output `shouldBe` "2\n"
+            captured <- readIORef ref
+            captured
+                `shouldBe` [("stdout", "x"), ("stderr", "y"), ("stdout", "z")]
+
