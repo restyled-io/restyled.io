@@ -141,7 +141,6 @@ tests:
     source-dirs: test
     dependencies:
       - restyled
-      - HUnit
       - QuickCheck
       - bytestring
       - filepath
