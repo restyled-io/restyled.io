@@ -51,22 +51,21 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
 
     let capture stream = captureJobLogLine (entityKey job) stream . pack
 
-    runRestyle <- runDB $ do
+    withEnv <- runDB $ do
         capture "system" $ unwords $ "docker" : dockerRunArgsLogged settings job
 
         fetchRestyleMachine >>= \case
             Nothing -> do
                 capture "system" "Running on local Docker host"
-                pure followProcess
+                pure id
             Just machine -> do
                 capture "system" $ "Running on " <> displayMachine machine
-                pure $ runRestyleMachine machine
+                pure $ withRestyleMachineEnv machine
 
-    ec <- runRestyle
-        "docker"
-        (dockerRunArgs settings token repo job)
-        (runDB . capture "stdout")
-        (runDB . capture "stderr")
+    ec <-
+        withEnv
+        $ proc "docker" (dockerRunArgs settings token repo job)
+        $ followProcess (runDB . capture "stdout") (runDB . capture "stderr")
 
     ec <$ runDB (capture "system" $ "Restyler exited " <> displayExitCode ec)
 

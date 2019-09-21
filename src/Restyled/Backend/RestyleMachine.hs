@@ -2,12 +2,16 @@
 
 module Restyled.Backend.RestyleMachine
     ( fetchRestyleMachine
-    , runRestyleMachine
+    , withRestyleMachineEnv
+
+    -- * Exported for testing
+    , withExtraEnvVars
     )
 where
 
 import Restyled.Prelude
 
+import qualified Data.Map as Map
 import qualified Data.Text.IO as T
 import Database.Persist.Sql (rawSql)
 import Restyled.Models
@@ -30,28 +34,28 @@ fetchRestyleMachine =
     |] [PersistBool True]
 
 -- | Run a process on a @'RestyleMachine'@s
-runRestyleMachine
-    :: ( HasLogFunc env
-       , HasProcessContext env
-       , MonadReader env m
-       , MonadUnliftIO m
-       )
+withRestyleMachineEnv
+    :: (MonadIO m, HasProcessContext env, MonadReader env m)
     => RestyleMachine
-    -> FilePath
-    -> [String]
-    -> (String -> m ())
-    -> (String -> m ())
-    -> m ExitCode
-runRestyleMachine machine cmd args fOut fErr = do
+    -> m a
+    -> m a
+withRestyleMachineEnv machine f = do
     certPath <- restyleMachineCertPath machine
     setupCertificatesIfMissing machine certPath
 
     withExtraEnvVars
-            [ ("DOCKER_HOST", restyleMachineHost machine)
-            , ("DOCKER_CERT_PATH", pack certPath)
-            , ("DOCKER_TLS_VERIFY", "1")
-            ]
-        $ followProcess cmd args fOut fErr
+        [ ("DOCKER_HOST", restyleMachineHost machine)
+        , ("DOCKER_CERT_PATH", pack certPath)
+        , ("DOCKER_TLS_VERIFY", "1")
+        ]
+        f
+
+withExtraEnvVars
+    :: (HasProcessContext env, MonadReader env m, MonadIO m)
+    => [(Text, Text)]
+    -> m a
+    -> m a
+withExtraEnvVars = withModifyEnvVars . Map.union . Map.fromList
 
 setupCertificatesIfMissing :: MonadIO m => RestyleMachine -> FilePath -> m ()
 setupCertificatesIfMissing RestyleMachine {..} certPath =
