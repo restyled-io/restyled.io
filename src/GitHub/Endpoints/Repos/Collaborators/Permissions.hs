@@ -36,8 +36,8 @@ newtype CollaboratorPermissions = CollaboratorPermissions
     }
 
 instance FromJSON CollaboratorPermissions where
-    parseJSON = withObject "Permissions" $ \o -> CollaboratorPermissions
-        <$> o .: "permission"
+    parseJSON = withObject "Permissions"
+        $ \o -> CollaboratorPermissions <$> o .: "permission"
 
 collaboratorCanRead :: CollaboratorPermissions -> Bool
 collaboratorCanRead = permissionCanRead . collaboratorPermissionsPermission

@@ -20,9 +20,8 @@ data MarketplaceAccount = MarketplaceAccount
     }
 
 instance FromJSON MarketplaceAccount where
-    parseJSON = withObject "Account" $ \o -> MarketplaceAccount
-        <$> o .: "id"
-        <*> o .: "login"
+    parseJSON = withObject "Account"
+        $ \o -> MarketplaceAccount <$> o .: "id" <*> o .: "login"
 
 marketplaceListingPlanAccounts
     :: AuthMethod am

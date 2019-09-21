@@ -38,11 +38,9 @@ newtype Parsed = Parsed ContainsURLs
 instance Arbitrary Parsed where
     arbitrary = do
         n <- getPositive <$> arbitrary
-
-        Parsed . ContainsURLs . spaced . take n <$> oneof
-            [ alternating contentPart urlPart
-            , alternating urlPart contentPart
-            ]
+        parts <- oneof
+            [alternating contentPart urlPart, alternating urlPart contentPart]
+        pure $ Parsed $ ContainsURLs $ spaced $ take n parts
 
 -- | Add a leading space to any @'ContentPart'@ after a @'URLPart'@
 --

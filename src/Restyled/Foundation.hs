@@ -60,6 +60,8 @@ mkYesodData "App" $(parseRoutesFile "config/routes")
 
 type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 
+-- brittany-disable-next-binding
+
 instance Yesod App where
     approot = ApprootMaster $ appRoot . view settingsL
 
@@ -175,6 +177,8 @@ instance YesodPersist App where
     runDB = runDB
 
 instance YesodAuthPersist App
+
+-- brittany-disable-next-binding
 
 instance YesodAuth App where
     type AuthId App = UserId

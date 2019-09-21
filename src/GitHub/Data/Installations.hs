@@ -13,5 +13,4 @@ newtype Installation = Installation
     }
 
 instance FromJSON Installation where
-    parseJSON = withObject "Installation" $ \o ->
-        Installation <$> o .: "id"
+    parseJSON = withObject "Installation" $ \o -> Installation <$> o .: "id"
