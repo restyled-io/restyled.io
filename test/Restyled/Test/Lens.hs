@@ -1,7 +1,5 @@
 module Restyled.Test.Lens
-    ( entityKeyLens
-    , entityValLens
-    , fieldLens
+    ( fieldLens
     , (.~)
     , (?~)
     , (^.)
@@ -15,12 +13,6 @@ import Restyled.Prelude hiding (fieldLens)
 import Control.Lens ((.~), (?~), (^..), (^?))
 import qualified Database.Persist as P
 
-entityKeyLens :: Lens' (Entity record) (Key record)
-entityKeyLens = lens entityKey (\(Entity _ v) k -> Entity k v)
-
-entityValLens :: Lens' (Entity record) record
-entityValLens = lens entityVal (\(Entity k _) v -> Entity k v)
-
 fieldLens
     :: PersistEntity record => EntityField record field -> Lens' record field
 fieldLens field =
@@ -30,3 +22,9 @@ unsafeEntityLens :: Lens' record (Entity record)
 unsafeEntityLens = lens (Entity (error err)) (\_ entity -> entityVal entity)
   where
     err = "Cannot access EntityKey of Entity constructed unsafely without one"
+
+-- entityKeyLens :: Lens' (Entity record) (Key record)
+-- entityKeyLens = lens entityKey (\(Entity _ v) k -> Entity k v)
+
+entityValLens :: Lens' (Entity record) record
+entityValLens = lens entityVal (\(Entity k _) v -> Entity k v)
