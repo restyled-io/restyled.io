@@ -6,10 +6,6 @@ jobs:
     docker:
       - image: fpco/stack-build:lts-13.3
         environment:
-          GIT_AUTHOR_EMAIL: ci@restyled.io
-          GIT_AUTHOR_NAME: Restyled.io CI
-          GIT_COMMITTER_EMAIL: ci@restyled.io
-          GIT_COMMITTER_NAME: Restyled.io CI
           STACK_ARGUMENTS: --no-terminal
       - image: circleci/postgres:9.6.5-alpine
         environment:
