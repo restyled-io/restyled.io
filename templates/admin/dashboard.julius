@@ -1,40 +1,4 @@
 $(function() {
-  function linkContent(text) {
-    if (typeof(text) == 'string' && text.startsWith('http')) {
-      return $("<a>").attr({ href: text }).html(text);
-    } else {
-      return text;
-    }
-  }
-
-  function jsonToTable(data) {
-    if (data.length === 0) {
-      return $("<p>").addClass("centered").html("No data");
-    }
-
-    const headers = _.keys(data[0]);
-    const rows = _.map(data, function(obj) { return _.values(obj); });
-
-    return $("<table>").html([
-      $("<thead>").html(
-        $("<tr>").html(
-          headers.map(function(h) {
-            return $("<th>").html(h)
-          })
-        )
-      ),
-      $("<tbody>").html(
-        rows.map(function(row) {
-          return $("<tr>").html(
-            row.map(function(cell) {
-              return $("<td>").html(linkContent(cell))
-            })
-          )
-        })
-      )
-    ]);
-  }
-
   function generateDashboard(from, to) {
     c3.generate({
       bindto: "#jobs .chart",
@@ -62,10 +26,27 @@ $(function() {
       }
     });
 
-    $.getJSON(
-      `/admin/jobs?from=${from.format('X')}&to=${to.format('X')}`,
-      function(data) { $("#jobs .table").html(jsonToTable(data)); }
-    );
+    new Tabulator("#jobs .table", {
+      ajaxURL: "/admin/jobs",
+      ajaxParams: {
+        from: from.format("X"),
+        to: to.format("X")
+      },
+      height: 500,
+      layout: "fitColumns",
+      columns: [
+        { title: "Created", field: "created", sorter: "date" },
+        { title: "PR", field: "repoPull", headerFilter: true },
+        { title: "Exit", field: "exitCode", headerFilter: true },
+        {
+          title: "URL",
+          field: "url",
+          cellClick: function(e, cell) {
+            window.location = cell._cell.value;
+          }
+        }
+      ]
+    });
 
     $("#jobs .from").html(from.format("dddd M/D"));
     $("#jobs .to").html(to.format("dddd M/D"));
