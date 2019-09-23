@@ -37,28 +37,28 @@ $(function() {
 
   function generateDashboard(from, to) {
     c3.generate({
-      bindto: '#jobs .chart',
+      bindto: "#jobs .chart",
       data: {
-        url: `/admin/metrics?from=${from.format('X')}&to=${to.format('X')}`,
-        mimeType: 'json',
+        url: `/admin/metrics?from=${from.format("X")}&to=${to.format("X")}`,
+        mimeType: "json",
         keys: {
-          x: 'Date',
-          value: ['Succeeded', 'Failed', 'Unfinished']
+          x: "Date",
+          value: ["Succeeded", "Failed", "Unfinished"]
         },
-        type: 'line'
+        type: "line"
       },
       axis: {
         x: {
           tick: {
             format: function(x) {
               // Moment uses ms
-              return moment(x * 1000).format('dd ha');
+              return moment(x * 1000).format("dd ha");
             }
           }
         }
       },
       color: {
-        pattern: ['green', 'red', 'grey']
+        pattern: ["green", "red", "grey"]
       }
     });
 
@@ -67,19 +67,19 @@ $(function() {
       function(data) { $("#jobs .table").html(jsonToTable(data)); }
     );
 
-    $("#jobs .from").html(from.format('dddd M/D'));
-    $("#jobs .to").html(to.format('dddd M/D'));
+    $("#jobs .from").html(from.format("dddd M/D"));
+    $("#jobs .to").html(to.format("dddd M/D"));
   }
 
-  let from = moment().subtract(1, 'day')
-  let to = moment()
+  let from = moment().subtract(1, "day");
+  let to = moment();
 
   $("#jobs .prev").click(function() {
-    generateDashboard(from.subtract(1, 'day'), to.subtract(1, 'day'));
+    generateDashboard(from.subtract(1, "day"), to.subtract(1, "day"));
   });
 
   $("#jobs .next").click(function() {
-    generateDashboard(from.add(1, 'day'), to.add(1, 'day'));
+    generateDashboard(from.add(1, "day"), to.add(1, "day"));
   });
 
   generateDashboard(from, to);
