@@ -31,11 +31,18 @@ docker-machine create \
   --amazonec2-monitoring \
   "$machine_name"
 
-echo 'Adding cron.weekly entry for docker prune'
-docker-machine ssh "$machine_name" 'sudo tee /etc/cron.weekly/prune.sh' <<'EOM'
+echo 'Adding cron.daily entry for pruning machine'
+docker-machine ssh "$machine_name" 'sudo tee /etc/cron.daily/prune.sh' <<'EOM'
 #!/bin/sh
-exec docker system prune --all --force
+set -x
+
+find /tmp -maxdepth 1 \
+  -type d -name 'restyler-*' \
+  -cmin +$((12 * 60)) \
+  -exec rm -r {} +
+
+docker system prune --all --force
 EOM
-docker-machine ssh "$machine_name" 'sudo chmod +x /etc/cron.weekly/prune.sh'
+docker-machine ssh "$machine_name" 'sudo chmod +x /etc/cron.daily/prune.sh'
 
 bin/show-machine "$machine_name"
