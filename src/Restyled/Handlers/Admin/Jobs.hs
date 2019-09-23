@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Restyled.Handlers.Admin.Jobs
     ( getAdminJobsR
     )
@@ -18,6 +20,7 @@ instance ToJSON JobSummary where
         [ "created" .= jobCreatedAt
         , "repoPull" .= repoPullPath jobOwner jobRepo jobPullRequest
         , "exitCode" .= jobExitCode
+        , "exitReason" .= (reasonForExitCode =<< jobExitCode)
         , "url" .= urlRender (repoP jobOwner jobRepo $ jobR jobId)
         ]
 
@@ -27,3 +30,25 @@ getAdminJobsR = do
     jobs <- runDB $ selectListWithTimeRange JobCompletedAt range
     urlRender <- getUrlRender
     sendResponse $ toJSON $ map (JobSummary urlRender) jobs
+
+-- | Give myself /something/ human readable
+--
+-- This is a maintenance burden to keep in sync, but the stakes are low. We'll
+-- do our best.
+--
+-- <https://github.com/restyled-io/restyler/blob/712fee7b5cc9d823ce99fd3a2d0de96d3e35b78f/src/Restyler/App/Error.hs#L166>
+--
+reasonForExitCode :: Int -> Maybe Text
+reasonForExitCode = \case
+    0 -> Nothing
+    10 -> Just "Invalid YAML"
+    11 -> Just "Invalid Restylers"
+    12 -> Just "No Restylers"
+    20 -> Just "Restyler error"
+    30 -> Just "GitHub error"
+    31 -> Just "PR fetch failure"
+    32 -> Just "PR clone failure"
+    40 -> Just "HTTP Error"
+    50 -> Just "System error"
+    99 -> Just "Known unknown"
+    _ -> Just "Unknown unknown"

@@ -38,6 +38,7 @@ $(function() {
         { title: "Created", field: "created", sorter: "date" },
         { title: "PR", field: "repoPull", headerFilter: true },
         { title: "Exit", field: "exitCode", headerFilter: true },
+        { title: "Reason", field: "exitReason" },
         {
           title: "URL",
           field: "url",
