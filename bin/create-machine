@@ -1,27 +1,44 @@
 #!/bin/sh
-#
-# Examples:
-#
-#   # Default instance-type (t2.micro) and root-size (16GB)
-#   bin/create-machine restyled-prod-X
-#
-#   # Specify instance-type
-#   bin/create-machine restyled-prod-X t2.medium
-#
-#   # Specify instance-type and root-size (in GB)
-#   bin/create-machine restyled-prod-X t1.micro 32
-#
-###
 set -e
 
-if [ -z "$1" ]; then
-  echo "usage: create-machine <name> [instance-type] [root-size]" >&2
+usage() {
+  echo "usage: create-machine [-t instance-type] [-s root-size] <name>"
+}
+
+die_usage() {
+  usage >&2
   exit 64
+}
+
+while getopts ":ht:s:" opt; do
+  case "$opt" in
+    h)
+      usage
+      exit 0
+      ;;
+    t) instance_type=$OPTARG ;;
+    s) root_size=$OPTARG ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      die_usage
+      ;;
+    :)
+      echo "Invalid option: -$OPTARG requires an argument" >&2
+      die_usage
+      ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+if [ -z "$1" ]; then
+  echo "Missing option: <name>" >&2
+  die_usage
 fi
 
 machine_name=$1
-instance_type=${2:-t2.micro}
-root_size=${3:-16}
+instance_type=${instance_type:-t2.micro}
+root_size=${root_size:-16}
 
 printf 'Creating new docker machine (%s)\n' "$machine_name"
 docker-machine create \
