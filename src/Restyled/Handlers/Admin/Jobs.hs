@@ -42,8 +42,8 @@ reasonForExitCode :: Int -> Maybe Text
 reasonForExitCode = \case
     0 -> Nothing
     10 -> Just "Invalid YAML"
-    11 -> Just "Invalid Restylers"
-    12 -> Just "No Restylers"
+    11 -> Just "Unknown Restyler"
+    12 -> Just "Invalid restylers.yaml"
     20 -> Just "Restyler error"
     30 -> Just "GitHub error"
     31 -> Just "PR fetch failure"
