@@ -27,9 +27,9 @@ awaitWebhook
     => Integer
     -> m (Maybe ByteString)
 awaitWebhook t = do
-    logInfo "Awaiting webhook"
+    logDebug "Awaiting webhook"
     eresult <- runRedis $ brpop [webhookQueueName] t
-    logInfo $ "Popped: " <> displayShow eresult
+    logDebug $ "Popped: " <> displayShow eresult
     pure $ either (const Nothing) (snd <$>) eresult
 
 data JobNotProcessed
