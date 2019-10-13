@@ -15,7 +15,6 @@ import Restyled.Authorization
 import Restyled.Backend.Foundation
 import Restyled.Models
 import Restyled.Settings
-import Restyled.Settings.Display
 import Restyled.Yesod
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
@@ -48,9 +47,8 @@ instance HasRedis App where
     redisConnectionL = backendL . redisConnectionL
 
 loadApp :: Backend -> IO App
-loadApp backend@Backend {..} = do
-    runRIO backend $ logInfoN $ pack $ displayAppSettings backendSettings
-    App backend <$> makeStatic (appStaticDir backendSettings)
+loadApp backend@Backend {..} = App backend
+    <$> makeStatic (appStaticDir backendSettings)
   where
     makeStatic
         | appMutableStatic backendSettings = staticDevel

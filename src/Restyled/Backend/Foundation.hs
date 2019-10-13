@@ -9,6 +9,7 @@ where
 import Restyled.Prelude
 
 import Restyled.Settings
+import Restyled.Settings.Display
 
 -- | Like @'App'@ but with no webapp-related bits
 data Backend = Backend
@@ -40,6 +41,8 @@ instance HasRedis Backend where
 loadBackend :: AppSettings -> IO Backend
 loadBackend settings@AppSettings {..} = do
     logFunc <- terminalLogFunc appLogLevel
+
+    runRIO logFunc $ logInfoN $ pack $ displayAppSettings settings
 
     Backend logFunc settings
         <$> mkDefaultProcessContext
