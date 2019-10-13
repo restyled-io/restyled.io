@@ -160,8 +160,10 @@ adminLayout widget = do
         addScriptRemote
             "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"
 
-        addStylesheetRemote "https://unpkg.com/tabulator-tables@4.4.1/dist/css/tabulator.min.css"
-        addScriptRemote "https://unpkg.com/tabulator-tables@4.4.1/dist/js/tabulator.min.js"
+        addStylesheetRemote
+            "https://unpkg.com/tabulator-tables@4.4.1/dist/css/tabulator.min.css"
+        addScriptRemote
+            "https://unpkg.com/tabulator-tables@4.4.1/dist/js/tabulator.min.js"
 
         $(widgetFile "admin-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
