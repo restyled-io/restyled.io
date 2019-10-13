@@ -23,11 +23,13 @@ enqueueWebhook :: ByteString -> Redis ()
 enqueueWebhook = void . lpush webhookQueueName . pure
 
 awaitWebhook
-    :: (HasRedis env, MonadReader env m, MonadIO m)
+    :: (HasLogFunc env, HasRedis env, MonadReader env m, MonadIO m)
     => Integer
     -> m (Maybe ByteString)
 awaitWebhook t = do
+    logInfo "Awaiting webhook"
     eresult <- runRedis $ brpop [webhookQueueName] t
+    logInfo $ "Popped: " <> displayShow eresult
     pure $ either (const Nothing) (snd <$>) eresult
 
 data JobNotProcessed
