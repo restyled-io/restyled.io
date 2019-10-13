@@ -103,7 +103,10 @@ deleteUnsynchronized synchronizedAccountIds = do
         $ "Deleting "
         <> displayShow (length unsynchronizedAccounts)
         <> " unsynchronized accounts"
-    deleteWhere [MarketplaceAccountId <-. map entityKey unsynchronizedAccounts]
+
+    let accountIds = map entityKey unsynchronizedAccounts
+    deleteWhere [MarketplaceEnabledRepoMarketplaceAccount <-. accountIds]
+    deleteWhere [MarketplaceAccountId <-. accountIds]
 
 fetchDiscountMarketplacePlan
     :: MonadIO m => SqlPersistT m (Entity MarketplacePlan)
