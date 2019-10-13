@@ -49,7 +49,10 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
     settings <- view settingsL
     token <- repoInstallationToken settings repo
 
-    let capture stream = captureJobLogLine (entityKey job) stream . pack
+    let
+        capture stream msg = do
+            when (stream == "system") $ lift $ logDebug $ fromString msg
+            captureJobLogLine (entityKey job) stream $ pack msg
 
     withEnv <- runDB $ do
         capture "system" $ unwords $ "docker" : dockerRunArgsLogged settings job
