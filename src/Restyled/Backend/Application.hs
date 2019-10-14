@@ -69,10 +69,16 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
                 capture "system" $ "Running on " <> displayMachine machine
                 pure $ withRestyleMachineEnv machine
 
-    ec <-
-        withEnv
-        $ proc "docker" (dockerRunArgs settings token repo job)
-        $ followProcess (runDB . capture "stdout") (runDB . capture "stderr")
+    let
+        dockerRunProc =
+            proc "timeout"
+                $ appDockerRunTimeout settings
+                : "docker"
+                : dockerRunArgs settings token repo job
+
+    ec <- withEnv $ dockerRunProc $ followProcess
+        (runDB . capture "stdout")
+        (runDB . capture "stderr")
 
     ec <$ runDB (capture "system" $ "Restyler exited " <> displayExitCode ec)
 

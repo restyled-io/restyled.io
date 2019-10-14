@@ -68,6 +68,17 @@ data AppSettings = AppSettings
     , appMutableStatic :: Bool
     , appStaticDir :: FilePath
     , appStubMarketplaceListing :: Bool
+    , appDockerRunTimeout :: String
+    -- ^ Timeout for docker-run invocation
+    --
+    -- From @man timeout@:
+    --
+    -- @
+    -- DURATION is a floating point number with an optional  suffix:  's'  for
+    -- seconds  (the default), 'm' for minutes, 'h' for hours or 'd' for days.
+    -- A duration of 0 disables the associated timeout.
+    -- @
+    --
     }
 
 class HasSettings env where
@@ -115,6 +126,7 @@ loadSettings =
         <*> switch "MUTABLE_STATIC" mempty
         <*> var nonempty "STATIC_DIR" (def "static")
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
+        <*> var nonempty "DOCKER_RUN_TIMEOUT" (def "0")
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
