@@ -1,7 +1,10 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Restyled.Backend.Application
-    ( runBackend
+    ( runWebhooks
+    , runRetries
+    , runSyncMarketplace
+    , runSyncMarketplaceOnce
     )
 where
 
@@ -16,7 +19,7 @@ import Restyled.Backend.Webhook
 import Restyled.Models
 import Restyled.Settings
 
-runBackend
+runWebhooks
     :: ( HasCallStack
        , HasLogFunc env
        , HasSettings env
@@ -24,15 +27,27 @@ runBackend
        , HasRedis env
        , HasProcessContext env
        )
-    => RIO env ()
-runBackend = do
-    asyncs <- sequence
-        [ async synchronizeMarketplacePlans
-        , async $ runQueue (awaitJob 120) $ processJob execRestyler
-        , async $ runQueue (awaitWebhook 120) $ processWebhook execRestyler
-        ]
+    => RIO env a
+runWebhooks = runQueue (awaitWebhook 120) $ processWebhook execRestyler
 
-    void $ waitAny asyncs
+runRetries
+    :: ( HasCallStack
+       , HasLogFunc env
+       , HasSettings env
+       , HasDB env
+       , HasRedis env
+       , HasProcessContext env
+       )
+    => RIO env a
+runRetries = runQueue (awaitJob 120) $ processJob execRestyler
+
+runSyncMarketplace
+    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env a
+runSyncMarketplace = runSynchronize
+
+runSyncMarketplaceOnce
+    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
+runSyncMarketplaceOnce = runSynchronizeOnce
 
 runQueue :: Monad m => m (Maybe a) -> (a -> m ()) -> m b
 runQueue awaitItem processItem = forever $ traverse_ processItem =<< awaitItem

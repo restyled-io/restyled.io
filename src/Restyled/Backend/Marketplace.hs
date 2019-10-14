@@ -11,10 +11,8 @@ module Restyled.Backend.Marketplace
     , isPrivateRepoPlan
 
     -- * Main loop
-    , synchronizeMarketplacePlans
-
-    -- * One iteration
     , runSynchronize
+    , runSynchronizeOnce
     )
 where
 
@@ -28,16 +26,16 @@ import qualified Data.Vector as V
 import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
 
-synchronizeMarketplacePlans
-    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env a
-synchronizeMarketplacePlans = do
-    handleAny (logWarn . displayShow) runSynchronize
-    liftIO $ threadDelay $ 5 * 60 * 1000000
-    synchronizeMarketplacePlans
-
 runSynchronize
-    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
+    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env a
 runSynchronize = do
+    handleAny (logWarn . displayShow) runSynchronizeOnce
+    liftIO $ threadDelay $ 5 * 60 * 1000000
+    runSynchronize
+
+runSynchronizeOnce
+    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
+runSynchronizeOnce = do
     AppSettings {..} <- view settingsL
     let useStubbed = appStubMarketplaceListing
 

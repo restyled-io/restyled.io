@@ -4,9 +4,8 @@ import Restyled.Prelude
 
 import LoadEnv (loadEnvFrom)
 import Restyled.Application (runWaiApp)
-import Restyled.Backend.Application (runBackend)
+import Restyled.Backend.Application
 import Restyled.Backend.Foundation (loadBackend)
-import Restyled.Backend.Marketplace (runSynchronize)
 import Restyled.Development.Seeds (seedDB)
 import Restyled.Foundation (loadApp)
 import Restyled.Options
@@ -21,6 +20,9 @@ main = do
 
     case oCommand of
         Web -> runWaiApp =<< loadApp backend
-        Backend -> runRIO backend runBackend
-        SyncMarketplace -> runRIO backend runSynchronize
-        SeedDB -> runRIO backend $ runDB seedDB
+        Backend cmd -> runRIO backend $ case cmd of
+            Webhooks -> runWebhooks
+            Retries -> runRetries
+            SyncMarketplace -> runSyncMarketplace
+            SyncMarketplaceOnce -> runSyncMarketplaceOnce
+            SeedDB -> runDB seedDB
