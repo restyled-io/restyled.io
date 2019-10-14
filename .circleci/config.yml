@@ -72,20 +72,17 @@ jobs:
           command: |
             sha=${CIRCLE_SHA1:0:10}
             release_image=quay.io/restyled-io/restyled.io:$sha
+            services=(web webhooks retries sync-marketplace)
 
-            cat >Dockerfile.web <<EOM
+            for service in "${services[@}}"; do
+              cat >"Dockerfile.$service" <<EOM
             FROM $release_image
-            CMD ["/app/restyled.io", "web"]
-            EOM
-
-            cat >Dockerfile.backend <<EOM
-            FROM $release_image
-            CMD ["/app/restyled.io", "backend"]
+            CMD ["/app/restyled.io", "$service"]
             EOM
 
             heroku container:login
             heroku container:push --recursive --app restyled-io
-            heroku container:release web backend --app restyled-io
+            heroku container:release "${services[@]}" --app restyled-io
             notify "restyled-io" "Deployed at $sha"
 
 workflows:

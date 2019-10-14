@@ -1,6 +1,7 @@
 module Restyled.Options
     ( RestyledOptions(..)
     , RestyledCommand(..)
+    , BackendCommand(..)
     , parseRestyledOptions
     )
 where
@@ -16,8 +17,13 @@ data RestyledOptions = RestyledOptions
 
 data RestyledCommand
     = Web
-    | Backend
+    | Backend BackendCommand
+
+data BackendCommand
+    = Webhooks
+    | Retries
     | SyncMarketplace
+    | SyncMarketplaceOnce
     | SeedDB
 
 parseRestyledOptions :: IO RestyledOptions
@@ -35,7 +41,9 @@ restyledOptions = RestyledOptions
         ))
     <*> subparser
         (  command "web" (info (pure Web) mempty)
-        <> command "backend" (info (pure Backend) mempty)
-        <> command "sync-marketplace" (info (pure SyncMarketplace) mempty)
-        <> command "seed-db" (info (pure SeedDB) mempty)
+        <> command "webhooks" (info (pure $ Backend Webhooks) mempty)
+        <> command "retries" (info (pure $ Backend Retries) mempty)
+        <> command "sync-marketplace" (info (pure $ Backend SyncMarketplace) mempty)
+        <> command "sync-marketplace-once" (info (pure $ Backend SyncMarketplaceOnce) mempty)
+        <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
         )
