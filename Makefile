@@ -85,7 +85,7 @@ test:
 watch:
 	stack build $(STACK_ARGUMENTS) \
 	  --fast --pedantic --test --file-watch \
-	  --exec 'sh -c "pkill restyled.io; bin/restyled.io-dev web & bin/restyled.io-dev backend &"' \
+	  --exec bin/restyled-restart \
 	  --ghc-options -DDEVELOPMENT
 
 .PHONY: ngrok.http
