@@ -3,8 +3,6 @@
 module Restyled.Backend.Application
     ( runWebhooks
     , runRetries
-    , runSyncMarketplace
-    , runSyncMarketplaceOnce
     )
 where
 
@@ -13,7 +11,6 @@ import Restyled.Prelude
 import Restyled.Backend.DockerRun
 import Restyled.Backend.ExecRestyler
 import Restyled.Backend.Job
-import Restyled.Backend.Marketplace
 import Restyled.Backend.RestyleMachine
 import Restyled.Backend.Webhook
 import Restyled.Models
@@ -40,14 +37,6 @@ runRetries
        )
     => RIO env a
 runRetries = runQueue (awaitJob 120) $ processJob execRestyler
-
-runSyncMarketplace
-    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env a
-runSyncMarketplace = runSynchronize
-
-runSyncMarketplaceOnce
-    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
-runSyncMarketplaceOnce = runSynchronizeOnce
 
 runQueue :: Monad m => m (Maybe a) -> (a -> m ()) -> m b
 runQueue awaitItem processItem = forever $ traverse_ processItem =<< awaitItem

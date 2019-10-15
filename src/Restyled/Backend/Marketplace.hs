@@ -10,9 +10,8 @@ module Restyled.Backend.Marketplace
     , fetchDiscountMarketplacePlan
     , isPrivateRepoPlan
 
-    -- * Main loop
+    -- * Sync
     , runSynchronize
-    , runSynchronizeOnce
     )
 where
 
@@ -27,15 +26,8 @@ import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
 
 runSynchronize
-    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env a
-runSynchronize = do
-    handleAny (logWarn . displayShow) runSynchronizeOnce
-    liftIO $ threadDelay $ 5 * 60 * 1000000
-    runSynchronize
-
-runSynchronizeOnce
     :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
-runSynchronizeOnce = do
+runSynchronize = do
     AppSettings {..} <- view settingsL
     let useStubbed = appStubMarketplaceListing
 

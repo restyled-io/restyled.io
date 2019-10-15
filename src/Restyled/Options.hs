@@ -23,7 +23,6 @@ data BackendCommand
     = Webhooks
     | Retries
     | SyncMarketplace
-    | SyncMarketplaceOnce
     | SeedDB
 
 parseRestyledOptions :: IO RestyledOptions
@@ -44,6 +43,8 @@ restyledOptions = RestyledOptions
         <> command "webhooks" (info (pure $ Backend Webhooks) mempty)
         <> command "retries" (info (pure $ Backend Retries) mempty)
         <> command "sync-marketplace" (info (pure $ Backend SyncMarketplace) mempty)
-        <> command "sync-marketplace-once" (info (pure $ Backend SyncMarketplaceOnce) mempty)
         <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
+
+        -- Deprecated alias
+        <> command "sync-marketplace-once" (info (pure $ Backend SyncMarketplace) mempty)
         )
