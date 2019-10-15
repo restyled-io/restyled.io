@@ -1,0 +1,28 @@
+name: Push
+on: [push]
+
+jobs:
+  publish-image:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Publish image to Quay.io
+      id: publish
+      uses: elgohr/Publish-Docker-Github-Action@2.6
+      env:
+        REVISION: ${{ github.sha }}
+      with:
+        buildargs: REVISION
+        name: restyled-io/restyled.io
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_PASSWORD }}
+        registry: quay.io
+        snapshot: true
+        cache: true
+    - name: Notify
+      uses: maddox/actions/pushover@master
+      env:
+        APP_TOKEN: ${{ secrets.PUSHOVER_APP_TOKEN }}
+        USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
+        TITLE: restyled.io
+        MESSAGE: Published ${{ steps.publish.outputs.snapshot-tag }}
