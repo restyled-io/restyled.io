@@ -72,7 +72,7 @@ jobs:
           command: |
             sha=${CIRCLE_SHA1:0:10}
             release_image=quay.io/restyled-io/restyled.io:$sha
-            services=(web webhooks retries sync-marketplace)
+            services=(web webhooks retries)
 
             for service in "${services[@]}"; do
               cat >"Dockerfile.$service" <<EOM
