@@ -74,7 +74,7 @@ jobs:
             release_image=quay.io/restyled-io/restyled.io:$sha
             services=(web webhooks retries sync-marketplace)
 
-            for service in "${services[@}}"; do
+            for service in "${services[@]}"; do
               cat >"Dockerfile.$service" <<EOM
             FROM $release_image
             CMD ["/app/restyled.io", "$service"]
