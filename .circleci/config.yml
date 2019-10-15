@@ -79,6 +79,7 @@ jobs:
             FROM $release_image
             CMD ["/app/restyled.io", "$service"]
             EOM
+            done
 
             heroku container:login
             heroku container:push --recursive --app restyled-io
