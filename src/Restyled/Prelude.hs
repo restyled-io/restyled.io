@@ -32,7 +32,7 @@ import RIO as X hiding (Handler, first, second)
 import Control.Error.Util as X
     (exceptT, hoistMaybe, hush, hushT, note, noteT, (??))
 import Control.Monad.Except as X
-import Control.Monad.Extra as X (fromMaybeM)
+import Control.Monad.Extra as X (fromMaybeM, partitionM)
 import Control.Monad.Logger as X
     (logDebugN, logErrorN, logInfoN, logOtherN, logWarnN)
 import Control.Monad.Trans.Maybe as X

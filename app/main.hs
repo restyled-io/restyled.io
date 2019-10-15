@@ -7,6 +7,7 @@ import Restyled.Application (runWaiApp)
 import Restyled.Backend.Application
 import Restyled.Backend.Foundation (loadBackend)
 import Restyled.Backend.Marketplace (runSynchronize)
+import Restyled.Backend.RestyleMachine (runRestyleMachinesCheck)
 import Restyled.Development.Seeds (seedDB)
 import Restyled.Foundation (loadApp)
 import Restyled.Options
@@ -25,4 +26,5 @@ main = do
             Webhooks -> runWebhooks
             Retries -> runRetries
             SyncMarketplace -> runSynchronize
+            CheckRestyleMachines -> runRestyleMachinesCheck
             SeedDB -> runDB seedDB

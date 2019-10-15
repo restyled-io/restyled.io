@@ -1,10 +1,13 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 module Restyled.Backend.RestyleMachine
-    ( fetchRestyleMachine
+    ( runRestyleMachinesCheck
+    , fetchRestyleMachine
     , withRestyleMachineEnv
 
     -- * Exported for testing
+    , CheckRestyleMachinesResult(..)
+    , checkRestyleMachines
     , withExtraEnvVars
     )
 where
@@ -19,6 +22,45 @@ import RIO.Directory
     (createDirectoryIfMissing, doesDirectoryExist, getHomeDirectory)
 import System.FilePath ((</>))
 import Text.Shakespeare.Text (st)
+
+runRestyleMachinesCheck
+    :: (HasLogFunc env, HasDB env, HasProcessContext env) => RIO env ()
+runRestyleMachinesCheck = do
+    result <- runDB $ checkRestyleMachines $ \(Entity _ machine) -> do
+        (ec, _out, _err) <- withRestyleMachineEnv machine
+            $ proc "timeout" ["3s", "docker", "info"] readProcess
+        pure $ ec == ExitSuccess
+
+    case result of
+        AllHealthy -> logInfo "All enabled Restyle Machines are healthy"
+        NoneHealthy -> logError "No enabled Restyle Machines are healthy"
+        Disabled machines ->
+            logWarn
+                $ "Disabled "
+                <> displayShow (length machines)
+                <> " unhealthy machine(s)"
+
+data CheckRestyleMachinesResult
+    = AllHealthy
+    | NoneHealthy
+    | Disabled [Entity RestyleMachine]
+    deriving (Eq, Show)
+
+checkRestyleMachines
+    :: MonadIO m
+    => (Entity RestyleMachine -> m Bool)
+    -> SqlPersistT m CheckRestyleMachinesResult
+checkRestyleMachines isHealthy = do
+    enabled <- selectList [RestyleMachineEnabled ==. True] []
+    results <- partitionM (lift . isHealthy) enabled
+    case results of
+        ([], _) -> pure NoneHealthy
+        (_, []) -> pure AllHealthy
+        (_, unhealthy) -> do
+            updateWhere
+                [RestyleMachineId <-. map entityKey unhealthy]
+                [RestyleMachineEnabled =. False]
+            pure $ Disabled unhealthy
 
 -- brittany-disable-next-binding
 

@@ -23,6 +23,7 @@ data BackendCommand
     = Webhooks
     | Retries
     | SyncMarketplace
+    | CheckRestyleMachines
     | SeedDB
 
 parseRestyledOptions :: IO RestyledOptions
@@ -43,6 +44,7 @@ restyledOptions = RestyledOptions
         <> command "webhooks" (info (pure $ Backend Webhooks) mempty)
         <> command "retries" (info (pure $ Backend Retries) mempty)
         <> command "sync-marketplace" (info (pure $ Backend SyncMarketplace) mempty)
+        <> command "check-restyle-machines" (info (pure $ Backend CheckRestyleMachines) mempty)
         <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
 
         -- Deprecated alias
