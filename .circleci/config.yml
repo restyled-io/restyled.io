@@ -4,7 +4,7 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: fpco/stack-build:lts-13.3
+      - image: fpco/stack-build:lts-14.6
         environment:
           STACK_ARGUMENTS: --no-terminal
       - image: circleci/postgres:9.6.5-alpine
@@ -47,31 +47,35 @@ jobs:
 
   image:
     docker:
-      - image: quay.io/restyled-io/ops
+      - image: restyled/ops:v5
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
       - run:
           name: Build
           command: |
             sha=${CIRCLE_SHA1:0:10}
-            release_image=quay.io/restyled-io/restyled.io:$sha
-            docker build \
-              --build-arg "REVISION=$CIRCLE_SHA1" \
-              --tag "$release_image" .
-            docker login -u "$QUAY_USERNAME" -p "$QUAY_PASSWORD" quay.io
-            docker push "$release_image"
+            release_image=restyled/restyled.io:$sha
+
+            docker login \
+              -u "$DOCKERHUB_USERNAME" \
+              -p "$DOCKERHUB_PASSWORD"
+
+            docker-build-remote-cache "$release_image" \
+              --build-arg "REVISION=$CIRCLE_SHA1"
 
   release:
     docker:
-      - image: quay.io/restyled-io/ops
+      - image: restyled/ops
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
       - run:
           name: Release
           command: |
             sha=${CIRCLE_SHA1:0:10}
-            release_image=quay.io/restyled-io/restyled.io:$sha
+            release_image=restyled/restyled.io:$sha
             services=(web webhooks retries)
 
             for service in "${services[@]}"; do
