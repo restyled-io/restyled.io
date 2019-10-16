@@ -20,10 +20,20 @@ COPY LICENSE /src/
 RUN stack install --ghc-options -DDOCKERIZED
 
 # Runtime
-FROM fpco/stack-run:lts
-MAINTAINER Pat Brisbin <pbrisbin@gmail.com>
+FROM ubuntu:18.04
 
-ENV LANG en_US.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8
+RUN \
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gcc \
+    libpq-dev \
+    locales \
+    netbase && \
+  locale-gen en_US.UTF-8 && \
+  rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app
 WORKDIR /app
