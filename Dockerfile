@@ -1,17 +1,8 @@
 # Build stage
-FROM fpco/stack-build:lts-13.3 as builder
-MAINTAINER Pat Brisbin <pbrisbin@gmail.com>
+FROM quay.io/restyled-io/stack-build:lts-14.6 as builder
+label maintainer="Pat Brisbin <pbrisbin@gmail.com>"
 
-ENV LANG en_US.UTF-8
-ENV PATH /root/.local/bin:$PATH
-
-RUN mkdir -p /src
-WORKDIR /src
-
-COPY stack.yaml /src/
-RUN stack setup
-
-COPY package.yaml /src/
+COPY stack.yaml package.yaml /src/
 RUN stack install --dependencies-only
 
 COPY app /src/app
