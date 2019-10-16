@@ -1,5 +1,5 @@
 # Build stage
-FROM quay.io/restyled-io/stack-build:lts-14.6 as builder
+FROM quay.io/restyled-io/stack-build:lts-14.6-2 as builder
 label maintainer="Pat Brisbin <pbrisbin@gmail.com>"
 
 COPY stack.yaml package.yaml /src/
