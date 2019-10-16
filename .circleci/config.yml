@@ -50,8 +50,6 @@ jobs:
       - image: quay.io/restyled-io/ops
     steps:
       - checkout
-      - setup_remote_docker:
-         docker_layer_caching: true
       - run:
           name: Build
           command: |
