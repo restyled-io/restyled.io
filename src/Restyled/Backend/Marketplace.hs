@@ -48,10 +48,25 @@ runSynchronize = do
             <> displayShow (length accounts)
             <> " accounts with plan "
             <> displayShow (GH.marketplacePlanName plan)
+
+        logPlanChange (length accounts)
+            =<< runDB (count [MarketplaceAccountMarketplacePlan ==. planId])
+
         traverse (runDB . synchronizeAccount planId) accounts
 
     runDB $ deleteUnsynchronized $ vconcat synchronizedAccountIds
     logInfo "GitHub Marketplace data synchronized"
+
+logPlanChange
+    :: HasLogFunc env
+    => Int -- ^ New count
+    -> Int -- ^ Old count
+    -> RIO env ()
+logPlanChange newCount oldCount = case newCount `compare` oldCount of
+    LT -> logWarn $ "Lost " <> suffix
+    EQ -> logDebug "No accounts lost or gained"
+    GT -> logInfo $ "Gained " <> suffix
+    where suffix = "paying accounts (was " <> displayShow oldCount <> ")"
 
 synchronizePlan
     :: MonadIO m => GH.MarketplacePlan -> SqlPersistT m MarketplacePlanId
