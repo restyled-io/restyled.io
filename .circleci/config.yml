@@ -50,6 +50,7 @@ jobs:
       - image: quay.io/restyled-io/ops
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Build
           command: |
