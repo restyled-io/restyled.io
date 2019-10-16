@@ -11,7 +11,9 @@ COPY templates /src/templates
 
 COPY config /src/config
 COPY static /src/static
-COPY .git/refs/heads/master /src/config/revision
+
+ARG REVISION=unknown
+RUN echo $REVISION > /src/config/revision
 
 COPY LICENSE /src/
 

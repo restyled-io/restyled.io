@@ -56,7 +56,9 @@ jobs:
           command: |
             sha=${CIRCLE_SHA1:0:10}
             release_image=quay.io/restyled-io/restyled.io:$sha
-            docker build --tag "$release_image" .
+            docker build \
+              --build-arg "REVISION=$CIRCLE_SHA1" \
+              --tag "$release_image" .
             docker login -u "$QUAY_USERNAME" -p "$QUAY_PASSWORD" quay.io
             docker push "$release_image"
 
