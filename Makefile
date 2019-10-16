@@ -91,3 +91,21 @@ watch:
 .PHONY: ngrok.http
 ngrok.http: setup.ngrok
 	ngrok http -subdomain restyled 3000
+
+.PHONY: image
+image:
+	docker run -it --rm \
+	  --volume /var/run/docker.sock:/var/run/docker.sock \
+	  --volume "$(HOME)"/.docker/config.json:/root/.docker/config.json:ro \
+	  --volume "$(PWD)":/build:ro \
+	  --workdir /build \
+	  restyled/ops:v5 docker-build-remote-cache \
+	  restyled/restyled.io:testing \
+	  --build-arg "REVISION=testing"
+
+.PHONY: image.check
+image.check: image
+	docker run -it --rm --net=host \
+	  --volume "$(PWD)"/.env.development:/app/.env:ro \
+	  restyled/restyled.io:testing /app/restyled.io \
+	  -e .env web
