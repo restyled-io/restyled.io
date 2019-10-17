@@ -27,11 +27,3 @@
         #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
 
   ^{jobOutput output}
-
-  <aside>
-    $maybe _ <- jobCompletedAt job
-      <form
-        method=post
-        action=@{repoP (jobOwner job) (jobRepo job) $ jobRetryR jobId}
-        >
-        <button .action>Retry job

@@ -7,16 +7,13 @@ module Restyled.Handlers.Repos
     , getRepoJobsR
     , getRepoJobR
     , getRepoJobLogLinesR
-    , postRepoJobRetryR
     )
 where
 
 import Restyled.Prelude
 
-import Restyled.Backend.Job
 import Restyled.Foundation
 import Restyled.Models
-import Restyled.Routes
 import Restyled.Settings
 import Restyled.StreamJobLogLines
 import Restyled.Widgets.Job
@@ -65,10 +62,3 @@ getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler ()
 getRepoJobLogLinesR _owner _name jobId = do
     void $ runDB $ get404 jobId
     webSockets $ streamJobLogLines jobId
-
-postRepoJobRetryR :: OwnerName -> RepoName -> JobId -> Handler Html
-postRepoJobRetryR owner name jobId = do
-    job <- runDB $ insertJobRetry =<< get404 jobId
-    runRedis $ enqueueJob job
-    setMessage "Job enqueued"
-    redirect $ repoP owner name $ jobR $ entityKey job

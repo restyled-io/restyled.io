@@ -12,7 +12,6 @@ module Restyled.Routes
     -- * Repos' Jobs
     , jobsR
     , jobR
-    , jobRetryR
     , jobLogR
 
     -- * Repos' Pulls' Jobs
@@ -43,9 +42,6 @@ jobsR = RepoJobsP RepoJobsR
 
 jobR :: JobId -> RepoP
 jobR jobId = RepoJobsP $ RepoJobP jobId RepoJobR
-
-jobRetryR :: JobId -> RepoP
-jobRetryR jobId = RepoJobsP $ RepoJobP jobId RepoJobRetryR
 
 jobLogR :: JobId -> RepoP
 jobLogR jobId = RepoJobsP $ RepoJobP jobId RepoJobLogLinesR
