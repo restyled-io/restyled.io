@@ -86,4 +86,3 @@ fromProcessed (ExecRestylerSuccess job ec) = runDB $ completeJob ec job
 
 queueName :: ByteString
 queueName = "restyled:hooks:webhooks"
-
