@@ -39,33 +39,14 @@ processWebhook
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
-processWebhook execRestyler =
-    exceptT fromNotProcessed fromProcessed
-        . processWebhookFromT execRestyler
-        . acceptWebhook
+processWebhook execRestyler body = exceptT fromNotProcessed fromProcessed $ do
+    webhook <- withExceptT WebhookIgnored $ acceptWebhook body
+    job <- withExceptT (JobIgnored $ awJob webhook) $ acceptJob webhook
 
-processWebhookFromT
-    :: ExecRestyler (RIO env)
-    -> ExceptT IgnoredWebhookReason (RIO env) AcceptedWebhook
-    -> ExceptT JobNotProcessed (RIO env) JobProcessed
-processWebhookFromT execRestyler getWebhook =
-    withExceptT WebhookIgnored getWebhook
-        >>= acceptWebhookJob
-        >>= restyleAcceptedJob execRestyler
+    let failure = ExecRestylerFailure $ ajJob job
+        success = ExecRestylerSuccess $ ajJob job
 
-acceptWebhookJob
-    :: AcceptedWebhook -> ExceptT JobNotProcessed (RIO env) AcceptedJob
-acceptWebhookJob webhook@AcceptedWebhook {..} =
-    withExceptT (JobIgnored awJob) $ acceptJob webhook
-
-restyleAcceptedJob
-    :: ExecRestyler (RIO env)
-    -> AcceptedJob
-    -> ExceptT JobNotProcessed (RIO env) JobProcessed
-restyleAcceptedJob execRestyler job@AcceptedJob {..} =
-    withExceptT (ExecRestylerFailure ajJob)
-        $ ExecRestylerSuccess ajJob
-        <$> tryExecRestyler execRestyler job
+    withExceptT failure $ success <$> tryExecRestyler execRestyler job
 
 fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
 fromNotProcessed = \case
