@@ -4,7 +4,6 @@ module Restyled.Backend.Webhook
     ( enqueueWebhook
     , awaitWebhook
     , processWebhook
-    , processWebhookFrom
     )
 where
 
@@ -40,15 +39,10 @@ processWebhook
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
-processWebhook execRestyler = processWebhookFrom execRestyler . acceptWebhook
-
-processWebhookFrom
-    :: (HasLogFunc env, HasDB env)
-    => ExecRestyler (RIO env)
-    -> ExceptT IgnoredWebhookReason (RIO env) AcceptedWebhook
-    -> RIO env ()
-processWebhookFrom execRestyler =
-    exceptT fromNotProcessed fromProcessed . processWebhookFromT execRestyler
+processWebhook execRestyler =
+    exceptT fromNotProcessed fromProcessed
+        . processWebhookFromT execRestyler
+        . acceptWebhook
 
 processWebhookFromT
     :: ExecRestyler (RIO env)
