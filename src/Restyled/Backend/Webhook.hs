@@ -1,8 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Restyled.Backend.Webhook
-    ( webhookQueueName
-    , enqueueWebhook
+    ( enqueueWebhook
     , awaitWebhook
     , processWebhook
     , processWebhookFrom
@@ -16,11 +15,8 @@ import Restyled.Backend.AcceptedWebhook
 import Restyled.Backend.ExecRestyler
 import Restyled.Models
 
-webhookQueueName :: ByteString
-webhookQueueName = "restyled:hooks:webhooks"
-
 enqueueWebhook :: ByteString -> Redis ()
-enqueueWebhook = void . lpush webhookQueueName . pure
+enqueueWebhook = void . lpush queueName . pure
 
 awaitWebhook
     :: (HasLogFunc env, HasRedis env, MonadReader env m, MonadIO m)
@@ -28,7 +24,7 @@ awaitWebhook
     -> m (Maybe ByteString)
 awaitWebhook t = do
     logDebug "Awaiting webhook"
-    eresult <- runRedis $ brpop [webhookQueueName] t
+    eresult <- runRedis $ brpop [queueName] t
     logDebug $ "Popped: " <> displayShow eresult
     pure $ either (const Nothing) (snd <$>) eresult
 
@@ -93,3 +89,7 @@ fromNotProcessed = \case
 
 fromProcessed :: HasDB env => JobProcessed -> RIO env ()
 fromProcessed (ExecRestylerSuccess job ec) = runDB $ completeJob ec job
+
+queueName :: ByteString
+queueName = "restyled:hooks:webhooks"
+
