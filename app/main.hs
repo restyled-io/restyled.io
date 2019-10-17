@@ -24,7 +24,6 @@ main = do
         Web -> runWaiApp =<< loadApp backend
         Backend cmd -> runRIO backend $ case cmd of
             Webhooks -> runWebhooks
-            Retries -> runRetries
             SyncMarketplace -> runSynchronize
             CheckRestyleMachines -> runRestyleMachinesCheck
             SeedDB -> runDB seedDB

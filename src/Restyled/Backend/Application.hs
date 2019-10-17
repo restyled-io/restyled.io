@@ -2,7 +2,6 @@
 
 module Restyled.Backend.Application
     ( runWebhooks
-    , runRetries
     )
 where
 
@@ -10,7 +9,6 @@ import Restyled.Prelude
 
 import Restyled.Backend.DockerRun
 import Restyled.Backend.ExecRestyler
-import Restyled.Backend.Job
 import Restyled.Backend.RestyleMachine
 import Restyled.Backend.Webhook
 import Restyled.Models
@@ -26,17 +24,6 @@ runWebhooks
        )
     => RIO env a
 runWebhooks = runQueue (awaitWebhook 120) $ processWebhook execRestyler
-
-runRetries
-    :: ( HasCallStack
-       , HasLogFunc env
-       , HasSettings env
-       , HasDB env
-       , HasRedis env
-       , HasProcessContext env
-       )
-    => RIO env a
-runRetries = runQueue (awaitJob 120) $ processJob execRestyler
 
 runQueue :: Monad m => m (Maybe a) -> (a -> m ()) -> m b
 runQueue awaitItem processItem = forever $ traverse_ processItem =<< awaitItem
