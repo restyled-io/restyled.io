@@ -23,11 +23,9 @@ import Test.QuickCheck as X
 import qualified Data.Text as T
 import Database.Persist.Sql
     (SqlBackend, SqlPersistT, connEscapeName, rawExecute, rawSql, unSingle)
-import Database.Redis (del)
+import Database.Redis (del, keys)
 import LoadEnv (loadEnvFrom)
 import Restyled.Backend.Foundation (loadBackend)
-import Restyled.Backend.Job (queueName)
-import Restyled.Backend.Webhook (webhookQueueName)
 import qualified RIO.DB as RIO
 import Text.Shakespeare.Text (st)
 
@@ -54,9 +52,7 @@ wipeDB = do
     rawExecute query []
 
 wipeRedis :: Redis ()
-wipeRedis = do
-    void $ del [queueName]
-    void $ del [webhookQueueName]
+wipeRedis = void $ runExceptT $ ExceptT . del =<< ExceptT (keys "restyled:*")
 
 -- brittany-disable-next-binding
 
