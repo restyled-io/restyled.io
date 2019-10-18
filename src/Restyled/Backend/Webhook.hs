@@ -51,7 +51,7 @@ processWebhook execRestyler body = exceptT fromNotProcessed fromProcessed $ do
 fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
 fromNotProcessed = \case
     WebhookIgnored reason ->
-        logWarn $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason
+        logDebug $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason
     JobIgnored job reason -> do
         logWarn
             $ fromString
