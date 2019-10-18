@@ -4,7 +4,6 @@ module Restyled.Models.Job
     (
     -- * Creating Jobs
       insertJob
-    , insertJobRetry
 
     -- * Queries
     , fetchJobIsInProgress
@@ -36,22 +35,6 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         , jobOwner = repoOwner
         , jobRepo = repoName
         , jobPullRequest = pullRequestNumber
-        , jobCreatedAt = now
-        , jobUpdatedAt = now
-        , jobCompletedAt = Nothing
-        , jobExitCode = Nothing
-        , jobStdout = Nothing
-        , jobStderr = Nothing
-        }
-
-insertJobRetry :: MonadIO m => Job -> SqlPersistT m (Entity Job)
-insertJobRetry job = do
-    now <- liftIO getCurrentTime
-    insertEntity Job
-        { jobSvcs = jobSvcs job
-        , jobOwner = jobOwner job
-        , jobRepo = jobRepo job
-        , jobPullRequest = jobPullRequest job
         , jobCreatedAt = now
         , jobUpdatedAt = now
         , jobCompletedAt = Nothing

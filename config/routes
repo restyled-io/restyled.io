@@ -22,7 +22,6 @@
     / RepoJobsR GET
     /#JobId RepoJobP:
       / RepoJobR GET
-      /retry RepoJobRetryR POST
       /log RepoJobLogLinesR GET
 
   /marketplace RepoMarketplaceP:
