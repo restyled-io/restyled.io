@@ -55,12 +55,22 @@ fromNotProcessed = \case
     JobIgnored job reason -> do
         logWarn
             $ fromString
-            $ "Job ignored: "
+            $ "Job ignored for "
+            <> jobPath job
+            <> ": "
             <> ignoredJobReasonToLogMessage reason
         runDB $ completeJobSkipped (ignoredJobReasonToJobLogLine reason) job
     ExecRestylerFailure job ex -> do
-        logError $ "Exec failure: " <> displayShow ex
+        logError
+            $ fromString
+            $ "Exec failure for "
+            <> jobPath job
+            <> ": "
+            <> show ex
         runDB $ completeJobErrored (show ex) job
+  where
+    jobPath (Entity _ Job {..}) =
+        unpack $ repoPullPath jobOwner jobRepo jobPullRequest
 
 fromProcessed :: HasDB env => JobProcessed -> RIO env ()
 fromProcessed (ExecRestylerSuccess job ec) = runDB $ completeJob ec job
