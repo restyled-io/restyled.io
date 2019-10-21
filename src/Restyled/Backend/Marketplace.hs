@@ -49,7 +49,7 @@ runSynchronize = do
             <> " accounts with plan "
             <> displayShow (GH.marketplacePlanName plan)
 
-        logPlanChange (length accounts)
+        logPlanChange (GH.marketplacePlanName plan) (length accounts)
             =<< runDB (count [MarketplaceAccountMarketplacePlan ==. planId])
 
         traverse (runDB . synchronizeAccount planId) accounts
@@ -59,14 +59,18 @@ runSynchronize = do
 
 logPlanChange
     :: HasLogFunc env
-    => Int -- ^ New count
+    => Text -- ^ Plan name
+    -> Int -- ^ New count
     -> Int -- ^ Old count
     -> RIO env ()
-logPlanChange newCount oldCount = case newCount `compare` oldCount of
-    LT -> logWarn $ "Lost " <> suffix
-    EQ -> logDebug "No accounts lost or gained"
-    GT -> logInfo $ "Gained " <> suffix
-    where suffix = "paying accounts (was " <> displayShow oldCount <> ")"
+logPlanChange planName newCount oldCount = case newCount `compare` oldCount of
+    LT -> logWarn $ prefix <> "lost" <> suffix
+    EQ -> logInfo $ prefix <> "no accounts lost or gained"
+    GT -> logInfo $ prefix <> "gained" <> suffix
+  where
+    prefix = fromString $ unpack planName <> ": "
+    suffix = fromString $ " " <> unpack (pluralize' "account" "accounts" diff)
+    diff = abs $ newCount - oldCount
 
 synchronizePlan
     :: MonadIO m => GH.MarketplacePlan -> SqlPersistT m MarketplacePlanId

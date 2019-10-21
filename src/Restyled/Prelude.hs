@@ -21,6 +21,7 @@ module Restyled.Prelude
 
     -- * Formatting
     , pluralize
+    , pluralize'
 
     -- * Re-exports
     , module X
@@ -129,5 +130,17 @@ setLineBuffering = do
     hSetBuffering stdout LineBuffering
     hSetBuffering stderr LineBuffering
 
-pluralize :: TL.Text -> TL.Text -> Int -> TL.Text
+pluralize
+    :: TL.Text -- ^ Singular
+    -> TL.Text -- ^ Plural
+    -> Int -- ^ Amount
+    -> TL.Text
 pluralize s p n = format (int % " " % plural s p) n n
+
+-- | @'pluralize'@ for strict @'Text'@
+pluralize'
+    :: Text -- ^ Singular
+    -> Text -- ^ Plural
+    -> Int -- ^ Amount
+    -> Text
+pluralize' s p = TL.toStrict . pluralize (TL.fromStrict s) (TL.fromStrict p)
