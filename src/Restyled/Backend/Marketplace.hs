@@ -35,7 +35,7 @@ runSynchronize = do
     auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
     plans <- untryIO $ GH.marketplaceListingPlans auth useStubbed
 
-    logInfo $ "Synchronizing " <> displayShow (length plans) <> " plans"
+    logDebug $ "Synchronizing " <> displayShow (length plans) <> " plans"
     synchronizedAccountIds <- for plans $ \plan -> do
         planId <- runDB $ synchronizePlan plan
         accounts <-
@@ -43,7 +43,7 @@ runSynchronize = do
             $ GH.marketplaceListingPlanAccounts auth useStubbed
             $ GH.marketplacePlanId plan
 
-        logInfo
+        logDebug
             $ "Synchronizing "
             <> displayShow (length accounts)
             <> " accounts with plan "
@@ -108,7 +108,7 @@ deleteUnsynchronized synchronizedAccountIds = do
         []
 
     lift
-        $ logInfo
+        $ logDebug
         $ "Deleting "
         <> displayShow (length unsynchronizedAccounts)
         <> " unsynchronized accounts"
