@@ -27,11 +27,14 @@
             #{restyleMachineKey machine}
 
       <aside>
-        <a .button href=@{AdminP $ AdminMachinesP $ AdminMachineInfoR machineId}>
-          Docker Info
+        <form
+          .form-websockets
+          action=@{AdminP $ AdminMachinesP $ AdminMachineInfoR machineId}
+          >
+          <input type=submit value="Docker Info" />
 
         <form
-          method=post
+          .form-websockets
           action=@{AdminP $ AdminMachinesP $ AdminMachinePruneR machineId}
           >
           <input type=submit value="Prune" />

@@ -142,6 +142,7 @@ adminLayout widget = do
     master <- getYesod
     mmsg <- getMessage
     pc <- widgetToPageContent $ do
+        addScript $ staticR "js/admin.js"
         addStylesheet $ staticR "css/strapless.css"
         addStylesheet $ staticR "css/main.css"
         addStylesheet $ staticR "css/admin.css"

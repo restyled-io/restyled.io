@@ -7,6 +7,7 @@ import RIO
 
 import RIO.Process
 import RIO.Process.Follow
+import RIO.Time
 import Test.Hspec
 
 spec :: Spec
@@ -28,3 +29,18 @@ spec = do
             captured
                 `shouldBe` [("stdout", "x"), ("stderr", "y"), ("stdout", "z")]
 
+        it "captures output as it is generated" $ do
+            ref <- newIORef ([] :: [(UTCTime, String)])
+
+            let capture content = do
+                    now <- getCurrentTime
+                    atomicModifyIORef' ref $ \x -> (x <> [(now, content)], ())
+                script = "echo x; sleep 0.1; echo y"
+
+            void
+                $ withProcessContextNoLogging
+                $ proc "sh" ["-c", script]
+                $ followProcess capture capture
+
+            [t1, t2] <- map fst <$> readIORef ref
+            diffUTCTime t2 t1 `shouldSatisfy` (> 0.1)

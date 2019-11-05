@@ -7,17 +7,17 @@ module Restyled.Handlers.Admin.Machines
     , patchAdminMachineR
     , deleteAdminMachineR
     , getAdminMachineInfoR
-    , postAdminMachinePruneR
+    , getAdminMachinePruneR
     )
 where
 
 import Restyled.Prelude
 
-import qualified Data.Text.Lazy.Encoding as TL
 import Restyled.Backend.RestyleMachine
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Settings
+import Restyled.WebSockets
 import Restyled.Yesod
 
 machineForm :: Form RestyleMachine
@@ -80,34 +80,27 @@ deleteAdminMachineR machineId = do
     setMessage "Machine deleted"
     redirect $ AdminP $ AdminMachinesP AdminMachinesR
 
-getAdminMachineInfoR :: RestyleMachineId -> Handler Html
+getAdminMachineInfoR :: RestyleMachineId -> Handler ()
 getAdminMachineInfoR machineId = do
     machine <- runDB $ get404 machineId
-    (ec', out', err') <- withRestyleMachineEnv machine
-        $ proc "docker" ["info"] readProcess
 
-    let out = TL.decodeUtf8 out'
-        err = TL.decodeUtf8 err'
-        ec = case ec' of
-            ExitSuccess -> "0"
-            ExitFailure n -> show n
+    withAsyncWebSockets_ $ \write ->
+        for_ [("df", ["-h"]), ("docker", ["info"])] $ \(cmd, args) -> do
+            ec <- withRestyleMachineEnv machine $ proc cmd args $ followProcess
+                (write . pack . ("[stdout]: " <>))
+                (write . pack . ("[stderr]: " <>))
+            write $ tshow ec
 
-    adminLayout $ do
-        setTitle "Restyled Admin / Machine Info"
-        $(widgetFile "admin/machines/info")
-
-postAdminMachinePruneR :: RestyleMachineId -> Handler Html
-postAdminMachinePruneR machineId = do
+-- NB must be GET for WebSockets response
+getAdminMachinePruneR :: RestyleMachineId -> Handler ()
+getAdminMachinePruneR machineId = do
     machine <- runDB $ get404 machineId
-    (ec', out', err') <- withRestyleMachineEnv machine
-        $ proc "docker" ["system", "prune", "--all", "--force"] readProcess
 
-    let out = TL.decodeUtf8 out'
-        err = TL.decodeUtf8 err'
-        ec = case ec' of
-            ExitSuccess -> "0"
-            ExitFailure n -> show n
-
-    adminLayout $ do
-        setTitle "Restyled Admin / Machine Prune"
-        $(widgetFile "admin/machines/prune")
+    withAsyncWebSockets_ $ \write -> do
+        ec <-
+            withRestyleMachineEnv machine
+            $ proc "docker" ["system", "prune", "--all", "--force"]
+            $ followProcess
+                  (write . pack . ("[stdout]: " <>))
+                  (write . pack . ("[stderr]: " <>))
+        write $ tshow ec

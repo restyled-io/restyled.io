@@ -1,6 +1,0 @@
-<section>
-  <pre>
-    \$ docker info
-    [#{ec}]
-    #{out}
-    #{err}
