@@ -44,7 +44,7 @@ getAdminMachinesNewR = do
     (widget, enctype) <- generateFormPost machineForm
 
     adminLayout $ do
-        setTitle "Restyled Amin / New Machine"
+        setTitle "Restyled Admin / New Machine"
         $(widgetFile "admin/machines/new")
 
 postAdminMachinesR :: Handler Html
@@ -60,7 +60,7 @@ postAdminMachinesR = do
         _ -> do
             setMessage "Unable to create machine"
             adminLayout $ do
-                setTitle "Restyled Amin / New Machine"
+                setTitle "Restyled Admin / New Machine"
                 $(widgetFile "admin/machines/new")
 
 patchAdminMachineR :: RestyleMachineId -> Handler Html
@@ -93,7 +93,7 @@ getAdminMachineInfoR machineId = do
             ExitFailure n -> show n
 
     adminLayout $ do
-        setTitle "Restyled Amin / Machine Info"
+        setTitle "Restyled Admin / Machine Info"
         $(widgetFile "admin/machines/info")
 
 postAdminMachinePruneR :: RestyleMachineId -> Handler Html
@@ -109,5 +109,5 @@ postAdminMachinePruneR machineId = do
             ExitFailure n -> show n
 
     adminLayout $ do
-        setTitle "Restyled Amin / Machine Prune"
+        setTitle "Restyled Admin / Machine Prune"
         $(widgetFile "admin/machines/prune")
