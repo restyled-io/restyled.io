@@ -1,5 +1,6 @@
 module RIO.Process.Follow
     ( followProcess
+    , followProcessStdin
     )
 where
 
@@ -42,16 +43,30 @@ followProcess
     :: MonadUnliftIO m
     => (String -> m ()) -- ^ Called with each line of @stdout@
     -> (String -> m ()) -- ^ Called with each line of @stderr@
+    -> ProcessConfig () stdout stderr
+    -> m ExitCode
+followProcess = followProcessStdin closed
+
+followProcessStdin
+    :: MonadUnliftIO m
+    => StreamSpec 'STInput stdin  -- ^ What to do with stdin
+    -> (String -> m ()) -- ^ Called with each line of @stdout@
+    -> (String -> m ()) -- ^ Called with each line of @stderr@
     -> ProcessConfig stdin stdout stderr
     -> m ExitCode
-followProcess fOut fErr pc = withProcessWait (setPipes pc) $ \p -> do
-    aOut <- async $ followPipe (getStdout p) fOut
-    aErr <- async $ followPipe (getStderr p) fErr
-    ec <- waitExitCode p
-    ec <$ traverse_ wait [aOut, aErr]
+followProcessStdin stdinSpec fOut fErr pc =
+    withProcessWait (setPipes stdinSpec pc) $ \p -> do
+        aOut <- async $ followPipe (getStdout p) fOut
+        aErr <- async $ followPipe (getStderr p) fErr
+        ec <- waitExitCode p
+        ec <$ traverse_ wait [aOut, aErr]
 
-setPipes :: ProcessConfig stdin stdout stderr -> ProcessConfig () Handle Handle
-setPipes = setStdin closed . setStdout createPipe . setStderr createPipe
+setPipes
+    :: StreamSpec 'STInput stdin
+    -> ProcessConfig stdin stdout stderr
+    -> ProcessConfig stdin Handle Handle
+setPipes stdinSpec =
+    setStdin stdinSpec . setStdout createPipe . setStderr createPipe
 
 followPipe :: MonadUnliftIO m => Handle -> (String -> m ()) -> m ()
 followPipe h act = handle handleEOF $ forever $ act =<< liftIO (hGetLine h)
