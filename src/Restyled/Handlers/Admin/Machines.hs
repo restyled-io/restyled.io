@@ -84,12 +84,11 @@ getAdminMachineInfoR :: RestyleMachineId -> Handler ()
 getAdminMachineInfoR machineId = do
     machine <- runDB $ get404 machineId
 
-    withAsyncWebSockets_ $ \write ->
-        for_ [("df", ["-h"]), ("docker", ["info"])] $ \(cmd, args) -> do
-            ec <- withRestyleMachineEnv machine $ proc cmd args $ followProcess
-                (write . pack . ("[stdout]: " <>))
-                (write . pack . ("[stderr]: " <>))
-            write $ tshow ec
+    withAsyncWebSockets_ $ \write -> do
+        write "Fetching information..."
+        withRestyleMachineEnv machine $ proc "docker" ["info"] $ followProcess
+            (write . pack . ("[stdout]: " <>))
+            (write . pack . ("[stderr]: " <>))
 
 -- NB must be GET for WebSockets response
 getAdminMachinePruneR :: RestyleMachineId -> Handler ()
@@ -97,6 +96,7 @@ getAdminMachinePruneR machineId = do
     machine <- runDB $ get404 machineId
 
     withAsyncWebSockets_ $ \write -> do
+        write "Pruning host..."
         ec <-
             withRestyleMachineEnv machine
             $ proc "docker" ["system", "prune", "--all", "--force"]
