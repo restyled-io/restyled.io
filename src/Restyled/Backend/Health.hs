@@ -8,6 +8,7 @@ where
 import Restyled.Prelude
 
 import Data.List (genericLength)
+import qualified Data.Text as T
 import Restyled.Models
 import Restyled.TimeRange
 
@@ -74,9 +75,12 @@ runHealthCheck jobs HealthCheck {..} = HealthCheckResult
 logHealthCheckResult
     :: (HasLogFunc env, Show stat) => HealthCheckResult stat -> RIO env ()
 logHealthCheckResult (HealthCheckResult health stat message) = case health of
-    Normal -> logInfoN $ message <> ": " <> tshow stat
-    Warning -> logWarnN $ message <> ": " <> tshow stat
-    Fatal -> logErrorN $ message <> ": " <> tshow stat
+    Normal -> logInfoN message'
+    Warning -> logWarnN message'
+    Fatal -> logErrorN message'
+  where
+    message' = T.unwords
+        ["healthcheck", "message=" <> tshow message, "stat=" <> tshow stat]
 
 filterLastMinutes :: TimeRange -> Int -> [Entity Job] -> [Entity Job]
 filterLastMinutes range =
