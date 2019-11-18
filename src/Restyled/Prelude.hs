@@ -47,7 +47,6 @@ import Data.Either as X (fromLeft, fromRight)
 import Data.Functor.Syntax as X ((<$$>))
 import Data.Proxy as X
 import Data.Text as X (Text, pack, unpack)
-import Data.Time as X
 import Database.Persist as X
 import Database.Persist.Sql as X (SqlBackend, SqlPersistT)
 import RIO.DB as X
@@ -56,6 +55,7 @@ import RIO.Logger as X
 import RIO.Process as X
 import RIO.Process.Follow as X
 import RIO.Redis as X
+import RIO.Time as X
 import SVCS.GitHub as X
 import SVCS.Names as X
 import SVCS.Payload as X
