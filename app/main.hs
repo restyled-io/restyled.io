@@ -6,6 +6,7 @@ import LoadEnv (loadEnvFrom)
 import Restyled.Application (runWaiApp)
 import Restyled.Backend.Application
 import Restyled.Backend.Foundation (loadBackend)
+import Restyled.Backend.Health (runHealthChecks)
 import Restyled.Backend.Marketplace (runSynchronize)
 import Restyled.Backend.RestyleMachine (runRestyleMachinesCheck)
 import Restyled.Development.Seeds (seedDB)
@@ -26,4 +27,5 @@ main = do
             Webhooks -> runWebhooks
             SyncMarketplace -> runSynchronize
             CheckRestyleMachines -> runRestyleMachinesCheck
+            Health -> runHealthChecks
             SeedDB -> runDB seedDB
