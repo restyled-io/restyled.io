@@ -79,8 +79,8 @@ logHealthCheckResult (HealthCheckResult health stat message) = case health of
     Warning -> logWarnN message'
     Fatal -> logErrorN message'
   where
-    message' = T.unwords
-        ["healthcheck", "message=" <> tshow message, "stat=" <> tshow stat]
+    message' =
+        T.unwords ["healthcheck=" <> tshow message, "stat=" <> tshow stat]
 
 filterLastMinutes :: TimeRange -> Int -> [Entity Job] -> [Entity Job]
 filterLastMinutes range =
