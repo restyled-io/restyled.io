@@ -89,6 +89,12 @@
 
 <section .action>
   <h2>Ready to try?
+
+  <ul>
+    <li>Public repositories plans are free forever
+    <li>Private repository plans starting at $5
+    <li>14 day free trial
+
   <p .centered .large>
     <a .button href="https://github.com/marketplace/restyled-io">
       Install from GitHub Marketplace
