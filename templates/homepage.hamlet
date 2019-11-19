@@ -26,63 +26,36 @@
 
 <section>
   <h2>How it works
+  <p>
+    Open a Pull Request that changes files in one of our
+    <a href=https://github.com/restyled-io/restyled.io/wiki/Available-Restylers>many, many supported languages</a>.
+    If it doesn't conform to your preferred style, a status check will fail and
+    point to another Pull Request where it's been <i>restyled</i>:
 
   <p>
-    Open a Pull Request that changes files in one of our many, many
-    <a href=https://github.com/restyled-io/restyled.io/wiki/Available-Restylers>supported languages</a>.
-    If it doesn't conform to your preferred style, you'll find another Pull
-    Request where it's been <i>restyled</i>:
+    <img src=@{staticR "img/docs/differences-status.png"}>
 
-  <p>
-    <img src=@{staticR "img/docs/minor-referenced.png"}>
-
-  <section .how-it-works-highlight>
+  <div .how-it-works-highlight>
     <p>
-      You'll also get a blocking status on your Pull Request.
-
-    <p>
-      <img src=@{staticR "img/docs/differences-status.png"}>
+      Click through to see what tools corrected your style:
 
     <p>
-      <small>
-        Not a fan? These can be disabled in your
-        <a href=https://github.com/restyled-io/restyled.io/wiki/Configuration-Reference#statusesconfig>settings</a>.
-
-  <p>
-    Click through to see what tools corrected your style:
-
-  <p>
-    <img src=@{staticR "img/docs/minor-details.png"}>
-
-  <p>
-    And review those differences:
-
-  <p>
-    <img src=@{staticR "img/docs/minor-restyled.png"}>
-
-  <p>
-    And, if you like, merge them back into yours.
-
-  <p>
-    <img src=@{staticR "img/docs/merge-button.png"}>
-
-  <section .how-it-works-highlight>
-    <p>
-      If we ever run into trouble, you'll be able to see why:
+      <img src=@{staticR "img/docs/minor-details.png"}>
 
     <p>
-      <img src=@{staticR "img/docs/error-status.png"}>
+      Review the differences:
 
     <p>
-      <img src=@{staticR "img/docs/error-details.png"}>
+      <img src=@{staticR "img/docs/minor-differences.png"}>
 
     <p>
-      <small>
-        And hopefully
-        <a href=https://github.com/restyled-io/restyled.io/wiki/Configuration-Reference#pattern>configure around it</a>.
+      And, if you like, merge them back into yours.
+
+    <p>
+      <img src=@{staticR "img/docs/merge-button.png"}>
 
   <p>
-    Once you've fixed things up, you'll get an updated status.
+    Rejoice in your consistent style and green status!
 
   <p>
     <img src=@{staticR "img/docs/minor-success.png"}>
@@ -91,8 +64,8 @@
   <h2>Ready to try?
 
   <ul>
-    <li>Public repositories plans are free forever
-    <li>Private repository plans starting at $5
+    <li>Public repository plans are free forever
+    <li>Private repository plans start at just $5
     <li>14 day free trial
 
   <p .centered .large>
