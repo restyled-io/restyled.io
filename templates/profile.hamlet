@@ -9,8 +9,8 @@
 <section>
   <p>
     <strong>Can't find a repository?
-    We only display organizations on this page if your organization membership
-    is public (we're working on fixing this!).
+    We can only display organizations on this page if your organization
+    membership is public.
   <p>
     But don't worry: Restyled will still restyle PRs in repositories even if
     private organization membership means they're not visible on this page.
