@@ -21,70 +21,57 @@ data HealthCheck stat = HealthCheck
     , hcHealth :: stat -> Health
     }
 
-data HealthCheckResult stat = HealthCheckResult Health stat Text
-
 runHealthChecks :: (HasLogFunc env, HasDB env) => RIO env ()
 runHealthChecks = do
     range <- timeRangeFromMinutesAgo 60
     jobs <- runDB $ selectListWithTimeRange' JobCreatedAt range
 
-    logHealthCheckResult $ runHealthCheck jobs $ HealthCheck
-        { hcName = "Jobs completed last 10 minutes"
-        , hcFilter = filterLastMinutes range 10
-        , hcCompute = completions
-        , hcHealth = \case
-            0 -> Fatal
-            _ -> Normal
-        }
+    runHealthCheck
+        jobs
+        HealthCheck
+            { hcName = "Jobs completed last 60 minutes"
+            , hcFilter = id
+            , hcCompute = completions
+            , hcHealth = \case
+                0 -> Fatal
+                _ -> Normal
+            }
 
-    logHealthCheckResult $ runHealthCheck jobs $ HealthCheck
-        { hcName = "Effective success rate last 10 minutes"
-        , hcFilter = filterLastMinutes range 10
-        , hcCompute = errorRate [10, 11, 20]
-        , hcHealth = thresholds (< 80) (< 95)
-        }
+    runHealthCheck
+        jobs
+        HealthCheck
+            { hcName = "Effective success rate last 60 minutes"
+            , hcFilter = id
+            , hcCompute = errorRate [10, 11, 20]
+            , hcHealth = thresholds (< 60) (< 80)
+            }
 
-    logHealthCheckResult $ runHealthCheck jobs $ HealthCheck
-        { hcName = "Total success rate last 10 minutes"
-        , hcFilter = filterLastMinutes range 10
-        , hcCompute = errorRate []
-        , hcHealth = thresholds (< 50) (< 65)
-        }
+    runHealthCheck
+        jobs
+        HealthCheck
+            { hcName = "Total success rate last 60 minutes"
+            , hcFilter = id
+            , hcCompute = errorRate []
+            , hcHealth = thresholds (< 40) (< 60)
+            }
 
-    logHealthCheckResult $ runHealthCheck jobs $ HealthCheck
-        { hcName = "Effective success rate last 60 minutes"
-        , hcFilter = filterLastMinutes range 60
-        , hcCompute = errorRate [10, 11, 20]
-        , hcHealth = thresholds (< 85) (< 99)
-        }
-
-    logHealthCheckResult $ runHealthCheck jobs $ HealthCheck
-        { hcName = "Total success rate last 60 minutes"
-        , hcFilter = filterLastMinutes range 60
-        , hcCompute = errorRate []
-        , hcHealth = thresholds (< 70) (< 85)
-        }
-
-runHealthCheck :: [Entity Job] -> HealthCheck stat -> HealthCheckResult stat
-runHealthCheck jobs HealthCheck {..} = HealthCheckResult
-    (hcHealth stat)
-    stat
-    hcName
-    where stat = hcCompute $ hcFilter jobs
-
-logHealthCheckResult
-    :: (HasLogFunc env, Show stat) => HealthCheckResult stat -> RIO env ()
-logHealthCheckResult (HealthCheckResult health stat message) = case health of
-    Normal -> logInfoN message'
-    Warning -> logWarnN message'
-    Fatal -> logErrorN message'
+runHealthCheck
+    :: (HasLogFunc env, Show stat)
+    => [Entity Job]
+    -> HealthCheck stat
+    -> RIO env ()
+runHealthCheck jobs HealthCheck {..} = case health of
+    Normal -> logInfoN message
+    Warning -> logWarnN message
+    Fatal -> logErrorN message
   where
-    message' =
-        T.unwords ["healthcheck=" <> tshow message, "stat=" <> tshow stat]
+    stat = hcCompute $ hcFilter jobs
+    health = hcHealth stat
+    message = T.unwords ["healthcheck=" <> tshow hcName, "stat=" <> tshow stat]
 
-filterLastMinutes :: TimeRange -> Int -> [Entity Job] -> [Entity Job]
-filterLastMinutes range =
-    filterTimeRange (jobCreatedAt . entityVal) . subRangeToByMinutes range
+-- filterLastMinutes :: TimeRange -> Int -> [Entity Job] -> [Entity Job]
+-- filterLastMinutes range =
+--     filterTimeRange (jobCreatedAt . entityVal) . subRangeToByMinutes range
 
 completions :: [Entity Job] -> Int
 completions = length . mapMaybe (jobExitCode . entityVal)
