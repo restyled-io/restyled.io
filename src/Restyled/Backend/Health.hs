@@ -24,7 +24,7 @@ data HealthCheck stat = HealthCheck
 runHealthChecks :: (HasLogFunc env, HasDB env) => RIO env ()
 runHealthChecks = do
     range <- timeRangeFromMinutesAgo 60
-    jobs <- runDB $ selectListWithTimeRange' JobCreatedAt range
+    jobs <- runDB $ selectListWithTimeRange JobCreatedAt range
 
     runHealthCheck
         jobs
@@ -68,10 +68,6 @@ runHealthCheck jobs HealthCheck {..} = case health of
     stat = hcCompute $ hcFilter jobs
     health = hcHealth stat
     message = T.unwords ["healthcheck=" <> tshow hcName, "stat=" <> tshow stat]
-
--- filterLastMinutes :: TimeRange -> Int -> [Entity Job] -> [Entity Job]
--- filterLastMinutes range =
---     filterTimeRange (jobCreatedAt . entityVal) . subRangeToByMinutes range
 
 completions :: [Entity Job] -> Int
 completions = length . mapMaybe (jobExitCode . entityVal)

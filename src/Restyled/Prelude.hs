@@ -6,6 +6,7 @@ module Restyled.Prelude
     , untryIO
 
     -- * Persist
+    , SqlEntity
     , overEntity
     , replaceEntity
     , selectFirstT
@@ -80,38 +81,30 @@ fromLeftM f me = either f pure =<< me
 untryIO :: (MonadIO m, Exception e) => IO (Either e a) -> m a
 untryIO = fromLeftM throwIO . liftIO
 
+type SqlEntity a = (PersistEntity a, PersistEntityBackend a ~ SqlBackend)
+
 overEntity :: Entity a -> (a -> a) -> Entity a
 overEntity e f = e { entityVal = f $ entityVal e }
 
-replaceEntity
-    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
-    => Entity a
-    -> SqlPersistT m ()
+replaceEntity :: (MonadIO m, SqlEntity a) => Entity a -> SqlPersistT m ()
 replaceEntity (Entity k v) = replace k v
 
 selectFirstT
-    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
+    :: (MonadIO m, SqlEntity a)
     => [Filter a]
     -> [SelectOpt a]
     -> MaybeT (SqlPersistT m) (Entity a)
 selectFirstT x = MaybeT . selectFirst x
 
-getT
-    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
-    => Key a
-    -> MaybeT (SqlPersistT m) a
+getT :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) a
 getT = MaybeT . get
 
 getEntityT
-    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
-    => Key a
-    -> MaybeT (SqlPersistT m) (Entity a)
+    :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) (Entity a)
 getEntityT = MaybeT . getEntity
 
 getByT
-    :: (MonadIO m, PersistEntity a, PersistEntityBackend a ~ SqlBackend)
-    => Unique a
-    -> MaybeT (SqlPersistT m) (Entity a)
+    :: (MonadIO m, SqlEntity a) => Unique a -> MaybeT (SqlPersistT m) (Entity a)
 getByT = MaybeT . getBy
 
 bimapMExceptT

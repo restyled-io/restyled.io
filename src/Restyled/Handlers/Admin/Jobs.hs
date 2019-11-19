@@ -27,7 +27,7 @@ instance ToJSON JobSummary where
 getAdminJobsR :: Handler Value
 getAdminJobsR = do
     range <- requiredTimeRange
-    jobs <- runDB $ selectListWithTimeRange JobCompletedAt range
+    jobs <- runDB $ selectListWithTimeRangeBy Just JobCompletedAt range
     urlRender <- getUrlRender
     sendResponse $ toJSON $ map (JobSummary urlRender) jobs
 
