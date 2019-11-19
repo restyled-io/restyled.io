@@ -28,13 +28,13 @@
   <h2>How it works
 
   <p>
-    Open a Pull Request that changes files in one of our
+    Open a Pull Request that changes files in one of our many, many
     <a href=https://github.com/restyled-io/restyled.io/wiki/Available-Restylers>supported languages</a>.
-    If it doesn't conform to your preferred style, you'll receive a comment that
-    it's been <i>restyled</i>:
+    If it doesn't conform to your preferred style, you'll find another Pull
+    Request where it's been <i>restyled</i>:
 
   <p>
-    <img src=@{staticR "img/docs/minor-commented.png"}>
+    <img src=@{staticR "img/docs/minor-referenced.png"}>
 
   <section .how-it-works-highlight>
     <p>
@@ -49,7 +49,13 @@
         <a href=https://github.com/restyled-io/restyled.io/wiki/Configuration-Reference#statusesconfig>settings</a>.
 
   <p>
-    Review the differences in the restyled Pull Request:
+    Click through to see what tools corrected your style:
+
+  <p>
+    <img src=@{staticR "img/docs/minor-details.png"}>
+
+  <p>
+    And review those differences:
 
   <p>
     <img src=@{staticR "img/docs/minor-restyled.png"}>
@@ -79,7 +85,7 @@
     Once you've fixed things up, you'll get an updated status.
 
   <p>
-    <img src=@{staticR "img/docs/green-status.png"}>
+    <img src=@{staticR "img/docs/minor-success.png"}>
 
 <section .action>
   <h2>Ready to try?
