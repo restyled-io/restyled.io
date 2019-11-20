@@ -12,73 +12,73 @@ import qualified Data.Text as T
 import Restyled.Models
 import Restyled.TimeRange
 
-data Health = Normal | Warning | Fatal
+data Stat = Count Int | Rate (Maybe Double)
 
-data HealthCheck stat = HealthCheck
+showStat :: Stat -> String
+showStat = \case
+    Count c -> show c
+    Rate Nothing -> "N/A"
+    Rate (Just r) -> show r <> "%"
+
+data Health = Normal | Warning | Fatal
+    deriving Show
+
+data HealthCheck = HealthCheck
     { hcName :: Text
-    , hcFilter :: [Entity Job] -> [Entity Job]
-    , hcCompute :: [Entity Job] -> stat
-    , hcHealth :: stat -> Health
+    , hcCompute :: [Entity Job] -> Stat
+    , hcHealth :: Stat -> Health
     }
 
 runHealthChecks :: (HasLogFunc env, HasDB env) => RIO env ()
 runHealthChecks = do
+    logInfoN "Running 60 minute HealthChecks"
     range <- timeRangeFromMinutesAgo 60
     jobs <- runDB $ selectListWithTimeRange JobCreatedAt range
-
-    runHealthCheck
-        jobs
-        HealthCheck
-            { hcName = "Jobs completed last 60 minutes"
-            , hcFilter = id
+    traverse_
+        (runHealthCheck jobs)
+        [ HealthCheck
+            { hcName = "Jobs completed"
             , hcCompute = completions
             , hcHealth = \case
-                0 -> Fatal
+                Count 0 -> Fatal
                 _ -> Normal
             }
-
-    runHealthCheck
-        jobs
-        HealthCheck
-            { hcName = "Effective success rate last 60 minutes"
-            , hcFilter = id
+        , HealthCheck
+            { hcName = "Effective success rate"
             , hcCompute = errorRate [10, 11, 20]
             , hcHealth = thresholds (< 60) (< 80)
             }
-
-    runHealthCheck
-        jobs
-        HealthCheck
-            { hcName = "Total success rate last 60 minutes"
-            , hcFilter = id
+        , HealthCheck
+            { hcName = "Total success rate"
             , hcCompute = errorRate []
             , hcHealth = thresholds (< 40) (< 60)
             }
+        ]
 
-runHealthCheck
-    :: (HasLogFunc env, Show stat)
-    => [Entity Job]
-    -> HealthCheck stat
-    -> RIO env ()
+runHealthCheck :: (HasLogFunc env) => [Entity Job] -> HealthCheck -> RIO env ()
 runHealthCheck jobs HealthCheck {..} = case health of
     Normal -> logInfoN message
     Warning -> logWarnN message
     Fatal -> logErrorN message
   where
-    stat = hcCompute $ hcFilter jobs
+    stat = hcCompute jobs
     health = hcHealth stat
-    message = T.unwords ["healthcheck=" <> tshow hcName, "stat=" <> tshow stat]
+    message = T.pack $ unwords
+        [ "healthcheck=" <> show hcName
+        , "health=" <> show health
+        , "stat=" <> showStat stat
+        ]
 
-completions :: [Entity Job] -> Int
-completions = length . mapMaybe (jobExitCode . entityVal)
+completions :: [Entity Job] -> Stat
+completions = Count . length . mapMaybe (jobExitCode . entityVal)
 
 errorRate
     :: [Int] -- ^ Exit codes to ignore
     -> [Entity Job]
-    -> Double
+    -> Stat
 errorRate ignoreCodes jobs
-    | total == 0 = 0
-    | otherwise = (succeeded / total) * 100
+    | total == 0 = Rate Nothing
+    | otherwise = Rate $ Just $ (succeeded / total) * 100
   where
     exitCodes =
         filter (`notElem` ignoreCodes) $ mapMaybe (jobExitCode . entityVal) jobs
@@ -86,11 +86,17 @@ errorRate ignoreCodes jobs
     succeeded = genericLength $ filter (== 0) exitCodes
 
 thresholds
-    :: (stat -> Bool) -- ^ True if Fatal
-    -> (stat -> Bool) -- ^ True if Warning
-    -> stat
+    :: (Double -> Bool) -- ^ True if Fatal
+    -> (Double -> Bool) -- ^ True if Warning
+    -> Stat
     -> Health
 thresholds isFatal isWarning stat
-    | isFatal stat = Fatal
-    | isWarning stat = Warning
+    | threshold isFatal stat = Fatal
+    | threshold isWarning stat = Warning
     | otherwise = Normal
+
+threshold :: (Double -> Bool) -> Stat -> Bool
+threshold f = \case
+    Count c -> f $ fromIntegral c
+    Rate Nothing -> False
+    Rate (Just r) -> f r
