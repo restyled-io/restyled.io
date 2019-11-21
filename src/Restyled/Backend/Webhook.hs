@@ -46,6 +46,7 @@ processWebhook execRestyler body = exceptT fromNotProcessed fromProcessed $ do
     let failure = ExecRestylerFailure $ ajJob job
         success = ExecRestylerSuccess $ ajJob job
 
+    logInfo $ fromString $ "Executing Restyler for " <> jobPath (ajJob job)
     withExceptT failure $ success <$> tryExecRestyler execRestyler job
 
 fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
@@ -68,12 +69,15 @@ fromNotProcessed = \case
             <> ": "
             <> show ex
         runDB $ completeJobErrored (show ex) job
-  where
-    jobPath (Entity _ Job {..}) =
-        unpack $ repoPullPath jobOwner jobRepo jobPullRequest
 
-fromProcessed :: HasDB env => JobProcessed -> RIO env ()
-fromProcessed (ExecRestylerSuccess job ec) = runDB $ completeJob ec job
+fromProcessed :: (HasLogFunc env, HasDB env) => JobProcessed -> RIO env ()
+fromProcessed (ExecRestylerSuccess job ec) = do
+    runDB $ completeJob ec job
+    logInfo $ fromString $ "Job completed for " <> jobPath job
+
+jobPath :: Entity Job -> String
+jobPath (Entity _ Job {..}) =
+    unpack $ repoPullPath jobOwner jobRepo jobPullRequest
 
 queueName :: ByteString
 queueName = "restyled:hooks:webhooks"
