@@ -23,7 +23,13 @@ runWebhooks
        , HasProcessContext env
        )
     => RIO env a
-runWebhooks = runQueue (awaitWebhook 120) $ processWebhook execRestyler
+runWebhooks =
+    scaled 4 $ runQueue (awaitWebhook 120) $ processWebhook execRestyler
+
+scaled :: MonadUnliftIO m => Int -> m a -> m a
+scaled scale action = do
+    asyncs <- replicateM scale $ async action
+    snd <$> waitAny asyncs
 
 runQueue :: Monad m => m (Maybe a) -> (a -> m ()) -> m b
 runQueue awaitItem processItem = forever $ traverse_ processItem =<< awaitItem
