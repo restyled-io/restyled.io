@@ -3,10 +3,8 @@ set -eu
 
 queue=restyled:hooks:webhooks
 
-while true; do
-  printf '[%s] llen(%s) => ' "$(date)" "$queue"
-  echo "llen $queue" |
-    ./bin/heroku redis:cli --confirm restyled-io 2>&1 |
-    grep -v 'Warning\|Connecting\|Disconnected' |
-    grep -v '^ *$'
-done
+printf '[%s] llen(%s) => ' "$(date)" "$queue"
+echo "llen $queue" |
+  ./bin/heroku redis:cli --confirm restyled-io 2>&1 |
+  grep -v 'Warning\|Connecting\|Disconnected' |
+  grep -v '^ *$'
