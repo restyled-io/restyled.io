@@ -9,6 +9,7 @@ module RIO.Redis
 
     -- * Actions we use
     -- | FIXME: encapsulate our own push/pop?
+    , llen
     , lpush
     , brpop
 
@@ -21,7 +22,7 @@ import RIO
 
 import Data.Aeson (ToJSON, encode)
 import Data.ByteString.Lazy (toStrict)
-import Database.Redis (Connection, Redis, brpop, checkedConnect, lpush)
+import Database.Redis (Connection, Redis, brpop, checkedConnect, llen, lpush)
 import qualified Database.Redis as Redis
 
 class HasRedis env where

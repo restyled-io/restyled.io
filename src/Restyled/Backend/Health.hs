@@ -23,51 +23,64 @@ showStat = \case
 data Health = Normal | Warning | Fatal
     deriving Show
 
-data HealthCheck = HealthCheck
+data HealthCheck m a = HealthCheck
     { hcName :: Text
-    , hcCompute :: [Entity Job] -> Stat
+    , hcFetch :: m a
+    , hcCompute :: a -> Stat
     , hcHealth :: Stat -> Health
     }
 
-runHealthChecks :: (HasLogFunc env, HasDB env) => RIO env ()
+runHealthChecks :: (HasLogFunc env, HasDB env, HasRedis env) => RIO env ()
 runHealthChecks = do
-    logInfoN "Running 60 minute HealthChecks"
+    runHealthCheck HealthCheck
+        { hcName = "Webhooks queue depth"
+        , hcFetch = runRedis $ llen "restyled:hooks:webhooks"
+        , hcCompute = Count . either (const 999) fromIntegral
+        , hcHealth = thresholds (> 20) (> 5)
+        }
+
     range <- timeRangeFromMinutesAgo 60
     jobs <- runDB $ selectListWithTimeRange JobCreatedAt range
     traverse_
-        (runHealthCheck jobs)
+        runHealthCheck
         [ HealthCheck
-            { hcName = "Jobs completed"
+            { hcName = "Jobs completed last hour"
+            , hcFetch = pure jobs
             , hcCompute = completions
             , hcHealth = \case
                 Count 0 -> Fatal
                 _ -> Normal
             }
         , HealthCheck
-            { hcName = "Effective success rate"
+            { hcName = "Effective success rate last hour"
+            , hcFetch = pure jobs
             , hcCompute = errorRate [10, 11, 20]
             , hcHealth = thresholds (< 60) (< 80)
             }
         , HealthCheck
-            { hcName = "Total success rate"
+            { hcName = "Total success rate last hour"
+            , hcFetch = pure jobs
             , hcCompute = errorRate []
             , hcHealth = thresholds (< 40) (< 60)
             }
         ]
 
-runHealthCheck :: (HasLogFunc env) => [Entity Job] -> HealthCheck -> RIO env ()
-runHealthCheck jobs HealthCheck {..} = case health of
-    Normal -> logInfoN message
-    Warning -> logWarnN message
-    Fatal -> logErrorN message
-  where
-    stat = hcCompute jobs
-    health = hcHealth stat
-    message = T.pack $ unwords
-        [ "healthcheck=" <> show hcName
-        , "health=" <> show health
-        , "stat=" <> showStat stat
-        ]
+runHealthCheck :: HasLogFunc env => HealthCheck (RIO env) a -> RIO env ()
+runHealthCheck HealthCheck {..} = do
+    a <- hcFetch
+
+    let stat = hcCompute a
+        health = hcHealth stat
+        message = T.pack $ unwords
+            [ "healthcheck=" <> show hcName
+            , "health=" <> show health
+            , "stat=" <> showStat stat
+            ]
+
+    case health of
+        Normal -> logInfoN message
+        Warning -> logWarnN message
+        Fatal -> logErrorN message
 
 completions :: [Entity Job] -> Stat
 completions = Count . length . mapMaybe (jobExitCode . entityVal)
