@@ -84,7 +84,6 @@ emptySettings = AppSettings
     , appStaticDir = error "unused"
     , appStubMarketplaceListing = True
     , appDockerRunTimeout = error "unused"
-    , appBackendScale = error "unused"
     }
 
 userWithEmail :: Text -> User

@@ -79,7 +79,6 @@ data AppSettings = AppSettings
     -- A duration of 0 disables the associated timeout.
     -- @
     --
-    , appBackendScale :: Natural
     }
 
 class HasSettings env where
@@ -128,7 +127,6 @@ loadSettings =
         <*> var nonempty "STATIC_DIR" (def "static")
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
         <*> var nonempty "DOCKER_RUN_TIMEOUT" (def "0")
-        <*> var auto "BACKEND_SCALE" (def 8)
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
