@@ -36,34 +36,17 @@ runHealthChecks = do
         { hcName = "Webhooks queue depth"
         , hcFetch = runRedis $ llen "restyled:hooks:webhooks"
         , hcCompute = Count . either (const 999) fromIntegral
-        , hcHealth = thresholds (> 20) (> 5)
+        , hcHealth = thresholds (> 50) (> 10)
         }
 
-    range <- timeRangeFromMinutesAgo 60
-    jobs <- runDB $ selectListWithTimeRange JobCreatedAt range
-    traverse_
-        runHealthCheck
-        [ HealthCheck
-            { hcName = "Jobs completed last hour"
-            , hcFetch = pure jobs
-            , hcCompute = completions
-            , hcHealth = \case
-                Count 0 -> Fatal
-                _ -> Normal
-            }
-        , HealthCheck
-            { hcName = "Effective success rate last hour"
-            , hcFetch = pure jobs
-            , hcCompute = errorRate [10, 11, 20]
-            , hcHealth = thresholds (< 60) (< 80)
-            }
-        , HealthCheck
-            { hcName = "Total success rate last hour"
-            , hcFetch = pure jobs
-            , hcCompute = errorRate []
-            , hcHealth = thresholds (< 40) (< 60)
-            }
-        ]
+    runHealthCheck HealthCheck
+        { hcName = "Effective success rate last hour"
+        , hcFetch = do
+            range <- timeRangeFromMinutesAgo 60
+            runDB $ selectListWithTimeRange JobCreatedAt range
+        , hcCompute = errorRate [10, 11, 20]
+        , hcHealth = thresholds (< 60) (< 80)
+        }
 
 runHealthCheck :: HasLogFunc env => HealthCheck (RIO env) a -> RIO env ()
 runHealthCheck HealthCheck {..} = do
@@ -81,9 +64,6 @@ runHealthCheck HealthCheck {..} = do
         Normal -> logInfoN message
         Warning -> logWarnN message
         Fatal -> logErrorN message
-
-completions :: [Entity Job] -> Stat
-completions = Count . length . mapMaybe (jobExitCode . entityVal)
 
 errorRate
     :: [Int] -- ^ Exit codes to ignore
