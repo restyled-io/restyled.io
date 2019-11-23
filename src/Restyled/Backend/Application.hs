@@ -56,12 +56,7 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
                 capture "system" $ "Running on " <> displayMachine machine
                 pure $ withRestyleMachineEnv machine
 
-    let
-        dockerRunProc =
-            proc "timeout"
-                $ appDockerRunTimeout settings
-                : "docker"
-                : dockerRunArgs settings token repo job
+    let dockerRunProc = proc "docker" $ dockerRunArgs settings token repo job
 
     ec <- withEnv $ dockerRunProc $ followProcess
         (runDB . capture "stdout")
