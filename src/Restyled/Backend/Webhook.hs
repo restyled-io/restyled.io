@@ -9,6 +9,9 @@ where
 
 import Restyled.Prelude
 
+import qualified Data.Text.Lazy as TL
+import Formatting (format)
+import Formatting.Time (diff)
 import Restyled.Backend.AcceptedJob
 import Restyled.Backend.AcceptedWebhook
 import Restyled.Backend.ExecRestyler
@@ -73,11 +76,32 @@ fromNotProcessed = \case
 fromProcessed :: (HasLogFunc env, HasDB env) => JobProcessed -> RIO env ()
 fromProcessed (ExecRestylerSuccess job ec) = do
     runDB $ completeJob ec job
-    logInfo $ fromString $ "Job completed for " <> jobPath job
+
+    -- Don't use Job attributes to log the Outcome, since that would require
+    -- reloading from DB. Might as well avoid it since we have all the
+    -- completion values here anyway.
+    now <- getCurrentTime
+    logInfo
+        $ fromString
+        $ "Job completed for "
+        <> jobPath job
+        <> " ("
+        <> jobOutcome ec (jobCreatedAt $ entityVal job) now
+        <> ")"
 
 jobPath :: Entity Job -> String
 jobPath (Entity _ Job {..}) =
     unpack $ repoPullPath jobOwner jobRepo jobPullRequest
+
+jobOutcome :: ExitCode -> UTCTime -> UTCTime -> String
+jobOutcome ec createdAt completedAt = "exited " <> status <> " in " <> duration
+  where
+    status = case ec of
+        ExitSuccess -> "0"
+        ExitFailure i -> show i
+
+    duration =
+        TL.unpack $ format (diff False) $ diffUTCTime createdAt completedAt
 
 queueName :: ByteString
 queueName = "restyled:hooks:webhooks"
