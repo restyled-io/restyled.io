@@ -84,17 +84,19 @@ captureJobLogLine jobId stream content = do
         , jobLogLineContent = content
         }
 
-completeJobSkipped :: MonadIO m => String -> Entity Job -> SqlPersistT m ()
+completeJobSkipped
+    :: MonadIO m => String -> Entity Job -> SqlPersistT m (Entity Job)
 completeJobSkipped reason job = do
     captureJobLogLine (entityKey job) "system" $ pack reason
     completeJob ExitSuccess job
 
-completeJobErrored :: MonadIO m => String -> Entity Job -> SqlPersistT m ()
+completeJobErrored
+    :: MonadIO m => String -> Entity Job -> SqlPersistT m (Entity Job)
 completeJobErrored reason job = do
     captureJobLogLine (entityKey job) "system" $ pack reason
     completeJob (ExitFailure 99) job
 
-completeJob :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m ()
+completeJob :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m (Entity Job)
 completeJob ec job = do
     now <- liftIO getCurrentTime
     replaceEntity $ overEntity job $ \j -> j

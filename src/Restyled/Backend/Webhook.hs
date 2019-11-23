@@ -63,7 +63,9 @@ fromNotProcessed = \case
             <> jobPath job
             <> ": "
             <> ignoredJobReasonToLogMessage reason
-        runDB $ completeJobSkipped (ignoredJobReasonToJobLogLine reason) job
+        void $ runDB $ completeJobSkipped
+            (ignoredJobReasonToJobLogLine reason)
+            job
     ExecRestylerFailure job ex -> do
         logError
             $ fromString
@@ -71,37 +73,30 @@ fromNotProcessed = \case
             <> jobPath job
             <> ": "
             <> show ex
-        runDB $ completeJobErrored (show ex) job
+        void $ runDB $ completeJobErrored (show ex) job
 
 fromProcessed :: (HasLogFunc env, HasDB env) => JobProcessed -> RIO env ()
 fromProcessed (ExecRestylerSuccess job ec) = do
-    runDB $ completeJob ec job
-
-    -- Don't use Job attributes to log the Outcome, since that would require
-    -- reloading from DB. Might as well avoid it since we have all the
-    -- completion values here anyway.
-    now <- getCurrentTime
+    updatedJob <- runDB $ completeJob ec job
     logInfo
         $ fromString
         $ "Job completed for "
         <> jobPath job
         <> " ("
-        <> jobOutcome ec (jobCreatedAt $ entityVal job) now
+        <> jobOutcome (entityVal updatedJob)
         <> ")"
 
 jobPath :: Entity Job -> String
 jobPath (Entity _ Job {..}) =
     unpack $ repoPullPath jobOwner jobRepo jobPullRequest
 
-jobOutcome :: ExitCode -> UTCTime -> UTCTime -> String
-jobOutcome ec createdAt completedAt = "exited " <> status <> " in " <> duration
+jobOutcome :: Job -> String
+jobOutcome Job {..} = fromMaybe "N/A" $ do
+    exitCode <- jobExitCode
+    duration <- getDuration <$> jobCompletedAt
+    pure $ "exited " <> show exitCode <> " in " <> duration
   where
-    status = case ec of
-        ExitSuccess -> "0"
-        ExitFailure i -> show i
-
-    duration =
-        TL.unpack $ format (diff False) $ diffUTCTime createdAt completedAt
+    getDuration = TL.unpack . format (diff False) . diffUTCTime jobCreatedAt
 
 queueName :: ByteString
 queueName = "restyled:hooks:webhooks"

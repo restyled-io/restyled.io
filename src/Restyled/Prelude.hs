@@ -86,8 +86,9 @@ type SqlEntity a = (PersistEntity a, PersistEntityBackend a ~ SqlBackend)
 overEntity :: Entity a -> (a -> a) -> Entity a
 overEntity e f = e { entityVal = f $ entityVal e }
 
-replaceEntity :: (MonadIO m, SqlEntity a) => Entity a -> SqlPersistT m ()
-replaceEntity (Entity k v) = replace k v
+replaceEntity
+    :: (MonadIO m, SqlEntity a) => Entity a -> SqlPersistT m (Entity a)
+replaceEntity e@(Entity k v) = e <$ replace k v
 
 selectFirstT
     :: (MonadIO m, SqlEntity a)
