@@ -49,7 +49,7 @@ processWebhook execRestyler body = exceptT fromNotProcessed fromProcessed $ do
     let failure = ExecRestylerFailure $ ajJob job
         success = ExecRestylerSuccess $ ajJob job
 
-    logInfo $ fromString $ "Executing Restyler for " <> jobPath (ajJob job)
+    logDebug $ fromString $ "Executing Restyler for " <> jobPath (ajJob job)
     withExceptT failure $ success <$> tryExecRestyler execRestyler job
 
 fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
