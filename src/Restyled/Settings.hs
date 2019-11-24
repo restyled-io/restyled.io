@@ -68,6 +68,7 @@ data AppSettings = AppSettings
     , appMutableStatic :: Bool
     , appStaticDir :: FilePath
     , appStubMarketplaceListing :: Bool
+    , appRestrictedRepos :: [Text]
     }
 
 class HasSettings env where
@@ -115,6 +116,7 @@ loadSettings =
         <*> switch "MUTABLE_STATIC" mempty
         <*> var nonempty "STATIC_DIR" (def "static")
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
+        <*> var (splitOn ',') "RESTRICTED_REPOS" (def [])
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
