@@ -53,6 +53,13 @@ packages:
       sha256: ed05f839d189a312392f35d41888602b5929a8c0bcd54ee50bffe013552526ba
   original:
     hackage: yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d
+- completed:
+    hackage: semigroups-0.19.1@sha256:ecae129621e0d2f77bef2f01e4458c2e0567ab6e1f39579c61d7cec8058ebb0e,6262
+    pantry-tree:
+      size: 534
+      sha256: 61160272cccf0dcffe7fe23b7644412b959a8ec232bed4d43be235176f0bd90b
+  original:
+    hackage: semigroups-0.19.1
 snapshots:
 - completed:
     size: 524127

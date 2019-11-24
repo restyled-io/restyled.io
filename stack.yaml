@@ -12,6 +12,9 @@ extra-deps:
   - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075
   - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d
 
+  # For DerivingVia GenericSemigroupMonoid
+  - semigroups-0.19.1
+
 # Makes weeder work in stack-2
 ghc-options:
   "$locals":
