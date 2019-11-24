@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module Restyled.Backend.RestyleMachine
@@ -15,6 +16,7 @@ where
 import Restyled.Prelude
 
 import qualified Data.Map as Map
+import Data.Semigroup.Generic
 import qualified Data.Text.IO as T
 import Database.Persist.Sql (rawSql)
 import Restyled.Models
@@ -32,8 +34,8 @@ runRestyleMachinesCheck = do
         pure $ ec == ExitSuccess
 
     case result of
-        AllHealthy -> logInfo "All enabled Restyle Machines are healthy"
-        NoneHealthy -> logError "No enabled Restyle Machines are healthy"
+        AllHealthy -> logInfo "All Restyle Machines healthy"
+        NoneHealthy -> logError "No Restyle Machines are healthy"
         Disabled machines ->
             logWarn
                 $ "Disabled "
@@ -51,16 +53,54 @@ checkRestyleMachines
     => (Entity RestyleMachine -> m Bool)
     -> SqlPersistT m CheckRestyleMachinesResult
 checkRestyleMachines isHealthy = do
-    enabled <- selectList [RestyleMachineEnabled ==. True] []
-    results <- partitionM (lift . isHealthy) enabled
-    case results of
-        ([], _) -> pure NoneHealthy
-        (_, []) -> pure AllHealthy
-        (_, unhealthy) -> do
+    machines <- selectList [] []
+    fromMachineState =<< lift (getRestyleMachinesState isHealthy machines)
+  where
+    fromMachineState RestyleMachinesState {..}
+        | null rmsSteady && null rmsDisabledHealthy = pure NoneHealthy
+        | otherwise = do
             updateWhere
-                [RestyleMachineId <-. map entityKey unhealthy]
+                [RestyleMachineId <-. map entityKey rmsDisabledHealthy]
+                [RestyleMachineEnabled =. True]
+            updateWhere
+                [RestyleMachineId <-. map entityKey rmsEnabledUnhealthy]
                 [RestyleMachineEnabled =. False]
-            pure $ Disabled unhealthy
+            pure $ if null rmsEnabledUnhealthy
+                then AllHealthy
+                else Disabled rmsEnabledUnhealthy
+
+data RestyleMachinesState = RestyleMachinesState
+    { rmsEnabledUnhealthy :: [Entity RestyleMachine]
+    , rmsDisabledHealthy :: [Entity RestyleMachine]
+    , rmsSteady :: [Entity RestyleMachine]
+    }
+    deriving stock Generic
+    deriving (Semigroup, Monoid) via (GenericSemigroupMonoid RestyleMachinesState)
+
+enabledUnhealthyState :: Entity RestyleMachine -> RestyleMachinesState
+enabledUnhealthyState machine = mempty { rmsEnabledUnhealthy = [machine] }
+
+disabledHealthyState :: Entity RestyleMachine -> RestyleMachinesState
+disabledHealthyState machine = mempty { rmsDisabledHealthy = [machine] }
+
+steadyState :: Entity RestyleMachine -> RestyleMachinesState
+steadyState machine = mempty { rmsSteady = [machine] }
+
+getRestyleMachinesState
+    :: MonadIO m
+    => (Entity RestyleMachine -> m Bool)
+    -> [Entity RestyleMachine]
+    -> m RestyleMachinesState
+getRestyleMachinesState isHealthy = foldMapM go
+  where
+    go machine@(Entity _ RestyleMachine {..}) = do
+        healthy <- isHealthy machine
+
+        pure $ case (restyleMachineEnabled, healthy) of
+            (True, True) -> steadyState machine
+            (True, False) -> enabledUnhealthyState machine
+            (False, True) -> disabledHealthyState machine
+            (False, False) -> mempty
 
 -- brittany-disable-next-binding
 

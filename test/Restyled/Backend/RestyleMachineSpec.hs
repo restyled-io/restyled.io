@@ -13,11 +13,11 @@ spec :: Spec
 spec = do
     withApp $ do
         describe "checkRestyleMachines" $ do
-            it "disables machines failing the check" $ runDB $ do
+            it "disables enabled machines failing the check" $ runDB $ do
                 machineId1 <- insertMachine True
                 machineId2 <- insertMachine True
                 machineId3 <- insertMachine True
-                Just machine2Before <- P.get machineId1
+                Just machine2Before <- P.get machineId2
 
                 result <-
                     checkRestyleMachines $ pure . (/= machineId2) . entityKey
@@ -26,6 +26,19 @@ spec = do
                 fetchRestyleMachineEnabled machineId1 `shouldReturn` True
                 fetchRestyleMachineEnabled machineId2 `shouldReturn` False
                 fetchRestyleMachineEnabled machineId3 `shouldReturn` True
+
+            it "enables disabled machines passing the check" $ runDB $ do
+                machineId1 <- insertMachine False
+                machineId2 <- insertMachine False
+                machineId3 <- insertMachine False
+
+                result <-
+                    checkRestyleMachines $ pure . (== machineId2) . entityKey
+
+                result `shouldBe` AllHealthy
+                fetchRestyleMachineEnabled machineId1 `shouldReturn` False
+                fetchRestyleMachineEnabled machineId2 `shouldReturn` True
+                fetchRestyleMachineEnabled machineId3 `shouldReturn` False
 
             it "won't cause zero enabled machines" $ runDB $ do
                 machineId1 <- insertMachine True
