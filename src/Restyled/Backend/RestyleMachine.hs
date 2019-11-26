@@ -1,9 +1,8 @@
 {-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 module Restyled.Backend.RestyleMachine
     ( runRestyleMachinesCheck
-    , fetchRestyleMachine
+    , withRestyleMachine
     , withRestyleMachineEnv
 
     -- * Exported for testing
@@ -18,12 +17,10 @@ import Restyled.Prelude
 import qualified Data.Map as Map
 import Data.Semigroup.Generic
 import qualified Data.Text.IO as T
-import Database.Persist.Sql (rawSql)
 import Restyled.Models
 import RIO.Directory
     (createDirectoryIfMissing, doesDirectoryExist, getHomeDirectory)
 import System.FilePath ((</>))
-import Text.Shakespeare.Text (st)
 
 runRestyleMachinesCheck
     :: (HasLogFunc env, HasDB env, HasProcessContext env) => RIO env ()
@@ -102,18 +99,19 @@ getRestyleMachinesState isHealthy = foldMapM go
             (False, True) -> disabledHealthyState machine
             (False, False) -> mempty
 
--- brittany-disable-next-binding
-
--- | Select a @'RestyleMachine'@ from the enabled set
-fetchRestyleMachine :: MonadIO m => SqlPersistT m (Maybe RestyleMachine)
-fetchRestyleMachine =
-    headMaybe . map entityVal <$> rawSql [st|
-        SELECT ??
-        FROM restyle_machine
-        WHERE restyle_machine.enabled = ?
-        ORDER BY RANDOM ()
-        LIMIT 1
-    |] [PersistBool True]
+-- | Fetch a Machine, and increment its @jobCount@ during execution
+withRestyleMachine
+    :: HasDB env => (Maybe (Entity RestyleMachine) -> RIO env a) -> RIO env a
+withRestyleMachine f = do
+    mMachine <- runDB $ do
+        mMachine <- selectFirst
+            [RestyleMachineEnabled ==. True]
+            [Asc RestyleMachineJobCount]
+        mMachine <$ traverse_ increment mMachine
+    f mMachine `finally` runDB (traverse_ decrement mMachine)
+  where
+    increment = flip update [RestyleMachineJobCount +=. 1] . entityKey
+    decrement = flip update [RestyleMachineJobCount -=. 1] . entityKey
 
 -- | Run a process on a @'RestyleMachine'@s
 withRestyleMachineEnv

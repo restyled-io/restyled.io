@@ -11,11 +11,12 @@ import Restyled.Backend.AcceptedJob
 import Restyled.Models
 
 -- | Execution of the Restyler process
---
--- TODO: try not to need @'Entity'@s, try not to need @'Repo'@.
---
 newtype ExecRestyler m = ExecRestyler
-    { unExecRestyler :: Entity Repo -> Entity Job -> m ExitCode
+    { unExecRestyler
+        :: Entity Repo
+        -> Entity Job
+        -> Maybe (Entity RestyleMachine)
+        -> m ExitCode
     }
 
 -- | Run the @'ExecRestyler'@ and capture exceptions to @'ExceptT'@
@@ -23,6 +24,7 @@ tryExecRestyler
     :: MonadUnliftIO m
     => ExecRestyler m
     -> AcceptedJob
+    -> Maybe (Entity RestyleMachine)
     -> ExceptT SomeException m ExitCode
 tryExecRestyler (ExecRestyler execRestyler) AcceptedJob {..} =
-    ExceptT $ tryAny $ execRestyler ajRepo ajJob
+    ExceptT . tryAny . execRestyler ajRepo ajJob

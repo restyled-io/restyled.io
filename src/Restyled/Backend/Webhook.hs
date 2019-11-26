@@ -15,6 +15,7 @@ import Formatting.Time (diff)
 import Restyled.Backend.AcceptedJob
 import Restyled.Backend.AcceptedWebhook
 import Restyled.Backend.ExecRestyler
+import Restyled.Backend.RestyleMachine
 import Restyled.Models
 import Restyled.Settings
 
@@ -43,17 +44,20 @@ processWebhook
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
-processWebhook execRestyler body = exceptT fromNotProcessed fromProcessed $ do
-    restrictedRepos <- appRestrictedRepos <$> view settingsL
-    webhook <- withExceptT WebhookIgnored $ acceptWebhook body
-    job <- withExceptT (JobIgnored $ awJob webhook)
-        $ acceptJob restrictedRepos webhook
+processWebhook execRestyler body = withRestyleMachine $ \mMachine ->
+    exceptT fromNotProcessed fromProcessed $ do
+        restrictedRepos <- appRestrictedRepos <$> view settingsL
+        webhook <- withExceptT WebhookIgnored $ acceptWebhook body
+        job <- withExceptT (JobIgnored $ awJob webhook)
+            $ acceptJob restrictedRepos webhook
 
-    let failure = ExecRestylerFailure $ ajJob job
-        success = ExecRestylerSuccess $ ajJob job
+        let failure = ExecRestylerFailure $ ajJob job
+            success = ExecRestylerSuccess $ ajJob job
 
-    logDebug $ fromString $ "Executing Restyler for " <> jobPath (ajJob job)
-    withExceptT failure $ success <$> tryExecRestyler execRestyler job
+        logDebug $ fromString $ "Executing Restyler for " <> jobPath (ajJob job)
+        withExceptT failure
+            $ success
+            <$> tryExecRestyler execRestyler job mMachine
 
 fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
 fromNotProcessed = \case

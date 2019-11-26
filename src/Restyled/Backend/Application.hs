@@ -36,7 +36,7 @@ execRestyler
        , HasDB env
        )
     => ExecRestyler (RIO env)
-execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
+execRestyler = ExecRestyler $ \(Entity _ repo) job mMachine -> do
     settings <- view settingsL
     token <- repoInstallationToken settings repo
 
@@ -48,11 +48,11 @@ execRestyler = ExecRestyler $ \(Entity _ repo) job -> do
     withEnv <- runDB $ do
         capture "system" $ unwords $ "docker" : dockerRunArgsLogged settings job
 
-        fetchRestyleMachine >>= \case
+        case mMachine of
             Nothing -> do
                 capture "system" "Running on local Docker host"
                 pure id
-            Just machine -> do
+            Just (Entity _ machine) -> do
                 capture "system" $ "Running on " <> displayMachine machine
                 pure $ withRestyleMachineEnv machine
 
