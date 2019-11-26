@@ -29,6 +29,7 @@ seedDB = do
             , restyleMachineCaCert = "-- CA --\n"
             , restyleMachineCert = "-- CERT --\n"
             , restyleMachineKey = "-- Key --\n"
+            , restyleMachineJobCount = 0
             }
         []
 

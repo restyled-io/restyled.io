@@ -59,6 +59,7 @@ RestyleMachine
   caCert Text
   cert Text
   key Text
+  jobCount Int
 
   UniqueRestyledMachine name
   deriving Eq Show

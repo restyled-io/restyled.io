@@ -81,6 +81,7 @@ insertMachine enabled = insert RestyleMachine
     , restyleMachineCaCert = ""
     , restyleMachineCert = ""
     , restyleMachineKey = ""
+    , restyleMachineJobCount = 0
     }
 
 fetchRestyleMachineEnabled

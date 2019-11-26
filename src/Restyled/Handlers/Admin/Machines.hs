@@ -30,6 +30,7 @@ machineForm =
         <*> (unTextarea <$> areq textareaField "Certificate Authority" Nothing)
         <*> (unTextarea <$> areq textareaField "Certificate" Nothing)
         <*> (unTextarea <$> areq textareaField "Private Key" Nothing)
+        <*> pure 0
 
 getAdminMachinesR :: Handler Html
 getAdminMachinesR = do
