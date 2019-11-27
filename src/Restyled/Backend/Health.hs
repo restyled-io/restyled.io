@@ -9,6 +9,7 @@ import Restyled.Prelude
 
 import Data.List (genericLength)
 import qualified Data.Text as T
+import Restyled.Backend.Webhook (queueDepth)
 import Restyled.Models
 import Restyled.TimeRange
 
@@ -34,8 +35,8 @@ runHealthChecks :: (HasLogFunc env, HasDB env, HasRedis env) => RIO env ()
 runHealthChecks = do
     runHealthCheck HealthCheck
         { hcName = "Webhooks queue depth"
-        , hcFetch = runRedis $ llen "restyled:hooks:webhooks"
-        , hcCompute = Count . either (const 999) fromIntegral
+        , hcFetch = runRedis queueDepth
+        , hcCompute = Count . maybe 999 fromIntegral
         , hcHealth = thresholds (> 50) (> 10)
         }
 

@@ -4,6 +4,7 @@ module Restyled.Backend.Webhook
     ( enqueueWebhook
     , awaitWebhook
     , processWebhook
+    , queueDepth
     )
 where
 
@@ -104,6 +105,9 @@ jobOutcome Job {..} = fromMaybe "N/A" $ do
     pure $ "exited " <> show exitCode <> " in " <> duration
   where
     getDuration = TL.unpack . format (diff False) . diffUTCTime jobCreatedAt
+
+queueDepth :: Redis (Maybe Integer)
+queueDepth = hush <$> llen queueName
 
 queueName :: ByteString
 queueName = "restyled:hooks:webhooks"
