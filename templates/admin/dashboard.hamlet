@@ -1,4 +1,11 @@
+<section #machines>
+  <h2>Machines
+  <div .dashboard>
+  <p>
+    <a href="#" #stop-refresh">Stop refresh
+
 <section #jobs>
+  <h2>Jobs
   <div .controls>
     <p .centered>
       <a .prev href=#prev>Previous

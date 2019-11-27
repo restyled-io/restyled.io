@@ -24,6 +24,9 @@ module Restyled.Prelude
     , pluralize
     , pluralize'
 
+    -- * Text
+    , decodeUtf8
+
     -- * Re-exports
     , module X
     )
@@ -138,3 +141,6 @@ pluralize'
     -> Int -- ^ Amount
     -> Text
 pluralize' s p = TL.toStrict . pluralize (TL.fromStrict s) (TL.fromStrict p)
+
+decodeUtf8 :: ByteString -> Text
+decodeUtf8 = decodeUtf8With lenientDecode

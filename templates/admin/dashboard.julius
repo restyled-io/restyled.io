@@ -65,4 +65,46 @@ $(function() {
   });
 
   generateDashboard(from, to);
+
+  function drawMachinesDashboard() {
+    const current = $("#machines .dashboard");
+    const redrawn = $("<div>").addClass("dashboard");
+
+    $.getJSON("/admin/machines/state", function(data) {
+      const queueDepth = $("<div>").addClass("queue-depth")
+      const load = $("<div>").addClass("load")
+      const jobCounts = $("<ul>").addClass("job-counts")
+      const containerProcesses = $("<div>").addClass("container-processes")
+
+      queueDepth.html(
+        `<p><strong>Queue depth</strong>: ${data.queueDepth}</p>`
+      );
+
+      $.each(data.jobCounts, function(name, jobCount) {
+        jobCounts.append($("<li>").html(
+          `${name}: ${jobCount}`
+        ));
+      });
+
+      $.each(data.containerProcesses, function(name, processes) {
+        containerProcesses.append($("<div>").html(
+          `<p>${name}</p><pre>${processes}</pre>`
+        ));
+      });
+
+      load.append(jobCounts)
+      load.append(containerProcesses)
+      redrawn.append(load);
+      redrawn.append(queueDepth);
+      current.replaceWith(redrawn);
+    });
+  }
+
+  drawMachinesDashboard();
+  const interval = window.setInterval(drawMachinesDashboard, 2000);
+
+  $("#machines #stop-refresh").click(function(e) {
+    e.preventDefault()
+    window.clearInterval(interval);
+  });
 });

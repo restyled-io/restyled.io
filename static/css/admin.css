@@ -18,6 +18,15 @@ nav {
   padding-right: 0;
 }
 
+/* Machines dashboard */
+#machines .dashboard .load {
+  display: flex;
+}
+
+#machines .dashboard .container-processes {
+  width: 60%;
+}
+
 /* modal */
 .modal {
   background-color: rgb(0,0,0);
