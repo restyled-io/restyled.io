@@ -11,8 +11,19 @@ shift
 
 # shellcheck disable=SC2046
 eval $(docker-machine env "$machine_name")
-printf '\e[34mName\e[0m: %s\n' "$machine_name"
-printf '\e[34mHost\e[0m: %s\n' "$DOCKER_HOST"
-printf '\e[34mCertificate Authority\e[0m:\n%s\n' "$(cat "$DOCKER_CERT_PATH"/ca.pem)"
-printf '\e[34mCertificate\e[0m:\n%s\n' "$(cat "$DOCKER_CERT_PATH"/cert.pem)"
-printf '\e[34mPrivate Key\e[0m:\n%s\n' "$(cat "$DOCKER_CERT_PATH"/key.pem)"
+
+ruby -r json -e "
+  def read_cert(path)
+    File.read(File.join(\"$DOCKER_CERT_PATH\", path))
+  end
+
+  json = {
+    name: \"$machine_name\",
+    host: \"$DOCKER_HOST\",
+    certificateAuthority: read_cert(\"ca.pem\"),
+    certificate: read_cert(\"cert.pem\"),
+    privateKey: read_cert(\"key.pem\"),
+  }
+
+  puts JSON.dump(json)
+"

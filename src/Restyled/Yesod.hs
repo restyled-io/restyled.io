@@ -1,3 +1,5 @@
+{-# LANGUAGE QuasiQuotes #-}
+
 module Restyled.Yesod
     (
     -- * DB
@@ -5,6 +7,7 @@ module Restyled.Yesod
 
     -- * Fields
     , epochField
+    , jsonField
 
     -- * Re-exports
     , module X
@@ -32,6 +35,25 @@ getEntity404 k = Entity k <$> get404 k
 epochField
     :: (Monad m, RenderMessage (HandlerSite m) FormMessage) => Field m UTCTime
 epochField = inputField parseEpoch
+
+jsonField
+    :: ( Monad m
+       , RenderMessage (HandlerSite m) FormMessage
+       , FromJSON a
+       , ToJSON a
+       )
+    => Field m a
+jsonField = Field
+    { fieldParse = parseHelper parseVal
+    , fieldView = \theId name attrs val isReq -> toWidget [hamlet|
+$newline never
+<textarea :isReq:required="" id="#{theId}" name="#{name}" *{attrs}>#{showVal val}
+|]
+    , fieldEnctype = UrlEncoded
+    }
+  where
+    parseVal = first (MsgInvalidEntry . pack) . eitherDecodeStrict . encodeUtf8
+    showVal = decodeUtf8 . encodeStrict
 
 parseEpoch :: Text -> Either FormMessage UTCTime
 parseEpoch t =

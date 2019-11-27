@@ -13,6 +13,7 @@ where
 
 import Restyled.Prelude
 
+import Restyled.Admin.CreateMachine
 import Restyled.Backend.RestyleMachine
 import Restyled.Foundation
 import Restyled.Models
@@ -20,17 +21,12 @@ import Restyled.Settings
 import Restyled.WebSockets
 import Restyled.Yesod
 
-machineForm :: Form RestyleMachine
+machineForm :: Form (Handler RestyleMachine)
 machineForm =
     renderDivs
-        $ RestyleMachine
-        <$> areq textField "Name" Nothing
-        <*> areq checkBoxField "Enabled" (Just True)
-        <*> areq textField "Host" Nothing
-        <*> (unTextarea <$> areq textareaField "Certificate Authority" Nothing)
-        <*> (unTextarea <$> areq textareaField "Certificate" Nothing)
-        <*> (unTextarea <$> areq textareaField "Private Key" Nothing)
-        <*> pure 0
+        $ createMachineGetRestyleMachine
+        <$> areq jsonField "Machine JSON" { fsAttrs = attrs } Nothing
+    where attrs = [("placeholder", createMachinePlaceholder), ("rows", "30")]
 
 getAdminMachinesR :: Handler Html
 getAdminMachinesR = do
@@ -53,7 +49,8 @@ postAdminMachinesR = do
     ((result, widget), enctype) <- runFormPost machineForm
 
     case result of
-        FormSuccess machine -> do
+        FormSuccess getMachine -> do
+            machine <- getMachine
             void $ runDB $ insert machine
             setMessage "Machine created"
             redirect $ AdminP $ AdminMachinesP AdminMachinesR
