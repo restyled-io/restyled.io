@@ -47,7 +47,7 @@ jobs:
 
   image:
     docker:
-      - image: restyled/ops:v5
+      - image: restyled/ops:v6
     steps:
       - checkout
       - setup_remote_docker:
@@ -67,7 +67,7 @@ jobs:
 
   release:
     docker:
-      - image: restyled/ops
+      - image: restyled/ops:v6
     steps:
       - setup_remote_docker:
           version: 18.09.3
@@ -76,18 +76,20 @@ jobs:
           command: |
             sha=${CIRCLE_SHA1:0:10}
             release_image=restyled/restyled.io:$sha
-            services=(web webhooks retries)
 
-            for service in "${services[@]}"; do
-              cat >"Dockerfile.$service" <<EOM
+            # Update ECS Backend service
+            ecs deploy restyled-prod restyled-prod-webhooks \
+              --image restyled-jobs "$release_image"
+
+            # Release web Heroku dyno
+            cat >Dockerfile.web <<EOM
             FROM $release_image
-            CMD ["/app/restyled.io", "$service"]
+            CMD ["/app/restyled.io", "web"]
             EOM
-            done
 
             heroku container:login
             heroku container:push --recursive --app restyled-io
-            heroku container:release "${services[@]}" --app restyled-io
+            heroku container:release web --app restyled-io
             notify "restyled-io" "Deployed at $sha"
 
 workflows:
