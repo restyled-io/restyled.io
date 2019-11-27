@@ -4,6 +4,7 @@ module Restyled.Backend.RestyleMachine
     ( runRestyleMachinesCheck
     , withRestyleMachine
     , withRestyleMachineEnv
+    , deleteRestyleMachine
 
     -- * Exported for testing
     , CheckRestyleMachinesResult(..)
@@ -19,7 +20,11 @@ import Data.Semigroup.Generic
 import qualified Data.Text.IO as T
 import Restyled.Models
 import RIO.Directory
-    (createDirectoryIfMissing, doesDirectoryExist, getHomeDirectory)
+    ( createDirectoryIfMissing
+    , doesDirectoryExist
+    , getHomeDirectory
+    , removeDirectoryRecursive
+    )
 import System.FilePath ((</>))
 
 runRestyleMachinesCheck
@@ -129,6 +134,12 @@ withRestyleMachineEnv machine f = do
         , ("DOCKER_TLS_VERIFY", "1")
         ]
         f
+
+deleteRestyleMachine :: MonadIO m => Entity RestyleMachine -> SqlPersistT m ()
+deleteRestyleMachine (Entity machineId machine) = do
+    delete machineId
+    certPath <- restyleMachineCertPath machine
+    whenM (doesDirectoryExist certPath) $ removeDirectoryRecursive certPath
 
 withExtraEnvVars
     :: (HasProcessContext env, MonadReader env m, MonadIO m)

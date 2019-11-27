@@ -1,7 +1,10 @@
 module Restyled.Yesod
     (
+    -- * DB
+      getEntity404
+
     -- * Fields
-      epochField
+    , epochField
 
     -- * Re-exports
     , module X
@@ -21,6 +24,10 @@ import Yesod.Paginator as X
 import Yesod.Persist as X (get404, getBy404)
 
 import Restyled.Prelude
+
+getEntity404
+    :: (MonadHandler m, SqlEntity a) => Key a -> SqlPersistT m (Entity a)
+getEntity404 k = Entity k <$> get404 k
 
 epochField
     :: (Monad m, RenderMessage (HandlerSite m) FormMessage) => Field m UTCTime

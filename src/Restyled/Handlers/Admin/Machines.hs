@@ -75,9 +75,7 @@ patchAdminMachineR machineId = do
 
 deleteAdminMachineR :: RestyleMachineId -> Handler Html
 deleteAdminMachineR machineId = do
-    runDB $ do
-        void $ get404 machineId
-        delete machineId
+    runDB $ deleteRestyleMachine =<< getEntity404 machineId
     setMessage "Machine deleted"
     redirect $ AdminP $ AdminMachinesP AdminMachinesR
 
