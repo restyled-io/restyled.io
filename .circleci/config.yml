@@ -79,6 +79,7 @@ jobs:
 
             # Update ECS Backend service
             ecs deploy restyled-prod restyled-prod-webhooks \
+              --region us-east-1 \
               --image restyled-jobs "$release_image"
 
             # Release web Heroku dyno
