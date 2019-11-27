@@ -65,7 +65,7 @@ jobs:
             docker-build-remote-cache "$release_image" \
               --build-arg "REVISION=$CIRCLE_SHA1"
 
-  release:
+  release-frontend:
     docker:
       - image: restyled/ops:v6
     steps:
@@ -77,12 +77,6 @@ jobs:
             sha=${CIRCLE_SHA1:0:10}
             release_image=restyled/restyled.io:$sha
 
-            # Update ECS Backend service
-            ecs deploy restyled-prod restyled-prod-webhooks \
-              --region us-east-1 \
-              --image restyled-jobs "$release_image"
-
-            # Release web Heroku dyno
             cat >Dockerfile.web <<EOM
             FROM $release_image
             CMD ["/app/restyled.io", "web"]
@@ -91,7 +85,24 @@ jobs:
             heroku container:login
             heroku container:push --recursive --app restyled-io
             heroku container:release web --app restyled-io
-            notify "restyled-io" "Deployed at $sha"
+            notify "restyled-io" "Frontend deployed at $sha"
+
+  release-backend:
+    docker:
+      - image: restyled/ops:v6
+    steps:
+      - setup_remote_docker:
+          version: 18.09.3
+      - run:
+          name: Release
+          command: |
+            sha=${CIRCLE_SHA1:0:10}
+            release_image=restyled/restyled.io:$sha
+
+            ecs deploy restyled-prod restyled-prod-webhooks \
+              --region us-east-1 \
+              --image restyled-jobs "$release_image"
+            notify "restyled-io" "Backend deployed at $sha"
 
 workflows:
   version: 2
@@ -99,7 +110,15 @@ workflows:
     jobs:
       - build
       - image
-      - release:
+      - release-backend:
+          requires:
+            - build
+            - image
+          filters:
+            branches:
+              only:
+                - master
+      - release-frontend:
           requires:
             - build
             - image
