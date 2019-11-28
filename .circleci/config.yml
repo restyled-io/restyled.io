@@ -99,9 +99,17 @@ jobs:
             sha=${CIRCLE_SHA1:0:10}
             release_image=restyled/restyled.io:$sha
 
-            ecs deploy restyled-prod restyled-prod-webhooks \
+            ecs deploy restyled-prod webhooks \
               --region us-east-1 \
-              --image restyled-jobs "$release_image"
+              --image restyled-backend "$release_image"
+
+            for cmd in health sync-marketplace; do
+              ecs cron restyled-prod "$cmd" \
+                --region us-east-1 \
+                --task restyled-prod-backend \
+                --command restyled-backend "/app/restyled.io,$cmd"
+            done
+
             notify "restyled-io" "Backend deployed at $sha"
 
 workflows:
