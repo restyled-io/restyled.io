@@ -45,6 +45,7 @@ docker-machine create \
   --driver amazonec2 \
   --amazonec2-root-size "$root_size" \
   --amazonec2-instance-type "$instance_type" \
+  --amazonec2-iam-instance-profile RestyleMachine \
   --amazonec2-monitoring \
   "$machine_name"
 
