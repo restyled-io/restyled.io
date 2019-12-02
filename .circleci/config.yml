@@ -106,7 +106,7 @@ jobs:
             for cmd in health sync-marketplace; do
               ecs cron restyled-prod "$cmd" \
                 --region us-east-1 \
-                --task restyled-prod-backend \
+                --image restyled-backend "$release_image" \
                 --command restyled-backend "/app/restyled.io,$cmd"
             done
 
