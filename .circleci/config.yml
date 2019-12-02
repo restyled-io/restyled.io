@@ -85,7 +85,7 @@ jobs:
             heroku container:login
             heroku container:push --recursive --app restyled-io
             heroku container:release web --app restyled-io
-            notify "restyled-io" "Frontend deployed at $sha"
+            notify "restyled-io[fronted]" "Deployed at $sha"
 
   release-backend:
     docker:
@@ -98,19 +98,19 @@ jobs:
           command: |
             sha=${CIRCLE_SHA1:0:10}
             release_image=restyled/restyled.io:$sha
+            scheduled_commands=(health sync-marketplace)
 
             ecs deploy restyled-prod webhooks \
               --region us-east-1 \
               --image restyled-backend "$release_image"
 
-            for cmd in health sync-marketplace; do
-              ecs cron restyled-prod "$cmd" \
+            for cmd in "${scheduled_commands[@]}"; do
+              ecs cron restyled-prod restyled-prod-backend "$cmd" \
                 --region us-east-1 \
-                --image restyled-backend "$release_image" \
                 --command restyled-backend "/app/restyled.io,$cmd"
             done
 
-            notify "restyled-io" "Backend deployed at $sha"
+            notify "restyled-io[backend]" "Deployed at $sha"
 
 workflows:
   version: 2
