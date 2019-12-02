@@ -100,15 +100,21 @@ jobs:
             release_image=restyled/restyled.io:$sha
             scheduled_commands=(health sync-marketplace)
 
-            ecs deploy restyled-prod webhooks \
-              --region us-east-1 \
-              --image restyled-backend "$release_image"
-
             for cmd in "${scheduled_commands[@]}"; do
               ecs cron restyled-prod restyled-prod-backend "$cmd" \
                 --region us-east-1 \
+                --rollback \
+                --no-deregister \
+                --image restyled-backend "$release_image" \
                 --command restyled-backend "/app/restyled.io,$cmd"
             done
+
+            ecs deploy restyled-prod webhooks \
+              --region us-east-1 \
+              --rollback \
+              --no-deregister \
+              --image restyled-backend "$release_image" \
+              --command restyled-backend "/app/restyled.io,webhooks"
 
             notify "restyled-io[backend]" "Deployed at $sha"
 
