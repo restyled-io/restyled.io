@@ -9,7 +9,8 @@ $(function() {
           x: "Date",
           value: ["Succeeded", "Failed", "Unfinished"]
         },
-        type: "line"
+        type: "area",
+        groups: [["Succeeded", "Failed", "Unfinished"]]
       },
       axis: {
         x: {
