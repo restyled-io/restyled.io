@@ -18,6 +18,7 @@ buildRepo owner name = Repo
     , repoInstallationId = 123
     , repoIsPrivate = False
     , repoDebugEnabled = False
+    , repoEnabled = True
     }
 
 buildPrivateRepo :: OwnerName -> RepoName -> Repo
@@ -28,6 +29,7 @@ buildPrivateRepo owner name = Repo
     , repoInstallationId = 123
     , repoIsPrivate = True
     , repoDebugEnabled = False
+    , repoEnabled = True
     }
 
 -- | TODO: this should be Fixture, not Factory because it's a singleton

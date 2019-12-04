@@ -18,7 +18,6 @@ import Restyled.Backend.AcceptedWebhook
 import Restyled.Backend.ExecRestyler
 import Restyled.Backend.RestyleMachine
 import Restyled.Models
-import Restyled.Settings
 
 enqueueWebhook :: ByteString -> Redis ()
 enqueueWebhook = void . lpush queueName . pure
@@ -41,16 +40,14 @@ data JobNotProcessed
 data JobProcessed = ExecRestylerSuccess (Entity Job) ExitCode
 
 processWebhook
-    :: (HasLogFunc env, HasSettings env, HasDB env)
+    :: (HasLogFunc env, HasDB env)
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
 processWebhook execRestyler body = withRestyleMachine $ \mMachine ->
     exceptT fromNotProcessed fromProcessed $ do
-        restrictedRepos <- appRestrictedRepos <$> view settingsL
         webhook <- withExceptT WebhookIgnored $ acceptWebhook body
-        job <- withExceptT (JobIgnored $ awJob webhook)
-            $ acceptJob restrictedRepos webhook
+        job <- withExceptT (JobIgnored $ awJob webhook) $ acceptJob webhook
 
         let failure = ExecRestylerFailure $ ajJob job
             success = ExecRestylerSuccess $ ajJob job

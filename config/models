@@ -24,6 +24,7 @@ Repo json
   installationId InstallationId
   isPrivate Bool
   debugEnabled Bool
+  enabled Bool
 
   UniqueRepo svcs owner name
   deriving Eq Show

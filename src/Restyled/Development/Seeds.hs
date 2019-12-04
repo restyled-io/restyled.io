@@ -56,6 +56,7 @@ restyledRepo name = Repo
     , repoInstallationId = 58920
     , repoIsPrivate = False
     , repoDebugEnabled = True
+    , repoEnabled = True
     }
 
 restyledRepoPrivate :: RepoName -> Repo

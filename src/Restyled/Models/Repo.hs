@@ -137,6 +137,7 @@ findOrCreateRepo Payload {..} = upsertRepo Repo
     , repoInstallationId = pInstallationId
     , repoIsPrivate = pRepoIsPrivate
     , repoDebugEnabled = False
+    , repoEnabled = True
     }
 
 upsertRepo :: MonadIO m => Repo -> SqlPersistT m (Entity Repo)

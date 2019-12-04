@@ -51,6 +51,7 @@ publicRepo owner name = Repo
     , repoInstallationId = 1
     , repoIsPrivate = False
     , repoDebugEnabled = False
+    , repoEnabled = True
     }
 
 makeInaccessible :: Repo -> Repo

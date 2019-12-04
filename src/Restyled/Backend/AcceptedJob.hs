@@ -28,20 +28,15 @@ data AcceptedJob = AcceptedJob
 
 -- | Given an Accepted webhook, accept or ignore that Job
 acceptJob
-    :: MonadIO m
-    => [Text]
-    -> AcceptedWebhook
-    -> ExceptT IgnoredJobReason m AcceptedJob
-acceptJob restrictedRepos AcceptedWebhook {..} = do
+    :: MonadIO m => AcceptedWebhook -> ExceptT IgnoredJobReason m AcceptedJob
+acceptJob AcceptedWebhook {..} = do
     when (repoSvcs repo /= GitHubSVCS) $ throwError $ NonGitHubRepo repo
-    when restricted $ throwError $ ManualRestriction repo
+    unless (repoEnabled repo) $ throwError $ ManualRestriction repo
     whenMarketplacePlanForbids allows $ throwError . PlanLimitation repo
     pure $ AcceptedJob awRepo awJob
   where
     repo = entityVal awRepo
     allows = awMarketplaceAllows
-    restricted =
-        repoPath (repoOwner repo) (repoName repo) `elem` restrictedRepos
 
 ignoredJobReasonToLogMessage :: IgnoredJobReason -> String
 ignoredJobReasonToLogMessage = \case

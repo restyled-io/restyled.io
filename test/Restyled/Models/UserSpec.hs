@@ -83,7 +83,6 @@ emptySettings = AppSettings
     , appMutableStatic = False
     , appStaticDir = error "unused"
     , appStubMarketplaceListing = True
-    , appRestrictedRepos = []
     }
 
 userWithEmail :: Text -> User
