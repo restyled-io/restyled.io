@@ -59,6 +59,7 @@ data AppSettings = AppSettings
     , appGitHubOAuthKeys :: Maybe OAuthKeys
     , appGitHubRateLimitToken :: ByteString
     , appGitLabOAuthKeys :: Maybe OAuthKeys
+    , appGitHubStudentsOAuthKeys :: Maybe OAuthKeys
     , appRestylerImage :: String
     , appRestylerTag :: Maybe String
     , appAdmins :: [Text]
@@ -105,6 +106,13 @@ loadSettings =
         <*> (liftA2 OAuthKeys
             <$> optional (var nonempty "GITLAB_OAUTH_CLIENT_ID" mempty)
             <*> optional (var nonempty "GITLAB_OAUTH_CLIENT_SECRET" mempty)
+            )
+        <*> (liftA2 OAuthKeys
+            <$> optional
+                    (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_ID" mempty)
+            <*> optional
+                    (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_SECRET" mempty
+                    )
             )
         <*> var str "RESTYLER_IMAGE" (def "restyled/restyler")
         <*> optional (var str "RESTYLER_TAG" mempty)

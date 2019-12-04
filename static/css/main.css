@@ -67,6 +67,20 @@ form .errors {
   text-align: center;
 }
 
+.github-students .logo {
+  width: 6em;
+  margin: auto;
+}
+
+.github-students .logo img {
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
+
+  outline-offset: 0;
+  outline: none;
+}
+
 section.login {
   margin-top: 3em;
 }

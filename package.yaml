@@ -88,6 +88,8 @@ library:
     - hoauth2
     - iso8601-time
     - jwt
+    - lens
+    - lens-aeson
     - load-env
     - megaparsec
     - monad-logger

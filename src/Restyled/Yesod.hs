@@ -20,6 +20,7 @@ import Yesod.Auth as X
 import Yesod.Auth.Message as X
 import Yesod.Auth.OAuth2 as X
 import Yesod.Auth.OAuth2.GitHub as X
+import Yesod.Auth.OAuth2.GitHubStudents as X
 import Yesod.Auth.OAuth2.GitLab as X
 import Yesod.Core as X
 import Yesod.Form as X

@@ -90,6 +90,7 @@ instance Yesod App where
     isAuthorized RobotsR _ = pure Authorized
     isAuthorized ThanksGitHubR _ = pure Authorized
     isAuthorized ThanksGitHubSetupR _ = pure Authorized
+    isAuthorized (GitHubStudentsP _) _ = pure Authorized
 
     isAuthorized ProfileR _ =
         maybe AuthenticationRequired (const Authorized) <$> maybeAuthId
@@ -196,10 +197,13 @@ instance YesodAuth App where
     loginHandler = do
         plugins <- getsYesod authPlugins
 
-        let formatPluginName = \case
-                "github" -> "GitHub"
-                "gitlab" -> "GitLab"
-                name -> name
+        let
+            -- Nothing results in hiding that plugin on the Login page
+            formatPluginName :: Text -> Maybe Text
+            formatPluginName = \case
+                "github" -> Just "GitHub"
+                "gitlab" -> Just "GitLab"
+                _ -> Nothing
 
         authLayout $ do
             setTitle "Log In"
@@ -208,6 +212,7 @@ instance YesodAuth App where
     authPlugins app = addAuthBackDoor (app ^. settingsL)
         . addOAuth2Plugin oauth2GitLab (appGitLabOAuthKeys $ app ^. settingsL)
         . addOAuth2Plugin oauth2GitHub (appGitHubOAuthKeys $ app ^. settingsL)
+        . addOAuth2Plugin oauth2GitHubStudents (appGitHubStudentsOAuthKeys $ app ^. settingsL)
         $ []
 
 instance RenderMessage App FormMessage where

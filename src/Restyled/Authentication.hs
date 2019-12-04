@@ -5,7 +5,9 @@ where
 
 import Restyled.Prelude
 
+import qualified Data.Text as T
 import Network.OAuth.OAuth2 as OAuth2
+import Restyled.GitHubStudents (giftGitHubStudents)
 import Restyled.Models
 import Restyled.Yesod
 
@@ -41,14 +43,17 @@ authenticateUser creds@Creds {..} = do
 
     case (mUserId, userFromCreds creds) of
         -- Existing user, good data: update accordingly
-        (Just userId, Right user) ->
+        (Just userId, Right user) -> do
+            giftGitHubStudents creds
             Authenticated userId <$ replaceUser userId user
 
         -- Existing user, no data: authenticate anyway
         (Just userId, Left _) -> pure $ Authenticated userId
 
         -- New user, good data: create accordingly
-        (Nothing, Right user) -> Authenticated <$> insert user
+        (Nothing, Right user) -> do
+            giftGitHubStudents creds
+            Authenticated <$> insert user
 
         -- No user, no data: bail
         (Nothing, Left err) -> do
@@ -79,8 +84,8 @@ replaceUser userId User {..} = update userId $ catMaybes
     ]
 
 userFromCreds :: Creds site -> Either String User
-userFromCreds creds = case credsPlugin creds of
-    "github" -> do
+userFromCreds creds
+    | "github" `T.isPrefixOf` credsPlugin creds = do
         GitHubUser {..} <- getUserResponseJSON creds
 
         pure User
@@ -94,8 +99,7 @@ userFromCreds creds = case credsPlugin creds of
             , userCredsIdent = credsIdent creds
             , userCredsPlugin = credsPlugin creds
             }
-
-    "gitlab" -> do
+    | "gitlab" == credsPlugin creds = do
         GitLabUser {..} <- getUserResponseJSON creds
 
         pure User
@@ -109,5 +113,4 @@ userFromCreds creds = case credsPlugin creds of
             , userCredsIdent = credsIdent creds
             , userCredsPlugin = credsPlugin creds
             }
-
-    x -> Left $ unpack $ "Unexpected AuthPlugin: " <> x
+    | otherwise = Left $ unpack $ "Unexpected AuthPlugin: " <> credsPlugin creds

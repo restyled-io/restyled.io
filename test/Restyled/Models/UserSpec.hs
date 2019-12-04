@@ -74,6 +74,7 @@ emptySettings = AppSettings
     , appGitHubOAuthKeys = Nothing
     , appGitHubRateLimitToken = error "unused"
     , appGitLabOAuthKeys = Nothing
+    , appGitHubStudentsOAuthKeys = Nothing
     , appRestylerImage = ""
     , appRestylerTag = Nothing
     , appAdmins = []

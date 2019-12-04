@@ -1,0 +1,30 @@
+<header .github-students>
+  <h1>GitHub Student Developer Pack
+  <div .logo>
+    <img src=@{staticR "img/logos/github-students.png"}>
+
+<section>
+  $if wasGifted
+    <p> Thanks for signing up for Restyled's student offer!
+
+    <p>
+      You've been gifted our
+      <em>Friends & Family
+      plan and can receive Restyled PRs on private repositories for free.
+
+    <p>
+      Don't forget to install the
+      <a href="https://github.com/apps/restyled-io">Restyled.io App</a>,
+      check out our
+      <a href="https://github.com/restyled-io/restyled.io/wiki">documentation</a>,
+      and if you run into any issues, please
+      <a href=mailto:support@restyled.io>email support</a>.
+  $else
+    <p>
+      Unfortunately you're not able to redeem this benefit. Are you sure you
+      have the
+      <a href="https://education.github.com/pack">GitHub Student Developer Pack</a>?
+
+    <p>
+      If this issue persists, please
+      <a href=mailto:support@restyled.io>email support</a>.

@@ -22,6 +22,7 @@ import Restyled.Handlers.Admin.Marketplace
 import Restyled.Handlers.Admin.Metrics
 import Restyled.Handlers.Admin.Repos
 import Restyled.Handlers.Common
+import Restyled.Handlers.GitHubStudents
 import Restyled.Handlers.Home
 import Restyled.Handlers.Marketplace
 import Restyled.Handlers.PrivacyPolicy
