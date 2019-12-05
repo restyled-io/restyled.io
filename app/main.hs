@@ -8,7 +8,7 @@ import Restyled.Backend.Application
 import Restyled.Backend.Foundation (loadBackend)
 import Restyled.Backend.Health (runHealthChecks)
 import Restyled.Backend.Marketplace (runSynchronize)
-import Restyled.Backend.RestyleMachine (runRestyleMachinesCheck)
+import Restyled.Backend.Reconcile (runReconcile)
 import Restyled.Development.Seeds (seedDB)
 import Restyled.Foundation (loadApp)
 import Restyled.Options
@@ -26,6 +26,6 @@ main = do
         Backend cmd -> runRIO backend $ case cmd of
             Webhooks -> runWebhooks
             SyncMarketplace -> runSynchronize
-            CheckRestyleMachines -> runRestyleMachinesCheck
             Health -> runHealthChecks
+            Reconcile -> runReconcile
             SeedDB -> runDB seedDB
