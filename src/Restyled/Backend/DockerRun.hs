@@ -11,11 +11,14 @@ import Restyled.Settings
 
 dockerRunArgs :: AppSettings -> AccessToken -> Repo -> Entity Job -> [String]
 dockerRunArgs settings token repo job =
-    ["run", "--rm"] <> restylerEnv settings token repo <> restyler settings job
+    ["run", "--rm", "--label", "restyler"]
+        <> restylerEnv settings token repo
+        <> restyler settings job
 
 -- | @'dockerRunArgsLogged'@ but without possibly-secret @--env@ arguments
 dockerRunArgsLogged :: AppSettings -> Entity Job -> [String]
-dockerRunArgsLogged settings job = ["run", "--rm"] <> restyler settings job
+dockerRunArgsLogged settings job =
+    ["run", "--rm", "--label", "restyler"] <> restyler settings job
 
 restyler :: AppSettings -> Entity Job -> [String]
 restyler settings job =

@@ -45,13 +45,14 @@ getContainerProcesses
     -> m (HashMap Text Text)
 getContainerProcesses machines =
     fmap HashMap.fromList $ for machines $ \machine -> do
-        -- TODO: do I care about errors here?
-        (_ec, out, _stderr) <- withRestyleMachineEnv machine $ proc
+        out <- withRestyleMachineEnv machine $ proc
             "docker"
             [ "ps"
+            , "--filter"
+            , "--label=restyler"
             , "--format"
             , "{{.RunningFor}} {{.Image}}\\n  {{.Command}}"
             , "--no-trunc"
             ]
-            readProcess
+            readProcessStdout_
         pure (restyleMachineName machine, decodeUtf8 $ LBS.toStrict out)
