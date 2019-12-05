@@ -6,6 +6,7 @@ module Restyled.Models.Repo
       repoPath
     , repoPullPath
     , repoIsDebug
+    , repoInstallationToken
 
     -- * Queries
     , fetchReposByOwnerName
@@ -46,6 +47,12 @@ repoPullPath owner name num = repoPath owner name <> "#" <> toPathPiece num
 repoIsDebug :: AppSettings -> Repo -> Bool
 repoIsDebug AppSettings {..} Repo {..} =
     appLogLevel == LevelDebug || repoDebugEnabled
+
+repoInstallationToken
+    :: (HasCallStack, MonadIO m) => AppSettings -> Repo -> m AccessToken
+repoInstallationToken AppSettings {..} Repo {..} = do
+    auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
+    untryIO $ accessTokenFor auth repoInstallationId
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo

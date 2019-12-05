@@ -22,8 +22,8 @@ data RestyledCommand
 data BackendCommand
     = Webhooks
     | SyncMarketplace
-    | CheckRestyleMachines
     | Health
+    | Reconcile
     | SeedDB
 
 parseRestyledOptions :: IO RestyledOptions
@@ -43,10 +43,7 @@ restyledOptions = RestyledOptions
         (  command "web" (info (pure Web) mempty)
         <> command "webhooks" (info (pure $ Backend Webhooks) mempty)
         <> command "sync-marketplace" (info (pure $ Backend SyncMarketplace) mempty)
-        <> command "check-restyle-machines" (info (pure $ Backend CheckRestyleMachines) mempty)
         <> command "health" (info (pure $ Backend Health) mempty)
+        <> command "reconcile" (info (pure $ Backend Reconcile) mempty)
         <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
-
-        -- Deprecated alias
-        <> command "sync-marketplace-once" (info (pure $ Backend SyncMarketplace) mempty)
         )

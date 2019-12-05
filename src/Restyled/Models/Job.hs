@@ -14,6 +14,7 @@ module Restyled.Models.Job
     , attachJobOutput
     , fetchJobOutput
     , captureJobLogLine
+    , fetchLastJobLogLineCreatedAt
 
     -- * Completing Jobs
     , completeJobSkipped
@@ -35,6 +36,8 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         , jobOwner = repoOwner
         , jobRepo = repoName
         , jobPullRequest = pullRequestNumber
+        , jobMachineName = Nothing
+        , jobContainerId = Nothing
         , jobCreatedAt = now
         , jobUpdatedAt = now
         , jobCompletedAt = Nothing
@@ -83,6 +86,13 @@ captureJobLogLine jobId stream content = do
         , jobLogLineStream = stream
         , jobLogLineContent = content
         }
+
+fetchLastJobLogLineCreatedAt
+    :: MonadIO m => JobId -> SqlPersistT m (Maybe UTCTime)
+fetchLastJobLogLineCreatedAt jobId =
+    jobLogLineCreatedAt . entityVal <$$> selectFirst
+        [JobLogLineJob ==. jobId]
+        [Desc JobLogLineCreatedAt]
 
 completeJobSkipped
     :: MonadIO m => String -> Entity Job -> SqlPersistT m (Entity Job)

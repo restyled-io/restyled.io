@@ -1,0 +1,12 @@
+# vim: ft=yaml
+Description: Add machine and container to job data
+Created: 2019-12-10 17:47:27.984139403 UTC
+Depends: create-job
+Apply: |
+  ALTER TABLE job
+    ADD COLUMN machine_name text NULL,
+    ADD COLUMN container_id text NULL
+Revert: |
+  ALTER TABLE job
+    DROP COLUMN IF EXISTS machine_name,
+    DROP COLUMN IF EXISTS container_id

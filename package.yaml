@@ -86,6 +86,7 @@ library:
     - http-conduit
     - http-types
     - hoauth2
+    - iso8601-time
     - jwt
     - load-env
     - megaparsec

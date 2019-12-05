@@ -35,6 +35,9 @@ Job json
   repo RepoName
   pullRequest PullRequestNum
 
+  machineName Text Maybe
+  containerId Text Maybe
+
   createdAt UTCTime
   updatedAt UTCTime
   completedAt UTCTime Maybe
@@ -62,7 +65,7 @@ RestyleMachine
   key Text
   jobCount Int
 
-  UniqueRestyledMachine name
+  UniqueRestyleMachine name
   deriving Eq Show
 
 MarketplacePlan
