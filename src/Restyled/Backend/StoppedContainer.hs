@@ -11,6 +11,7 @@ data StoppedContainer = StoppedContainer
     , scFinishedAt :: UTCTime
     , scExitCode :: Int
     }
+    deriving Show
 
 instance FromJSON StoppedContainer where
     parseJSON = withObject "Container" $ \o -> do
@@ -31,4 +32,9 @@ getStoppedContainerT
     -> MaybeT (RIO env) StoppedContainer
 getStoppedContainerT containerId = do
     bs <- lift $ proc "docker" ["inspect", containerId] readProcessStdout_
-    hoistMaybe $ decode bs
+
+    case eitherDecode bs of
+        Left err -> do
+            logError $ "docker-inspect: " <> fromString err
+            hoistMaybe Nothing
+        Right xs -> hoistMaybe $ listToMaybe xs
