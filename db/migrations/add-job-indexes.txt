@@ -1,0 +1,8 @@
+# vim: ft=yaml
+Description: Add indexes on job
+Created: 2019-12-11 19:22:13.026251439 UTC
+Depends: create-job
+Apply: |
+  CREATE INDEX job_created_at_idx ON job (created_at)
+Revert: |
+  DROP INDEX IF EXISTS job_created_at_idx
