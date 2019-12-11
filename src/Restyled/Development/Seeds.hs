@@ -6,7 +6,7 @@ where
 import Restyled.Prelude
 
 import qualified Prelude as Unsafe
-import Restyled.Backend.Marketplace
+import Restyled.Backend.DiscountMarketplacePlan
 import Restyled.Models
 
 seedDB :: MonadIO m => SqlPersistT m ()

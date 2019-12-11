@@ -7,7 +7,6 @@ module Restyled.Backend.Marketplace
     , whenMarketplacePlanForbids
 
     -- * Helpers useful outside this module
-    , fetchDiscountMarketplacePlan
     , isPrivateRepoPlan
 
     -- * Sync
@@ -17,6 +16,7 @@ where
 
 import Restyled.Prelude
 
+import Restyled.Backend.DiscountMarketplacePlan
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.Settings
@@ -116,20 +116,6 @@ deleteUnsynchronized synchronizedAccountIds = do
     let accountIds = map entityKey unsynchronizedAccounts
     deleteWhere [MarketplaceEnabledRepoMarketplaceAccount <-. accountIds]
     deleteWhere [MarketplaceAccountId <-. accountIds]
-
-fetchDiscountMarketplacePlan
-    :: MonadIO m => SqlPersistT m (Entity MarketplacePlan)
-fetchDiscountMarketplacePlan = upsert
-    plan
-    [ MarketplacePlanName =. marketplacePlanName
-    , MarketplacePlanDescription =. marketplacePlanDescription
-    ]
-  where
-    plan@MarketplacePlan {..} = MarketplacePlan
-        { marketplacePlanGithubId = 0
-        , marketplacePlanName = "Friends & Family"
-        , marketplacePlanDescription = "Manually managed discount plan"
-        }
 
 data MarketplacePlanAllows
     = MarketplacePlanAllows
