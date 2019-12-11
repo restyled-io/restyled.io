@@ -49,7 +49,7 @@ getContainerProcesses machines =
             "docker"
             [ "ps"
             , "--filter"
-            , "--label=restyler"
+            , "label=restyler"
             , "--format"
             , "{{.RunningFor}} {{.Image}}\\n  {{.Command}}"
             , "--no-trunc"
