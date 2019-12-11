@@ -88,7 +88,7 @@ followJobContainer mTimestamp job container = do
 
     exitCode <- wait waitAsync <* wait logsAsync
     capture job "system" $ "Restyler exited " <> displayExitCode exitCode
-    exitCode <$ proc "docker" ["rm", container] runProcess
+    exitCode <$ proc "docker" ["rm", container] readProcess
 
 capture
     :: (HasLogFunc env, HasDB env) => Entity Job -> Text -> String -> RIO env ()
