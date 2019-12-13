@@ -39,9 +39,7 @@ instance HasRedis Backend where
 
 loadBackend :: AppSettings -> IO Backend
 loadBackend settings@AppSettings {..} = do
-    logFunc <- case appLogStyle of
-        Terminal -> terminalLogFunc appLogLevel
-        LogDNA -> pure $ logDNALogFunc appLogLevel
+    logFunc <- terminalLogFunc appLogLevel
 
     runRIO logFunc $ logInfo "Starting up..."
 
