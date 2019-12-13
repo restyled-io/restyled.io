@@ -18,7 +18,6 @@ runReconcile = do
         , JobCompletedAt ==. Nothing
         ]
         [Asc JobCreatedAt]
-    logInfo $ "Reconciling " <> displayShow (length openJobs) <> " job(s)"
     traverse_ reconcileJob openJobs
 
 reconcileJob
@@ -33,9 +32,8 @@ reconcileJob job@(Entity jobId Job {..}) = void $ runMaybeT $ do
     logInfo
         $ fromString
         $ unpack
-        $ "Reconciling "
-        <> repoPullPath jobOwner jobRepo jobPullRequest
-        <> " on "
+        $ repoPullPath jobOwner jobRepo jobPullRequest
+        <> " in progress on "
         <> machineName
         <> ":"
         <> pack containerId
@@ -47,10 +45,15 @@ reconcileJob job@(Entity jobId Job {..}) = void $ runMaybeT $ do
             mTimestamp <- runDB $ fetchLastJobLogLineCreatedAt jobId
 
             logInfo
-                $ "Following stopped container from "
+                $ "Reconciling stopped container from "
                 <> displayShow mTimestamp
+                <> " to "
+                <> displayShow (scFinishedAt stoppedContainer)
+                <> " (exited "
+                <> displayShow (scExitCode stoppedContainer)
+                <> ")"
+
             void $ followJobContainer mTimestamp job containerId
-            logInfo "Finishing Job"
             runDB $ finishJob job machine stoppedContainer
 
 finishJob
