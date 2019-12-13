@@ -17,7 +17,7 @@ instance FromJSON StoppedContainer where
     parseJSON = withObject "Container" $ \o -> do
         state <- o .: "State"
         running <- state .: "Running"
-        guard $ not running
+        when running $ fail "Container not stopped"
         StoppedContainer
             <$> state
             .: "StartedAt"
@@ -35,6 +35,6 @@ getStoppedContainerT containerId = do
 
     case eitherDecode bs of
         Left err -> do
-            logError $ "docker-inspect: " <> fromString err
+            logWarn $ "docker-inspect: " <> fromString err
             hoistMaybe Nothing
         Right xs -> hoistMaybe $ listToMaybe xs
