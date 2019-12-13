@@ -55,12 +55,6 @@ dockerRunJob (Entity _ repo) job mMachine = do
     handleAny loggedExitFailure $ withEnv $ do
         container <- chomp <$> proc "docker" args readProcessStdout_
 
-        runDB $ update
-            (entityKey job)
-            [ JobMachineName =. Just machineName
-            , JobContainerId =. Just (pack container)
-            ]
-
         capture job "system"
             $ "Running on "
             <> unpack machineName
