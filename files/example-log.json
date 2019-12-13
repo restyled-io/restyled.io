@@ -1,0 +1,16 @@
+{
+  "messageType": "DATA_MESSAGE",
+  "owner": "123456789012",
+  "logGroup": "sampleGroup",
+  "logStream": "testStream",
+  "subscriptionFilters": [
+    "LambdaStream_cloudwatchlogs-node"
+  ],
+  "logEvents": [
+    {
+      "id": "34622316099697884706540976068822859012661220141643892546",
+      "timestamp": 1557946425136,
+      "message": "INFO This is Sample Log Line for CloudWatch Logging..."
+    }
+  ]
+}
