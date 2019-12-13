@@ -13,6 +13,7 @@ import Restyled.Settings
 dockerRunArgs :: AppSettings -> AccessToken -> Repo -> Entity Job -> [String]
 dockerRunArgs settings token repo job =
     [ "--label", "restyler"
+    , "--label", "job-id=" <> unpack (toPathPiece $ entityKey job)
     , "--env", "DEBUG=" <> if repoIsDebug settings repo then "1" else ""
     , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack (atToken token)
     , "--volume", "/tmp:/tmp"
