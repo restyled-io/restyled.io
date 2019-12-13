@@ -41,7 +41,7 @@ loadBackend :: AppSettings -> IO Backend
 loadBackend settings@AppSettings {..} = do
     logFunc <- terminalLogFunc appLogLevel
 
-    runRIO logFunc $ logInfoN $ pack $ displayAppSettings settings
+    runRIO logFunc $ logInfo "Starting up..."
 
     Backend logFunc settings
         <$> mkDefaultProcessContext
