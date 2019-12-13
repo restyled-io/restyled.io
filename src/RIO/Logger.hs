@@ -57,10 +57,10 @@ simpleLogFunc logLevel useColor = mkLogFunc $ \_cs _source level msg ->
 
 levelBuilder :: LogLevel -> Builder
 levelBuilder = byteString . \case
-    LevelDebug -> "Debug"
-    LevelInfo -> "Info"
-    LevelWarn -> "Warn"
-    LevelError -> "Error"
+    LevelDebug -> "DEBUG"
+    LevelInfo -> "INFO"
+    LevelWarn -> "WARN"
+    LevelError -> "ERROR"
     LevelOther x -> encodeUtf8 x
 
 levelStyle :: LogLevel -> SGR
