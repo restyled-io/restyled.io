@@ -9,7 +9,6 @@ where
 import Restyled.Prelude
 
 import Restyled.Settings
-import Restyled.Settings.Display
 
 -- | Like @'App'@ but with no webapp-related bits
 data Backend = Backend
