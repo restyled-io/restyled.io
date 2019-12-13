@@ -6,6 +6,7 @@ module RIO.Logger
       terminalLogFunc
     , terminalUseColor
     , simpleLogFunc
+    , logDNALogFunc
 
     -- * Interfacing with @"Control.Monad.Logger"@ types
     , logFuncLog
@@ -17,7 +18,9 @@ import RIO
 import qualified Control.Monad.Logger as Logger
 import Data.ByteString.Builder (Builder, byteString, toLazyByteString)
 import qualified Data.ByteString.Char8 as BS8
+import Data.Time.ISO8601 (formatISO8601)
 import RIO.Orphans ()
+import RIO.Time (getCurrentTime)
 import System.Console.ANSI
 
 -- | @'simpleLogFunc'@ with use-color set automatically
@@ -70,6 +73,23 @@ levelStyle = \case
     LevelWarn -> SetColor Foreground Dull Yellow
     LevelError -> SetColor Foreground Dull Red
     LevelOther _ -> Reset
+
+logDNALogFunc
+    :: LogLevel
+    -- ^ Minimum @'LogLevel'@
+    -> LogFunc
+logDNALogFunc logLevel = mkLogFunc $ \_cs _source level msg ->
+    when (level >= logLevel) $ do
+        now <- getCurrentTime
+
+        BS8.putStrLn
+            $ toStrictBytes
+            $ toLazyByteString
+            $ fromString (formatISO8601 now)
+            <> " - "
+            <> levelBuilder level
+            <> " "
+            <> getUtf8Builder msg
 
 -- | Convert a @'LogFunc'@ to a function of @'MonadLogger'@ arguments
 logFuncLog

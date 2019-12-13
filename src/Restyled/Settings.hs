@@ -1,8 +1,12 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Restyled.Settings
     ( OAuthKeys(..)
     , addOAuth2Plugin
+
+    -- * LogStyle
+    , LogStyle(..)
 
     -- * Runtime @'AppSettings'@
     , AppSettings(..)
@@ -46,6 +50,14 @@ addOAuth2Plugin
 addOAuth2Plugin mkPlugin = maybe id $ \OAuthKeys {..} ->
     (<> [mkPlugin oauthKeysClientId oauthKeysClientSecret])
 
+data LogStyle = Terminal | LogDNA
+
+parseLogStyle :: String -> Either String LogStyle
+parseLogStyle = \case
+    "terminal" -> Right Terminal
+    "logDNA" -> Right LogDNA
+    x -> Left $ "Invalid LOG_STYLE: " <> x
+
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
     , appRedisConf :: ConnectInfo
@@ -53,6 +65,7 @@ data AppSettings = AppSettings
     , appHost :: HostPreference
     , appPort :: Int
     , appLogLevel :: LogLevel
+    , appLogStyle :: LogStyle
     , appCopyright :: Text
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
@@ -94,6 +107,7 @@ loadSettings =
         <*> var str "HOST" (def "*4")
         <*> var auto "PORT" (def 3000)
         <*> var logLevel "LOG_LEVEL" (def LevelInfo)
+        <*> var (eitherReader parseLogStyle) "LOG_STYLE" (def LogDNA)
         <*> var str "COPYRIGHT" (def "Patrick Brisbin 2018-2019")
         <*> var githubId "GITHUB_APP_ID" mempty
         <*> var nonempty "GITHUB_APP_KEY" mempty
