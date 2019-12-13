@@ -47,7 +47,7 @@ jobs:
 
   image:
     docker:
-      - image: restyled/ops:v8
+      - image: restyled/ops:v9
     steps:
       - checkout
       - setup_remote_docker:
@@ -67,7 +67,7 @@ jobs:
 
   release-frontend:
     docker:
-      - image: restyled/ops:v8
+      - image: restyled/ops:v9
     steps:
       - setup_remote_docker:
           version: 18.09.3
@@ -89,7 +89,7 @@ jobs:
 
   release-backend:
     docker:
-      - image: restyled/ops:v8
+      - image: restyled/ops:v9
     steps:
       - setup_remote_docker:
           version: 18.09.3
@@ -98,7 +98,7 @@ jobs:
           command: |
             sha=${CIRCLE_SHA1:0:10}
             release_image=restyled/restyled.io:$sha
-            ecs-deploy-restyled --image restyled-backend "$release_image"
+            ecs-deploy-restyled --image restyled "$release_image"
             notify "restyled-io[backend]" "Deployed at $sha"
 
 workflows:
