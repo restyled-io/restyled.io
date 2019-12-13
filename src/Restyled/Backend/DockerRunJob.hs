@@ -3,6 +3,10 @@
 module Restyled.Backend.DockerRunJob
     ( dockerRunJob
     , followJobContainer
+
+    -- * Useful utility
+    -- | TODO: find a new home
+    , chomp
     )
 where
 
@@ -31,11 +35,17 @@ import Restyled.Settings
 -- this up, but may not find an open Job to reconcile it to.
 --
 dockerRunJob
-    :: (HasLogFunc env, HasDB env, HasSettings env, HasProcessContext env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasSettings env
+       , HasProcessContext env
+       )
     => Entity Repo
     -> Entity Job
     -> Maybe (Entity RestyleMachine)
-    -> RIO env ExitCode
+    -> m ExitCode
     -- ^ Exit code will be @99@ if there was some exception in this process
 dockerRunJob (Entity _ repo) job mMachine = do
     settings <- view settingsL
@@ -66,11 +76,16 @@ dockerRunJob (Entity _ repo) job mMachine = do
         mMachine
 
 followJobContainer
-    :: (HasLogFunc env, HasDB env, HasProcessContext env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasProcessContext env
+       )
     => Maybe UTCTime
     -> Entity Job
     -> String -- ^ Container Id
-    -> RIO env ExitCode
+    -> m ExitCode
 followJobContainer mTimestamp job container = do
     waitAsync <-
         async
@@ -91,12 +106,19 @@ followJobContainer mTimestamp job container = do
     exitCode <$ proc "docker" ["rm", container] readProcess
 
 capture
-    :: (HasLogFunc env, HasDB env) => Entity Job -> Text -> String -> RIO env ()
+    :: (MonadUnliftIO m, MonadReader env m, HasLogFunc env, HasDB env)
+    => Entity Job
+    -> Text
+    -> String
+    -> m ()
 capture job stream msg = do
     when (stream == "system") $ logDebug $ fromString msg
     runDB $ captureJobLogLine (entityKey job) stream $ pack msg
 
-loggedExitFailure :: (HasLogFunc env, Show ex) => ex -> RIO env ExitCode
+loggedExitFailure
+    :: (MonadIO m, MonadReader env m, HasLogFunc env, Show ex)
+    => ex
+    -> m ExitCode
 loggedExitFailure ex = ExitFailure 99 <$ logError msg
     where msg = "RestyleMachine.dockerRunJob: " <> displayShow ex
 

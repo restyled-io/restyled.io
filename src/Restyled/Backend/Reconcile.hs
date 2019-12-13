@@ -1,5 +1,8 @@
+
+
 module Restyled.Backend.Reconcile
     ( runReconcile
+    , reconcileMachine
     )
 where
 
@@ -10,63 +13,91 @@ import Restyled.Backend.RestyleMachine (withRestyleMachineEnv)
 import Restyled.Backend.StoppedContainer
 import Restyled.Models
 
-runReconcile :: (HasLogFunc env, HasDB env, HasProcessContext env) => RIO env ()
+runReconcile
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasProcessContext env
+       )
+    => m ()
 runReconcile = do
-    openJobs <- runDB $ selectList
-        [ JobMachineName !=. Nothing
-        , JobContainerId !=. Nothing
-        , JobCompletedAt ==. Nothing
-        ]
-        [Asc JobCreatedAt]
-    traverse_ reconcileJob openJobs
+    machines <- runDB $ selectList [] []
+
+    for_ machines $ \(Entity machineId machine) -> do
+        (warnings, reconciled) <- withRestyleMachineEnv machine reconcileMachine
+
+        unless (null warnings)
+            $ logWarn
+            $ "Reconcilation warnings: "
+            <> displayShow warnings
+
+        unless (reconciled == 0) $ do
+            logInfo $ displayShow reconciled <> " Job(s) reconciled"
+            runDB $ update machineId [RestyleMachineJobCount -=. reconciled]
+
+reconcileMachine
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasProcessContext env
+       )
+    => m ([String], Int)
+reconcileMachine =
+    either unreconciled reconcileStoppedContainers =<< getStoppedContainers
+  where
+    unreconciled :: Applicative m => String -> m ([String], Int)
+    unreconciled err = pure ([err], 0)
+
+reconcileStoppedContainers
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasProcessContext env
+       )
+    => [StoppedContainer]
+    -> m ([String], Int)
+reconcileStoppedContainers =
+    pure . second sum . partitionEithers <=< traverse reconcileStoppedContainer
+
+reconcileStoppedContainer
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasProcessContext env
+       )
+    => StoppedContainer
+    -> m (Either String Int)
+reconcileStoppedContainer stoppedContainer@StoppedContainer {..} = do
+    mJob <- runDB
+        $ selectFirst [JobId ==. scJobId, JobCompletedAt ==. Nothing] []
+
+    case mJob of
+        Nothing -> pure $ Left noSuchJob
+        Just job -> Right 1 <$ reconcileJob job stoppedContainer
+  where
+    noSuchJob =
+        "No incomplete Job found with Id " <> unpack (toPathPiece scJobId)
 
 reconcileJob
-    :: (HasLogFunc env, HasDB env, HasProcessContext env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasProcessContext env
+       )
     => Entity Job
-    -> RIO env ()
-reconcileJob job@(Entity jobId Job {..}) = void $ runMaybeT $ do
-    machineName <- hoistMaybe jobMachineName
-    containerId <- unpack <$> hoistMaybe jobContainerId
-    machine <- MaybeT $ runDB $ getBy $ UniqueRestyleMachine machineName
-
-    logInfo
-        $ fromString
-        $ unpack
-        $ repoPullPath jobOwner jobRepo jobPullRequest
-        <> " in progress on "
-        <> machineName
-        <> ":"
-        <> pack containerId
-
-    withRestyleMachineEnv (entityVal machine) $ do
-        stoppedContainer <- getStoppedContainerT containerId
-
-        lift $ do
-            mTimestamp <- runDB $ fetchLastJobLogLineCreatedAt jobId
-
-            logInfo
-                $ "Reconciling stopped container from "
-                <> displayShow mTimestamp
-                <> " to "
-                <> displayShow (scFinishedAt stoppedContainer)
-                <> " (exited "
-                <> displayShow (scExitCode stoppedContainer)
-                <> ")"
-
-            void $ followJobContainer mTimestamp job containerId
-            runDB $ finishJob job machine stoppedContainer
-
-finishJob
-    :: MonadIO m
-    => Entity Job
-    -> Entity RestyleMachine
     -> StoppedContainer
-    -> SqlPersistT m ()
-finishJob (Entity jobId _) (Entity machineId _) StoppedContainer {..} = do
-    update
-        jobId
+    -> m ()
+reconcileJob job StoppedContainer {..} = do
+    mTimestamp <- runDB $ fetchLastJobLogLineCreatedAt scJobId
+    void $ followJobContainer mTimestamp job scContainerId
+    runDB $ update
+        scJobId
         [ JobUpdatedAt =. scFinishedAt
         , JobCompletedAt =. Just scFinishedAt
         , JobExitCode =. Just scExitCode
         ]
-    update machineId [RestyleMachineJobCount -=. 1]
