@@ -44,11 +44,10 @@ simpleLogFunc logLevel useColor = mkLogFunc $ \_cs _source level msg ->
         $ BS8.putStrLn
         $ toStrictBytes
         $ toLazyByteString
-        $ "["
-        <> setSGRCodeBuilder [levelStyle level]
+        $ setSGRCodeBuilder [levelStyle level]
         <> levelBuilder level
         <> setSGRCodeBuilder [Reset]
-        <> "] "
+        <> " "
         <> getUtf8Builder msg
   where
     setSGRCodeBuilder
