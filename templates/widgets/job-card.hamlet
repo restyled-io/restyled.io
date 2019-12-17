@@ -27,3 +27,8 @@
         #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
 
   ^{jobOutput output}
+
+  <p>
+    <small>
+      <a target=_blank href=#{issueUrl}>
+        Report an Issue with this Job

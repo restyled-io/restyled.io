@@ -108,6 +108,7 @@ library:
     - time
     - transformers
     - unordered-containers
+    - uri-encode
     - vector
     - wai
     - wai-extra
