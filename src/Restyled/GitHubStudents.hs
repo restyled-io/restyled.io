@@ -51,10 +51,16 @@ handleGitHubStudent GitHubStudent { id, login } verified
     | verified = giftDiscountMarketplacePlan id login
     | otherwise = ungiftDiscountMarketplacePlan id login
 
-verifyIsGitHubStudent :: MonadIO m => OAuth2.AccessToken -> m Bool
+verifyIsGitHubStudent
+    :: (MonadIO m, MonadLogger m) => OAuth2.AccessToken -> m Bool
 verifyIsGitHubStudent token = do
     body <- getResponseBody <$> httpBS req
-    pure $ fromMaybe False $ body ^? key "student" . _Bool
+
+    case body ^? key "student" . _Bool of
+        Nothing -> do
+            logWarnN $ "Unexpected response: " <> tshow body
+            pure False
+        Just x -> pure x
   where
     req =
         addRequestHeader hAccept "application/json"
