@@ -74,6 +74,7 @@ library:
     - data-default
     - envparse
     - errors
+    - esqueleto
     - extra
     - fast-logger
     - file-embed
