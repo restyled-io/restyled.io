@@ -8,7 +8,7 @@ import Restyled.Test
 import qualified Database.Persist as P
 import qualified GitHub.Data as GH
 import Restyled.Authorization (authRepoCacheKey)
-import Restyled.Handlers.Profile (GitHubOrg(..), githubOrgsCacheKey)
+import Restyled.GitHubOrg
 
 spec :: Spec
 spec = withApp $ do

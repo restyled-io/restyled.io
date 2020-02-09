@@ -1,0 +1,24 @@
+<section>
+  <table>
+    <thead>
+      <tr>
+        <th>Account
+        <th>Plan
+        <th>GitHub
+        <th>Email
+
+    <tbody>
+      $forall Customer mAccount mUser <- customers
+        <tr>
+          $maybe account <- mAccount
+            <td>#{caMarketplaceAccountLogin account}
+            <td>#{caMarketplacePlanName account}
+          $nothing
+            <td>
+            <td>
+          $maybe user <- mUser
+            <td>#{cuGitHubLogin user}
+            <td>#{cuEmail user}
+          $nothing
+            <td>
+            <td>
