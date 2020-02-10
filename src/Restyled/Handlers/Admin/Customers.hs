@@ -5,10 +5,9 @@ module Restyled.Handlers.Admin.Customers
     )
 where
 
-import Restyled.Prelude hiding (isNothing, on, (==.), (^.))
+import Restyled.Prelude.Esqueleto
 
 import qualified Data.Function as Function
-import Database.Esqueleto
 import Restyled.Foundation
 import Restyled.GitHubOrg
 import Restyled.Models
@@ -73,25 +72,19 @@ orphanCustomer found user = do
     pure Customer { cAccount = Nothing, cUser = Just user }
 
 fetchCustomerAccounts :: MonadIO m => SqlPersistT m [CustomerAccount]
-fetchCustomerAccounts = do
-    results <- select $ from $ \(accounts `InnerJoin` plans) -> do
-        on
-            $ plans
-            ^. MarketplacePlanId
-            ==. accounts
-            ^. MarketplaceAccountMarketplacePlan
-        pure
-            ( accounts ^. MarketplaceAccountGithubLogin
-            , plans ^. MarketplacePlanName
-            )
-
-    pure $ map
-        (\(login, name) -> CustomerAccount
-            { caMarketplaceAccountLogin = unValue login
-            , caMarketplacePlanName = unValue name
-            }
-        )
-        results
+fetchCustomerAccounts =
+    selectMap (uncurry CustomerAccount . unValue2)
+        $ from
+        $ \(accounts `InnerJoin` plans) -> do
+              on
+                  $ plans
+                  ^. persistIdField
+                  ==. accounts
+                  ^. MarketplaceAccountMarketplacePlan
+              pure
+                  ( accounts ^. MarketplaceAccountGithubLogin
+                  , plans ^. MarketplacePlanName
+                  )
 
 fetchCustomerUsers :: SqlPersistT Handler [CustomerUser]
 fetchCustomerUsers = do
