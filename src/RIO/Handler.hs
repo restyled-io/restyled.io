@@ -1,6 +1,10 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module RIO.Handler () where
+module RIO.Handler
+    ( handlerEnvL
+    , siteL
+    )
+where
 
 import RIO
 

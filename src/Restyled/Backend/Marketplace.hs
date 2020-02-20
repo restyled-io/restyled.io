@@ -93,9 +93,18 @@ synchronizeAccount planId account = entityKey <$> upsert
     MarketplaceAccount
         { marketplaceAccountGithubId = GH.marketplaceAccountId account
         , marketplaceAccountGithubLogin = GH.marketplaceAccountLogin account
+        , marketplaceAccountGithubType = GH.marketplaceAccountType account
+        , marketplaceAccountEmail = GH.marketplaceAccountEmail account
+        , marketplaceAccountBillingEmail =
+            GH.marketplaceAccountOrganizationBillingEmail account
         , marketplaceAccountMarketplacePlan = planId
         }
-    [MarketplaceAccountMarketplacePlan =. planId]
+    [ MarketplaceAccountGithubType =. GH.marketplaceAccountType account
+    , MarketplaceAccountEmail =. GH.marketplaceAccountEmail account
+    , MarketplaceAccountBillingEmail
+        =. GH.marketplaceAccountOrganizationBillingEmail account
+    , MarketplaceAccountMarketplacePlan =. planId
+    ]
 
 deleteUnsynchronized
     :: HasLogFunc env => [MarketplaceAccountId] -> SqlPersistT (RIO env) ()

@@ -45,6 +45,9 @@ seedDB = do
             { marketplaceAccountGithubId = 50812
             , marketplaceAccountGithubLogin = "pbrisbin"
             , marketplaceAccountMarketplacePlan = discountPlanId
+            , marketplaceAccountGithubType = "User"
+            , marketplaceAccountEmail = Nothing
+            , marketplaceAccountBillingEmail = Nothing
             }
         [MarketplaceAccountMarketplacePlan =. discountPlanId]
 

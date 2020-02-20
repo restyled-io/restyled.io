@@ -43,6 +43,10 @@ instance MonadCache m => MonadCache (SqlPersistT m) where
     getCache = lift . getCache
     setCache k = lift . setCache k
 
+instance HasRedis env => MonadCache (RIO env) where
+    getCache = getCacheRedis
+    setCache = setCacheRedis
+
 instance HasRedis env => MonadCache (HandlerFor env) where
     getCache = getCacheRedis
     setCache = setCacheRedis

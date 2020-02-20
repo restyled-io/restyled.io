@@ -76,6 +76,10 @@ MarketplacePlan
 MarketplaceAccount
   githubId GitHubUserId
   githubLogin GitHubUserName
+  githubType Text -- User vs Org
+
+  email Text Maybe
+  billingEmail Text Maybe
 
   marketplacePlan MarketplacePlanId
 

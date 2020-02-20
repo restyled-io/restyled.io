@@ -60,7 +60,7 @@ fetchJobLogLines jobId offset = selectList
 data JobOutput
     = JobOutputInProgress (Entity Job)
     | JobOutputCompleted [Entity JobLogLine]
-    | JobOutputLegacy Job
+    | JobOutputCompressed Job
 
 attachJobOutput
     :: MonadIO m => Entity Job -> SqlPersistT m (Entity Job, JobOutput)
@@ -72,7 +72,7 @@ fetchJobOutput jobE@(Entity jobId job@Job {..}) =
         (Just _, Nothing, Nothing) -> JobOutputCompleted <$> selectList
             [JobLogLineJob ==. jobId]
             [Asc JobLogLineCreatedAt]
-        (Just _, _, _) -> pure $ JobOutputLegacy job
+        (Just _, _, _) -> pure $ JobOutputCompressed job
         (_, _, _) -> pure $ JobOutputInProgress jobE
 
 captureJobLogLine :: MonadIO m => JobId -> Text -> Text -> SqlPersistT m ()

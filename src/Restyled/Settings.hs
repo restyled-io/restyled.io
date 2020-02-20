@@ -25,7 +25,9 @@ import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
 import Restyled.Env
 import Restyled.Yesod hiding (LogLevel(..))
+import RIO.Handler
 import Yesod.Auth.Dummy
+import Yesod.Core.Types (HandlerData(..))
 
 #if DEVELOPMENT
 import Yesod.Default.Util (widgetFileReload)
@@ -76,6 +78,9 @@ class HasSettings env where
 
 instance HasSettings AppSettings where
     settingsL = id
+
+instance HasSettings env => HasSettings (HandlerData child env) where
+    settingsL = handlerEnvL . siteL . settingsL
 
 addAuthBackDoor
     :: YesodAuth app => AppSettings -> [AuthPlugin app] -> [AuthPlugin app]

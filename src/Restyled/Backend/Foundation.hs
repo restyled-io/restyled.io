@@ -1,6 +1,7 @@
 module Restyled.Backend.Foundation
     ( Backend(..)
     , loadBackend
+    , loadBackendHandle
     , runDB
     , runRedis
     )
@@ -38,8 +39,11 @@ instance HasRedis Backend where
         lens backendRedisConn $ \x y -> x { backendRedisConn = y }
 
 loadBackend :: AppSettings -> IO Backend
-loadBackend settings@AppSettings {..} = do
-    logFunc <- terminalLogFunc appLogLevel
+loadBackend = loadBackendHandle stdout
+
+loadBackendHandle :: Handle -> AppSettings -> IO Backend
+loadBackendHandle h settings@AppSettings {..} = do
+    logFunc <- terminalLogFunc h appLogLevel
 
     runRIO logFunc $ logInfo "Starting up..."
 

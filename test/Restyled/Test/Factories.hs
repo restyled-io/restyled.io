@@ -46,4 +46,7 @@ buildMarketplaceAccount userId userName planId = MarketplaceAccount
     { marketplaceAccountGithubId = userId
     , marketplaceAccountGithubLogin = userName
     , marketplaceAccountMarketplacePlan = planId
+    , marketplaceAccountGithubType = "User"
+    , marketplaceAccountEmail = Nothing
+    , marketplaceAccountBillingEmail = Nothing
     }

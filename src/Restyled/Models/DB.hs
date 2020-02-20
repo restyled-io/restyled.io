@@ -1,3 +1,4 @@
+{-# LANGUAGE NoDeriveAnyClass #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Entities defined via @config/models@

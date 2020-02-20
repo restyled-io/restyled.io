@@ -74,4 +74,7 @@ insertAccountOnPlan username planGitHubId = do
         { marketplaceAccountGithubId = 123
         , marketplaceAccountGithubLogin = username
         , marketplaceAccountMarketplacePlan = planId
+        , marketplaceAccountGithubType = "User"
+        , marketplaceAccountEmail = Nothing
+        , marketplaceAccountBillingEmail = Nothing
         }

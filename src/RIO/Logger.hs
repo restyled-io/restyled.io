@@ -4,7 +4,6 @@ module RIO.Logger
     (
     -- * Building @'LogFunc'@
       terminalLogFunc
-    , terminalUseColor
     , simpleLogFunc
 
     -- * Interfacing with @"Control.Monad.Logger"@ types
@@ -21,27 +20,25 @@ import RIO.Orphans ()
 import System.Console.ANSI
 
 -- | @'simpleLogFunc'@ with use-color set automatically
-terminalLogFunc :: LogLevel -> IO LogFunc
-terminalLogFunc logLevel = simpleLogFunc logLevel <$> terminalUseColor
-
-terminalUseColor :: IO Bool
-terminalUseColor = and <$> traverse hSupportsANSI [stdout, stderr]
+terminalLogFunc :: Handle -> LogLevel -> IO LogFunc
+terminalLogFunc h logLevel = simpleLogFunc h logLevel <$> hSupportsANSI h
 
 -- | Construct a simple @'LogFunc'@
 --
--- - Output to @'stdout'@
 -- - Only show message at or above a given @'LogLevel'@
 -- - Use color if told to
 --
 simpleLogFunc
-    :: LogLevel
+    :: Handle
+    -- ^ Handle for output
+    -> LogLevel
     -- ^ Minimum @'LogLevel'@
     -> Bool
     -- ^ Use color?
     -> LogFunc
-simpleLogFunc logLevel useColor = mkLogFunc $ \_cs _source level msg ->
+simpleLogFunc h logLevel useColor = mkLogFunc $ \_cs _source level msg ->
     when (level >= logLevel)
-        $ BS8.putStrLn
+        $ BS8.hPutStrLn h
         $ toStrictBytes
         $ toLazyByteString
         $ setSGRCodeBuilder [levelStyle level]

@@ -10,6 +10,7 @@ default-extensions:
   - ConstraintKinds
   - DataKinds
   - DefaultSignatures
+  - DeriveAnyClass
   - DeriveDataTypeable
   - DeriveFoldable
   - DeriveFunctor
@@ -67,6 +68,7 @@ library:
     - blaze-html
     - blaze-markup
     - bytestring
+    - cassava
     - composition-extra
     - conduit
     - conduit-extra

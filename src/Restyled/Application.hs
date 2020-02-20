@@ -15,7 +15,6 @@ import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Restyled.Foundation
 import Restyled.Handlers.Admin
-import Restyled.Handlers.Admin.Customers
 import Restyled.Handlers.Admin.Jobs
 import Restyled.Handlers.Admin.Machines
 import Restyled.Handlers.Admin.Machines.State

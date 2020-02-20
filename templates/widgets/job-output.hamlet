@@ -13,7 +13,7 @@ $case output
       $forall logLine <- logLines
         ^{colorizedJobLogLine logLine}
 
-  $of JobOutputLegacy job
+  $of JobOutputCompressed job
     $maybe x <- jobStdout job
       $if not (T.null x)
         <pre>

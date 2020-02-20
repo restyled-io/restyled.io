@@ -7,7 +7,8 @@ where
 
 import Prelude
 
-import Data.Aeson (FromJSON(..), withObject, (.:))
+import Data.Aeson (FromJSON(..), withObject, (.:), (.:?))
+import Data.Text (Text)
 import Data.Vector (Vector)
 import GitHub.Auth
 import GitHub.Data
@@ -17,11 +18,24 @@ import GitHub.Request
 data MarketplaceAccount = MarketplaceAccount
     { marketplaceAccountId :: Id User
     , marketplaceAccountLogin :: Name User
+    , marketplaceAccountEmail :: Maybe Text
+    , marketplaceAccountOrganizationBillingEmail :: Maybe Text
+    , marketplaceAccountType :: Text
     }
 
 instance FromJSON MarketplaceAccount where
-    parseJSON = withObject "Account"
-        $ \o -> MarketplaceAccount <$> o .: "id" <*> o .: "login"
+    parseJSON = withObject "Account" $ \o ->
+        MarketplaceAccount
+            <$> o
+            .: "id"
+            <*> o
+            .: "login"
+            <*> o
+            .:? "email"
+            <*> o
+            .:? "organization_billing_email"
+            <*> o
+            .: "type"
 
 marketplaceListingPlanAccounts
     :: AuthMethod am

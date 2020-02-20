@@ -38,8 +38,6 @@
   /repos AdminReposP:
     / AdminReposR GET
     /search AdminReposSearchR GET
-  /customers AdminCustomersP:
-    / AdminCustomersR GET
   /machines AdminMachinesP:
     / AdminMachinesR GET POST
     /new AdminMachinesNewR GET

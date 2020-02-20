@@ -11,13 +11,13 @@ import Restyled.Prelude
 
 import qualified Data.Vector as V
 import Restyled.Cache
-import Restyled.Foundation
 import Restyled.Models
 import Restyled.Settings
 import Restyled.Yesod
 
 -- | Wrapper for JSON instances for caching
 newtype GitHubOrg = GitHubOrg SimpleOrganization
+    deriving newtype (Eq, Ord)
 
 githubOrgLogin :: GitHubOrg -> GitHubUserName
 githubOrgLogin (GitHubOrg SimpleOrganization {..}) =
@@ -42,12 +42,28 @@ instance FromJSON GitHubOrg where
         simpleOrganizationAvatarUrl <- o .: "avatarUrl"
         pure $ GitHubOrg SimpleOrganization { .. }
 
-requestUserOrgs :: User -> Handler [GitHubOrg]
+requestUserOrgs
+    :: ( MonadIO m
+       , MonadLogger m
+       , MonadCache m
+       , MonadReader env m
+       , HasSettings env
+       )
+    => User
+    -> m [GitHubOrg]
 requestUserOrgs = maybe (pure []) requestUserNameOrgs . userGithubUsername
 
-requestUserNameOrgs :: GitHubUserName -> Handler [GitHubOrg]
+requestUserNameOrgs
+    :: ( MonadIO m
+       , MonadLogger m
+       , MonadCache m
+       , MonadReader env m
+       , HasSettings env
+       )
+    => GitHubUserName
+    -> m [GitHubOrg]
 requestUserNameOrgs username = caching (githubOrgsCacheKey username) $ do
-    auth <- getsYesod $ Just . OAuth . appGitHubRateLimitToken . view settingsL
+    auth <- asks $ Just . OAuth . appGitHubRateLimitToken . view settingsL
     result <- liftIO $ publicOrganizationsFor' auth username
 
     case result of

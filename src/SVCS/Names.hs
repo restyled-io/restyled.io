@@ -36,6 +36,7 @@ import Prelude
 
 import Control.Monad ((<=<))
 import Data.Aeson
+import Data.Csv (ToField(..))
 import Data.Proxy
 import Data.Semigroup ((<>))
 import Data.Text (Text, unpack)
@@ -118,12 +119,12 @@ instance PersistFieldSql (Id a) where
 instance ToMarkup (Id a) where
     toMarkup = toMarkup . untagId
 
-deriving instance Num IssueNumber
-deriving instance Read IssueNumber
-deriving instance PathPiece IssueNumber
-deriving instance PersistField IssueNumber
-deriving instance PersistFieldSql IssueNumber
-deriving instance ToMarkup IssueNumber
+deriving newtype instance Num IssueNumber
+deriving newtype instance Read IssueNumber
+deriving newtype instance PathPiece IssueNumber
+deriving newtype instance PersistField IssueNumber
+deriving newtype instance PersistFieldSql IssueNumber
+deriving newtype instance ToMarkup IssueNumber
 
 instance Read (Name a) where
     readsPrec n = map (\(x, s) -> (mkName Proxy x, s)) . readsPrec n
@@ -141,6 +142,9 @@ instance PersistFieldSql (Name a) where
 
 instance ToMarkup (Name a) where
     toMarkup = toMarkup . untagName
+
+instance ToField (Name a) where
+    toField = toField . untagName
 
 instance Num (Id a) where
     fromInteger = mkId Proxy . fromInteger

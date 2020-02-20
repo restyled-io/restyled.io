@@ -1,0 +1,12 @@
+# vim: ft=yaml
+Description: Fix billing email
+Created: 2020-02-25 21:02:22.688481184 UTC
+Depends: add-marketplace-account-fields add-marketplace-account
+Apply: |
+  ALTER TABLE "marketplace_account"
+    ALTER COLUMN billing_email DROP NOT NULL,
+    ALTER COLUMN billing_email DROP DEFAULT
+Revert: |
+  ALTER TABLE "marketplace_account"
+    ALTER COLUMN billing_email SET DEFAULT 'unknown@example.com',
+    ALTER COLUMN billing_email SET NOT NULL

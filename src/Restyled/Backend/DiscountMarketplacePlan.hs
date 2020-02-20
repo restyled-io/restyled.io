@@ -41,6 +41,9 @@ giftDiscountMarketplacePlan githubId githubLogin = do
             { marketplaceAccountGithubId = githubId
             , marketplaceAccountGithubLogin = githubLogin
             , marketplaceAccountMarketplacePlan = planId
+            , marketplaceAccountGithubType = "User"
+            , marketplaceAccountEmail = Nothing
+            , marketplaceAccountBillingEmail = Nothing
             }
         [MarketplaceAccountMarketplacePlan =. planId]
 

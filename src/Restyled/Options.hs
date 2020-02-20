@@ -9,6 +9,7 @@ where
 import Restyled.Prelude
 
 import Options.Applicative
+import Restyled.Export
 
 data RestyledOptions = RestyledOptions
     { oEnvFile :: Maybe FilePath
@@ -18,6 +19,7 @@ data RestyledOptions = RestyledOptions
 data RestyledCommand
     = Web
     | Backend BackendCommand
+    | Export ExportOptions
 
 data BackendCommand
     = Webhooks
@@ -46,4 +48,5 @@ restyledOptions = RestyledOptions
         <> command "health" (info (pure $ Backend Health) mempty)
         <> command "reconcile" (info (pure $ Backend Reconcile) mempty)
         <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
+        <> command "export" (info (Export <$> exportOptions) mempty)
         )
