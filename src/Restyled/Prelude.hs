@@ -17,6 +17,9 @@ module Restyled.Prelude
     -- * ExceptT
     , bimapMExceptT
 
+    -- * Bufunctor
+    , both
+
     -- * IO
     , setLineBuffering
 
@@ -43,7 +46,7 @@ import Control.Monad.Logger as X
 import Control.Monad.Trans.Maybe as X
 import Data.Aeson as X hiding (Result(..))
 import Data.Aeson.Casing as X
-import Data.Bifunctor as X (first, second)
+import Data.Bifunctor as X (Bifunctor, bimap, first, second)
 import Data.Bitraversable as X (bimapM)
 import Data.ByteString as X (ByteString)
 import Data.Char as X (isSpace, toLower)
@@ -54,7 +57,7 @@ import Data.Text as X (Text, pack, unpack)
 import Database.Persist as X
 import Database.Persist.Sql as X (SqlBackend, SqlPersistT)
 import RIO.DB as X
-import RIO.List as X (headMaybe)
+import RIO.List as X (headMaybe, partition)
 import RIO.Logger as X
 import RIO.Process as X
 import RIO.Process.Follow as X
@@ -117,6 +120,9 @@ bimapMExceptT f g (ExceptT m) = ExceptT $ h =<< m
   where
     h (Left e) = Left <$> f e
     h (Right a) = Right <$> g a
+
+both :: Bifunctor p => (a -> b) -> p a a -> p b b
+both f = bimap f f
 
 -- | Set output handles to line buffering
 --

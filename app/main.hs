@@ -5,6 +5,7 @@ import Restyled.Prelude
 import LoadEnv (loadEnvFrom)
 import Restyled.Application (runWaiApp)
 import Restyled.Backend.Application
+import Restyled.Backend.CompressJobs (runCompressJobs)
 import Restyled.Backend.Foundation (loadBackend, loadBackendHandle)
 import Restyled.Backend.Health (runHealthChecks)
 import Restyled.Backend.Marketplace (runSynchronize)
@@ -34,6 +35,7 @@ main = do
                 Health -> runHealthChecks
                 Reconcile -> runReconcile
                 SeedDB -> runDB seedDB
+                CompressJobs options -> runCompressJobs options
         Export options -> do
             -- Log to stderr, since we produce actually useful output
             backend <- loadBackendHandle stderr settings

@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Compress Job Log Line data to avoid blowing our DB row limits. Will compress
+# more recent Jobs if they have high line-counts, then will compress older Jobs
+# with lower line-counts. Recent Jobs (this week) are only compressed if over
+# 1000 lines, while Jobs older then 180 days are compressed regardless of line
+# count.
+#
+set -eu
+
+compress_jobs() {
+  echo "compress-jobs $*"
+  stack exec restyled.io -- -e .env.production compress-jobs "$@"
+}
+
+compress_jobs --days 7 --lines 1000
+compress_jobs --days 14 --lines 500
+compress_jobs --days 30 --lines 250
+compress_jobs --days 90 --lines 100
+compress_jobs --days 180 --lines 0

@@ -15,6 +15,7 @@ module Restyled.Models.Job
     , fetchJobOutput
     , captureJobLogLine
     , fetchLastJobLogLineCreatedAt
+    , compressJobOutput
 
     -- * Completing Jobs
     , completeJobSkipped
@@ -25,6 +26,7 @@ where
 
 import Restyled.Prelude
 
+import qualified Data.Text as T
 import Restyled.Models.DB
 
 insertJob
@@ -91,6 +93,19 @@ fetchLastJobLogLineCreatedAt jobId =
     jobLogLineCreatedAt . entityVal <$$> selectFirst
         [JobLogLineJob ==. jobId]
         [Desc JobLogLineCreatedAt]
+
+compressJobOutput :: MonadIO m => JobId -> SqlPersistT m ()
+compressJobOutput jobId = do
+    logLines <- fetchJobLogLines jobId 0
+
+    let
+        (out, err) =
+            both (T.unlines . map jobLogLineContent)
+                $ partition ((/= "stderr") . jobLogLineStream)
+                $ map entityVal logLines
+
+    update jobId [JobStdout =. Just out, JobStderr =. Just err]
+    deleteWhere [JobLogLineId <-. map entityKey logLines]
 
 completeJobSkipped
     :: MonadIO m => String -> Entity Job -> SqlPersistT m (Entity Job)
