@@ -40,7 +40,7 @@ runHealthChecks = do
         , hcHealth = thresholds (> 50) (> 10)
         }
 
-    runHealthCheck HealthCheck
+    runOnHoursHealthCheck HealthCheck
         { hcName = "Effective success rate last hour"
         , hcFetch = do
             range <- timeRangeFromMinutesAgo 60
@@ -48,6 +48,14 @@ runHealthChecks = do
         , hcCompute = errorRate [10, 11, 20]
         , hcHealth = thresholds (< 60) (< 80)
         }
+
+runOnHoursHealthCheck :: HasLogFunc env => HealthCheck (RIO env) a -> RIO env ()
+runOnHoursHealthCheck hc = do
+    onHours <- fromMaybe True . isLocalWorkingHours "EST" <$> getCurrentTime
+
+    if onHours
+        then runHealthCheck hc
+        else logInfoN $ "Skipping on-hours HealthCheck: " <> hcName hc
 
 runHealthCheck :: HasLogFunc env => HealthCheck (RIO env) a -> RIO env ()
 runHealthCheck HealthCheck {..} = do
@@ -94,3 +102,22 @@ threshold f = \case
     Count c -> f $ fromIntegral c
     Rate Nothing -> False
     Rate (Just r) -> f r
+
+isLocalWorkingHours :: String -> UTCTime -> Maybe Bool
+isLocalWorkingHours tzString now = do
+    tz <- readMaybe tzString
+    let LocalTime {..} = utcToLocalTime tz now
+    guard $ isWorkDay $ dayOfWeek localDay
+    sevenAM <- makeTimeOfDayValid 7 0 0
+    sevenPM <- makeTimeOfDayValid 19 0 0
+    guard $ localTimeOfDay >= sevenAM && localTimeOfDay <= sevenPM
+    pure True
+  where
+    isWorkDay = \case
+        Sunday -> False
+        Monday -> True
+        Tuesday -> True
+        Wednesday -> True
+        Thursday -> True
+        Friday -> True
+        Saturday -> False
