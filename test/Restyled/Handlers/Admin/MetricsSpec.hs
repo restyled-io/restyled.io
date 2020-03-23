@@ -5,7 +5,6 @@ where
 
 import Restyled.Test
 
-import Control.Lens ((^..))
 import Data.Aeson.Lens
 import qualified Prelude as Unsafe
 

@@ -48,14 +48,13 @@ import Data.Aeson as X hiding (Result(..))
 import Data.Aeson.Casing as X
 import Data.Bifunctor as X (Bifunctor, bimap, first, second)
 import Data.Bitraversable as X (bimapM)
-import Data.ByteString as X (ByteString)
 import Data.Char as X (isSpace, toLower)
 import Data.Either as X (fromLeft, fromRight)
 import Data.Functor.Syntax as X ((<$$>))
 import Data.Proxy as X
-import Data.Text as X (Text, pack, unpack)
+import Data.Text as X (pack, unpack)
 import Database.Persist as X
-import Database.Persist.Sql as X (SqlBackend, SqlPersistT)
+import Database.Persist.Sql as X (SqlBackend)
 import RIO.DB as X
 import RIO.List as X (headMaybe, partition)
 import RIO.Logger as X
@@ -66,13 +65,11 @@ import RIO.Time as X
 import SVCS.GitHub as X
 import SVCS.Names as X
 import SVCS.Payload as X
-import System.Exit as X (ExitCode(..))
 import Web.PathPieces as X
 
 import qualified Data.Text.Lazy as TL
 import Formatting (format, (%))
 import Formatting.Formatters (int, plural)
-import System.IO (BufferMode(..))
 
 fromJustNoteM :: MonadIO m => String -> Maybe a -> m a
 fromJustNoteM msg = fromMaybeM (throwString msg) . pure

@@ -36,9 +36,9 @@ import Prelude
 
 import Control.Monad ((<=<))
 import Data.Aeson
+import Data.Bifunctor (first)
 import Data.Csv (ToField(..))
 import Data.Proxy
-import Data.Semigroup ((<>))
 import Data.Text (Text, unpack)
 import Database.Persist.Sql
 import GitHub.Data
@@ -127,7 +127,7 @@ deriving newtype instance PersistFieldSql IssueNumber
 deriving newtype instance ToMarkup IssueNumber
 
 instance Read (Name a) where
-    readsPrec n = map (\(x, s) -> (mkName Proxy x, s)) . readsPrec n
+    readsPrec n = map (first $ mkName Proxy) . readsPrec n
 
 instance PathPiece (Name  a) where
     toPathPiece = toPathPiece . untagName

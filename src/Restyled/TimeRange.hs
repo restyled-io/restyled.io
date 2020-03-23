@@ -17,7 +17,7 @@ where
 
 import Restyled.Prelude
 
-import Database.Persist.Sql (RawSql, SqlPersistT, rawSql)
+import Database.Persist.Sql (RawSql, rawSql)
 import Restyled.Yesod
 
 data TimeRange = TimeRange

@@ -21,8 +21,7 @@ import Restyled.Test.Yesod as X
 import Test.QuickCheck as X
 
 import qualified Data.Text as T
-import Database.Persist.Sql
-    (SqlBackend, SqlPersistT, connEscapeName, rawExecute, rawSql, unSingle)
+import Database.Persist.Sql (connEscapeName, rawExecute, rawSql, unSingle)
 import Database.Redis (del, keys)
 import LoadEnv (loadEnvFrom)
 import Restyled.Backend.Foundation (loadBackend)

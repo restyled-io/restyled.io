@@ -9,7 +9,6 @@ import Restyled.Prelude.Esqueleto
 import Control.Monad.Logger (MonadLogger)
 import qualified Data.Csv as Csv
 import qualified Data.List.NonEmpty as NE
-import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Semigroup (First(..), sconcat)
 import Restyled.Cache

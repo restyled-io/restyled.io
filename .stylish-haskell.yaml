@@ -23,7 +23,6 @@ newline: native
 
 # N.B. must be kept in sync with package.yaml
 language_extensions:
-  - AutoDeriveTypeable
   - BangPatterns
   - BinaryLiterals
   - ConstraintKinds
@@ -45,7 +44,6 @@ language_extensions:
   - GeneralizedNewtypeDeriving
   - InstanceSigs
   - KindSignatures
-  - MonadFailDesugaring
   - MultiParamTypeClasses
   - MultiWayIf
   - NamedFieldPuns

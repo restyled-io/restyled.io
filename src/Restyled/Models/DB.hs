@@ -1,5 +1,6 @@
 {-# LANGUAGE NoDeriveAnyClass #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | Entities defined via @config/models@
 module Restyled.Models.DB

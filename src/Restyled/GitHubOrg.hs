@@ -63,8 +63,8 @@ requestUserNameOrgs
     => GitHubUserName
     -> m [GitHubOrg]
 requestUserNameOrgs username = caching (githubOrgsCacheKey username) $ do
-    auth <- asks $ Just . OAuth . appGitHubRateLimitToken . view settingsL
-    result <- liftIO $ publicOrganizationsFor' auth username
+    auth <- asks $ OAuth . appGitHubRateLimitToken . view settingsL
+    result <- liftIO $ githubRequest auth $ publicOrganizationsForR username FetchAll
 
     case result of
         Left err -> [] <$ logWarnN (tshow err)

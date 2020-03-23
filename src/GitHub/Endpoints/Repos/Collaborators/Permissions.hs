@@ -13,23 +13,22 @@ where
 import Prelude
 
 import Data.Aeson
-import Data.Text (unpack)
 import GitHub.Data
 import GitHub.Request
 
-data CollaboratorPermission
-    = CollaboratorPermissionAdmin
-    | CollaboratorPermissionRead
-    | CollaboratorPermissionWrite
-    | CollaboratorPermissionNone
+-- data CollaboratorPermission
+--     = CollaboratorPermissionAdmin
+--     | CollaboratorPermissionRead
+--     | CollaboratorPermissionWrite
+--     | CollaboratorPermissionNone
 
-instance FromJSON CollaboratorPermission where
-    parseJSON = withText "permission" $ \case
-        "admin" -> pure CollaboratorPermissionAdmin
-        "read" -> pure CollaboratorPermissionRead
-        "write" -> pure CollaboratorPermissionWrite
-        "none" -> pure CollaboratorPermissionNone
-        x -> fail $ "Invalid permissions value " <> unpack x
+-- instance FromJSON CollaboratorPermission where
+--     parseJSON = withText "permission" $ \case
+--         "admin" -> pure CollaboratorPermissionAdmin
+--         "read" -> pure CollaboratorPermissionRead
+--         "write" -> pure CollaboratorPermissionWrite
+--         "none" -> pure CollaboratorPermissionNone
+--         x -> fail $ "Invalid permissions value " <> unpack x
 
 newtype CollaboratorPermissions = CollaboratorPermissions
     { collaboratorPermissionsPermission :: CollaboratorPermission

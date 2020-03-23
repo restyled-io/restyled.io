@@ -1,19 +1,22 @@
-resolver: lts-14.6
+resolver: lts-15.4
 extra-deps:
   - envparse-0.4.1@sha256:989902e6368532548f61de1fa245ad2b39176cddd8743b20071af519a709ce30
-  - github-0.22@sha256:13f09e904248a40dd173c08f2859d0dfda178a7c27f88df20b70a0d5a7614757
+  - github-0.25@sha256:32e1ede86a04976e06740a5993fab5306c5dbfdd17e96d83b79e53b82195739e,7091
+  - yesod-auth-oauth2-0.6.1.2@sha256:181c757c8ba0f57c23119414db90e1859271bfeb85667d88a99746001c064aba,2891
+  - yesod-paginator-1.1.0.2@sha256:f21d30b5a02e23a5ff65461cef6a1ca1c6c26700b8fa4013d5114c3291d7a9ed,2321
 
-  # for github-0.22
+  # for github
   - binary-instances-1@sha256:b17565598b8df3241f9b46fa8e3a3368ecc8e3f2eb175d7c28f319042a6f5c79,2613
 
-  # for dbmigrations-postgresql
-  - HDBC-postgresql-2.3.2.6@sha256:6e1636b0414ae7b028a01f1a90cf3e28c14f1df7867cf2615d5357d9abcd6279
-  - HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da
-  - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075
-  - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d
+  # for yesod-auth-oauth
+  - hoauth2-1.8.9@sha256:63929253f6cdeb096a369980d2acf0d7eedd0c98ac46f962f717c56b724069a4,5734
 
-  # For DerivingVia GenericSemigroupMonoid
-  - semigroups-0.19.1
+  # for dbmigrations-postgresql
+  - HDBC-postgresql-2.3.2.7@sha256:93d8e3c3d2dc9291a10f28ae3f8d0604a55ef47298ed43003a4d16f3d9905bae,3228
+  - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
+  - HDBC-2.4.0.3@sha256:99d3de808f53271afb0a8c31adfc99c7ef94f28355aba58bb0c9dffd4376296f,2998
+  - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d,1887
+  - HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da,1818
 
 # Makes weeder work in stack-2
 ghc-options:

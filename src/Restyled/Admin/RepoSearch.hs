@@ -48,5 +48,5 @@ ilike
     -> Filter record
 ilike field value = Filter
     field
-    (Left $ fromString $ unpack $ "%" <> value <> "%")
+    (FilterValue $ fromString $ unpack $ "%" <> value <> "%")
     (BackendSpecificFilter "ILIKE")

@@ -23,7 +23,6 @@ conf_preprocessor:
 # N.B. must be kept in sync with package.yaml
 conf_forward:
   options_ghc:
-    - -XAutoDeriveTypeable
     - -XBangPatterns
     - -XBinaryLiterals
     - -XConstraintKinds
@@ -45,7 +44,6 @@ conf_forward:
     - -XGeneralizedNewtypeDeriving
     - -XInstanceSigs
     - -XKindSignatures
-    - -XMonadFailDesugaring
     - -XMultiParamTypeClasses
     - -XMultiWayIf
     - -XNamedFieldPuns

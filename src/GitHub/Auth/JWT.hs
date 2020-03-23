@@ -14,7 +14,6 @@ import Data.Text.Encoding (encodeUtf8)
 import Data.Time
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
 import GHC.Stack
-import GitHub.Auth (AuthMethod(..))
 import GitHub.Data
 import GitHub.Data.Apps
 import Network.HTTP.Simple (addRequestHeader)

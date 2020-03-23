@@ -52,7 +52,7 @@ repoInstallationToken
     :: (HasCallStack, MonadIO m) => AppSettings -> Repo -> m AccessToken
 repoInstallationToken AppSettings {..} Repo {..} = do
     auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
-    untryIO $ accessTokenFor auth repoInstallationId
+    untryIO $ githubRequest auth $ accessTokenForR repoInstallationId
 
 data RepoWithStats = RepoWithStats
     { rwsRepo :: Entity Repo

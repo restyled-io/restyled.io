@@ -14,7 +14,7 @@ where
 import RIO
 
 import qualified Control.Monad.Logger as Logger
-import Data.ByteString.Builder (Builder, byteString, toLazyByteString)
+import Data.ByteString.Builder (byteString, toLazyByteString)
 import qualified Data.ByteString.Char8 as BS8
 import RIO.Orphans ()
 import System.Console.ANSI

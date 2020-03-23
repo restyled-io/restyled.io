@@ -8,6 +8,9 @@ module SVCS.GitHub
     -- * Installation Auth
     , githubAuthInstallation
 
+    -- * Running requests
+    , githubRequest
+
     -- * Re-exports
     , module X
     )
@@ -17,9 +20,10 @@ import GitHub.Auth as X hiding (Auth)
 import GitHub.Auth.JWT as X
 import GitHub.Data as X (Id, getUrl, mkId, toPathPart, untagId)
 import GitHub.Data.AccessTokens as X
+import GitHub.Data.Request as X (FetchCount(..))
 import GitHub.Endpoints.Installations.AccessTokens as X
 import GitHub.Endpoints.Organizations as X
-    (SimpleOrganization(..), publicOrganizationsFor')
+    (SimpleOrganization(..), publicOrganizationsForR)
 import GitHub.Endpoints.Repos.Collaborators.Permissions as X
 
 import Prelude
@@ -32,6 +36,7 @@ import GitHub.Auth
 import GitHub.Data
 import GitHub.Data.Apps
 import GitHub.Data.Installations
+import GitHub.Request
 import SVCS.Names (RepoSVCS(..))
 import SVCS.Payload
 
@@ -66,5 +71,8 @@ githubAuthInstallation
     -> IO (Either Error Auth)
 githubAuthInstallation appId appKey installationId = do
     auth <- authJWTMax appId appKey
-    etoken <- accessTokenFor auth installationId
+    etoken <- githubRequest auth $ accessTokenForR installationId
     pure $ fmap (OAuth . encodeUtf8 . atToken) etoken
+
+githubRequest :: (AuthMethod am, GitHubRW req res) => am -> req -> res
+githubRequest = github

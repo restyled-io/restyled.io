@@ -4,7 +4,6 @@ version: 0.1.1.0
 license: MIT
 
 default-extensions:
-  - AutoDeriveTypeable
   - BangPatterns
   - BinaryLiterals
   - ConstraintKinds
@@ -27,7 +26,6 @@ default-extensions:
   - GeneralizedNewtypeDeriving
   - InstanceSigs
   - KindSignatures
-  - MonadFailDesugaring
   - MultiParamTypeClasses
   - MultiWayIf
   - NamedFieldPuns

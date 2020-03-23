@@ -8,7 +8,6 @@ where
 import Restyled.Prelude
 
 import qualified Data.ByteString.Lazy as LBS
-import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Restyled.Backend.RestyleMachine
 import qualified Restyled.Backend.Webhook as Webhook

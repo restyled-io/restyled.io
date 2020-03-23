@@ -19,7 +19,6 @@ where
 import Restyled.Prelude
 
 import qualified Data.Default as Default (def)
-import Database.Persist.Postgresql (PostgresConf(..))
 import Database.Redis (ConnectInfo(..), defaultConnectInfo)
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)

@@ -11,7 +11,6 @@ where
 
 import Restyled.Prelude
 
-import Control.Monad.Fail (MonadFail(..))
 import Control.Monad.Logger (MonadLogger(..), toLogStr)
 import qualified Data.ByteString.Lazy as LBS
 import Network.Wai.Test (SResponse(..))
