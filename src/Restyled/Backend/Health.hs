@@ -51,11 +51,17 @@ runHealthChecks = do
 
 runOnHoursHealthCheck :: HasLogFunc env => HealthCheck (RIO env) a -> RIO env ()
 runOnHoursHealthCheck hc = do
-    onHours <- fromMaybe True . isLocalWorkingHours "EST" <$> getCurrentTime
+    localWorkingHours <- isLocalWorkingHours "EST" <$> getCurrentTime
 
-    if onHours
-        then runHealthCheck hc
-        else logInfoN $ "Skipping on-hours HealthCheck: " <> hcName hc
+    case localWorkingHours of
+        UnableToReadTimeZone err -> do
+            logWarnN $ "Error reading " <> pack err <> " as TimeZone"
+            runHealthCheck hc
+        UnableToMakeTimeOfDay h -> do
+            logWarnN $ "Error making TimeOfDay for hour " <> tshow h
+            runHealthCheck hc
+        InsideWorkingHours -> runHealthCheck hc
+        x -> logInfoN $ "Skipping " <> tshow (hcName hc) <> ": " <> tshow x
 
 runHealthCheck :: HasLogFunc env => HealthCheck (RIO env) a -> RIO env ()
 runHealthCheck HealthCheck {..} = do
@@ -103,21 +109,53 @@ threshold f = \case
     Rate Nothing -> False
     Rate (Just r) -> f r
 
-isLocalWorkingHours :: String -> UTCTime -> Maybe Bool
-isLocalWorkingHours tzString now = do
-    tz <- readMaybe tzString
+-- | Return value for local working hours check
+--
+-- We make separate contructors for programmer errors vs it being working hours
+-- or not. This allows the caller to react accordingly (e.g. still run the
+-- health-check for the "falsey" cases of programmer error), and gives a great
+-- place to attach any supporting data (e.g. why we decided it wasn't working
+-- hours).
+--
+-- Boolean-blindness is a thing, kids!
+--
+data LocalWorkingHours
+    = UnableToReadTimeZone String
+    | UnableToMakeTimeOfDay Int
+    | NotWeekDay DayOfWeek
+    | BeforeWorkingHours TimeOfDay
+    | AfterWorkingHours TimeOfDay
+    | InsideWorkingHours
+    deriving Show
+
+-- brittany-next-binding --columns=85
+
+isLocalWorkingHours :: String -> UTCTime -> LocalWorkingHours
+isLocalWorkingHours tzString now = either id id $ runExcept $ do
+    tz <- noted (UnableToReadTimeZone tzString) $ readMaybe tzString
     let LocalTime {..} = utcToLocalTime tz now
-    guard $ isWorkDay $ dayOfWeek localDay
-    sevenAM <- makeTimeOfDayValid 7 0 0
-    sevenPM <- makeTimeOfDayValid 19 0 0
-    guard $ localTimeOfDay >= sevenAM && localTimeOfDay <= sevenPM
-    pure True
-  where
-    isWorkDay = \case
-        Sunday -> False
-        Monday -> True
-        Tuesday -> True
-        Wednesday -> True
-        Thursday -> True
-        Friday -> True
-        Saturday -> False
+    sevenAM <- noted (UnableToMakeTimeOfDay 7) $ makeTimeOfDayValid 7 0 0
+    sevenPM <- noted (UnableToMakeTimeOfDay 19) $ makeTimeOfDayValid 19 0 0
+    throwUnless (isWorkDay $ dayOfWeek localDay) $ NotWeekDay $ dayOfWeek localDay
+    throwWhen (localTimeOfDay < sevenAM) $ BeforeWorkingHours localTimeOfDay
+    throwWhen (localTimeOfDay > sevenPM) $ AfterWorkingHours localTimeOfDay
+    pure InsideWorkingHours
+
+isWorkDay :: DayOfWeek -> Bool
+isWorkDay = \case
+    Sunday -> False
+    Monday -> True
+    Tuesday -> True
+    Wednesday -> True
+    Thursday -> True
+    Friday -> True
+    Saturday -> False
+
+noted :: e -> Maybe a -> Except e a
+noted e = maybe (throwError e) pure
+
+throwWhen :: MonadError e f => Bool -> e -> f ()
+throwWhen p = when p . throwError
+
+throwUnless :: MonadError e f => Bool -> e -> f ()
+throwUnless p = unless p . throwError
