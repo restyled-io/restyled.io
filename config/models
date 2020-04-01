@@ -40,6 +40,9 @@ Job json
   completedAt UTCTime Maybe
 
   exitCode Int Maybe
+  log (JSONB [Entity JobLogLine]) Maybe
+
+  -- Deprecated
   stdout Text Maybe
   stderr Text Maybe
 

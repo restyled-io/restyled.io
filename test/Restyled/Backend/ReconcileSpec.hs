@@ -39,6 +39,7 @@ createInFlightJob = do
         , jobUpdatedAt = now
         , jobCompletedAt = Nothing
         , jobExitCode = Nothing
+        , jobLog = Nothing
         , jobStdout = Nothing
         , jobStderr = Nothing
         }

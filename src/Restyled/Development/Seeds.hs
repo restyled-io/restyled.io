@@ -84,6 +84,7 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
         , jobUpdatedAt = createdAt
         , jobCompletedAt = Nothing
         , jobExitCode = Nothing
+        , jobLog = Nothing
         , jobStdout = Nothing
         , jobStderr = Nothing
         }

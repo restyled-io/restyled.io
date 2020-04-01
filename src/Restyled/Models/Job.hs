@@ -42,6 +42,7 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         , jobUpdatedAt = now
         , jobCompletedAt = Nothing
         , jobExitCode = Nothing
+        , jobLog = Nothing
         , jobStdout = Nothing
         , jobStderr = Nothing
         }
@@ -70,12 +71,22 @@ attachJobOutput job = (job, ) <$> fetchJobOutput job
 
 fetchJobOutput :: MonadIO m => Entity Job -> SqlPersistT m JobOutput
 fetchJobOutput jobE@(Entity jobId job@Job {..}) =
-    case (jobCompletedAt, jobStdout, jobStderr) of
-        (Just _, Nothing, Nothing) -> JobOutputCompleted <$> selectList
-            [JobLogLineJob ==. jobId]
-            [Asc JobLogLineCreatedAt]
-        (Just _, _, _) -> pure $ JobOutputCompressed job
-        (_, _, _) -> pure $ JobOutputInProgress jobE
+    case (jobCompletedAt, jobLog, jobStdout, jobStderr) of
+        -- Job is done and Log records (still) exist
+        (Just _, Nothing, Nothing, Nothing) ->
+            JobOutputCompleted <$> selectList
+                [JobLogLineJob ==. jobId]
+                [Asc JobLogLineCreatedAt]
+
+        -- Job is done and Log has been written into the Job itself
+        (Just _, Just (JSONB logLines), _, _) ->
+            pure $ JobOutputCompleted logLines
+
+        -- Deprecated: old style compressed log
+        (Just _, _, _, _) -> pure $ JobOutputCompressed job
+
+        -- Job is in progress
+        (Nothing, _, _, _) -> pure $ JobOutputInProgress jobE
 
 captureJobLogLine :: MonadIO m => JobId -> Text -> Text -> SqlPersistT m ()
 captureJobLogLine jobId stream content = do

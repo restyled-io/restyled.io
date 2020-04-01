@@ -54,6 +54,7 @@ import Data.Functor.Syntax as X ((<$$>))
 import Data.Proxy as X
 import Data.Text as X (pack, unpack)
 import Database.Persist as X
+import Database.Persist.JSONB as X
 import Database.Persist.Sql as X (SqlBackend)
 import RIO.DB as X
 import RIO.List as X (headMaybe, partition)

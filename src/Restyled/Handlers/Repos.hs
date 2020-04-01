@@ -65,5 +65,6 @@ getRepoJobLogLinesR _owner _name jobId = do
     webSockets $ streamJobLogLines jobId
 
     -- If not access via WebSockets, respond with plain text Job log
+    -- TODO: this assumes un-compressed Job Logs
     jobLogLines <- runDB $ fetchJobLogLines jobId 0
     pure $ T.unlines $ map textJobLogLine jobLogLines

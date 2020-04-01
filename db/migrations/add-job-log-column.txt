@@ -1,0 +1,10 @@
+# vim: ft=yaml
+Description: Add job log column
+Created: 2020-04-01 18:04:08.995876002 UTC
+Depends: create-job
+Apply: |
+  ALTER TABLE job
+    ADD COLUMN log JSONB NULL
+Revert: |
+  ALTER TABLE job
+    DROP COLUMN log JSONB NULL

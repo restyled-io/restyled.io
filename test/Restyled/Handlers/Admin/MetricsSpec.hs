@@ -77,6 +77,7 @@ jobAt createdAt mCompletion = Job
     , jobUpdatedAt = fromMaybe createdAt $ fst <$> mCompletion
     , jobCompletedAt = fst <$> mCompletion
     , jobExitCode = snd <$> mCompletion
+    , jobLog = Nothing
     , jobStdout = Nothing
     , jobStderr = Nothing
     }
