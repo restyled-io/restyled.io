@@ -12,6 +12,7 @@ where
 
 import Restyled.Prelude
 
+import qualified Data.Text as T
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Settings
@@ -58,7 +59,11 @@ getRepoJobR owner name jobId = do
         setTitle $ toHtml $ repoPath owner name <> " #" <> toPathPiece jobId
         $(widgetFile "job")
 
-getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler ()
+getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler Text
 getRepoJobLogLinesR _owner _name jobId = do
     void $ runDB $ get404 jobId
     webSockets $ streamJobLogLines jobId
+
+    -- If not access via WebSockets, respond with plain text Job log
+    jobLogLines <- runDB $ fetchJobLogLines jobId 0
+    pure $ T.unlines $ map textJobLogLine jobLogLines

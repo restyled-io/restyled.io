@@ -10,6 +10,7 @@ module Restyled.Widgets.Job
     , jobCompletion
 
     -- * Utilities
+    , textJobLogLine
     , colorizedJobLogLine
     , scrubGitHubToken
     )
@@ -89,6 +90,9 @@ jobOutput output = $(widgetFile "widgets/job-output")
         JobOutputInProgress (Entity jobId _) ->
             "logs-job-id-" <> toPathPiece jobId
         _ -> "unused"
+
+textJobLogLine :: Entity JobLogLine -> Text
+textJobLogLine = scrubGitHubToken . jobLogLineContent . entityVal
 
 colorizedJobLogLine :: Entity JobLogLine -> Widget
 colorizedJobLogLine (Entity _ JobLogLine {..}) =
