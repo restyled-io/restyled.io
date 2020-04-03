@@ -26,7 +26,6 @@ where
 
 import Restyled.Prelude
 
-import qualified Data.Text as T
 import Restyled.Models.DB
 
 insertJob
@@ -108,15 +107,8 @@ fetchLastJobLogLineCreatedAt jobId =
 compressJobOutput :: MonadIO m => JobId -> SqlPersistT m ()
 compressJobOutput jobId = do
     logLines <- fetchJobLogLines jobId 0
-
-    let
-        (out, err) =
-            both (T.unlines . map jobLogLineContent)
-                $ partition ((/= "stderr") . jobLogLineStream)
-                $ map entityVal logLines
-
-    update jobId [JobStdout =. Just out, JobStderr =. Just err]
-    deleteWhere [JobLogLineId <-. map entityKey logLines]
+    update jobId [JobLog =. Just (JSONB logLines)]
+    deleteWhere [JobLogLineJob ==. jobId]
 
 completeJobSkipped
     :: MonadIO m => String -> Entity Job -> SqlPersistT m (Entity Job)
