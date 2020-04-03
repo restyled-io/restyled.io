@@ -123,13 +123,16 @@ completeJobErrored reason job = do
     completeJob (ExitFailure 99) job
 
 completeJob :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m (Entity Job)
-completeJob ec job = do
+completeJob ec job@(Entity jobId _) = do
     now <- liftIO getCurrentTime
-    replaceEntity $ overEntity job $ \j -> j
+    logLines <- fetchJobLogLines jobId 0
+    updatedJob <- replaceEntity $ overEntity job $ \j -> j
         { jobUpdatedAt = now
         , jobCompletedAt = Just now
         , jobExitCode = Just $ exitCode ec
+        , jobLog = Just $ JSONB logLines
         }
+    updatedJob <$ deleteWhere [JobLogLineJob ==. jobId]
 
 exitCode :: ExitCode -> Int
 exitCode = \case
