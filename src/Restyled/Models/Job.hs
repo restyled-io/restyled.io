@@ -12,6 +12,7 @@ module Restyled.Models.Job
     -- * @'JobOutput'@
     , JobOutput(..)
     , attachJobOutput
+    , fetchJobLog
     , fetchJobOutput
     , captureJobLogLine
     , fetchLastJobLogLineCreatedAt
@@ -49,6 +50,10 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
 fetchJobIsInProgress :: MonadIO m => JobId -> SqlPersistT m Bool
 fetchJobIsInProgress jobId =
     isJust <$> selectFirst [JobId ==. jobId, JobCompletedAt ==. Nothing] []
+
+fetchJobLog :: MonadIO m => Entity Job -> SqlPersistT m [Entity JobLogLine]
+fetchJobLog (Entity jobId Job {..}) =
+    maybe (fetchJobLogLines jobId 0) (pure . unJSONB) jobLog
 
 fetchJobLogLines
     :: MonadIO m

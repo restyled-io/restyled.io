@@ -61,10 +61,9 @@ getRepoJobR owner name jobId = do
 
 getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler Text
 getRepoJobLogLinesR _owner _name jobId = do
-    job <- runDB $ get404 jobId
+    job <- runDB $ getEntity404 jobId
     webSockets $ streamJobLogLines jobId
 
-    -- If not access via WebSockets, respond with plain text Job log
-    jobLogLines <- maybe (runDB $ fetchJobLogLines jobId 0) (pure . unJSONB)
-        $ jobLog job
+    -- If not accessed via WebSockets, respond with plain text Job log
+    jobLogLines <- runDB $ fetchJobLog job
     pure $ T.unlines $ map textJobLogLine jobLogLines
