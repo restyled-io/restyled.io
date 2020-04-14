@@ -18,6 +18,12 @@ nav {
   padding-right: 0;
 }
 
+/* Api Tokens */
+#api-tokens th:nth-child(1),
+#api-tokens td:nth-child(1) {
+  width: 50%
+}
+
 /* Machines dashboard */
 #machines .dashboard .load {
   display: flex;

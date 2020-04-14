@@ -10,6 +10,7 @@ import Restyled.Prelude
 
 import Data.Text (splitOn)
 import Restyled.ApiError
+import Restyled.ApiToken
 import Restyled.Authentication
 import Restyled.Authorization
 import Restyled.Backend.Foundation
@@ -214,6 +215,11 @@ instance YesodAuth App where
         . addOAuth2Plugin oauth2GitHub (appGitHubOAuthKeys $ app ^. settingsL)
         . addOAuth2Plugin oauth2GitHubStudents (appGitHubStudentsOAuthKeys $ app ^. settingsL)
         $ []
+
+    maybeAuthId = runMaybeT $ asum
+        [ MaybeT defaultMaybeAuthId
+        , MaybeT $ liftHandler $ runDB getUserIdByApiToken
+        ]
 
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage

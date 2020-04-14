@@ -97,3 +97,12 @@ MarketplaceEnabledRepo
 
   UniqueMarketplaceEnabledRepo marketplacePlan marketplaceAccount repo
   deriving Eq Show
+
+ApiToken
+  user UserId
+  hashed Text
+  description Text
+  createdAt UTCTime
+  lastUsedAt UTCTime Maybe
+
+  deriving Eq Show

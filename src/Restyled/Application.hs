@@ -21,6 +21,7 @@ import Restyled.Handlers.Admin.Machines.State
 import Restyled.Handlers.Admin.Marketplace
 import Restyled.Handlers.Admin.Metrics
 import Restyled.Handlers.Admin.Repos
+import Restyled.Handlers.Admin.Token
 import Restyled.Handlers.Common
 import Restyled.Handlers.GitHubStudents
 import Restyled.Handlers.Home

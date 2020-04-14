@@ -47,3 +47,6 @@
     !/#RestyleMachineId/prune AdminMachinePruneR GET
   /marketplace AdminMarketplaceR GET
   /metrics AdminMetricsR GET
+  /tokens AdminTokensP:
+    / AdminTokensR GET POST
+    /#ApiTokenId AdminTokenR DELETE

@@ -5,6 +5,10 @@ where
 
 import Restyled.Test
 
+import qualified Data.List.NonEmpty as NE
+import Network.HTTP.Types.Header (hAuthorization)
+import Restyled.ApiToken
+
 spec :: Spec
 spec = withApp $ do
     describe "AdminP" $ do
@@ -32,3 +36,63 @@ spec = withApp $ do
                 getAdmin
 
                 statusIs 200
+
+        it "accepts token auth by the Authorization header for admins" $ do
+            adminEmail <- NE.head <$> getTestAppAdmins
+            adminToken <- runDB $ createUserWithToken adminEmail
+
+            request $ do
+                setUrl $ AdminP $ AdminMachinesP AdminMachinesR
+                addRequestHeader
+                    ( hAuthorization
+                    , "token " <> encodeUtf8 (apiTokenRaw adminToken)
+                    )
+
+            statusIs 200
+
+        it "rejects token auth by the Authorization header for users" $ do
+            userToken <- runDB $ createUserWithToken "x@example.com"
+
+            request $ do
+                setUrl $ AdminP $ AdminMachinesP AdminMachinesR
+                addRequestHeader
+                    ( hAuthorization
+                    , "token " <> encodeUtf8 (apiTokenRaw userToken)
+                    )
+
+            statusIs 404
+
+        it "accepts token auth in a query parameter for admins" $ do
+            adminEmail <- NE.head <$> getTestAppAdmins
+            adminToken <- runDB $ createUserWithToken adminEmail
+
+            request $ do
+                setUrl $ AdminP $ AdminMachinesP AdminMachinesR
+                addGetParam "token" $ apiTokenRaw adminToken
+
+            statusIs 200
+
+        it "rejects token auth in a query parameter for users" $ do
+            userToken <- runDB $ createUserWithToken "x@example.com"
+
+            request $ do
+                setUrl $ AdminP $ AdminMachinesP AdminMachinesR
+                addGetParam "token" $ apiTokenRaw userToken
+
+            statusIs 404
+
+createUserWithToken :: MonadIO m => Text -> SqlPersistT m ApiTokenRaw
+createUserWithToken email = do
+    userId <- insert User
+        { userEmail = Just email
+        , userGithubUserId = Nothing
+        , userGithubUsername = Nothing
+        , userGitlabUserId = Nothing
+        , userGitlabUsername = Nothing
+        , userGitlabAccessToken = Nothing
+        , userGitlabRefreshToken = Nothing
+        , userCredsIdent = email
+        , userCredsPlugin = "dummy"
+        }
+
+    createApiToken userId "testing"

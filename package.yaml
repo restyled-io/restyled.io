@@ -99,6 +99,7 @@ library:
     - path-pieces
     - persistent
     - persistent-postgresql
+    - persistent-qq
     - persistent-template
     - rio
     - rio-orphans
@@ -112,6 +113,7 @@ library:
     - transformers
     - unordered-containers
     - uri-encode
+    - uuid
     - vector
     - wai
     - wai-extra
@@ -154,6 +156,7 @@ tests:
       - hspec
       - hspec-core
       - hspec-expectations-lifted
+      - http-types
       - lens
       - lens-aeson
       - load-env
