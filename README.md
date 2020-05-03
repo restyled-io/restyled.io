@@ -13,7 +13,7 @@ Website and backend for Restyled, https://restyled.io.
 1. Initialize dependencies, the database, build, lint and test:
 
    ```console
-   make boostrap
+   make bootstrap
    ```
 
 From here, you can use any `stack`-based development and testing work-flow.
