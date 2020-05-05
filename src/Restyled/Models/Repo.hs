@@ -114,6 +114,7 @@ data IgnoredWebhookReason
     = InvalidJSON String
     | IgnoredAction PullRequestEventType
     | IgnoredEventType Text
+    | IgnoredBotPullRequest Text
     | RestyledBotPullRequest Text
     | RepoNotFound OwnerName RepoName
 
@@ -122,6 +123,8 @@ reasonToLogMessage = \case
     InvalidJSON errs -> "invalid JSON: " <> errs
     IgnoredAction action -> "ignored action: " <> show action
     IgnoredEventType event -> "ignored event: " <> show event
+    IgnoredBotPullRequest author ->
+        "PR created by an ignored bot, " <> unpack author
     RestyledBotPullRequest author ->
         "PR created by Restyled bot, " <> unpack author
     RepoNotFound owner name ->
@@ -133,6 +136,7 @@ initializeFromWebhook
     -> SqlPersistT m (Either IgnoredWebhookReason (Entity Repo))
 initializeFromWebhook payload@Payload {..}
     | pAction `notElem` enqueueEvents = pure $ Left $ IgnoredAction pAction
+    | pAuthor `elem` ignoredBots = pure $ Left $ IgnoredBotPullRequest pAuthor
     | isRestyledBot pAuthor = pure $ Left $ RestyledBotPullRequest pAuthor
     | otherwise = Right <$> findOrCreateRepo payload
 
@@ -154,6 +158,27 @@ upsertRepo repo@Repo {..} = upsert
     , RepoIsPrivate =. repoIsPrivate
     , RepoDebugEnabled =. repoDebugEnabled
     ]
+
+-- | Bots whose PRs we choose to ignore
+--
+-- Ignoring all bots is too much, but some bots create PRs that are just never
+-- useful to Restyle. And some of those bots create PRs that are /problematic/
+-- to Restyle.
+--
+-- - @pull[bot]@
+--
+--   A bot to keep Forks up to date. It's unlikely anyone would want to keep
+--   their fork up to date *and* restyle on top of it, that's just a recipe for
+--   merge conflicts later. These PRs are typically also massive and so tie up
+--   Restyle Machines needlessly.
+--
+-- __TODO__: it would be better to ignore this after accepting the Webhook, so
+-- we could set a skipped-job and provide feedback to there users. In order to
+-- accomplish this, we'll need to send author information deeping into the
+-- system.
+--
+ignoredBots :: [Text]
+ignoredBots = ["pull[bot]"]
 
 -- | Matches on @restyled-io(-{env})[bot]@.
 isRestyledBot :: Text -> Bool
