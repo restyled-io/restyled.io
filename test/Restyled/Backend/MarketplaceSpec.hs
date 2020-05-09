@@ -61,6 +61,7 @@ insertRepo owner name isPrivate = insertEntity Repo
     , repoIsPrivate = isPrivate
     , repoDebugEnabled = False
     , repoEnabled = True
+    , repoRestylerImage = Nothing
     }
 
 insertAccountOnPlan :: MonadIO m => GitHubUserName -> Int -> SqlPersistT m ()
