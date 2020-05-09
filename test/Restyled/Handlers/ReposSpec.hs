@@ -52,6 +52,7 @@ publicRepo owner name = Repo
     , repoIsPrivate = False
     , repoDebugEnabled = False
     , repoEnabled = True
+    , repoRestylerImage = Nothing
     }
 
 makeInaccessible :: Repo -> Repo

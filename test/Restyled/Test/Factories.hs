@@ -19,6 +19,7 @@ buildRepo owner name = Repo
     , repoIsPrivate = False
     , repoDebugEnabled = False
     , repoEnabled = True
+    , repoRestylerImage = Nothing
     }
 
 buildPrivateRepo :: OwnerName -> RepoName -> Repo
@@ -30,6 +31,7 @@ buildPrivateRepo owner name = Repo
     , repoIsPrivate = True
     , repoDebugEnabled = False
     , repoEnabled = True
+    , repoRestylerImage = Nothing
     }
 
 -- | TODO: this should be Fixture, not Factory because it's a singleton

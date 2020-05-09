@@ -25,6 +25,7 @@ Repo json
   isPrivate Bool
   debugEnabled Bool
   enabled Bool
+  restylerImage Text Maybe
 
   UniqueRepo svcs owner name
   deriving Eq Show

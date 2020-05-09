@@ -60,6 +60,7 @@ restyledRepo name = Repo
     , repoIsPrivate = False
     , repoDebugEnabled = True
     , repoEnabled = True
+    , repoRestylerImage = Nothing
     }
 
 restyledRepoPrivate :: RepoName -> Repo
