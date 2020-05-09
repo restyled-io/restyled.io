@@ -1,8 +1,13 @@
 #!/bin/sh
 set -e
 
-if [ -z "$1" ]; then
-  set -- dev upgrade
+if [ -z "$1" ] || [ "$1" = upgrade ]; then
+  for db in dev test; do
+    echo "Upgrading $db database"
+    "$0" "$db" upgrade
+  done
+
+  exit
 fi
 
 DBM_MIGRATION_STORE=$(cd "$(dirname "$0")" && pwd)/migrations
