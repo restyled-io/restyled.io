@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Create a migration with moo-postgresql with the given Description, fix minor
+# issues with the generated file, and open it in $EDITOR.
+#
+# Usage:
+#
+#   db/migrate-new Add things to the things
+#
+# Requires sponge(1) from moreutils.
+#
+###
+set -eu
+
+export DBM_DATABASE=postgres://postgres:password@localhost/restyled
+DBM_MIGRATION_STORE=$(cd "$(dirname "$0")" && pwd)/migrations
+export DBM_MIGRATION_STORE
+
+if [ "$#" -eq 0 ]; then
+  echo "Usage: db/migrate-new <Migration description...>" >&2
+  exit 64
+fi
+
+description=$*
+name=$(echo "$description" | sed 's/.*/\l&/g; s/[^a-z0-9]/-/g')
+path=$DBM_MIGRATION_STORE/$name.txt
+
+stack exec -- moo-postgresql new "$name"
+
+{
+  echo '# vim: ft=yaml'
+  sed 's/^\(Description:\).*$/\1 '"$description"'/' "$path"
+} | sponge "$path"
+
+"$EDITOR" "$path"
