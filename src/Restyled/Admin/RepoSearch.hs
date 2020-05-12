@@ -7,6 +7,7 @@ where
 
 import Restyled.Prelude
 
+import qualified Data.Text as T
 import Restyled.Foundation
 import Restyled.Models
 
@@ -39,7 +40,10 @@ searchRepos limit q = runDB $ do
     pure SearchResults { srRepos = repos, srTotal = total }
 
 searchFilters :: Text -> [Filter Repo]
-searchFilters q = [RepoOwner `ilike` q] ||. [RepoName `ilike` q]
+searchFilters q = case T.breakOn "/" q of
+    (owner, name) | not (T.null name) ->
+        [RepoOwner ==. mkOwnerName owner, RepoName `ilike` T.drop 1 name]
+    _ -> [RepoOwner `ilike` q] ||. [RepoName `ilike` q]
 
 ilike
     :: (IsString a, PersistField a)
