@@ -38,11 +38,12 @@
   /repos AdminReposP:
     / AdminReposR GET
     /search AdminReposSearchR GET
+    !/#RepoId AdminRepoR PATCH
   /machines AdminMachinesP:
     / AdminMachinesR GET POST
     /new AdminMachinesNewR GET
     /state AdminMachinesStateR GET
-    !/#RestyleMachineId AdminMachineR PATCH DELETE
+    !/#RestyleMachineId AdminMachineR GET PATCH DELETE
     !/#RestyleMachineId/info AdminMachineInfoR GET
     !/#RestyleMachineId/prune AdminMachinePruneR GET
   /marketplace AdminMarketplaceR GET

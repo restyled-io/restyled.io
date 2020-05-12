@@ -57,7 +57,7 @@ JobLogLine json
 
   deriving Eq Show
 
-RestyleMachine
+RestyleMachine json
   name Text
   enabled Bool
   host Text

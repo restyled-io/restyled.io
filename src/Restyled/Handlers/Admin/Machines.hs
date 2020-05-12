@@ -4,6 +4,7 @@ module Restyled.Handlers.Admin.Machines
     ( getAdminMachinesR
     , getAdminMachinesNewR
     , postAdminMachinesR
+    , getAdminMachineR
     , patchAdminMachineR
     , deleteAdminMachineR
     , getAdminMachineInfoR
@@ -28,13 +29,16 @@ machineForm =
         <$> areq jsonField "Machine JSON" { fsAttrs = attrs } Nothing
     where attrs = [("placeholder", createMachinePlaceholder), ("rows", "30")]
 
-getAdminMachinesR :: Handler Html
+getAdminMachinesR :: Handler TypedContent
 getAdminMachinesR = do
     machines <- runDB
         $ selectList [] [Desc RestyleMachineEnabled, Asc RestyleMachineName]
-    adminLayout $ do
-        setTitle "Restyled Admin / Machines"
-        $(widgetFile "admin/machines")
+
+    selectRep $ do
+        provideRep @_ @Html $ adminLayout $ do
+            setTitle "Restyled Admin / Machines"
+            $(widgetFile "admin/machines")
+        provideRep @_ @Value $ pure $ toJSON machines
 
 getAdminMachinesNewR :: Handler Html
 getAdminMachinesNewR = do
@@ -44,37 +48,65 @@ getAdminMachinesNewR = do
         setTitle "Restyled Admin / New Machine"
         $(widgetFile "admin/machines/new")
 
-postAdminMachinesR :: Handler Html
-postAdminMachinesR = do
-    ((result, widget), enctype) <- runFormPost machineForm
+postAdminMachinesR :: Handler TypedContent
+postAdminMachinesR = selectRep $ do
+    provideRep @_ @Html $ do
+        ((result, widget), enctype) <- runFormPost machineForm
 
-    case result of
-        FormSuccess getMachine -> do
-            machine <- getMachine
-            void $ runDB $ insert machine
-            setMessage "Machine created"
-            redirect $ AdminP $ AdminMachinesP AdminMachinesR
+        case result of
+            FormSuccess getMachine -> do
+                machine <- getMachine
+                void $ runDB $ insert machine
+                setMessage "Machine created"
+                redirect $ AdminP $ AdminMachinesP AdminMachinesR
 
-        _ -> do
-            setMessage "Unable to create machine"
-            adminLayout $ do
-                setTitle "Restyled Admin / New Machine"
-                $(widgetFile "admin/machines/new")
+            _ -> do
+                setMessage "Unable to create machine"
+                adminLayout $ do
+                    setTitle "Restyled Admin / New Machine"
+                    $(widgetFile "admin/machines/new")
 
-patchAdminMachineR :: RestyleMachineId -> Handler Html
-patchAdminMachineR machineId = do
-    enabled <- runInputPost $ ireq boolField "enabled"
-    runDB $ do
-        void $ get404 machineId
-        update machineId [RestyleMachineEnabled =. enabled]
-    setMessage $ "Machine " <> if enabled then "enabled" else "disabled"
-    redirect $ AdminP $ AdminMachinesP AdminMachinesR
+    provideRep @_ @Value $ do
+        body <- requireCheckJsonBody
+        machine <- createMachineGetRestyleMachine body
+        machineE <- runDB $ insertEntity machine
+        sendStatusJSON status201 machineE
 
-deleteAdminMachineR :: RestyleMachineId -> Handler Html
+getAdminMachineR :: RestyleMachineId -> Handler Value
+getAdminMachineR machineId = runDB $ toJSON <$> getEntity404 machineId
+
+newtype AdminMachinePatch = AdminMachinePatch
+    { enabled :: Maybe Bool
+    }
+    deriving stock Generic
+    deriving anyclass FromJSON
+
+patchAdminMachineR :: RestyleMachineId -> Handler TypedContent
+patchAdminMachineR machineId = selectRep $ do
+    provideRep @_ @Html $ do
+        enabled <- runInputPost $ ireq boolField "enabled"
+        runDB $ do
+            void $ get404 machineId
+            update machineId [RestyleMachineEnabled =. enabled]
+        setMessage $ "Machine " <> if enabled then "enabled" else "disabled"
+        redirect $ AdminP $ AdminMachinesP AdminMachinesR
+
+    provideRep @_ @Value $ do
+        AdminMachinePatch {..} <- requireCheckJsonBody
+        runDB $ do
+            update machineId
+                $ catMaybes [(RestyleMachineEnabled =.) <$> enabled]
+            toJSON <$> getEntity404 machineId
+
+deleteAdminMachineR :: RestyleMachineId -> Handler TypedContent
 deleteAdminMachineR machineId = do
     runDB $ deleteRestyleMachine =<< getEntity404 machineId
-    setMessage "Machine deleted"
-    redirect $ AdminP $ AdminMachinesP AdminMachinesR
+
+    selectRep $ do
+        provideRep @_ @Value $ sendResponseNoContent
+        provideRep @_ @Html $ do
+            setMessage "Machine deleted"
+            redirect $ AdminP $ AdminMachinesP AdminMachinesR
 
 getAdminMachineInfoR :: RestyleMachineId -> Handler ()
 getAdminMachineInfoR machineId = do
