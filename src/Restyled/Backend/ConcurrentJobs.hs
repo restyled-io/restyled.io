@@ -49,7 +49,7 @@ isNewerThan = (>) `on` (jobCreatedAt . entityVal)
 -- | Cancel 'StaleJob's
 --
 -- Attempts to find a Container running the Job (known via @label@s) and sends a
--- SIGHUP signal to it. It is expected to exit on its own and whatever Backend
+-- SIGQUIT signal to it. It is expected to exit on its own and whatever Backend
 -- process is tracking it will do the required cleanup from there.
 --
 -- TODO: this signal will be ignored for now, but the logging will tell us how
@@ -79,9 +79,9 @@ cancelStaleJobs = go . unStaleJobs
 
         for_ (map entityKey jobs) $ \jobId -> do
             logInfo $ "Cancelling Job #" <> display (toPathPiece jobId)
-            traverse_ (sighupJobOnMachine jobId . entityVal) machines
+            traverse_ (sigquitJobOnMachine jobId . entityVal) machines
 
-sighupJobOnMachine
+sigquitJobOnMachine
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
@@ -90,11 +90,11 @@ sighupJobOnMachine
     => JobId
     -> RestyleMachine
     -> m ()
-sighupJobOnMachine jobId machine = do
+sigquitJobOnMachine jobId machine = do
     logDebug $ "Checking Restyle Machine " <> display name
     withRestyleMachineEnv machine $ do
         emContainer <- getRunningContainer jobId
-        either warn (traverse_ $ signalContainerLogged "SIGHUP") emContainer
+        either warn (traverse_ $ signalContainerLogged "SIGQUIT") emContainer
   where
     name = restyleMachineName machine
     warn err =
