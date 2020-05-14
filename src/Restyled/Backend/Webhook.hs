@@ -50,7 +50,7 @@ processWebhook execRestyler body =
             success = ExecRestylerSuccess acceptedJob
 
         logDebug $ "Executing Restyler for " <> display (jobPath acceptedJob)
-        withExceptT failure $ success <$> tryExecRestyler execRestyler job
+        eitherT failure success $ tryExecRestyler execRestyler job mMachine
 
 restyleMachineEnv
     :: (HasSettings env, HasLogFunc env, HasProcessContext env, HasDB env)

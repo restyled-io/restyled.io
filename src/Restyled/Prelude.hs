@@ -14,6 +14,9 @@ module Restyled.Prelude
     , getEntityT
     , getByT
 
+    -- * ExceptT
+    , eitherT
+
     -- * IO
     , setLineBuffering
 
@@ -99,6 +102,10 @@ getEntityT = MaybeT . getEntity
 getByT
     :: (MonadIO m, SqlEntity a) => Unique a -> MaybeT (SqlPersistT m) (Entity a)
 getByT = MaybeT . getBy
+
+eitherT
+    :: Functor f => (e -> e') -> (a -> a') -> ExceptT e f a -> ExceptT e' f a'
+eitherT l r f = withExceptT l $ r <$> f
 
 -- | Set output handles to line buffering
 --
