@@ -33,7 +33,6 @@ awaitWebhook t = do
 data JobNotProcessed
     = WebhookIgnored IgnoredWebhookReason
     | JobIgnored (Entity Job) IgnoredJobReason
-    | NewerJobInProgress (Entity Job) (Entity Job)
     | ExecRestylerFailure (Entity Job) SomeException
 
 data JobProcessed = ExecRestylerSuccess (Entity Job) ExitCode
@@ -49,11 +48,14 @@ processWebhook execRestyler body = withRestyleMachine $ \mMachine ->
         job <- withExceptT (JobIgnored $ awJob webhook) $ acceptJob webhook
 
         let acceptedJob = ajJob job
-            errStale = NewerJobInProgress acceptedJob
             failure = ExecRestylerFailure acceptedJob
             success = ExecRestylerSuccess acceptedJob
 
-        checkConcurrentJobs acceptedJob errStale
+        -- N.B. Ideally, we'd only cancel stale Jobs once the new Job is
+        -- started, but since we operate under single-threaded waiting we can't
+        -- do that. Some day we'll fire-forget-and-track, unblocking that
+        -- pattern.
+        lift $ cancelStaleJobs $ ajStaleJobs job
 
         logDebug $ "Executing Restyler for " <> display (jobPath acceptedJob)
         withExceptT failure
@@ -73,18 +75,6 @@ fromNotProcessed = \case
         void $ runDB $ completeJobSkipped
             (ignoredJobReasonToJobLogLine reason)
             job
-    NewerJobInProgress job inProgress -> do
-        let
-            msg =
-                "Newer Job #"
-                    <> toPathPiece (entityKey inProgress)
-                    <> " in progress"
-        logWarn
-            $ "Job ignored for "
-            <> display (jobPath job)
-            <> ": "
-            <> display msg
-        void $ runDB $ completeJobSkipped (unpack msg) job
     ExecRestylerFailure job ex -> do
         logError
             $ "Exec failure for "

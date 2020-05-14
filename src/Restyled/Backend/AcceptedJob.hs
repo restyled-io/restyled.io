@@ -13,6 +13,7 @@ where
 import Restyled.Prelude
 
 import Restyled.Backend.AcceptedWebhook
+import Restyled.Backend.ConcurrentJobs
 import Restyled.Backend.Marketplace
 import Restyled.Models
 
@@ -20,20 +21,25 @@ data IgnoredJobReason
     = NonGitHubRepo Repo
     | ManualRestriction Repo
     | PlanLimitation Repo MarketplacePlanLimitation
+    | NewerJobInProgress (Entity Job)
 
 data AcceptedJob = AcceptedJob
     { ajRepo :: Entity Repo
     , ajJob :: Entity Job
+    , ajStaleJobs :: StaleJobs
     }
 
 -- | Given an Accepted webhook, accept or ignore that Job
 acceptJob
-    :: MonadIO m => AcceptedWebhook -> ExceptT IgnoredJobReason m AcceptedJob
+    :: (MonadUnliftIO m, MonadReader env m, HasDB env)
+    => AcceptedWebhook
+    -> ExceptT IgnoredJobReason m AcceptedJob
 acceptJob AcceptedWebhook {..} = do
     when (repoSvcs repo /= GitHubSVCS) $ throwError $ NonGitHubRepo repo
     unless (repoEnabled repo) $ throwError $ ManualRestriction repo
     whenMarketplacePlanForbids allows $ throwError . PlanLimitation repo
-    pure $ AcceptedJob awRepo awJob
+    staleJobs <- checkConcurrentJobs awJob NewerJobInProgress
+    pure $ AcceptedJob awRepo awJob staleJobs
   where
     repo = entityVal awRepo
     allows = awMarketplaceAllows
@@ -46,6 +52,7 @@ ignoredJobReasonToLogMessage = \case
     PlanLimitation _ MarketplacePlanPublicOnly ->
         "Public-only Marketplace Plan"
     PlanLimitation _ MarketplacePlanMaxRepos -> "Maximum private repos in use"
+    NewerJobInProgress _ -> "Newer Job in progress"
 
 ignoredJobReasonToJobLogLine :: IgnoredJobReason -> String
 ignoredJobReasonToJobLogLine = unlines . \case
@@ -68,6 +75,10 @@ ignoredJobReasonToJobLogLine = unlines . \case
     PlanLimitation _ MarketplacePlanMaxRepos ->
         [ "You've reached the limit for private repositories on this plan."
         , "Upgrade your plan at https://github.com/marketplace/restyled-io"
+        ]
+    NewerJobInProgress (Entity jobId job) ->
+        [ "Newer Job #" <> unpack (toPathPiece jobId) <> " already in progress."
+        , "  Created at " <> show (jobCreatedAt job)
         ]
   where
     path :: Repo -> String

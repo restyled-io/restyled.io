@@ -1,5 +1,7 @@
 module Restyled.Backend.ConcurrentJobs
-    ( checkConcurrentJobs
+    ( StaleJobs
+    , checkConcurrentJobs
+    , cancelStaleJobs
     )
 where
 
@@ -9,58 +11,85 @@ import Restyled.Backend.RestyleMachine
 import Restyled.Backend.StoppedContainer
 import Restyled.Models
 
+newtype StaleJobs = StaleJobs
+    { unStaleJobs :: [Entity Job]
+    }
+
 -- | Handle concurrent Jobs for the same PR
 --
 -- If a concurrent Job exists that is newer than the one given, there is no need
 -- to process that Job. This function will throw in that case.
 --
--- If a concurrent Job exists that is older than the one given, we should cancel
--- it. Both to free resources and to prevent that Job erroring if it attempts to
--- push a stale resyling up after the in-progress Job finishes.
---
--- Cancelling is accomplished by sending a SIGHUP to the container. It is
--- expected to exit on its own and whatever Backend process is tracking it will
--- do the required cleanup from there.
+-- If concurrent Jobs exist that are older than the one given, we should cancel
+-- those. Both to free resources and to prevent that Job erroring if it attempts to
+-- push a stale resytling up after the in-progress Job finishes.
 --
 checkConcurrentJobs
-    :: (HasLogFunc env, HasProcessContext env, HasDB env)
+    :: (MonadUnliftIO m, MonadReader env m, HasDB env)
     => Entity Job
     -- ^ Job about to run
     -> (Entity Job -> e)
-    -- ^ Build the error to throw, if stale, given newer Job
-    -> ExceptT e (RIO env) ()
+    -- ^ Build the error to throw, if stale, given oldest newer Job
+    -> ExceptT e m StaleJobs
+    -- ^ Returns any older Jobs, for potential cancellation
 checkConcurrentJobs job errStale = do
-    mInProgressJob <- lift $ runDB $ fetchJobConcurrentWith job
+    (newer, older) <-
+        lift
+        $ runDB
+        $ partition (`isNewerThan` job)
+        <$> fetchJobsConcurrentWith job
 
-    for_ mInProgressJob $ \inProgress -> if inProgress `isNewerThan` job
-        then throwError $ errStale inProgress
-        else lift $ do
-            logInfo
-                $ "Cancelling Job: "
-                <> displayJob job
-                <> ", newer job in progress: "
-                <> displayJob inProgress
-            cancelJob $ entityKey job
+    case newer of
+        [] -> pure $ StaleJobs older
+        (x : _) -> throwError $ errStale x
 
 isNewerThan :: Entity Job -> Entity Job -> Bool
 isNewerThan = (>) `on` (jobCreatedAt . entityVal)
 
-cancelJob
-    :: (HasLogFunc env, HasProcessContext env, HasDB env) => JobId -> RIO env ()
-cancelJob jobId = do
-    machines <- runDB fetchActiveRestyleMachines
-    traverse_ (sighupJobOnMachine jobId . entityVal) machines
-
--- | Send SIGHUP to the Job's container, if found on a given Machine
+-- | Cancel 'StaleJob's
+--
+-- Attempts to find a Container running the Job (known via @label@s) and sends a
+-- SIGHUP signal to it. It is expected to exit on its own and whatever Backend
+-- process is tracking it will do the required cleanup from there.
 --
 -- TODO: this signal will be ignored for now, but the logging will tell us how
--- often we may use it if we built it.
+-- often we may use it if we built it. We could change nothing and just send
+-- TERM (or KILL). This would materialize as an error (and potentially red PR),
+-- but the newer Job would replace that status. This would be more attractive if
+-- we send Pending... :thinking:
 --
+cancelStaleJobs
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasProcessContext env
+       , HasDB env
+       )
+    => StaleJobs
+    -> m ()
+cancelStaleJobs = go . unStaleJobs
+  where
+    go [] = logDebug "No Stale Jobs to cancel"
+    go jobs = do
+        machines <- runDB fetchActiveRestyleMachines
+        logDebug
+            $ "Checking "
+            <> displayShow (length machines)
+            <> " active Restyle Machine(s)"
+
+        for_ (map entityKey jobs) $ \jobId -> do
+            logInfo $ "Cancelling Job #" <> display (toPathPiece jobId)
+            traverse_ (sighupJobOnMachine jobId . entityVal) machines
+
 sighupJobOnMachine
-    :: (HasLogFunc env, HasProcessContext env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasProcessContext env
+       )
     => JobId
     -> RestyleMachine
-    -> RIO env ()
+    -> m ()
 sighupJobOnMachine jobId machine = do
     logDebug $ "Checking Restyle Machine " <> display name
     withRestyleMachineEnv machine $ do
@@ -75,17 +104,8 @@ sighupJobOnMachine jobId machine = do
             <> " "
             <> fromString err
 
-displayJob :: Entity Job -> Utf8Builder
-displayJob jobE@(Entity jobId job) =
-    display (jobPath jobE)
-        <> " id="
-        <> display (toPathPiece jobId)
-        <> " createdAt="
-        <> displayShow (jobCreatedAt job)
-
-fetchJobConcurrentWith
-    :: MonadIO m => Entity Job -> SqlPersistT m (Maybe (Entity Job))
-fetchJobConcurrentWith (Entity jobId job) = selectFirst
+fetchJobsConcurrentWith :: MonadIO m => Entity Job -> SqlPersistT m [Entity Job]
+fetchJobsConcurrentWith (Entity jobId job) = selectList
     [ JobOwner ==. jobOwner job
     , JobRepo ==. jobRepo job
     , JobPullRequest ==. jobPullRequest job
