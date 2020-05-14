@@ -8,9 +8,9 @@ where
 
 import Restyled.Prelude
 
+import Restyled.Backend.Container
 import Restyled.Backend.DockerRunJob (followJobContainer)
 import Restyled.Backend.RestyleMachine (withRestyleMachineEnv)
-import Restyled.Backend.Container
 import Restyled.Models
 
 runReconcile
