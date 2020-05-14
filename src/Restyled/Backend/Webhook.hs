@@ -12,6 +12,7 @@ import Restyled.Prelude
 
 import Restyled.Backend.AcceptedJob
 import Restyled.Backend.AcceptedWebhook
+import Restyled.Backend.ConcurrentJobs
 import Restyled.Backend.ExecRestyler
 import Restyled.Backend.RestyleMachine
 import Restyled.Models
@@ -32,12 +33,13 @@ awaitWebhook t = do
 data JobNotProcessed
     = WebhookIgnored IgnoredWebhookReason
     | JobIgnored (Entity Job) IgnoredJobReason
+    | NewerJobInProgress (Entity Job) (Entity Job)
     | ExecRestylerFailure (Entity Job) SomeException
 
 data JobProcessed = ExecRestylerSuccess (Entity Job) ExitCode
 
 processWebhook
-    :: (HasLogFunc env, HasDB env)
+    :: (HasLogFunc env, HasProcessContext env, HasDB env)
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
@@ -47,8 +49,11 @@ processWebhook execRestyler body = withRestyleMachine $ \mMachine ->
         job <- withExceptT (JobIgnored $ awJob webhook) $ acceptJob webhook
 
         let acceptedJob = ajJob job
+            errStale = NewerJobInProgress acceptedJob
             failure = ExecRestylerFailure acceptedJob
             success = ExecRestylerSuccess acceptedJob
+
+        checkConcurrentJobs acceptedJob errStale
 
         logDebug $ "Executing Restyler for " <> display (jobPath acceptedJob)
         withExceptT failure
@@ -68,6 +73,18 @@ fromNotProcessed = \case
         void $ runDB $ completeJobSkipped
             (ignoredJobReasonToJobLogLine reason)
             job
+    NewerJobInProgress job inProgress -> do
+        let
+            msg =
+                "Newer Job #"
+                    <> toPathPiece (entityKey inProgress)
+                    <> " in progress"
+        logWarn
+            $ "Job ignored for "
+            <> display (jobPath job)
+            <> ": "
+            <> display msg
+        void $ runDB $ completeJobSkipped (unpack msg) job
     ExecRestylerFailure job ex -> do
         logError
             $ "Exec failure for "
