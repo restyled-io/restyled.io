@@ -10,9 +10,6 @@ where
 
 import Restyled.Prelude
 
-import qualified Data.Text.Lazy as TL
-import Formatting (format)
-import Formatting.Time (diff)
 import Restyled.Backend.AcceptedJob
 import Restyled.Backend.AcceptedWebhook
 import Restyled.Backend.ExecRestyler
@@ -49,10 +46,11 @@ processWebhook execRestyler body = withRestyleMachine $ \mMachine ->
         webhook <- withExceptT WebhookIgnored $ acceptWebhook body
         job <- withExceptT (JobIgnored $ awJob webhook) $ acceptJob webhook
 
-        let failure = ExecRestylerFailure $ ajJob job
-            success = ExecRestylerSuccess $ ajJob job
+        let acceptedJob = ajJob job
+            failure = ExecRestylerFailure acceptedJob
+            success = ExecRestylerSuccess acceptedJob
 
-        logDebug $ fromString $ "Executing Restyler for " <> jobPath (ajJob job)
+        logDebug $ "Executing Restyler for " <> display (jobPath acceptedJob)
         withExceptT failure
             $ success
             <$> tryExecRestyler execRestyler job mMachine
@@ -63,45 +61,30 @@ fromNotProcessed = \case
         logDebug $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason
     JobIgnored job reason -> do
         logWarn
-            $ fromString
             $ "Job ignored for "
-            <> jobPath job
+            <> display (jobPath job)
             <> ": "
-            <> ignoredJobReasonToLogMessage reason
+            <> fromString (ignoredJobReasonToLogMessage reason)
         void $ runDB $ completeJobSkipped
             (ignoredJobReasonToJobLogLine reason)
             job
     ExecRestylerFailure job ex -> do
         logError
-            $ fromString
             $ "Exec failure for "
-            <> jobPath job
+            <> display (jobPath job)
             <> ": "
-            <> show ex
+            <> displayShow ex
         void $ runDB $ completeJobErrored (show ex) job
 
 fromProcessed :: (HasLogFunc env, HasDB env) => JobProcessed -> RIO env ()
 fromProcessed (ExecRestylerSuccess job ec) = do
     updatedJob <- runDB $ completeJob ec job
     logInfo
-        $ fromString
         $ "Job completed for "
-        <> jobPath job
+        <> display (jobPath job)
         <> " ("
-        <> jobOutcome (entityVal updatedJob)
+        <> display (jobOutcome $ entityVal updatedJob)
         <> ")"
-
-jobPath :: Entity Job -> String
-jobPath (Entity _ Job {..}) =
-    unpack $ repoPullPath jobOwner jobRepo jobPullRequest
-
-jobOutcome :: Job -> String
-jobOutcome Job {..} = fromMaybe "N/A" $ do
-    exitCode <- jobExitCode
-    duration <- getDuration <$> jobCompletedAt
-    pure $ "exited " <> show exitCode <> " in " <> duration
-  where
-    getDuration = TL.unpack . format (diff False) . diffUTCTime jobCreatedAt
 
 queueDepth :: Redis (Maybe Integer)
 queueDepth = hush <$> llen queueName

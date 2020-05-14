@@ -2,8 +2,12 @@
 
 module Restyled.Models.Job
     (
+    -- * Formatting
+      jobPath
+    , jobOutcome
+
     -- * Creating Jobs
-      insertJob
+    , insertJob
 
     -- * Queries
     , fetchJobIsInProgress
@@ -27,7 +31,22 @@ where
 
 import Restyled.Prelude
 
+import qualified Data.Text.Lazy as TL
+import Formatting (format)
+import Formatting.Time (diff)
 import Restyled.Models.DB
+import Restyled.Models.Repo (repoPullPath)
+
+jobPath :: Entity Job -> Text
+jobPath (Entity _ Job {..}) = repoPullPath jobOwner jobRepo jobPullRequest
+
+jobOutcome :: Job -> Text
+jobOutcome Job {..} = fromMaybe "N/A" $ do
+    ec <- jobExitCode
+    duration <- getDuration <$> jobCompletedAt
+    pure $ pack $ "exited " <> show ec <> " in " <> duration
+  where
+    getDuration = TL.unpack . format (diff False) . diffUTCTime jobCreatedAt
 
 insertJob
     :: MonadIO m => Entity Repo -> PullRequestNum -> SqlPersistT m (Entity Job)
