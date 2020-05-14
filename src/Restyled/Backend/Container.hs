@@ -98,7 +98,7 @@ getRunningContainer jobId = do
     containerIds <- getContainerIdsBy
         [ "label=restyler"
         , "label=job-id=" <> unpack (toPathPiece jobId)
-        , "status=exited"
+        , "status=running"
         ]
 
     if null containerIds
