@@ -1,5 +1,4 @@
--- | Rename to just "Container"
-module Restyled.Backend.StoppedContainer
+module Restyled.Backend.Container
     ( StoppedContainer(..)
     , getStoppedContainers
     , RunningContainer(..)

@@ -7,8 +7,8 @@ where
 
 import Restyled.Prelude
 
+import Restyled.Backend.Container
 import Restyled.Backend.RestyleMachine
-import Restyled.Backend.StoppedContainer
 import Restyled.Models
 
 newtype StaleJobs = StaleJobs
