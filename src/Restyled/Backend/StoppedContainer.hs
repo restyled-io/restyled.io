@@ -1,6 +1,11 @@
+-- | Rename to just "Container"
 module Restyled.Backend.StoppedContainer
     ( StoppedContainer(..)
     , getStoppedContainers
+    , RunningContainer(..)
+    , getRunningContainer
+    , signalContainer
+    , signalContainerLogged
     )
 where
 
@@ -37,6 +42,32 @@ instance FromJSON StoppedContainer where
             <*> state
             .: "ExitCode"
 
+data RunningContainer = RunningContainer
+    { rcJobId :: JobId
+    , rcContainerId :: String
+    , rcStartedAt :: UTCTime
+    }
+
+instance Display RunningContainer where
+    display RunningContainer {..} =
+        "RunningContainer "
+            <> display (pack rcContainerId)
+            <> ", job "
+            <> display (toPathPiece rcJobId)
+            <> ", started "
+            <> displayShow rcStartedAt
+
+instance FromJSON RunningContainer where
+    parseJSON = withObject "Container" $ \o -> do
+        state <- o .: "State"
+        jobId <-
+            either fail pure
+            . fromPathPieceEither
+            =<< (.: "job-id")
+            =<< (.: "Labels")
+            =<< (o .: "Config")
+        RunningContainer jobId <$> o .: "Id" <*> state .: "StartedAt"
+
 fromPathPieceEither :: PathPiece a => Text -> Either String a
 fromPathPieceEither x =
     note ("Unable to parse with PathPiece: " <> unpack x) $ fromPathPiece x
@@ -49,24 +80,83 @@ getStoppedContainers
        )
     => m (Either String [StoppedContainer])
 getStoppedContainers = do
-    containerIds <- getExitedContainerIds
+    containerIds <- getContainerIdsBy
+        ["label=restyler", "label=job-id", "status=exited"]
 
     if null containerIds
         then pure $ Right []
-        else do
-            bs <- proc "docker" ("inspect" : containerIds) readProcessStdout_
-            pure $ eitherDecode bs
+        else inspectContainers containerIds
 
--- brittany-disable-next-binding
+getRunningContainer
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasProcessContext env
+       )
+    => JobId
+    -> m (Either String (Maybe RunningContainer))
+getRunningContainer jobId = do
+    containerIds <- getContainerIdsBy
+        [ "label=restyler"
+        , "label=job-id=" <> unpack (toPathPiece jobId)
+        , "status=exited"
+        ]
 
-getExitedContainerIds
-    :: (MonadUnliftIO m, MonadReader env m, HasLogFunc env, HasProcessContext env)
-    => m [String]
-getExitedContainerIds = lines . LBS8.unpack <$> proc "docker"
-    [ "ps"
-    , "--filter", "label=restyler"
-    , "--filter", "label=job-id"
-    , "--filter", "status=exited"
-    , "--format", "{{.ID}}"
-    ]
-    readProcessStdout_
+    if null containerIds
+        then pure $ Right Nothing
+        else second listToMaybe <$> inspectContainers containerIds
+
+getContainerIdsBy
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasProcessContext env
+       )
+    => [String]
+    -> m [String]
+getContainerIdsBy filters =
+    lines . LBS8.unpack <$> proc "docker" args readProcessStdout_
+  where
+    args = ["ps", "--format", "{{.ID}}"] <> filterArgs
+    filterArgs = concatMap (\f -> "--filter" : [f]) filters
+
+inspectContainers
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasProcessContext env
+       , FromJSON a
+       )
+    => [String]
+    -> m (Either String [a])
+inspectContainers containerIds =
+    eitherDecode <$> proc "docker" ("inspect" : containerIds) readProcessStdout_
+
+signalContainer
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasProcessContext env
+       )
+    => String
+    -> RunningContainer
+    -> m ExitCode
+signalContainer signal RunningContainer {..} =
+    proc "docker" ["kill", "--signal", signal, rcContainerId] runProcess
+
+signalContainerLogged
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasProcessContext env
+       )
+    => String
+    -> RunningContainer
+    -> m ()
+signalContainerLogged signal container = do
+    logDebug $ fromString signal <> " " <> display container
+    ec <- signalContainer signal container
+
+    case ec of
+        ExitSuccess -> logDebug "Success"
+        ExitFailure c -> logWarn $ "Non-zero exit:" <> displayShow c
