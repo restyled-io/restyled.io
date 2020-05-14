@@ -6,9 +6,9 @@ where
 import Restyled.Test
 
 import qualified Database.Persist as P
+import Restyled.Backend.Container
 import Restyled.Backend.DockerRunJob (chomp)
 import Restyled.Backend.Reconcile
-import Restyled.Backend.StoppedContainer
 
 spec :: Spec
 spec = withApp $ do

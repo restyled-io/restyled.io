@@ -9,9 +9,9 @@ where
 import Restyled.Prelude
 
 import Database.Persist.Sql (updateWhereCount)
+import Restyled.Backend.Container
 import Restyled.Backend.DockerRunJob (followJobContainer)
 import Restyled.Backend.RestyleMachine (withRestyleMachineEnv)
-import Restyled.Backend.StoppedContainer
 import Restyled.Models
 
 data ReconcileResult = ReconcileResult
