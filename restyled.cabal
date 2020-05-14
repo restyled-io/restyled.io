@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8cc2211c1cd2a85a096be3452782a2fb063d8a979ae4c2101acdc251721bc2cb
+-- hash: 330affaad3379d06f495934b18aa3d9cc392d7864e780935b6740df95b0a100f
 
 name:           restyled
 version:        0.1.1.0
@@ -34,6 +34,8 @@ library
       Restyled.Backend.AcceptedJob
       Restyled.Backend.AcceptedWebhook
       Restyled.Backend.Application
+      Restyled.Backend.ConcurrentJobs
+      Restyled.Backend.Container
       Restyled.Backend.DiscountMarketplacePlan
       Restyled.Backend.DockerRunArgs
       Restyled.Backend.DockerRunJob
@@ -42,7 +44,6 @@ library
       Restyled.Backend.Marketplace
       Restyled.Backend.Reconcile
       Restyled.Backend.RestyleMachine
-      Restyled.Backend.StoppedContainer
       Restyled.Backend.Webhook
       Restyled.Cache
       Restyled.Development.Seeds

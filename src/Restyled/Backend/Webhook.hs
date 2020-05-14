@@ -10,6 +10,7 @@ import Restyled.Prelude
 
 import Restyled.Backend.AcceptedJob
 import Restyled.Backend.AcceptedWebhook
+import Restyled.Backend.ConcurrentJobs
 import Restyled.Backend.ExecRestyler
 import Restyled.Backend.RestyleMachine
 import Restyled.Models
@@ -48,6 +49,12 @@ processWebhook execRestyler body =
         let acceptedJob = ajJob job
             failure = ExecRestylerFailure acceptedJob
             success = ExecRestylerSuccess acceptedJob
+
+        -- N.B. Ideally, we'd only cancel stale Jobs once the new Job is
+        -- started, but since we operate under single-threaded waiting we can't
+        -- do that. Some day we'll fire-forget-and-track, unblocking that
+        -- pattern.
+        lift $ cancelStaleJobs $ ajStaleJobs job
 
         logDebug $ "Executing Restyler for " <> display (jobPath acceptedJob)
         eitherT failure success $ tryExecRestyler execRestyler job
