@@ -1,125 +1,114 @@
-# yamllint disable rule:line-length
-version: 2.0
+version: 2.1
 
-jobs:
-  build:
+orbs:
+  stack-build: pbrisbin/stack-build@3.0.0
+  docker-build-cached: pbrisbin/docker-build-cached@1.0.0
+  aws-ecs: circleci/aws-ecs@0.0.10
+  aws-ecs-scheduled-tasks: pbrisbin/aws-ecs-scheduled-tasks@1.0.0
+  heroku-container: pbrisbin/heroku-container@1.0.0
+  pushover: pbrisbin/pushover@1.0.0
+
+executors:
+  default:
     docker:
       - image: fpco/stack-build:lts-14.6
-        environment:
-          STACK_ARGUMENTS: --no-terminal
       - image: circleci/postgres:9.6.5-alpine
         environment:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: restyled_test
       - image: redis:4.0.2-alpine
-    steps:
-      - checkout
-      - run:
-          name: Digest
-          command: git ls-files | xargs md5sum > digest
-      - restore_cache:
-          keys:
-            - v5-{{ .Branch }}-{{ checksum "stack.yaml" }}-{{ checksum "digest" }}
-            - v5-{{ .Branch }}-{{ checksum "stack.yaml" }}-
-            - v5-{{ .Branch }}
-            - v5-
-      - run:
-          name: Dependencies
-          command: make setup setup.lint
-      - run:
-          name: Build
-          command: make build
-      - save_cache:
-          key: v5-{{ .Branch }}-{{ checksum "stack.yaml" }}-{{ checksum "digest" }}
-          paths:
-            - ~/.stack
-            - ./.stack-work
-      - run:
-          name: Migrate
-          command: db/migrate test upgrade
-      - run:
-          name: Test
-          command: make test
-      - run:
-          name: Lint
-          command: make lint
 
-  image:
-    docker:
-      - image: restyled/ops:v9
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: 18.09.3
-      - run:
-          name: Build
-          command: |
-            sha=${CIRCLE_SHA1:0:10}
-            release_image=restyled/restyled.io:$sha
-
-            docker login \
-              -u "$DOCKERHUB_USERNAME" \
-              -p "$DOCKERHUB_PASSWORD"
-
-            docker-build-remote-cache "$release_image" \
-              --build-arg "REVISION=$CIRCLE_SHA1"
-
-  release-frontend:
-    docker:
-      - image: restyled/ops:v9
-    steps:
-      - setup_remote_docker:
-          version: 18.09.3
-      - run:
-          name: Release
-          command: |
-            sha=${CIRCLE_SHA1:0:10}
-            release_image=restyled/restyled.io:$sha
-
-            cat >Dockerfile.web <<EOM
-            FROM $release_image
-            CMD ["/app/restyled.io", "web"]
-            EOM
-
-            heroku container:login
-            heroku container:push --recursive --app restyled-io
-            heroku container:release web --app restyled-io
-            notify "restyled-io[fronted]" "Deployed at $sha"
-
-  release-backend:
-    docker:
-      - image: restyled/ops:v9
-    steps:
-      - setup_remote_docker:
-          version: 18.09.3
-      - run:
-          name: Release
-          command: |
-            sha=${CIRCLE_SHA1:0:10}
-            release_image=restyled/restyled.io:$sha
-            ecs-deploy-restyled --image restyled "$release_image"
-            notify "restyled-io[backend]" "Deployed at $sha"
+references:
+  master_only: &master_only
+    filters:
+      branches:
+        only:
+          - master
 
 workflows:
-  version: 2
   build_and_release:
     jobs:
-      - build
-      - image
-      - release-backend:
+      - stack-build/build-test-lint:
+          name: build
+          install-stack: false
+          upgrade-stack: true
+          before-dependencies:
+            - run: stack build --no-terminal -j 1 Cabal aeson haskell-src-exts
+          after-dependencies:
+            - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
+          before-test:
+            - run: db/migrate test upgrade
+          hlint-yaml-url:
+            https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
+          executor: default
+
+      - docker-build-cached/build-and-release:
+          name: image
+          registry-username: DOCKERHUB_USERNAME
+          registry-password: DOCKERHUB_PASSWORD
+          image: restyled/restyled.io
+          build-stages: builder
+          extra-build-arguments: '--build-arg "REVISION=$CIRCLE_SHA1"'
+
+      - heroku-container/push-and-release:
+          <<: *master_only
+          name: release-frontend
+          requires: [build, image]
+          app-name: restyled-io
+          recursive: true
+          before-build:
+            - run: |
+                cat >Dockerfile.web \<<EOM
+                FROM restyled/restyled.io:${CIRCLE_SHA1:0:10}
+                CMD ["/app/restyled.io", "web"]
+                EOM
+
+      - aws-ecs/deploy-service-update:
+          <<: *master_only
+          name: release-backend-webhooks
+          requires: [build, image]
+          family: restyled-prod-webhooks
+          cluster-name: restyled-prod
+          service-name: webhooks
+          container-image-name-updates:
+            'container=restyled,tag=${CIRCLE_SHA1:0:10}'
+
+      - aws-ecs-scheduled-tasks/deploy-scheduled-task-update:
+          <<: *master_only
+          name: release-backend-health
+          requires: [build, image]
+          family: restyled-prod-health
+          rule-name: health
+          container-image-name-updates:
+            'container=restyled,tag=${CIRCLE_SHA1:0:10}'
+
+      - aws-ecs-scheduled-tasks/deploy-scheduled-task-update:
+          <<: *master_only
+          name: release-backend-sync-marketplace
+          requires: [build, image]
+          family: restyled-prod-sync-marketplace
+          rule-name: sync-marketplace
+          container-image-name-updates:
+            'container=restyled,tag=${CIRCLE_SHA1:0:10}'
+
+      - aws-ecs-scheduled-tasks/deploy-scheduled-task-update:
+          <<: *master_only
+          name: release-backend-reconcile
+          requires: [build, image]
+          family: restyled-prod-reconcile
+          rule-name: reconcile
+          container-image-name-updates:
+            'container=restyled,tag=${CIRCLE_SHA1:0:10}'
+
+      - pushover/notify:
+          <<: *master_only
+          name: notify
           requires:
-            - build
-            - image
-          filters:
-            branches:
-              only:
-                - master
-      - release-frontend:
-          requires:
-            - build
-            - image
-          filters:
-            branches:
-              only:
-                - master
+            - release-frontend
+            - release-backend-webhooks
+            - release-backend-health
+            - release-backend-sync-marketplace
+            - release-backend-reconcile
+          title: 'Restyled deployments'
+          message: 'restyled.io deployed at ${CIRCLE_SHA1:0:10}'
