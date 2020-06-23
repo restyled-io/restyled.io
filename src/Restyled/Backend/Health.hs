@@ -45,7 +45,7 @@ runHealthChecks = do
         , hcFetch = do
             range <- timeRangeFromMinutesAgo 60
             runDB $ selectListWithTimeRange JobCreatedAt range
-        , hcCompute = errorRate [10, 11, 20]
+        , hcCompute = errorRate [10, 11, 20, 25]
         , hcHealth = thresholds (< 60) (< 80)
         }
 
