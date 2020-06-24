@@ -14,4 +14,10 @@
       <strong .to>
       <a .next href=#next>Next
   <div .chart>
-  <div .table>
+
+  <h3>Unfinished
+  <div .table-unfinished>
+  <h3>Errored
+  <div .table-errored>
+  <h3>All
+  <div .table-all>

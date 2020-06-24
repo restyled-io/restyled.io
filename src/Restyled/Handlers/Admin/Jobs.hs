@@ -24,12 +24,35 @@ instance ToJSON JobSummary where
         , "url" .= urlRender (repoP jobOwner jobRepo $ jobR jobId)
         ]
 
+data JobsFilter
+    = JobsFilterAll
+    | JobsFilterUnfinished
+    | JobsFilterErrored
+
+optionalJobsFilter :: Handler JobsFilter
+optionalJobsFilter = fromMaybeM (pure JobsFilterAll) $ runInputGet $ iopt
+    (eitherField readJobsFilter)
+    "filter"
+
+readJobsFilter :: Text -> Either Text JobsFilter
+readJobsFilter = \case
+    "all" -> Right JobsFilterAll
+    "unfinished" -> Right JobsFilterUnfinished
+    "errored" -> Right JobsFilterErrored
+    x -> Left $ "Invalid filter: " <> x
+
 getAdminJobsR :: Handler Value
 getAdminJobsR = do
     range <- requiredTimeRange
+    jobsFilter <- optionalJobsFilter
     jobs <- runDB $ selectListWithTimeRange JobCreatedAt range
     urlRender <- getUrlRender
-    sendResponse $ toJSON $ map (JobSummary urlRender) jobs
+    sendResponse $ toJSON $ map (JobSummary urlRender) $ case jobsFilter of
+        JobsFilterAll -> jobs
+        JobsFilterUnfinished ->
+            filter (isNothing . jobExitCode . entityVal) jobs
+        JobsFilterErrored ->
+            filter (maybe False (/= 0) . jobExitCode . entityVal) jobs
 
 -- | Give myself /something/ human readable
 --
@@ -45,6 +68,7 @@ reasonForExitCode = \case
     11 -> Just "Unknown Restyler"
     12 -> Just "Invalid restylers.yaml"
     20 -> Just "Restyler error"
+    25 -> Just "Restyle error"
     30 -> Just "GitHub error"
     31 -> Just "PR fetch failure"
     32 -> Just "PR clone failure"

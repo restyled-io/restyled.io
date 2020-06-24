@@ -8,6 +8,7 @@ module Restyled.Yesod
     -- * Fields
     , epochField
     , jsonField
+    , eitherField
 
     -- * Re-exports
     , module X
@@ -65,6 +66,12 @@ parseEpoch t =
         MsgInvalidNumber
             $ t
             <> " did not parse as whole seconds since Unix epoch"
+
+eitherField
+    :: (Monad m, RenderMessage (HandlerSite m) FormMessage)
+    => (Text -> Either Text a)
+    -> Field m a
+eitherField f = inputField $ first MsgInvalidEntry . f
 
 inputField
     :: (Monad m, RenderMessage (HandlerSite m) FormMessage)
