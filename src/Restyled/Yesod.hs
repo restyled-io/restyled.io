@@ -54,7 +54,7 @@ $newline never
     }
   where
     parseVal = first (MsgInvalidEntry . pack) . eitherDecodeStrict . encodeUtf8
-    showVal = decodeUtf8 . encodeStrict
+    showVal = either (const "") $ decodeUtf8 . encodeStrict
 
 parseEpoch :: Text -> Either FormMessage UTCTime
 parseEpoch t =
