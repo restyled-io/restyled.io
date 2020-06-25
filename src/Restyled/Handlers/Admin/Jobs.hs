@@ -18,11 +18,12 @@ import RIO.List (sort)
 data JobSummary = JobSummary (Route App -> Text) (Entity Job)
 
 instance ToJSON JobSummary where
-    toJSON (JobSummary urlRender (Entity jobId Job {..})) = object
+    toJSON (JobSummary urlRender eJob@(Entity jobId Job {..})) = object
         [ "created" .= jobCreatedAt
         , "repoPull" .= repoPullPath jobOwner jobRepo jobPullRequest
         , "exitCode" .= jobExitCode
         , "exitReason" .= (reasonForExitCode =<< jobExitCode)
+        , "duration" .= jobDuration eJob
         , "url" .= urlRender (repoP jobOwner jobRepo $ jobR jobId)
         ]
 

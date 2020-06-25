@@ -14,6 +14,7 @@ $(function() {
         { title: "PR", field: "repoPull", headerFilter: true },
         { title: "Exit", field: "exitCode", headerFilter: true },
         { title: "Reason", field: "exitReason" },
+        { title: "Duration", field: "duration" },
         {
           title: "URL",
           field: "url",
