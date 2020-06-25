@@ -54,6 +54,7 @@ $(function() {
     });
 
     jobsTabulator("unfinished", from, to);
+    jobsTabulator("slow", from, to);
     jobsTabulator("errored", from, to);
     jobsTabulator("all", from, to);
 

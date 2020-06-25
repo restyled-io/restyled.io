@@ -2,8 +2,11 @@
 
 module Restyled.Models.Job
     (
+    -- * Virtual fields
+      jobDuration
+
     -- * Creating Jobs
-      insertJob
+    , insertJob
 
     -- * Queries
     , fetchJobIsInProgress
@@ -28,6 +31,10 @@ where
 import Restyled.Prelude
 
 import Restyled.Models.DB
+
+jobDuration :: Entity Job -> Maybe NominalDiffTime
+jobDuration (Entity _ Job {..}) =
+    (`diffUTCTime` jobCreatedAt) <$> jobCompletedAt
 
 insertJob
     :: MonadIO m => Entity Repo -> PullRequestNum -> SqlPersistT m (Entity Job)

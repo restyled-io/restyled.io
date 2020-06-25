@@ -7,11 +7,13 @@ where
 
 import Restyled.Prelude hiding (to)
 
+import Data.Semigroup (Arg(..))
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Routes
 import Restyled.TimeRange
 import Restyled.Yesod
+import RIO.List (sort)
 
 data JobSummary = JobSummary (Route App -> Text) (Entity Job)
 
@@ -27,32 +29,44 @@ instance ToJSON JobSummary where
 data JobsFilter
     = JobsFilterAll
     | JobsFilterUnfinished
+    | JobsFilterSlow
     | JobsFilterErrored
 
-optionalJobsFilter :: Handler JobsFilter
-optionalJobsFilter = fromMaybeM (pure JobsFilterAll) $ runInputGet $ iopt
-    (eitherField readJobsFilter)
-    "filter"
+requiredJobsFilter :: Handler JobsFilter
+requiredJobsFilter = runInputGet $ ireq (eitherField readJobsFilter) "filter"
 
 readJobsFilter :: Text -> Either Text JobsFilter
 readJobsFilter = \case
     "all" -> Right JobsFilterAll
     "unfinished" -> Right JobsFilterUnfinished
+    "slow" -> Right JobsFilterSlow
     "errored" -> Right JobsFilterErrored
     x -> Left $ "Invalid filter: " <> x
 
 getAdminJobsR :: Handler Value
 getAdminJobsR = do
     range <- requiredTimeRange
-    jobsFilter <- optionalJobsFilter
-    jobs <- runDB $ selectListWithTimeRange JobCreatedAt range
+    jobsFilter <- requiredJobsFilter
     urlRender <- getUrlRender
-    sendResponse $ toJSON $ map (JobSummary urlRender) $ case jobsFilter of
-        JobsFilterAll -> jobs
+
+    let
+        selectJobs filters =
+            selectList (timeRangeFilter JobCreatedAt range <> filters)
+
+    jobs <- runDB $ case jobsFilter of
+        JobsFilterAll -> selectJobs [] [Desc JobCreatedAt]
         JobsFilterUnfinished ->
-            filter (isNothing . jobExitCode . entityVal) jobs
-        JobsFilterErrored ->
-            filter (maybe False (/= 0) . jobExitCode . entityVal) jobs
+            selectJobs [JobExitCode ==. Nothing] [Desc JobCreatedAt]
+        JobsFilterSlow ->
+            toSlowJobs <$> selectJobs [JobExitCode !=. Nothing] []
+        JobsFilterErrored -> selectJobs
+            [JobExitCode !=. Nothing, JobExitCode !=. Just 0]
+            [Desc JobCompletedAt]
+
+    sendResponse $ toJSON $ map (JobSummary urlRender) jobs
+
+toSlowJobs :: [Entity Job] -> [Entity Job]
+toSlowJobs = take 10 . map getArg . sort . mapMaybe (argByMay jobDuration)
 
 -- | Give myself /something/ human readable
 --
@@ -76,3 +90,9 @@ reasonForExitCode = \case
     50 -> Just "System error"
     99 -> Just "Known unknown"
     _ -> Just "Unknown unknown"
+
+argByMay :: (b -> Maybe a) -> b -> Maybe (Arg a b)
+argByMay f b = (`Arg` b) <$> f b
+
+getArg :: Arg a b -> b
+getArg (Arg _ b) = b

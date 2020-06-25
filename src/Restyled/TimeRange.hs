@@ -12,6 +12,7 @@ module Restyled.TimeRange
     , rawSqlWithTimeRange
     , selectListWithTimeRange
     , selectListWithTimeRangeBy
+    , timeRangeFilter
     )
 where
 
@@ -67,5 +68,17 @@ selectListWithTimeRangeBy
     -- ^ The entity field to filter with the range
     -> TimeRange
     -> SqlPersistT m [Entity a]
-selectListWithTimeRangeBy f field TimeRange {..} =
-    selectList [field >=. f tmFrom, field <=. f tmTo] [Desc field]
+selectListWithTimeRangeBy f field range =
+    selectList (timeRangeFilterBy f field range) [Desc field]
+
+timeRangeFilter :: EntityField a UTCTime -> TimeRange -> [Filter a]
+timeRangeFilter = timeRangeFilterBy id
+
+timeRangeFilterBy
+    :: PersistField b
+    => (UTCTime -> b)
+    -> EntityField a b
+    -> TimeRange
+    -> [Filter a]
+timeRangeFilterBy f field TimeRange {..} =
+    [field >=. f tmFrom, field <=. f tmTo]

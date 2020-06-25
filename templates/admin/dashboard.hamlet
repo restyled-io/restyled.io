@@ -17,6 +17,8 @@
 
   <h3>Unfinished
   <div .table-unfinished>
+  <h3>Slow
+  <div .table-slow>
   <h3>Errored
   <div .table-errored>
   <h3>All
