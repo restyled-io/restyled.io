@@ -51,6 +51,7 @@ import Data.Bitraversable as X (bimapM)
 import Data.Char as X (isSpace, toLower)
 import Data.Either as X (fromLeft, fromRight)
 import Data.Functor.Syntax as X ((<$$>))
+import Data.List.Extra as X (sortOn)
 import Data.Proxy as X
 import Data.Text as X (pack, unpack)
 import Database.Persist as X

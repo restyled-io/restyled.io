@@ -13,7 +13,6 @@ import Restyled.Models
 import Restyled.Routes
 import Restyled.TimeRange
 import Restyled.Yesod
-import RIO.List (sort)
 
 data JobSummary = JobSummary (Route App -> Text) (Entity Job)
 
@@ -67,7 +66,8 @@ getAdminJobsR = do
     sendResponse $ toJSON $ map (JobSummary urlRender) jobs
 
 toSlowJobs :: [Entity Job] -> [Entity Job]
-toSlowJobs = take 10 . map getArg . sort . mapMaybe (argByMay jobDuration)
+toSlowJobs =
+    take 10 . map getArg . sortOn Down . mapMaybe (argByMay jobDuration)
 
 -- | Give myself /something/ human readable
 --
