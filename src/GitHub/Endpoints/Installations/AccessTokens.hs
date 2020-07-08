@@ -13,5 +13,5 @@ import GitHub.Request.Preview
 accessTokenForR :: Id Installation -> PreviewRequest 'RW AccessToken
 accessTokenForR installationId = Command
     Post
-    ["installations", toPathPart installationId, "access_tokens"]
+    ["app", "installations", toPathPart installationId, "access_tokens"]
     mempty
