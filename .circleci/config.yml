@@ -26,7 +26,7 @@ jobs:
       - aws-cli/setup
       - run:
           name: Update CloudFormation Stack
-          commands: |
+          command: |
             image=restyled/restyled.io:${CIRCLE_SHA1:0:10}
             aws cloudformation update-stack \
               --stack-name prod-services \
