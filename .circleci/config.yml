@@ -24,15 +24,17 @@ jobs:
     steps:
       - checkout
       - aws-cli/setup
-      - run: |
-          image=restyled/restyled.io:${CIRCLE_SHA1:0:10}
-          aws cloudformation update-stack \
-            --stack-name prod-services \
-            --use-previous-template \
-            --parameter "ParameterKey=RestyledImage,ParameterValue=$image" \
-            --capabilities CAPABILITY_NAMED_IAM
-          aws cloudformation wait stack-update-complete \
-            --stack-name prod-services
+      - run:
+          name: Update CloudFormation Stack
+          commands: |
+            image=restyled/restyled.io:${CIRCLE_SHA1:0:10}
+            aws cloudformation update-stack \
+              --stack-name prod-services \
+              --use-previous-template \
+              --parameter "ParameterKey=RestyledImage,ParameterValue=$image" \
+              --capabilities CAPABILITY_NAMED_IAM
+            aws cloudformation wait stack-update-complete \
+              --stack-name prod-services
 
 references:
   master_only: &master_only
