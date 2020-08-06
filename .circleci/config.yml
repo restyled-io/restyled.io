@@ -3,8 +3,7 @@ version: 2.1
 orbs:
   stack-build: pbrisbin/stack-build@3.0.0
   docker-build-cached: pbrisbin/docker-build-cached@1.0.0
-  aws-ecs: circleci/aws-ecs@0.0.10
-  aws-ecs-scheduled-tasks: pbrisbin/aws-ecs-scheduled-tasks@1.0.0
+  aws-cli: circleci/aws-cli@1.2.1
   heroku-container: pbrisbin/heroku-container@1.0.0
   pushover: pbrisbin/pushover@1.0.0
 
@@ -18,6 +17,21 @@ executors:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: restyled_test
       - image: redis:4.0.2-alpine
+
+jobs:
+  update-stack-image:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup
+      - run: |
+          aws cloudformation update-stack \
+            --stack-name prod-services \
+            --use-previous-template \
+            --parameter "ParameterKey=RestyledImage,ParameterValue=${CIRCLE_SHA1:0:10}" \
+            --capabilities CAPABILITY_NAMED_IAM
+          aws cloudformation wait stack-update-complete \
+            --stack-name prod-services
 
 references:
   master_only: &master_only
@@ -63,52 +77,17 @@ workflows:
                 FROM restyled/restyled.io:${CIRCLE_SHA1:0:10}
                 CMD ["/app/restyled.io", "web"]
                 EOM
+          context: deploy-heroku
 
-      - aws-ecs/deploy-service-update:
+      - update-stack-image:
           <<: *master_only
-          name: release-backend-webhooks
+          name: release-backend
           requires: [build, image]
-          family: restyled-prod-webhooks
-          cluster-name: restyled-prod
-          service-name: webhooks
-          container-image-name-updates:
-            'container=restyled,tag=${CIRCLE_SHA1:0:10}'
-
-      - aws-ecs-scheduled-tasks/deploy-scheduled-task-update:
-          <<: *master_only
-          name: release-backend-health
-          requires: [build, image]
-          family: restyled-prod-health
-          rule-name: health
-          container-image-name-updates:
-            'container=restyled,tag=${CIRCLE_SHA1:0:10}'
-
-      - aws-ecs-scheduled-tasks/deploy-scheduled-task-update:
-          <<: *master_only
-          name: release-backend-sync-marketplace
-          requires: [build, image]
-          family: restyled-prod-sync-marketplace
-          rule-name: sync-marketplace
-          container-image-name-updates:
-            'container=restyled,tag=${CIRCLE_SHA1:0:10}'
-
-      - aws-ecs-scheduled-tasks/deploy-scheduled-task-update:
-          <<: *master_only
-          name: release-backend-reconcile
-          requires: [build, image]
-          family: restyled-prod-reconcile
-          rule-name: reconcile
-          container-image-name-updates:
-            'container=restyled,tag=${CIRCLE_SHA1:0:10}'
+          context: deploy-aws
 
       - pushover/notify:
           <<: *master_only
           name: notify
-          requires:
-            - release-frontend
-            - release-backend-webhooks
-            - release-backend-health
-            - release-backend-sync-marketplace
-            - release-backend-reconcile
+          requires: [release-frontend, release-backend]
           title: 'Restyled deployments'
           message: 'restyled.io deployed at ${CIRCLE_SHA1:0:10}'
