@@ -84,6 +84,8 @@ emptySettings = AppSettings
     , appMutableStatic = False
     , appStaticDir = error "unused"
     , appStubMarketplaceListing = True
+    , appRestyleMachineLocal = True
+    , appRestyleMachineJobsMax = 3
     }
 
 userWithEmail :: Text -> User

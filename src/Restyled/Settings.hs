@@ -70,6 +70,8 @@ data AppSettings = AppSettings
     , appMutableStatic :: Bool
     , appStaticDir :: FilePath
     , appStubMarketplaceListing :: Bool
+    , appRestyleMachineLocal :: Bool
+    , appRestyleMachineJobsMax :: Natural
     }
 
 class HasSettings env where
@@ -127,6 +129,8 @@ loadSettings =
         <*> switch "MUTABLE_STATIC" mempty
         <*> var nonempty "STATIC_DIR" (def "static")
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
+        <*> switch "RESTYLE_MACHINE_LOCAL" mempty
+        <*> var auto "RESTYLE_MACHINE_JOBS_MAX" (def 3)
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"

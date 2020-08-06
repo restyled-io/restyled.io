@@ -16,7 +16,6 @@ import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBS8
 import Data.Time.ISO8601 (formatISO8601)
 import Restyled.Backend.DockerRunArgs
-import Restyled.Backend.RestyleMachine (withRestyleMachineEnv)
 import Restyled.Models
 import Restyled.Settings
 
@@ -44,30 +43,25 @@ dockerRunJob
        )
     => Entity Repo
     -> Entity Job
-    -> Maybe (Entity RestyleMachine)
     -> m ExitCode
     -- ^ Exit code will be @99@ if there was some exception in this process
-dockerRunJob (Entity _ repo) job mMachine = do
+dockerRunJob (Entity _ repo) job = do
     settings <- view settingsL
     token <- repoInstallationToken settings repo
     let args = "run" : "--detach" : dockerRunArgs settings token repo job
 
-    handleAny loggedExitFailure $ withEnv $ do
+    handleAny loggedExitFailure $ do
         container <- chomp <$> proc "docker" args readProcessStdout_
 
-        capture job "system"
-            $ "Running on "
-            <> unpack machineName
-            <> " ("
-            <> container
-            <> ")"
+        -- TODO
+        -- capture job "system"
+        --     $ "Running on "
+        --     <> unpack restyleMachineName
+        --     <> " ("
+        --     <> container
+        --     <> ")"
 
         followJobContainer Nothing job container
-  where
-    (machineName, withEnv) = maybe
-        ("localhost", id)
-        ((restyleMachineName &&& withRestyleMachineEnv) . entityVal)
-        mMachine
 
 followJobContainer
     :: ( MonadUnliftIO m

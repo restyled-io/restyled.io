@@ -15,7 +15,6 @@ newtype ExecRestyler m = ExecRestyler
     { unExecRestyler
         :: Entity Repo
         -> Entity Job
-        -> Maybe (Entity RestyleMachine)
         -> m ExitCode
     }
 
@@ -24,7 +23,6 @@ tryExecRestyler
     :: MonadUnliftIO m
     => ExecRestyler m
     -> AcceptedJob
-    -> Maybe (Entity RestyleMachine)
     -> ExceptT SomeException m ExitCode
 tryExecRestyler (ExecRestyler execRestyler) AcceptedJob {..} =
-    ExceptT . tryAny . execRestyler ajRepo ajJob
+    ExceptT $ tryAny $ execRestyler ajRepo ajJob

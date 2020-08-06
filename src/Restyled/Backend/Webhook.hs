@@ -18,6 +18,7 @@ import Restyled.Backend.AcceptedWebhook
 import Restyled.Backend.ExecRestyler
 import Restyled.Backend.RestyleMachine
 import Restyled.Models
+import Restyled.Settings
 
 enqueueWebhook :: ByteString -> Redis ()
 enqueueWebhook = void . lpush queueName . pure
@@ -40,12 +41,12 @@ data JobNotProcessed
 data JobProcessed = ExecRestylerSuccess (Entity Job) ExitCode
 
 processWebhook
-    :: (HasLogFunc env, HasDB env)
+    :: (HasSettings env, HasLogFunc env, HasProcessContext env, HasDB env)
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
-processWebhook execRestyler body = withRestyleMachine $ \mMachine ->
-    exceptT fromNotProcessed fromProcessed $ do
+processWebhook execRestyler body =
+    restyleMachineEnv $ exceptT fromNotProcessed fromProcessed $ do
         webhook <- withExceptT WebhookIgnored $ acceptWebhook body
         job <- withExceptT (JobIgnored $ awJob webhook) $ acceptJob webhook
 
@@ -53,9 +54,18 @@ processWebhook execRestyler body = withRestyleMachine $ \mMachine ->
             success = ExecRestylerSuccess $ ajJob job
 
         logDebug $ fromString $ "Executing Restyler for " <> jobPath (ajJob job)
-        withExceptT failure
-            $ success
-            <$> tryExecRestyler execRestyler job mMachine
+        withExceptT failure $ success <$> tryExecRestyler execRestyler job
+
+restyleMachineEnv
+    :: (HasSettings env, HasLogFunc env, HasProcessContext env, HasDB env)
+    => RIO env a
+    -> RIO env a
+restyleMachineEnv act = do
+    restyleMachineLocal <- appRestyleMachineLocal <$> view settingsL
+
+    if restyleMachineLocal
+        then act
+        else withRestyleMachine $ (`withRestyleMachineEnv` act) . entityVal
 
 fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
 fromNotProcessed = \case
