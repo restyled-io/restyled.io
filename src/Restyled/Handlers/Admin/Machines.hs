@@ -15,6 +15,7 @@ where
 import Restyled.Prelude
 
 import Restyled.Admin.CreateMachine
+import Restyled.Backend.Reconcile (reconcileMachine)
 import Restyled.Backend.RestyleMachine
 import Restyled.Foundation
 import Restyled.Models
@@ -100,7 +101,19 @@ patchAdminMachineR machineId = selectRep $ do
 
 deleteAdminMachineR :: RestyleMachineId -> Handler TypedContent
 deleteAdminMachineR machineId = do
-    runDB $ deleteRestyleMachine =<< getEntity404 machineId
+    machine <- runDB $ getEntity404 machineId
+
+    -- Attempt to reconcile the machine. Best effort and capped at just under
+    -- the Heroku request timeout. We don't want to hold up deletes on this.
+    result <-
+        timeout (28 * 1000000)
+        $ handleAny (logErrorN . tshow)
+        $ void
+        $ (`withRestyleMachineEnv` reconcileMachine)
+        $ entityVal machine
+    logInfoN $ "Reconcile result: " <> tshow result
+
+    runDB $ deleteRestyleMachine machine
 
     selectRep $ do
         provideRep @_ @Value $ sendResponseNoContent
