@@ -51,3 +51,7 @@
   /tokens AdminTokensP:
     / AdminTokensR GET POST
     /#ApiTokenId AdminTokenR DELETE
+
+/system SystemP:
+  /metrics SystemMetricsP:
+    / SystemMetricsR GET

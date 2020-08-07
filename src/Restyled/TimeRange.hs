@@ -26,6 +26,9 @@ data TimeRange = TimeRange
     , tmTo :: UTCTime
     }
 
+instance ToJSON TimeRange where
+    toJSON TimeRange {..} = object ["from" .= tmFrom, "to" .= tmTo]
+
 timeRangeFromMinutesAgo :: MonadIO m => Int -> m TimeRange
 timeRangeFromMinutesAgo minutes = do
     now <- getCurrentTime

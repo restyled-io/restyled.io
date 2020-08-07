@@ -26,6 +26,9 @@ data JobMetrics = JobMetrics
 instance Semigroup JobMetrics where
     (<>) = gmappend
 
+instance Monoid JobMetrics where
+    mempty = gmempty
+
 data JobMetricsByHour = JobMetricsByHour
     { jmbhEpoch :: Int
     , jmbhJobMetrics :: JobMetrics

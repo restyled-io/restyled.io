@@ -29,6 +29,7 @@ import Restyled.Handlers.Marketplace
 import Restyled.Handlers.PrivacyPolicy
 import Restyled.Handlers.Profile
 import Restyled.Handlers.Repos
+import Restyled.Handlers.System.Metrics
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
 import Restyled.Settings
