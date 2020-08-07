@@ -14,7 +14,7 @@ import Restyled.Development.Seeds (seedDB)
 import Restyled.Export (runExport)
 import Restyled.Foundation (loadApp)
 import Restyled.Options
-import Restyled.Settings (loadSettings)
+import Restyled.Settings (AppSettings(..), loadSettings)
 
 main :: IO ()
 main = do
@@ -26,6 +26,9 @@ main = do
     case oCommand of
         Web -> do
             backend <- loadBackend settings
+            unless (appRestyleMachineLocal settings)
+                $ runRIO backend
+                $ safelyReconcile 10 Nothing
             runWaiApp =<< loadApp backend
         Backend cmd -> do
             backend <- loadBackend settings
