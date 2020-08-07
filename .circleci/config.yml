@@ -31,10 +31,11 @@ jobs:
             aws cloudformation update-stack \
               --stack-name prod-services \
               --use-previous-template \
-              --parameter "ParameterKey=Environment,UsePreviousValue=true" \
-              --parameter "ParameterKey=RestylerImage,UsePreviousValue=true" \
-              --parameter "ParameterKey=AppsWebhooksDesiredCount,UsePreviousValue=true" \
-              --parameter "ParameterKey=RestyledImage,ParameterValue=$image" \
+              --parameters \
+                "ParameterKey=Environment,UsePreviousValue=true" \
+                "ParameterKey=RestylerImage,UsePreviousValue=true" \
+                "ParameterKey=AppsWebhooksDesiredCount,UsePreviousValue=true" \
+                "ParameterKey=RestyledImage,ParameterValue=$image" \
               --capabilities CAPABILITY_NAMED_IAM
             aws cloudformation wait stack-update-complete \
               --stack-name prod-services
