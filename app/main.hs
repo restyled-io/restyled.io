@@ -26,14 +26,14 @@ main = do
     case oCommand of
         Web -> do
             backend <- loadBackend settings
-            unless (appRestyleMachineLocal settings)
-                $ runRIO backend
-                $ safelyReconcile 10 Nothing
             runWaiApp =<< loadApp backend
         Backend cmd -> do
             backend <- loadBackend settings
             runRIO backend $ case cmd of
-                Webhooks -> runWebhooks
+                Webhooks -> do
+                    unless (appRestyleMachineLocal settings)
+                        $ safelyReconcile 10 Nothing
+                    runWebhooks
                 SyncMarketplace -> runSynchronize
                 Health -> runHealthChecks
                 Reconcile -> safelyReconcile (10 * 60) Nothing
