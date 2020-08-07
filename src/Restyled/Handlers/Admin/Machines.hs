@@ -106,7 +106,7 @@ deleteAdminMachineR machineId = do
     -- Attempt to reconcile the machine. Best effort and capped at just under
     -- the Heroku request timeout. We don't want to hold up deletes on this.
     result <-
-        timeout (28 * 1000000)
+        timeout (15 * 1000000)
         $ handleAny (logErrorN . tshow)
         $ void
         $ (`withRestyleMachineEnv` reconcileMachine)
