@@ -108,6 +108,10 @@ instance Yesod App where
         settings <- getsYesod $ view settingsL
         runDB $ authorizeRepo settings owner repo =<< maybeAuthId
 
+    isAuthorized (SystemP _) _ = do
+        settings <- getsYesod $ view settingsL
+        runDB $ authorizeAdmin settings =<< maybeAuthId
+
     addStaticContent ext mime content = do
         staticDir <- getsYesod $ appStaticDir . view settingsL
 
