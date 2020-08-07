@@ -10,6 +10,7 @@ import qualified Restyled.Backend.Webhook as Webhook
 import Restyled.Foundation
 import Restyled.Metrics
 import Restyled.TimeRange
+import Restyled.Yesod
 
 data Metric n = Metric
     { mName :: Text
@@ -37,7 +38,8 @@ instance ToJSON Unit where
 getSystemMetricsR :: Handler Value
 getSystemMetricsR = do
     depth <- runRedis Webhook.queueDepth
-    range <- timeRangeFromMinutesAgo 5
+    mMins <- runInputGet $ iopt intField "since-minutes"
+    range <- timeRangeFromMinutesAgo $ min (6 * 60) $ fromMaybe 5 mMins
     jobMetrics <- runDB $ jmbhJobMetrics <$$> fetchJobMetricsByHour range
 
     let JobMetrics {..} = mconcat jobMetrics
