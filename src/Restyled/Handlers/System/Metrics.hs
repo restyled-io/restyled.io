@@ -40,11 +40,9 @@ getSystemMetricsR = do
     depth <- runRedis Webhook.queueDepth
     mMins <- runInputGet $ iopt intField "since-minutes"
     range <- timeRangeFromMinutesAgo $ min (6 * 60) $ fromMaybe 5 mMins
-    jobMetrics <- runDB $ jmbhJobMetrics <$$> fetchJobMetricsByHour range
+    JobMetrics {..} <- runDB $ fetchJobMetrics range
 
-    let JobMetrics {..} = mconcat jobMetrics
-
-        succeeded = getSum jmSucceeded
+    let succeeded = getSum jmSucceeded
         failed = getSum jmFailed
         completed = succeeded + failed
 

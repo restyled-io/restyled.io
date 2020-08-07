@@ -2,6 +2,7 @@
 
 module Restyled.Metrics
     ( JobMetrics(..)
+    , fetchJobMetrics
     , JobMetricsByHour(..)
     , fetchJobMetricsByHour
     )
@@ -29,6 +30,13 @@ instance Semigroup JobMetrics where
 instance Monoid JobMetrics where
     mempty = gmempty
 
+fromPair :: (Text, Int) -> JobMetrics
+fromPair (status, count)
+    | status == succeeded = JobMetrics (Sum count) 0 0
+    | status == failed = JobMetrics 0 (Sum count) 0
+    | status == unfinished = JobMetrics 0 0 (Sum count)
+    | otherwise = JobMetrics 0 0 0
+
 data JobMetricsByHour = JobMetricsByHour
     { jmbhEpoch :: Int
     , jmbhJobMetrics :: JobMetrics
@@ -41,6 +49,28 @@ instance ToJSON JobMetricsByHour  where
         , failed .= getSum jmFailed
         , unfinished .= getSum jmUnfinished
         ]
+
+-- brittany-disable-next-binding
+
+fetchJobMetrics :: MonadIO m => TimeRange -> SqlPersistT m JobMetrics
+fetchJobMetrics range = fromRows <$> rawSqlWithTimeRange
+    range
+    [st|
+            SELECT
+                CASE
+                    WHEN exit_code IS NULL THEN '#{unfinished}'
+                    WHEN exit_code = 0 THEN '#{succeeded}'
+                    ELSE '#{failed}'
+                END,
+                COUNT(*)
+            FROM job
+            WHERE #{dateField} >= ?
+              AND #{dateField} <= ?
+            GROUP BY 1
+        |]
+  where
+    fromRows :: [(Single Text, Single Int)] -> JobMetrics
+    fromRows = foldMap (fromPair . bimap unSingle unSingle)
 
 -- brittany-disable-next-binding
 
@@ -65,22 +95,18 @@ fetchJobMetricsByHour range =
             GROUP BY (1, 2)
         |]
   where
-    dateField :: Text
-    dateField = "COALESCE(completed_at, created_at)"
+    fromRows :: [(Single Int, Single Text, Single Int)] -> [JobMetricsByHour]
+    fromRows =
+        map (uncurry JobMetricsByHour)
+            . Map.toList
+            . Map.fromListWith (<>)
+            . map (regroup fromPair)
 
-fromRows :: [(Single Int, Single Text, Single Int)] -> [JobMetricsByHour]
-fromRows =
-    map (uncurry JobMetricsByHour)
-        . Map.toList
-        . Map.fromListWith (<>)
-        . map fromRow
+    regroup :: ((a, b) -> c) -> (Single x, Single a, Single b) -> (x, c)
+    regroup f (Single x, Single a, Single b) = (x, f (a, b))
 
-fromRow :: (Single Int, Single Text, Single Int) -> (Int, JobMetrics)
-fromRow (Single epoch, Single status, Single count)
-    | status == succeeded = (epoch, JobMetrics (Sum count) 0 0)
-    | status == failed = (epoch, JobMetrics 0 (Sum count) 0)
-    | status == unfinished = (epoch, JobMetrics 0 0 (Sum count))
-    | otherwise = (epoch, JobMetrics 0 0 0)
+dateField :: Text
+dateField = "COALESCE(completed_at, created_at)"
 
 -- | Avoid typo-bugs by using this anywhere the textual value is needed
 succeeded :: Text
