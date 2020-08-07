@@ -46,19 +46,19 @@ getSystemMetricsR = do
         failed = getSum jmFailed
         completed = succeeded + failed
 
-        successPercent :: Double
+        successPercent :: Maybe Double
         successPercent
             | completed == 0
-            = 0
+            = Nothing
             | otherwise
-            = (* 100) $ fromIntegral succeeded / fromIntegral completed
+            = Just $ (* 100) $ fromIntegral succeeded / fromIntegral completed
 
-    pure $ object
-        [ "range" .= range
-        , "metrics" .= toJSON
-            [ toJSON $ metric "QueueDepth" depth
-            , toJSON $ metric "JobsSucceeded" succeeded
-            , toJSON $ metric "JobsFailed" failed
-            , toJSON $ metricUnit Percent "JobsSuccessRate" successPercent
+        metrics :: [Value]
+        metrics = catMaybes
+            [ Just $ toJSON $ metric "QueueDepth" depth
+            , Just $ toJSON $ metric "JobsSucceeded" succeeded
+            , Just $ toJSON $ metric "JobsFailed" failed
+            , toJSON . metricUnit Percent "JobsSuccessRate" <$> successPercent
             ]
-        ]
+
+    pure $ object ["range" .= range, "metrics" .= metrics]
