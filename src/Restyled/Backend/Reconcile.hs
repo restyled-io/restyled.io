@@ -43,6 +43,11 @@ safelyReconcile
     -> m ()
 safelyReconcile t mMachines = do
     machines <- maybe (runDB $ selectList [] []) pure mMachines
+
+    logInfo
+        $ "Running container reconcilation on "
+        <> displayShow (length machines)
+        <> " machine(s)"
     meResult <- timeout (t * 1000000) $ tryAny $ runReconcile machines
 
     case meResult of
