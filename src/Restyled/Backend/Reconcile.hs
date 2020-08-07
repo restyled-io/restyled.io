@@ -1,7 +1,7 @@
-
-
 module Restyled.Backend.Reconcile
-    ( runReconcile
+    ( safelyReconcile
+
+    -- * Exported for testing
     , reconcileMachine
     )
 where
@@ -13,6 +13,44 @@ import Restyled.Backend.RestyleMachine (withRestyleMachineEnv)
 import Restyled.Backend.StoppedContainer
 import Restyled.Models
 
+data ReconcileResult = ReconcileResult
+    { rrMachineName :: Text
+    , rrWarnings :: [String]
+    , rrReconciled :: Int
+    }
+
+instance Display ReconcileResult where
+    display ReconcileResult {..} =
+        displayShow rrReconciled
+            <> " containers reconciled on "
+            <> display rrMachineName
+            <> (if null rrWarnings
+                   then ""
+                   else ", with warning(s): " <> displayShow rrWarnings
+               )
+
+safelyReconcile
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasProcessContext env
+       )
+    => Int
+    -- ^ Timeout in seconds
+    -> Maybe [Entity RestyleMachine]
+    -- ^ Machines to reconcile, 'Nothing' means /all/
+    -> m ()
+safelyReconcile t mMachines = do
+    machines <- maybe (runDB $ selectList [] []) pure mMachines
+    meResult <- timeout (t * 1000000) $ tryAny $ runReconcile machines
+
+    case meResult of
+        Nothing ->
+            logError $ "Timed out after " <> displayShow t <> " second(s)"
+        Just (Left ex) -> logError $ displayShow ex
+        Just (Right results) -> traverse_ (logInfo . display) results
+
 runReconcile
     :: ( MonadUnliftIO m
        , MonadReader env m
@@ -20,21 +58,20 @@ runReconcile
        , HasDB env
        , HasProcessContext env
        )
-    => m ()
-runReconcile = do
-    machines <- runDB $ selectList [] []
+    => [Entity RestyleMachine]
+    -> m [ReconcileResult]
+runReconcile = traverse $ \(Entity machineId machine) -> do
+    (warnings, reconciled) <- withRestyleMachineEnv machine reconcileMachine
 
-    for_ machines $ \(Entity machineId machine) -> do
-        (warnings, reconciled) <- withRestyleMachineEnv machine reconcileMachine
+    unless (reconciled == 0) $ runDB $ update
+        machineId
+        [RestyleMachineJobCount -=. reconciled]
 
-        unless (null warnings)
-            $ logWarn
-            $ "Reconcilation warnings: "
-            <> displayShow warnings
-
-        unless (reconciled == 0) $ do
-            logInfo $ displayShow reconciled <> " Job(s) reconciled"
-            runDB $ update machineId [RestyleMachineJobCount -=. reconciled]
+    pure ReconcileResult
+        { rrMachineName = restyleMachineName machine
+        , rrWarnings = warnings
+        , rrReconciled = reconciled
+        }
 
 reconcileMachine
     :: ( MonadUnliftIO m

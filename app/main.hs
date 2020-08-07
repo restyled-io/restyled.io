@@ -9,7 +9,7 @@ import Restyled.Backend.CompressJobs (runCompressJobs)
 import Restyled.Backend.Foundation (loadBackend, loadBackendHandle)
 import Restyled.Backend.Health (runHealthChecks)
 import Restyled.Backend.Marketplace (runSynchronize)
-import Restyled.Backend.Reconcile (runReconcile)
+import Restyled.Backend.Reconcile (safelyReconcile)
 import Restyled.Development.Seeds (seedDB)
 import Restyled.Export (runExport)
 import Restyled.Foundation (loadApp)
@@ -33,7 +33,7 @@ main = do
                 Webhooks -> runWebhooks
                 SyncMarketplace -> runSynchronize
                 Health -> runHealthChecks
-                Reconcile -> runReconcile
+                Reconcile -> safelyReconcile (10 * 60) Nothing
                 SeedDB -> runDB seedDB
                 CompressJobs options -> runCompressJobs options
         Export options -> do
