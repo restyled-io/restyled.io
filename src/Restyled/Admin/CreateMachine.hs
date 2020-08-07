@@ -52,4 +52,5 @@ createMachineGetRestyleMachine CreateMachine {..} = do
         , restyleMachineCert = certificate
         , restyleMachineKey = privateKey
         , restyleMachineJobCount = 0
+        , restyleMachineReconciling = False
         }

@@ -8,6 +8,7 @@ where
 
 import Restyled.Prelude
 
+import Database.Persist.Sql (updateWhereCount)
 import Restyled.Backend.DockerRunJob (followJobContainer)
 import Restyled.Backend.RestyleMachine (withRestyleMachineEnv)
 import Restyled.Backend.StoppedContainer
@@ -42,12 +43,8 @@ safelyReconcile
     -- ^ Machines to reconcile, 'Nothing' means /all/
     -> m ()
 safelyReconcile t mMachines = do
+    logInfo "Running container reconcilation"
     machines <- maybe (runDB $ selectList [] []) pure mMachines
-
-    logInfo
-        $ "Running container reconcilation on "
-        <> displayShow (length machines)
-        <> " machine(s)"
     meResult <- timeout (t * 1000000) $ tryAny $ runReconcile machines
 
     case meResult of
@@ -66,17 +63,32 @@ runReconcile
     => [Entity RestyleMachine]
     -> m [ReconcileResult]
 runReconcile = traverse $ \(Entity machineId machine) -> do
-    (warnings, reconciled) <- withRestyleMachineEnv machine reconcileMachine
+    n <- runDB $ updateWhereCount
+        [RestyleMachineId ==. machineId, RestyleMachineReconciling ==. False]
+        [RestyleMachineReconciling =. True]
 
-    unless (reconciled == 0) $ runDB $ update
-        machineId
-        [RestyleMachineJobCount -=. reconciled]
+    if n == 1
+        then do
+            (warnings, reconciled) <- withRestyleMachineEnv
+                machine
+                reconcileMachine
 
-    pure ReconcileResult
-        { rrMachineName = restyleMachineName machine
-        , rrWarnings = warnings
-        , rrReconciled = reconciled
-        }
+            runDB $ update
+                machineId
+                [ RestyleMachineJobCount -=. reconciled
+                , RestyleMachineReconciling =. False
+                ]
+
+            pure ReconcileResult
+                { rrMachineName = restyleMachineName machine
+                , rrWarnings = warnings
+                , rrReconciled = reconciled
+                }
+        else pure ReconcileResult
+            { rrMachineName = restyleMachineName machine
+            , rrWarnings = ["Already in reconcilation"]
+            , rrReconciled = 0
+            }
 
 reconcileMachine
     :: ( MonadUnliftIO m
