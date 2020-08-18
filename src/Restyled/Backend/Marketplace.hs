@@ -38,24 +38,36 @@ runSynchronize = do
     logDebug $ "Synchronizing " <> displayShow (length plans) <> " plans"
     synchronizedAccountIds <- for plans $ \plan -> do
         planId <- runDB $ synchronizePlan plan
-        accounts <-
-            untryIO
-            $ GH.marketplaceListingPlanAccounts auth useStubbed
-            $ GH.marketplacePlanId plan
-
-        logDebug
-            $ "Synchronizing "
-            <> displayShow (length accounts)
-            <> " Accounts for "
-            <> displayMarketplacePlan plan
-
-        logPlanChange plan (length accounts)
-            =<< runDB (count [MarketplaceAccountMarketplacePlan ==. planId])
-
-        traverse (runDB . synchronizeAccount planId) accounts
+        synchronizePlanAccounts plan planId
 
     runDB $ deleteUnsynchronized $ vconcat synchronizedAccountIds
     logInfo "GitHub Marketplace data synchronized"
+
+synchronizePlanAccounts
+    :: (HasLogFunc env, HasSettings env, HasDB env)
+    => GH.MarketplacePlan
+    -> MarketplacePlanId
+    -> RIO env (Vector MarketplaceAccountId)
+synchronizePlanAccounts plan planId = do
+    AppSettings {..} <- view settingsL
+    let useStubbed = appStubMarketplaceListing
+    auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
+
+    accounts <-
+        untryIO
+        $ GH.marketplaceListingPlanAccounts auth useStubbed
+        $ GH.marketplacePlanId plan
+
+    logDebug
+        $ "Synchronizing "
+        <> displayShow (length accounts)
+        <> " Accounts for "
+        <> displayMarketplacePlan plan
+
+    logPlanChange plan (length accounts)
+        =<< runDB (count [MarketplaceAccountMarketplacePlan ==. planId])
+
+    traverse (runDB . synchronizeAccount planId) accounts
 
 displayMarketplacePlan :: GH.MarketplacePlan -> Utf8Builder
 displayMarketplacePlan plan =
