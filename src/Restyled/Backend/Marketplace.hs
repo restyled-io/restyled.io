@@ -39,6 +39,7 @@ runSynchronize = do
     synchronizedAccountIds <- for plans $ \plan -> do
         planId <- runDB $ synchronizePlan plan
         synchronizePlanAccounts plan planId
+            `catchAny` synchronizePlanAccountsError plan planId
 
     runDB $ deleteUnsynchronized $ vconcat synchronizedAccountIds
     logInfo "GitHub Marketplace data synchronized"
@@ -68,6 +69,23 @@ synchronizePlanAccounts plan planId = do
         =<< runDB (count [MarketplaceAccountMarketplacePlan ==. planId])
 
     traverse (runDB . synchronizeAccount planId) accounts
+
+synchronizePlanAccountsError
+    :: (HasLogFunc env, HasDB env)
+    => GH.MarketplacePlan
+    -> MarketplacePlanId
+    -> SomeException
+    -> RIO env (Vector MarketplaceAccountId)
+synchronizePlanAccountsError plan planId ex = do
+    logError $ displayShow ex
+    logError
+        $ "Error synchronizing Accounts for "
+        <> displayMarketplacePlan plan
+        <> ", maintaining all current Accounts"
+
+    runDB
+        $ V.fromList
+        <$> selectKeysList [MarketplaceAccountMarketplacePlan ==. planId] []
 
 displayMarketplacePlan :: GH.MarketplacePlan -> Utf8Builder
 displayMarketplacePlan plan =
