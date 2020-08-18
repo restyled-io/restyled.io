@@ -46,10 +46,10 @@ runSynchronize = do
         logDebug
             $ "Synchronizing "
             <> displayShow (length accounts)
-            <> " accounts with plan "
-            <> displayShow (GH.marketplacePlanName plan)
+            <> " Accounts for "
+            <> displayMarketplacePlan plan
 
-        logPlanChange (GH.marketplacePlanName plan) (length accounts)
+        logPlanChange plan (length accounts)
             =<< runDB (count [MarketplaceAccountMarketplacePlan ==. planId])
 
         traverse (runDB . synchronizeAccount planId) accounts
@@ -57,18 +57,28 @@ runSynchronize = do
     runDB $ deleteUnsynchronized $ vconcat synchronizedAccountIds
     logInfo "GitHub Marketplace data synchronized"
 
+displayMarketplacePlan :: GH.MarketplacePlan -> Utf8Builder
+displayMarketplacePlan plan =
+    "Plan "
+        <> display (toPathPart $ GH.marketplacePlanId plan)
+        <> " ("
+        <> display (GH.marketplacePlanName plan)
+        <> ", "
+        <> display (GH.marketplacePlanState plan)
+        <> ")"
+
 logPlanChange
     :: HasLogFunc env
-    => Text -- ^ Plan name
+    => GH.MarketplacePlan
     -> Int -- ^ New count
     -> Int -- ^ Old count
     -> RIO env ()
-logPlanChange planName newCount oldCount = case newCount `compare` oldCount of
+logPlanChange plan newCount oldCount = case newCount `compare` oldCount of
     LT -> logWarn $ prefix <> "lost" <> suffix
     EQ -> logInfo $ prefix <> "no accounts lost or gained"
     GT -> logInfo $ prefix <> "gained" <> suffix
   where
-    prefix = fromString $ unpack planName <> ": "
+    prefix = displayMarketplacePlan plan <> ": "
     suffix = fromString $ " " <> unpack (pluralize' "account" "accounts" diff)
     diff = abs $ newCount - oldCount
 
