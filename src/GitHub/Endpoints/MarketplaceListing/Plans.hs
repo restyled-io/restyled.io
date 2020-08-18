@@ -18,11 +18,20 @@ data MarketplacePlan = MarketplacePlan
     { marketplacePlanId :: Id MarketplacePlan
     , marketplacePlanName :: Text
     , marketplacePlanDescription :: Text
+    , marketplacePlanState :: Text
     }
 
 instance FromJSON MarketplacePlan where
     parseJSON = withObject "Plan" $ \o ->
-        MarketplacePlan <$> o .: "id" <*> o .: "name" <*> o .: "description"
+        MarketplacePlan
+            <$> o
+            .: "id"
+            <*> o
+            .: "name"
+            <*> o
+            .: "description"
+            <*> o
+            .: "state"
 
 marketplaceListingPlans
     :: AuthMethod am
