@@ -3,6 +3,7 @@ module Restyled.Prelude.Esqueleto
     , selectMap
     , refineNotNull
     , unValue2
+    , unValue3
     , unValue5
     )
 where
@@ -52,6 +53,9 @@ refineNotNull m = do
 
 unValue2 :: (Value a, Value b) -> (a, b)
 unValue2 (Value a, Value b) = (a, b)
+
+unValue3 :: (Value a, Value b, Value c) -> (a, b, c)
+unValue3 (Value a, Value b, Value c) = (a, b, c)
 
 unValue5 :: (Value a, Value b, Value c, Value d, Value e) -> (a, b, c, d, e)
 unValue5 (Value a, Value b, Value c, Value d, Value e) = (a, b, c, d, e)
