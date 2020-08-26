@@ -9,7 +9,6 @@ where
 import Restyled.Prelude
 
 import Options.Applicative
-import Restyled.Backend.CompressJobs
 import Restyled.Export
 
 data RestyledOptions = RestyledOptions
@@ -25,10 +24,7 @@ data RestyledCommand
 data BackendCommand
     = Webhooks
     | SyncMarketplace
-    | Health
-    | Reconcile
     | SeedDB
-    | CompressJobs CompressOptions
 
 parseRestyledOptions :: IO RestyledOptions
 parseRestyledOptions = execParser $ info (restyledOptions <**> helper) fullDesc
@@ -47,9 +43,6 @@ restyledOptions = RestyledOptions
         (  command "web" (info (pure Web) mempty)
         <> command "webhooks" (info (pure $ Backend Webhooks) mempty)
         <> command "sync-marketplace" (info (pure $ Backend SyncMarketplace) mempty)
-        <> command "health" (info (pure $ Backend Health) mempty)
-        <> command "reconcile" (info (pure $ Backend Reconcile) mempty)
         <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
-        <> command "compress-jobs" (info (Backend . CompressJobs <$> compressOptions) mempty)
         <> command "export" (info (Export <$> exportOptions) mempty)
         )

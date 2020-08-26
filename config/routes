@@ -33,8 +33,6 @@
 
 /admin AdminR GET
 /admin AdminP:
-  /jobs AdminJobsP:
-    / AdminJobsR GET
   /repos AdminReposP:
     / AdminReposR GET
     /search AdminReposSearchR GET

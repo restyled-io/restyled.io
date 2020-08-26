@@ -5,9 +5,7 @@ import Restyled.Prelude
 import LoadEnv (loadEnvFrom)
 import Restyled.Application (runWaiApp)
 import Restyled.Backend.Application
-import Restyled.Backend.CompressJobs (runCompressJobs)
 import Restyled.Backend.Foundation (loadBackend, loadBackendHandle)
-import Restyled.Backend.Health (runHealthChecks)
 import Restyled.Backend.Marketplace (runSynchronize)
 import Restyled.Backend.Reconcile (safelyReconcile)
 import Restyled.Development.Seeds (seedDB)
@@ -35,10 +33,7 @@ main = do
                         $ safelyReconcile 10 Nothing
                     runWebhooks
                 SyncMarketplace -> runSynchronize
-                Health -> runHealthChecks
-                Reconcile -> safelyReconcile (10 * 60) Nothing
                 SeedDB -> runDB seedDB
-                CompressJobs options -> runCompressJobs options
         Export options -> do
             -- Log to stderr, since we produce actually useful output
             backend <- loadBackendHandle stderr settings
