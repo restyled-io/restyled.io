@@ -60,8 +60,6 @@ workflows:
             - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
           before-test:
             - run: db/migrate test upgrade
-          hlint-yaml-url:
-            https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
           executor: default
 
       - docker-build-cached/build-and-release:
