@@ -13,11 +13,15 @@ module Restyled.TimeRange
     , selectListWithTimeRange
     , selectListWithTimeRangeBy
     , timeRangeFilter
+
+    -- * Esqueleto
+    , withinTimeRange
     )
 where
 
 import Restyled.Prelude
 
+import qualified Database.Esqueleto as E
 import Database.Persist.Sql (RawSql, rawSql)
 import Restyled.Yesod
 
@@ -85,3 +89,10 @@ timeRangeFilterBy
     -> [Filter a]
 timeRangeFilterBy f field TimeRange {..} =
     [field >=. f tmFrom, field <=. f tmTo]
+
+withinTimeRange
+    :: E.SqlExpr (E.Value UTCTime) -> TimeRange -> E.SqlExpr (E.Value Bool)
+withinTimeRange field TimeRange {..} =
+    field E.>=. E.val tmFrom E.&&. field E.<=. E.val tmTo
+
+infix 4 `withinTimeRange`

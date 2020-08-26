@@ -16,6 +16,10 @@ module Restyled.Routes
 
     -- * Repos' Pulls' Jobs
     , pullJobsR
+
+    -- * Admin
+    , adminStatsReposR
+    , adminStatsJobsR
     )
 where
 
@@ -48,3 +52,9 @@ jobLogR jobId = RepoJobsP $ RepoJobP jobId RepoJobLogLinesR
 
 pullJobsR :: PullRequestNum -> RepoP
 pullJobsR num = pullP num $ RepoPullJobsP RepoPullJobsR
+
+adminStatsReposR :: Route App
+adminStatsReposR = AdminP $ AdminStatsP $ AdminStatsReposP AdminStatsReposR
+
+adminStatsJobsR :: Route App
+adminStatsJobsR = AdminP $ AdminStatsP $ AdminStatsJobsP AdminStatsJobsR

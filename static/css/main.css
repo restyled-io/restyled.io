@@ -49,6 +49,10 @@ form .errors {
   float: right;
 }
 
+.uncenter {
+  text-align: inherit !important;
+}
+
 .green { color: #7f9f7f; }
 .red { color: #cc9393; }
 

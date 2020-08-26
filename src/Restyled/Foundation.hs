@@ -173,6 +173,10 @@ adminLayout widget = do
         $(widgetFile "admin-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
+-- | Non-layout for delivering HTML fragments to load into the DOM via JS
+fragmentLayout :: Widget -> Handler Html
+fragmentLayout = withUrlRenderer . pageBody <=< widgetToPageContent
+
 -- | Route to a Static file at a given path
 --
 -- This removes the type-safety of the TH-defined functions, but makes we don't

@@ -50,6 +50,11 @@
   /tokens AdminTokensP:
     / AdminTokensR GET POST
     /#ApiTokenId AdminTokenR DELETE
+  /stats AdminStatsP:
+    /repos AdminStatsReposP:
+      / AdminStatsReposR GET
+    /jobs AdminStatsJobsP:
+      / AdminStatsJobsR GET
 
 /system SystemP:
   /metrics SystemMetricsP:
