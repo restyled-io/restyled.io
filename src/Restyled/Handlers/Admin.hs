@@ -12,9 +12,11 @@ where
 import Restyled.Prelude.Esqueleto
 
 import Control.Lens (_1, _3)
+import Data.Semigroup (getSum)
 import Formatting (format)
 import Formatting.Formatters as Formatters
 import Restyled.Foundation
+import Restyled.Metrics
 import Restyled.Models
 import Restyled.Routes
 import Restyled.Settings
@@ -102,31 +104,18 @@ getAdminStatsJobsR = do
         <p>#{format Formatters.commas incompleteJobs} (#{incompleteJobsPercent}) incomplete
     |]
 
-data JobStatus
-    = Success
-    | Failure
-    | Incomplete
-    deriving Eq
-
-fromExitCode :: Maybe Int -> JobStatus
-fromExitCode = \case
-    Nothing -> Incomplete
-    Just 0 -> Success
-    Just _ -> Failure
-
 fetchJobStats :: MonadIO m => TimeRange -> SqlPersistT m JobStats
 fetchJobStats timeRange = do
-    statuses <- selectMap (fromExitCode . unValue) . from $ \jobs -> do
-        where_ $ jobs ^. JobCreatedAt `withinTimeRange` timeRange
-        pure $ jobs ^. JobExitCode
+    JobMetrics {..} <- fetchJobMetrics timeRange
 
-    let totalJobs = length statuses
-        succeededJobs = length $ filter (== Success) statuses
+    let totalJobs = getSum $ jmSucceeded + jmFailed + jmUnfinished
+        succeededJobs = getSum jmSucceeded
         succeededJobsPercent = percent succeededJobs totalJobs
-        failedJobs = length $ filter (== Failure) statuses
+        failedJobs = getSum jmFailed
         failedJobsPercent = percent failedJobs totalJobs
-        incompleteJobs = length $ filter (== Incomplete) statuses
+        incompleteJobs = getSum jmUnfinished
         incompleteJobsPercent = percent incompleteJobs totalJobs
+
     pure $ JobStats { .. }
 
 data Range
