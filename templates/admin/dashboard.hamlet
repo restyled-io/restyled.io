@@ -1,25 +1,17 @@
-<section #machines>
-  <h2>Machines
-  <div .dashboard>
-  <p>
-    <a href="#" #stop-refresh">Stop refresh
+<section>
+  <form>
+   <aside .right>
+      <select #range>
+        <option value=1>Week
+        <option value=2>Month
+        <option value=3>Year
 
-<section #jobs>
-  <h2>Jobs
-  <div .controls>
-    <p .centered>
-      <a .prev href=#prev>Previous
-      <strong .from>
-      to
-      <strong .to>
-      <a .next href=#next>Next
-  <div .chart>
+<section>
+  <h2 .uncenter>Repository statistics
+  <div .fragment data-fragment-url=@{adminStatsReposR}>
+    <p>Loading...
 
-  <h3>Unfinished
-  <div .table-unfinished>
-  <h3>Slow
-  <div .table-slow>
-  <h3>Errored
-  <div .table-errored>
-  <h3>All
-  <div .table-all>
+<section>
+  <h2 .uncenter>Job statistics
+  <div .fragment data-fragment-url=@{adminStatsJobsR}>
+    <p>Loading...

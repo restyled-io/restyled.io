@@ -1,120 +1,22 @@
 $(function() {
-  function jobsTabulator(filter, from, to) {
-    new Tabulator(`#jobs .table-${filter}`, {
-      ajaxURL: "/admin/jobs",
-      ajaxParams: {
-        filter: filter,
-        from: from.format("X"),
-        to: to.format("X")
-      },
-      height: 500,
-      layout: "fitColumns",
-      columns: [
-        { title: "Created", field: "created", sorter: "date" },
-        { title: "PR", field: "repoPull", headerFilter: true },
-        { title: "Exit", field: "exitCode", headerFilter: true },
-        { title: "Reason", field: "exitReason" },
-        { title: "Duration", field: "duration" },
-        {
-          title: "URL",
-          field: "url",
-          cellClick: function(e, cell) {
-            window.location = cell._cell.value;
-          }
-        }
-      ]
+  const updateFragments = (rangeIdx) => {
+    const fragments = document.getElementsByClassName("fragment")
+
+    _.each(fragments, function(el) {
+      const url = `${el.dataset["fragmentUrl"]}?range=${rangeIdx}`
+      const $el = $(el)
+
+      $el.html("Loading...")
+      $.ajax({ url, success: function(data) { $el.html(data) } });
     });
   }
 
-  function generateDashboard(from, to) {
-    c3.generate({
-      bindto: "#jobs .chart",
-      data: {
-        url: `/admin/metrics?from=${from.format("X")}&to=${to.format("X")}`,
-        mimeType: "json",
-        keys: {
-          x: "Date",
-          value: ["Succeeded", "Failed", "Unfinished"]
-        },
-        type: "area",
-        groups: [["Succeeded", "Failed", "Unfinished"]]
-      },
-      axis: {
-        x: {
-          tick: {
-            format: function(x) {
-              // Moment uses ms
-              return moment(x * 1000).format("dd ha");
-            }
-          }
-        }
-      },
-      color: {
-        pattern: ["green", "red", "grey"]
-      }
-    });
+  updateFragments("1")
 
-    jobsTabulator("unfinished", from, to);
-    jobsTabulator("slow", from, to);
-    jobsTabulator("errored", from, to);
-    jobsTabulator("all", from, to);
+  const select = document.getElementById("range")
 
-    $("#jobs .from").html(from.format("dddd M/D"));
-    $("#jobs .to").html(to.format("dddd M/D"));
-  }
-
-  let from = moment().subtract(1, "day");
-  let to = moment();
-
-  $("#jobs .prev").click(function() {
-    generateDashboard(from.subtract(1, "day"), to.subtract(1, "day"));
-  });
-
-  $("#jobs .next").click(function() {
-    generateDashboard(from.add(1, "day"), to.add(1, "day"));
-  });
-
-  generateDashboard(from, to);
-
-  function drawMachinesDashboard() {
-    const current = $("#machines .dashboard");
-    const redrawn = $("<div>").addClass("dashboard");
-
-    $.getJSON("/admin/machines/state", function(data) {
-      const queueDepth = $("<div>").addClass("queue-depth")
-      const load = $("<div>").addClass("load")
-      const jobCounts = $("<ul>").addClass("job-counts")
-      const containerProcesses = $("<div>").addClass("container-processes")
-
-      queueDepth.html(
-        `<p><strong>Queue depth</strong>: ${data.queueDepth}</p>`
-      );
-
-      $.each(data.jobCounts, function(name, jobCount) {
-        jobCounts.append($("<li>").html(
-          `${name}: ${jobCount}`
-        ));
-      });
-
-      $.each(data.containerProcesses, function(name, processes) {
-        containerProcesses.append($("<div>").html(
-          `<p>${name}</p><pre>${processes}</pre>`
-        ));
-      });
-
-      load.append(jobCounts)
-      load.append(containerProcesses)
-      redrawn.append(load);
-      redrawn.append(queueDepth);
-      current.replaceWith(redrawn);
-    });
-  }
-
-  drawMachinesDashboard();
-  const interval = window.setInterval(drawMachinesDashboard, 2000);
-
-  $("#machines #stop-refresh").click(function(e) {
-    e.preventDefault()
-    window.clearInterval(interval);
-  });
+  $(select).change(function(e) {
+    const rangeIdx = $(this[this.selectedIndex]).val();
+    updateFragments(rangeIdx)
+  })
 });
