@@ -173,13 +173,14 @@ fetchJobStats timeRange = do
     pure $ JobStats { .. }
 
 data Range
-    = Week
+    = Day
+    | Week
     | Month
     | Year
     deriving stock (Eq, Show, Bounded, Enum)
 
 rangeOptions :: [(Text, Range)]
-rangeOptions = [("week", Week), ("month", Month), ("year", Year)]
+rangeOptions = [("day", Day), ("week", Week), ("month", Month), ("year", Year)]
 
 rangeIndex :: HasCallStack => Range -> Int
 rangeIndex range = maybe (error msg) (+ 1) $ elemIndex range $ map
@@ -190,11 +191,12 @@ rangeIndex range = maybe (error msg) (+ 1) $ elemIndex range $ map
 
 getAdminStatsTimeRange :: Handler (Range, TimeRange)
 getAdminStatsTimeRange = do
-    range <- fmap (fromMaybe Week) $ runInputGet $ iopt
+    range <- fmap (fromMaybe Day) $ runInputGet $ iopt
         (selectFieldList rangeOptions)
         "range"
 
     timeRange <- timeRangeFromMinutesAgo $ case range of
+        Day -> 60 * 24
         Week -> 60 * 24 * 7
         Month -> 60 * 24 * 31
         Year -> 60 * 24 * 365

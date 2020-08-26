@@ -2,9 +2,10 @@
   <form>
    <aside .right>
       <select #range>
-        <option value=#{rangeIndex Week}>Week
-        <option value=#{rangeIndex Month}>Month
-        <option value=#{rangeIndex Year}>Year
+        <option value=#{rangeIndex Day}>Today
+        <option value=#{rangeIndex Week}>This week
+        <option value=#{rangeIndex Month}>This month
+        <option value=#{rangeIndex Year}>This year
 
 <section>
   <h2 .uncenter>Repository statistics
