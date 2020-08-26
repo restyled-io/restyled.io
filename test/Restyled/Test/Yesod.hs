@@ -2,8 +2,6 @@
 
 module Restyled.Test.Yesod
     ( YesodSpec
-    , getWith
-    , getBody
     , getTestRoot
     , patchJSON
     , module X
@@ -13,8 +11,6 @@ where
 import Restyled.Prelude
 
 import Control.Monad.Logger (MonadLogger(..), toLogStr)
-import qualified Data.ByteString.Lazy as LBS
-import Network.Wai.Test (SResponse(..))
 import Restyled.Cache as X
 import Restyled.Test.Expectations
 import Test.Hspec.Core.Spec (SpecM)
@@ -38,23 +34,6 @@ instance HasRedis site => MonadCache (SIO (YesodExampleData site)) where
 
 instance MonadFail (SIO s) where
     fail = expectationFailure
-
--- | @GET@ with the given query parameters
-getWith
-    :: (RedirectUrl site url, Yesod site)
-    => [(Text, Text)]
-    -> url
-    -> YesodExample site ()
-getWith params route = request $ do
-    setUrl route
-    traverse_ (uncurry addGetParam) params
-
--- | Get the raw response body
---
--- Hint: @"Data.Aeson.Lens"@ has an instance for operating directly on this.
---
-getBody :: YesodExample site LBS.ByteString
-getBody = withResponse $ pure . simpleBody
 
 -- | Get the test application's root as a @'Text'@
 --

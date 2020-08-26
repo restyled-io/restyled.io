@@ -158,7 +158,6 @@ tests:
       - hspec-expectations-lifted
       - http-types
       - lens
-      - lens-aeson
       - load-env
       - megaparsec
       - monad-logger
@@ -167,7 +166,6 @@ tests:
       - shakespeare
       - text
       - time
-      - wai-extra
       - yesod-auth
       - yesod-core
       - yesod-test
