@@ -1,5 +1,8 @@
 ---
 - ignore:
+    # False positive in some Esqueleto code
+    name: Use .
+- ignore:
     # I find this hint is overwhelmingly false-positives
     name: Reduce duplication
 - ignore:
