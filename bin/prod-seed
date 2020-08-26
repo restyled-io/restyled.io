@@ -1,0 +1,280 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+psql_() {
+  psql --no-psqlrc --set=ON_ERROR_STOP=1 "$@"
+}
+
+random_word() {
+  sed '/^# word:\(.*\)$/!d; s//\1/' "$0" |
+    shuf -n 3 |
+    tr '\n' '-' |
+    sed 's/  */-/g; s/-$/\n/'
+}
+
+dev='postgres://postgres:password@localhost:5432/restyled'
+prod=$(sed '/^DATABASE_URL=\(.*\)$/!d; s//\1/' .env.production)
+interval='14 DAYS'
+sql_repo_columns='svcs, owner, name, installation_id, is_private, debug_enabled, enabled, restyler_image'
+sql_job_columns='svcs, owner, repo, pull_request, created_at, updated_at, completed_at, exit_code, log, stdout, stderr'
+sql_job_created_recently="job.created_at BETWEEN NOW() - INTERVAL '$interval' AND NOW()"
+sql_where_exists_job="WHERE EXISTS (SELECT FROM job WHERE job.owner = repo.owner AND job.repo = repo.name AND $sql_job_created_recently)"
+sql_select_repos="SELECT $sql_repo_columns FROM repo $sql_where_exists_job"
+sql_select_jobs="SELECT $sql_job_columns FROM job WHERE $sql_job_created_recently"
+sql_unique_names="SELECT DISTINCT owner from repo $sql_where_exists_job UNION SELECT DISTINCT name from repo $sql_where_exists_job"
+sed_script=
+
+echo "Building random names replacement"
+while read -r name; do
+  sed_script+='s/\<'"$name"'\>/'"$(random_word)"'/g; '
+done < <(psql_ --no-align --tuples-only -c "$sql_unique_names" "$prod")
+
+echo "Copying anonymized repo data"
+psql_ -c "COPY ($sql_select_repos) TO stdout WITH CSV" "$prod" |
+  sed "$sed_script" |
+  psql_ -c "COPY repo ($sql_repo_columns) FROM stdin WITH CSV" "$dev"
+
+echo "Copying anonymized job data"
+psql_ -c "COPY ($sql_select_jobs) TO stdout WITH CSV" "$prod" |
+  sed "$sed_script" |
+  psql_ -c "COPY job ($sql_job_columns) FROM stdin WITH CSV" "$dev"
+
+# Used to make random owner/repo names as a form of anonymizing:
+#
+# word:adult
+# word:aeroplane
+# word:air
+# word:aircraft carrier
+# word:airforce
+# word:airport
+# word:album
+# word:alphabet
+# word:apple
+# word:arm
+# word:army
+# word:baby
+# word:baby
+# word:backpack
+# word:balloon
+# word:banana
+# word:bank
+# word:barbecue
+# word:bathroom
+# word:bathtub
+# word:bed
+# word:bed
+# word:bee
+# word:bible
+# word:bible
+# word:bird
+# word:bomb
+# word:book
+# word:boss
+# word:bottle
+# word:bowl
+# word:box
+# word:boy
+# word:brain
+# word:bridge
+# word:butterfly
+# word:button
+# word:cappuccino
+# word:car
+# word:car-race
+# word:carpet
+# word:carrot
+# word:cave
+# word:chair
+# word:chess board
+# word:chief
+# word:child
+# word:chisel
+# word:chocolates
+# word:church
+# word:church
+# word:circle
+# word:circus
+# word:circus
+# word:clock
+# word:clown
+# word:coffee
+# word:coffee-shop
+# word:comet
+# word:compact disc
+# word:compass
+# word:computer
+# word:crystal
+# word:cup
+# word:cycle
+# word:data base
+# word:desk
+# word:diamond
+# word:dress
+# word:drill
+# word:drink
+# word:drum
+# word:dung
+# word:ears
+# word:earth
+# word:egg
+# word:electricity
+# word:elephant
+# word:eraser
+# word:explosive
+# word:eyes
+# word:family
+# word:fan
+# word:feather
+# word:festival
+# word:film
+# word:finger
+# word:fire
+# word:floodlight
+# word:flower
+# word:foot
+# word:fork
+# word:freeway
+# word:fruit
+# word:fungus
+# word:game
+# word:garden
+# word:gas
+# word:gate
+# word:gemstone
+# word:girl
+# word:gloves
+# word:god
+# word:grapes
+# word:guitar
+# word:hammer
+# word:hat
+# word:hieroglyph
+# word:highway
+# word:horoscope
+# word:horse
+# word:hose
+# word:ice
+# word:ice-cream
+# word:insect
+# word:jet fighter
+# word:junk
+# word:kaleidoscope
+# word:kitchen
+# word:knife
+# word:leather jacket
+# word:leg
+# word:library
+# word:liquid
+# word:magnet
+# word:man
+# word:map
+# word:maze
+# word:meat
+# word:meteor
+# word:microscope
+# word:milk
+# word:milkshake
+# word:mist
+# word:money $$$$
+# word:monster
+# word:mosquito
+# word:mouth
+# word:nail
+# word:navy
+# word:necklace
+# word:needle
+# word:onion
+# word:paintbrush
+# word:pants
+# word:parachute
+# word:passport
+# word:pebble
+# word:pendulum
+# word:pepper
+# word:perfume
+# word:pillow
+# word:plane
+# word:planet
+# word:pocket
+# word:post-office
+# word:potato
+# word:printer
+# word:prison
+# word:pyramid
+# word:radar
+# word:rainbow
+# word:record
+# word:restaurant
+# word:rifle
+# word:ring
+# word:robot
+# word:rock
+# word:rocket
+# word:roof
+# word:room
+# word:rope
+# word:saddle
+# word:salt
+# word:sandpaper
+# word:sandwich
+# word:satellite
+# word:school
+# word:sex
+# word:ship
+# word:shoes
+# word:shop
+# word:shower
+# word:signature
+# word:skeleton
+# word:slave
+# word:snail
+# word:software
+# word:solid
+# word:space shuttle
+# word:spectrum
+# word:sphere
+# word:spice
+# word:spiral
+# word:spoon
+# word:sports-car
+# word:spot light
+# word:square
+# word:staircase
+# word:star
+# word:stomach
+# word:sun
+# word:sunglasses
+# word:surveyor
+# word:swimming pool
+# word:sword
+# word:table
+# word:tapestry
+# word:teeth
+# word:telescope
+# word:television
+# word:tennis racquet
+# word:thermometer
+# word:tiger
+# word:toilet
+# word:tongue
+# word:torch
+# word:torpedo
+# word:train
+# word:treadmill
+# word:triangle
+# word:tunnel
+# word:typewriter
+# word:umbrella
+# word:vacuum
+# word:vampire
+# word:videotape
+# word:vulture
+# word:water
+# word:weapon
+# word:web
+# word:wheelchair
+# word:window
+# word:woman
+# word:worm
+# word:x-ray
+#
