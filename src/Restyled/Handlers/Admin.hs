@@ -119,6 +119,13 @@ data Range
 rangeOptions :: [(Text, Range)]
 rangeOptions = [("week", Week), ("month", Month), ("year", Year)]
 
+rangeIndex :: HasCallStack => Range -> Int
+rangeIndex range = maybe (error msg) (+ 1) $ elemIndex range $ map
+    snd
+    rangeOptions
+  where
+    msg = "rangeIndex: " <> show range <> " is not present in rangeOptions"
+
 getAdminStatsTimeRange :: Handler (Range, TimeRange)
 getAdminStatsTimeRange = do
     range <- fmap (fromMaybe Week) $ runInputGet $ iopt
