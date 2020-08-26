@@ -25,7 +25,7 @@ module Restyled.Prelude
 
     -- * Formatting
     , pluralize
-    , pluralize'
+    , pluralizeWith
 
     -- * Text
     , decodeUtf8
@@ -70,8 +70,8 @@ import SVCS.Payload as X
 import Web.PathPieces as X
 
 import qualified Data.Text.Lazy as TL
-import Formatting (format, (%))
-import Formatting.Formatters (int, plural)
+import Formatting (Format, format, (%))
+import qualified Formatting.Formatters as Formatters
 
 fromJustNoteM :: MonadIO m => String -> Maybe a -> m a
 fromJustNoteM msg = fromMaybeM (throwString msg) . pure
@@ -137,15 +137,16 @@ pluralize
     -> TL.Text -- ^ Plural
     -> Int -- ^ Amount
     -> TL.Text
-pluralize s p n = format (int % " " % plural s p) n n
+pluralize = pluralizeWith Formatters.int
 
--- | @'pluralize'@ for strict @'Text'@
-pluralize'
-    :: Text -- ^ Singular
-    -> Text -- ^ Plural
-    -> Int -- ^ Amount
-    -> Text
-pluralize' s p = TL.toStrict . pluralize (TL.fromStrict s) (TL.fromStrict p)
+pluralizeWith
+    :: (Num a, Eq a)
+    => Format (a -> TL.Text) (t1 -> t1 -> t2)
+    -> TL.Text
+    -> TL.Text
+    -> t1
+    -> t2
+pluralizeWith f s p n = format (f % " " % Formatters.plural s p) n n
 
 decodeUtf8 :: ByteString -> Text
 decodeUtf8 = decodeUtf8With lenientDecode

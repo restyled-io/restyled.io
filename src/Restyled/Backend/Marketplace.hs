@@ -109,7 +109,7 @@ logPlanChange plan newCount oldCount = case newCount `compare` oldCount of
     GT -> logInfo $ prefix <> "gained" <> suffix
   where
     prefix = displayMarketplacePlan plan <> ": "
-    suffix = fromString $ " " <> unpack (pluralize' "account" "accounts" diff)
+    suffix = display $ " " <> pluralize "account" "accounts" diff
     diff = abs $ newCount - oldCount
 
 synchronizePlan
