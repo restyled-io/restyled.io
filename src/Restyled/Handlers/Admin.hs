@@ -90,7 +90,7 @@ getAdminStatsJobsR = do
     JobStats {..} <- runDB $ fetchJobStats timeRange
 
     fragmentLayout [whamlet|
-        <p>#{pluralizeWith Formatters.commas "job" "jobs" totalJobs} Jobs this #{show range}
+        <p>#{pluralizeWith Formatters.commas "Job" "Jobs" totalJobs} this #{show range}
         <p>#{format Formatters.commas succeededJobs} (#{succeededJobsPercent}) succeeded
         <p>#{format Formatters.commas failedJobs} (#{failedJobsPercent}) failed
         <p>#{format Formatters.commas incompleteJobs} (#{incompleteJobsPercent}) incomplete
