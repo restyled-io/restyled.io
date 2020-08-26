@@ -1,5 +1,6 @@
 module Restyled.TimeRange
     ( TimeRange
+    , timeRangeBefore
     , timeRangeFromMinutesAgo
     , rawSqlWithTimeRange
     , withinTimeRange
@@ -18,6 +19,13 @@ data TimeRange = TimeRange
 
 instance ToJSON TimeRange where
     toJSON TimeRange {..} = object ["from" .= tmFrom, "to" .= tmTo]
+
+timeRangeBefore :: TimeRange -> TimeRange
+timeRangeBefore TimeRange {..} = TimeRange
+    { tmFrom = addUTCTime (negate diff) tmFrom
+    , tmTo = tmFrom
+    }
+    where diff = diffUTCTime tmTo tmFrom
 
 timeRangeFromMinutesAgo :: MonadIO m => Int -> m TimeRange
 timeRangeFromMinutesAgo minutes = do

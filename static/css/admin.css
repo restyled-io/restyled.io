@@ -24,13 +24,25 @@ nav {
   width: 50%
 }
 
-/* Machines dashboard */
-#machines .dashboard .load {
-  display: flex;
+/* Dashboard */
+.increased {
+  font-size: smaller;
+  font-weight: bold;
+  color: green
 }
 
-#machines .dashboard .container-processes {
-  width: 60%;
+.increased::after {
+  content: " ↗";
+}
+
+.decreased {
+  font-size: smaller;
+  font-weight: bold;
+  color: red;
+}
+
+.decreased::after {
+  content: " ↘";
 }
 
 /* modal */
