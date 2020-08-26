@@ -12,26 +12,18 @@ where
 import Restyled.Prelude.Esqueleto
 
 import Control.Lens (_1, _3)
+import Data.List (elemIndex)
 import Data.Semigroup (getSum)
 import Formatting (format)
 import Formatting.Formatters as Formatters
 import Restyled.Foundation
 import Restyled.Metrics
 import Restyled.Models
+import Restyled.Percentage
 import Restyled.Routes
 import Restyled.Settings
 import Restyled.TimeRange
 import Restyled.Yesod
-import Text.Blaze (ToMarkup(..))
-
-newtype Percentage = Percentage Double
-
-instance ToMarkup Percentage where
-    toMarkup (Percentage d) = toMarkup $ show (round @_ @Int d) <> "%"
-
-percent :: Int -> Int -> Percentage
-percent _ d | d <= 0 = Percentage 0
-percent n d = Percentage $ (fromIntegral n / fromIntegral d) * 100
 
 getAdminR :: Handler Html
 getAdminR = adminLayout $ do
@@ -78,7 +70,7 @@ fetchRepoStats timeRange = do
 
     let totalRepos = length ownerNamesJobs
         activeRepos = length $ filter ((> 0) . view _3) ownerNamesJobs
-        activeReposPercent = percent activeRepos totalRepos
+        activeReposPercent = percentage activeRepos totalRepos
         uniqueOwners = length $ nubOrd $ map (view _1) ownerNamesJobs
     pure RepoStats { .. }
 
@@ -110,11 +102,11 @@ fetchJobStats timeRange = do
 
     let totalJobs = getSum $ jmSucceeded + jmFailed + jmUnfinished
         succeededJobs = getSum jmSucceeded
-        succeededJobsPercent = percent succeededJobs totalJobs
+        succeededJobsPercent = percentage succeededJobs totalJobs
         failedJobs = getSum jmFailed
-        failedJobsPercent = percent failedJobs totalJobs
+        failedJobsPercent = percentage failedJobs totalJobs
         incompleteJobs = getSum jmUnfinished
-        incompleteJobsPercent = percent incompleteJobs totalJobs
+        incompleteJobsPercent = percentage incompleteJobs totalJobs
 
     pure $ JobStats { .. }
 
