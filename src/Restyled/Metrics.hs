@@ -18,6 +18,7 @@ data JobMetrics = JobMetrics
     { jmSucceeded :: Sum Int
     , jmFailed :: Sum Int
     , jmUnfinished :: Sum Int
+    , jmTotal :: Sum Int
     }
     deriving Generic
 
@@ -49,10 +50,10 @@ fromRows = foldMap (fromPair . bimap unSingle unSingle)
 
 fromPair :: (Text, Int) -> JobMetrics
 fromPair (status, count)
-    | status == succeeded = JobMetrics (Sum count) 0 0
-    | status == failed = JobMetrics 0 (Sum count) 0
-    | status == unfinished = JobMetrics 0 0 (Sum count)
-    | otherwise = JobMetrics 0 0 0
+    | status == succeeded = JobMetrics (Sum count) 0 0 (Sum count)
+    | status == failed = JobMetrics 0 (Sum count) 0 (Sum count)
+    | status == unfinished = JobMetrics 0 0 (Sum count) (Sum count)
+    | otherwise = JobMetrics 0 0 0 0
 
 
 dateField :: Text

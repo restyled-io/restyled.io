@@ -80,8 +80,8 @@ data JobStats = JobStats
     , succeededJobsPercent :: Percentage
     , failedJobs :: Int
     , failedJobsPercent :: Percentage
-    , incompleteJobs :: Int
-    , incompleteJobsPercent :: Percentage
+    , unfinishedJobs :: Int
+    , unfinishedJobsPercent :: Percentage
     }
 
 getAdminStatsJobsR :: Handler Html
@@ -93,20 +93,20 @@ getAdminStatsJobsR = do
         <p>#{pluralizeWith Formatters.commas "Job" "Jobs" totalJobs} this #{show range}
         <p>#{format Formatters.commas succeededJobs} (#{succeededJobsPercent}) succeeded
         <p>#{format Formatters.commas failedJobs} (#{failedJobsPercent}) failed
-        <p>#{format Formatters.commas incompleteJobs} (#{incompleteJobsPercent}) incomplete
+        <p>#{format Formatters.commas unfinishedJobs} (#{unfinishedJobsPercent}) unfinished
     |]
 
 fetchJobStats :: MonadIO m => TimeRange -> SqlPersistT m JobStats
 fetchJobStats timeRange = do
-    JobMetrics {..} <- fetchJobMetrics timeRange
+    metrics <- fetchJobMetrics timeRange
 
-    let totalJobs = getSum $ jmSucceeded + jmFailed + jmUnfinished
-        succeededJobs = getSum jmSucceeded
+    let totalJobs = getSum $ jmTotal metrics
+        succeededJobs = getSum $ jmSucceeded metrics
         succeededJobsPercent = percentage succeededJobs totalJobs
-        failedJobs = getSum jmFailed
+        failedJobs = getSum $ jmFailed metrics
         failedJobsPercent = percentage failedJobs totalJobs
-        incompleteJobs = getSum jmUnfinished
-        incompleteJobsPercent = percentage incompleteJobs totalJobs
+        unfinishedJobs = getSum $ jmUnfinished metrics
+        unfinishedJobsPercent = percentage unfinishedJobs totalJobs
 
     pure $ JobStats { .. }
 
