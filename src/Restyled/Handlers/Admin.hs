@@ -69,13 +69,15 @@ getAdminStatsReposR = do
 fetchRepoStats :: MonadIO m => TimeRange -> SqlPersistT m RepoStats
 fetchRepoStats timeRange = do
     reposWithActivity <- fetchReposWithActivity timeRange
-    activeReposPrevious <- fetchActiveReposCount $ timeRangeBefore timeRange
+    reposWithActivityPrevious <- fetchReposWithActivity $ timeRangeBefore timeRange
 
     let totalRepos = length reposWithActivity
         activeRepos = length $ filter (view _3) reposWithActivity
         activeReposPercent = percentage activeRepos totalRepos
         activeReposChanged =
-            changedPercentage (fromIntegral activeReposPrevious) activeRepos
+            changedPercentage
+                (length $ filter (view _3) reposWithActivityPrevious)
+                activeRepos
         uniqueOwners = length $ nubOrd $ map (view _1) reposWithActivity
     pure RepoStats { .. }
 
@@ -104,19 +106,6 @@ fetchReposWithActivity timeRange =
             , count @Int $ jobs ^. persistIdField
             )
     where convert = over _3 (> 0) . unValue3
-
--- brittany-disable-next-binding
-
-fetchActiveReposCount
-    :: MonadIO m
-    => TimeRange
-    -> SqlPersistT m Natural
-fetchActiveReposCount timeRange =
-    selectCount . from $ \(repos `InnerJoin` jobs) -> do
-        on $ repos ^. RepoOwner ==. jobs ^. JobOwner
-            &&. repos ^. RepoName ==. jobs ^. JobRepo
-            &&. jobs ^. JobCreatedAt `withinTimeRange` timeRange
-        groupBy (repos ^. RepoOwner, repos ^. RepoName)
 
 data JobStats = JobStats
     { totalJobs :: Int
