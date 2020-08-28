@@ -1,6 +1,7 @@
 module Restyled.Prelude.Esqueleto
     ( module X
     , selectMap
+    , selectCount
     , refineNotNull
     , unValue2
     , unValue3
@@ -42,6 +43,11 @@ import Database.Esqueleto.Internal.Sql (SqlSelect, veryUnsafeCoerceSqlExprValue)
 selectMap
     :: (MonadIO m, SqlSelect a r) => (r -> b) -> SqlQuery a -> SqlPersistT m [b]
 selectMap f = fmap (map f) . select
+
+selectCount :: MonadIO m => SqlQuery s -> SqlPersistT m Natural
+selectCount from' = fromMaybe 0 . headMaybe <$> selectMap
+    (fromIntegral . unValue)
+    (from' $> countRows @Int)
 
 refineNotNull
     :: PersistField a

@@ -51,7 +51,6 @@ data RepoStats = RepoStats
     , activeReposPercent :: Percentage
     , activeReposChanged :: Changed Percentage
     , uniqueOwners :: Int
-    , uniqueOwnersChanged :: Changed Percentage
     }
 
 getAdminStatsReposR :: Handler Html
@@ -61,55 +60,63 @@ getAdminStatsReposR = do
 
     fragmentLayout [whamlet|
         <p>#{pluralizeWith Formatters.commas "Repo" "Repos" totalRepos}
-        <p>
-            #{pluralizeWith Formatters.commas "Unique Owner" "Unique Owners" uniqueOwners}
-            ^{changedWidget uniqueOwnersChanged}
+        <p>#{pluralizeWith Formatters.commas "Unique Owner" "Unique Owners" uniqueOwners}
         <p>
             #{format Formatters.commas activeRepos} (#{activeReposPercent}) with Jobs this #{show range}
             ^{changedWidget activeReposChanged}
     |]
 
--- brittany-disable-next-binding
-
 fetchRepoStats :: MonadIO m => TimeRange -> SqlPersistT m RepoStats
 fetchRepoStats timeRange = do
-    ownerNamesJobs <-
-        -- N.B. we're using ^. on the jobs even though it's an OUTER JOIN and so
-        -- it could be nullable. It's safe because we don't return any possibly-
-        -- Nothing fields as non-Maybe values to Haskell. And it makes it much
-        -- easier to work with (e.g. for withinTimeRange)
-        selectMap unValue3 . from $ \(repos `LeftOuterJoin` jobs) -> do
-            on $ repos ^. RepoOwner ==. jobs ^. JobOwner
-                &&. repos ^. RepoName ==. jobs ^. JobRepo
-                &&. jobs ^. JobCreatedAt `withinTimeRange` timeRange
-            groupBy (repos ^. RepoOwner, repos ^. RepoName)
-            pure
-                ( repos ^. RepoOwner
-                , repos ^. RepoName
-                , count @Int $ jobs ^. persistIdField
-                )
+    reposWithActivity <- fetchReposWithActivity timeRange
+    activeReposPrevious <- fetchActiveReposCount $ timeRangeBefore timeRange
 
-    ownerNamesPrevious <-
-        selectMap unValue2 . from $ \(repos `InnerJoin` jobs) -> do
-            on $ repos ^. RepoOwner ==. jobs ^. JobOwner
-                &&. repos ^. RepoName ==. jobs ^. JobRepo
-                &&. jobs ^. JobCreatedAt `withinTimeRange` timeRangeBefore timeRange
-            groupBy (repos ^. RepoOwner, repos ^. RepoName)
-            pure
-                ( repos ^. RepoOwner
-                , repos ^. RepoName
-                )
-
-    let totalRepos = length ownerNamesJobs
-        activeRepos = length $ filter ((> 0) . view _3) ownerNamesJobs
+    let totalRepos = length reposWithActivity
+        activeRepos = length $ filter (view _3) reposWithActivity
         activeReposPercent = percentage activeRepos totalRepos
         activeReposChanged =
-            changedPercentage (length ownerNamesPrevious) activeRepos
-        uniqueOwners = length $ nubOrd $ map (view _1) ownerNamesJobs
-        uniqueOwnersChanged = changedPercentage
-            (length $ nubOrd $ map (view _1) ownerNamesPrevious)
-            uniqueOwners
+            changedPercentage (fromIntegral activeReposPrevious) activeRepos
+        uniqueOwners = length $ nubOrd $ map (view _1) reposWithActivity
     pure RepoStats { .. }
+
+-- brittany-disable-next-binding
+
+-- | Fetch All Owner/Name pairs, with number of Jobs during the 'TimeRange'
+--
+-- N.B. we're using @^.@ on the @jobs@ even though it's an @OUTER JOIN@ and so
+-- it could be nullable. It's safe because we don't return any
+-- possibly-@Nothing@ fields as non-@Maybe@ values to Haskell. And it makes it
+-- much easier to work with (e.g. for 'withinTimeRange')
+--
+fetchReposWithActivity
+    :: MonadIO m
+    => TimeRange
+    -> SqlPersistT m [(OwnerName, RepoName, Bool)]
+fetchReposWithActivity timeRange =
+    selectMap convert $ from $ \(repos `LeftOuterJoin` jobs) -> do
+        on $ repos ^. RepoOwner ==. jobs ^. JobOwner
+            &&. repos ^. RepoName ==. jobs ^. JobRepo
+            &&. jobs ^. JobCreatedAt `withinTimeRange` timeRange
+        groupBy (repos ^. RepoOwner, repos ^. RepoName)
+        pure
+            ( repos ^. RepoOwner
+            , repos ^. RepoName
+            , count @Int $ jobs ^. persistIdField
+            )
+    where convert = over _3 (> 0) . unValue3
+
+-- brittany-disable-next-binding
+
+fetchActiveReposCount
+    :: MonadIO m
+    => TimeRange
+    -> SqlPersistT m Natural
+fetchActiveReposCount timeRange =
+    selectCount . from $ \(repos `InnerJoin` jobs) -> do
+        on $ repos ^. RepoOwner ==. jobs ^. JobOwner
+            &&. repos ^. RepoName ==. jobs ^. JobRepo
+            &&. jobs ^. JobCreatedAt `withinTimeRange` timeRange
+        groupBy (repos ^. RepoOwner, repos ^. RepoName)
 
 data JobStats = JobStats
     { totalJobs :: Int
