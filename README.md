@@ -68,7 +68,7 @@ To process real `restyled-io/demo` Pull Requests:
 
    - Open a PR on `restyled-io/demo`,
    - Re-deliver an existing Webhook, or
-   - Use `bin/curl-webhook` with files under `fixtures/`
+   - Use `../ops/tools/curl-webhook`, possibly with files under `fixtures/`
 
 ## LICENSE
 
