@@ -9,7 +9,7 @@
       <a href=@{AdminR}>restyled admin
     <ul>
       <li>
-        <a href=@{AdminP $ AdminMarketplaceR}>Marketplace
+        <a href=@{AdminP $ AdminMarketplaceP AdminMarketplaceR}>Marketplace
       <li>
         <a href=@{AdminP $ AdminReposP AdminReposR}>Repos
       <li>

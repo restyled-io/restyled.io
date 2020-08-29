@@ -70,7 +70,7 @@ RestyleMachine json
   UniqueRestyleMachine name
   deriving Eq Show
 
-MarketplacePlan
+MarketplacePlan json
   githubId Int
   name Text
   description Text
@@ -78,7 +78,7 @@ MarketplacePlan
   UniqueMarketplacePlan githubId
   deriving Eq Show
 
-MarketplaceAccount
+MarketplaceAccount json
   githubId GitHubUserId
   githubLogin GitHubUserName
   githubType Text -- User vs Org

@@ -29,6 +29,8 @@ module SVCS.Names
     -- ** Abortive attempt to encapsulate
     , mkOwnerName
     , mkRepoName
+    , mkUserId
+    , mkUserName
     )
 where
 

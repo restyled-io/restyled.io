@@ -2,6 +2,9 @@
 
 module Restyled.Handlers.Admin.Marketplace
     ( getAdminMarketplaceR
+    , getAdminMarketplacePlansR
+    , getAdminMarketplaceAccountsR
+    , patchAdminMarketplaceAccountR
     )
 where
 
@@ -55,3 +58,52 @@ fetchUniqueRepoOwnersExcept exceptOwners = do
 accountsList :: Maybe Text -> [OwnerName] -> Widget
 accountsList mDescription owners =
     $(widgetFile "admin/marketplace/accounts-list")
+
+newtype MarketplacePlansQuery = MarketplacePlansQuery
+    { mpqGitHubId :: Int
+    }
+
+getAdminMarketplacePlansR :: Handler Value
+getAdminMarketplacePlansR = do
+    MarketplacePlansQuery {..} <- runInputGet $ MarketplacePlansQuery <$> ireq
+        intField
+        "githubId"
+
+    runDB $ toJSON <$> selectList
+        [MarketplacePlanGithubId ==. mpqGitHubId]
+        [Asc MarketplacePlanName]
+
+newtype MarketplaceAccountsQuery = MarketplaceAccountsQuery
+    { maqGithubLogin :: GitHubUserName
+    }
+
+getAdminMarketplaceAccountsR :: Handler Value
+getAdminMarketplaceAccountsR = do
+    MarketplaceAccountsQuery {..} <-
+        runInputGet
+        $ MarketplaceAccountsQuery
+        <$> (mkUserName <$> ireq textField "githubLogin")
+
+    runDB $ toJSON <$> selectList
+        [MarketplaceAccountGithubLogin ==. maqGithubLogin]
+        [Asc MarketplaceAccountGithubLogin]
+
+newtype MarketplaceAccountPatch = MarketplaceAccountPatch
+    { mapMarketplacePlan :: Maybe MarketplacePlanId
+    }
+
+instance FromJSON MarketplaceAccountPatch where
+    parseJSON = withObject "MarketplaceAccountPatch"
+        $ \o -> MarketplaceAccountPatch <$> o .: "marketplacePlan"
+
+patchAdminMarketplaceAccountR :: MarketplaceAccountId -> Handler Value
+patchAdminMarketplaceAccountR accountId = do
+    MarketplaceAccountPatch {..} <- requireCheckJsonBody
+
+    let
+        updates =
+            [(MarketplaceAccountMarketplacePlan =.) <$> mapMarketplacePlan]
+
+    runDB $ do
+        update accountId $ catMaybes updates
+        toJSON <$> get404 accountId

@@ -44,7 +44,14 @@
     !/#RestyleMachineId AdminMachineR GET PATCH DELETE
     !/#RestyleMachineId/info AdminMachineInfoR GET
     !/#RestyleMachineId/prune AdminMachinePruneR GET
-  /marketplace AdminMarketplaceR GET
+  /marketplace AdminMarketplaceP:
+    / AdminMarketplaceR GET
+    /plans AdminMarketplacePlansP:
+      / AdminMarketplacePlansR GET
+    /accounts AdminMarketplaceAccountsP:
+      / AdminMarketplaceAccountsR GET
+      /#MarketplaceAccountId AdminMarketplaceAccountP:
+        / AdminMarketplaceAccountR PATCH
   /tokens AdminTokensP:
     / AdminTokensR GET POST
     /#ApiTokenId AdminTokenR DELETE
