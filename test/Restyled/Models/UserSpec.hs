@@ -86,6 +86,7 @@ emptySettings = AppSettings
     , appStubMarketplaceListing = True
     , appRestyleMachineLocal = True
     , appRestyleMachineJobsMax = 3
+    , appRestylersVersion = "unused"
     }
 
 userWithEmail :: Text -> User
