@@ -16,7 +16,6 @@ dockerRunArgs settings token repo job =
     , "--label", "job-id=" <> unpack (toPathPiece $ entityKey job)
     , "--env", "DEBUG=" <> if repoIsDebug settings repo then "1" else ""
     , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack (atToken token)
-    , "--env", "RESTYLERS_VERSION=" <> unpack (appRestylersVersion settings)
     , "--volume", "/tmp:/tmp"
     , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
     , maybe settingsImage unpack (repoRestylerImage repo)

@@ -72,7 +72,6 @@ data AppSettings = AppSettings
     , appStubMarketplaceListing :: Bool
     , appRestyleMachineLocal :: Bool
     , appRestyleMachineJobsMax :: Natural
-    , appRestylersVersion :: Text
     }
 
 class HasSettings env where
@@ -132,7 +131,6 @@ loadSettings =
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
         <*> switch "RESTYLE_MACHINE_LOCAL" mempty
         <*> var auto "RESTYLE_MACHINE_JOBS_MAX" (def 3)
-        <*> var nonempty "RESTYLERS_VERSION" mempty
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
