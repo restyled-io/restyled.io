@@ -20,7 +20,7 @@ data JobMetrics = JobMetrics
     , jmUnfinished :: Sum Int
     , jmTotal :: Sum Int
     }
-    deriving Generic
+    deriving stock Generic
 
 instance Semigroup JobMetrics where
     (<>) = gmappend

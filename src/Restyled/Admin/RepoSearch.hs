@@ -16,7 +16,7 @@ data SearchResults
     { srRepos :: [Entity Repo]
     , srTotal :: Int
     }
-    deriving Generic
+    deriving stock Generic
 
 instance ToJSON SearchResults where
     toJSON = genericToJSON $ aesonPrefix camelCase

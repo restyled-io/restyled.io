@@ -1,4 +1,4 @@
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 module Restyled.Models.Job
     (

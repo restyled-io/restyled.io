@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module SVCS.Names
@@ -71,7 +70,7 @@ type GitLabUserId = Id User
 type GitLabUserName = Name User
 
 data RepoSVCS = GitHubSVCS | GitLabSVCS
-    deriving (Eq, Ord, Read, Show, Enum, Bounded)
+    deriving stock (Eq, Ord, Read, Show, Enum, Bounded)
 
 readRepoSVCS :: Text -> Either Text RepoSVCS
 readRepoSVCS = \case

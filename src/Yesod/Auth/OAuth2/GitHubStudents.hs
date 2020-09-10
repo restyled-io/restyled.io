@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Yesod.Auth.OAuth2.GitHubStudents
     ( oauth2GitHubStudents
     , pluginName
@@ -39,7 +37,7 @@ oauth2GitHubStudents clientId clientSecret =
   where
     oauth2 = OAuth2
         { oauthClientId = clientId
-        , oauthClientSecret = clientSecret
+        , oauthClientSecret = Just clientSecret
         , oauthOAuthorizeEndpoint =
             "https://github.com/login/oauth/authorize"
                 `withQuery` [scopeParam "," defaultScopes]

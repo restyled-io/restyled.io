@@ -1,6 +1,6 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -Wno-missing-local-signatures #-}
 
 module Restyled.Handlers.Admin
     ( getAdminR
@@ -69,15 +69,15 @@ getAdminStatsReposR = do
 fetchRepoStats :: MonadIO m => TimeRange -> SqlPersistT m RepoStats
 fetchRepoStats timeRange = do
     reposWithActivity <- fetchReposWithActivity timeRange
-    reposWithActivityPrevious <- fetchReposWithActivity $ timeRangeBefore timeRange
+    reposWithActivityPrevious <- fetchReposWithActivity
+        $ timeRangeBefore timeRange
 
     let totalRepos = length reposWithActivity
         activeRepos = length $ filter (view _3) reposWithActivity
         activeReposPercent = percentage activeRepos totalRepos
-        activeReposChanged =
-            changedPercentage
-                (length $ filter (view _3) reposWithActivityPrevious)
-                activeRepos
+        activeReposChanged = changedPercentage
+            (length $ filter (view _3) reposWithActivityPrevious)
+            activeRepos
         uniqueOwners = length $ nubOrd $ map (view _1) reposWithActivity
     pure RepoStats { .. }
 

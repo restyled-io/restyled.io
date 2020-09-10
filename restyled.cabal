@@ -1,0 +1,251 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: e81a52c1d0c45628bfc1048e189ffc08d139b2174b04f8cbba636a65ca073273
+
+name:           restyled
+version:        0.1.1.0
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+
+library
+  exposed-modules:
+      Database.Persist.JSONB
+      GitHub.Auth.JWT
+      GitHub.Data.AccessTokens
+      GitHub.Data.Apps
+      GitHub.Data.Installations
+      GitHub.Endpoints.Installations.AccessTokens
+      GitHub.Endpoints.MarketplaceListing.Plans
+      GitHub.Endpoints.MarketplaceListing.Plans.Accounts
+      GitHub.Endpoints.Repos.Collaborators.Permissions
+      GitHub.Request.Preview
+      Restyled.Admin.CreateMachine
+      Restyled.Admin.RepoSearch
+      Restyled.ApiError
+      Restyled.ApiToken
+      Restyled.Application
+      Restyled.Authentication
+      Restyled.Authorization
+      Restyled.Backend.AcceptedJob
+      Restyled.Backend.AcceptedWebhook
+      Restyled.Backend.Application
+      Restyled.Backend.DiscountMarketplacePlan
+      Restyled.Backend.DockerRunArgs
+      Restyled.Backend.DockerRunJob
+      Restyled.Backend.ExecRestyler
+      Restyled.Backend.Foundation
+      Restyled.Backend.Marketplace
+      Restyled.Backend.Reconcile
+      Restyled.Backend.RestyleMachine
+      Restyled.Backend.StoppedContainer
+      Restyled.Backend.Webhook
+      Restyled.Cache
+      Restyled.Development.Seeds
+      Restyled.Env
+      Restyled.Export
+      Restyled.Export.Customers
+      Restyled.Foundation
+      Restyled.GitHubOrg
+      Restyled.GitHubStudents
+      Restyled.Handlers.Admin
+      Restyled.Handlers.Admin.Machines
+      Restyled.Handlers.Admin.Machines.State
+      Restyled.Handlers.Admin.Marketplace
+      Restyled.Handlers.Admin.Repos
+      Restyled.Handlers.Admin.Token
+      Restyled.Handlers.Common
+      Restyled.Handlers.GitHubStudents
+      Restyled.Handlers.Home
+      Restyled.Handlers.Marketplace
+      Restyled.Handlers.PrivacyPolicy
+      Restyled.Handlers.Profile
+      Restyled.Handlers.Repos
+      Restyled.Handlers.System.Metrics
+      Restyled.Handlers.Thanks
+      Restyled.Handlers.Webhooks
+      Restyled.Metrics
+      Restyled.Models
+      Restyled.Models.DB
+      Restyled.Models.Job
+      Restyled.Models.Repo
+      Restyled.Models.User
+      Restyled.Options
+      Restyled.Percentage
+      Restyled.Prelude
+      Restyled.Prelude.Esqueleto
+      Restyled.PrivateRepoAllowance
+      Restyled.Routes
+      Restyled.Settings
+      Restyled.StreamJobLogLines
+      Restyled.TimeRange
+      Restyled.WebSockets
+      Restyled.Widgets.ContainsURLs
+      Restyled.Widgets.Job
+      Restyled.Widgets.JobLogLine
+      Restyled.Widgets.Repo
+      Restyled.Yesod
+      RIO.DB
+      RIO.Handler
+      RIO.Logger
+      RIO.Process.Follow
+      RIO.Redis
+      SVCS.GitHub
+      SVCS.Names
+      SVCS.Payload
+      Yesod.Auth.OAuth2.GitHubStudents
+  other-modules:
+      Paths_restyled
+  hs-source-dirs:
+      src
+  default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists
+  cpp-options: -DDEVELOPMENT=0 -DDOCKERIZED=0
+  build-depends:
+      aeson
+    , aeson-casing
+    , ansi-terminal
+    , base
+    , blaze-html
+    , blaze-markup
+    , bytestring
+    , cassava
+    , composition-extra
+    , conduit
+    , conduit-extra
+    , containers
+    , data-default
+    , envparse
+    , errors
+    , esqueleto
+    , extra
+    , fast-logger
+    , file-embed
+    , filepath
+    , formatting
+    , github
+    , gitrev
+    , hedis
+    , hjsmin
+    , hoauth2
+    , http-conduit
+    , http-types
+    , iso8601-time
+    , jwt
+    , lens
+    , lens-aeson
+    , load-env
+    , megaparsec
+    , monad-logger
+    , mtl
+    , optparse-applicative
+    , path-pieces
+    , persistent
+    , persistent-postgresql
+    , persistent-qq
+    , persistent-template
+    , rio
+    , rio-orphans
+    , safe-exceptions
+    , semigroups
+    , shakespeare
+    , tagged
+    , template-haskell
+    , text
+    , time
+    , transformers
+    , unordered-containers
+    , uri-encode
+    , uuid
+    , vector
+    , wai
+    , wai-extra
+    , warp
+    , websockets
+    , yesod
+    , yesod-auth
+    , yesod-auth-oauth2 >=0.6.1.5
+    , yesod-core
+    , yesod-form
+    , yesod-paginator >=1.1.0.2
+    , yesod-persistent
+    , yesod-static
+    , yesod-websockets
+  default-language: Haskell2010
+
+executable restyled.io
+  main-is: main.hs
+  other-modules:
+      Paths_restyled
+  hs-source-dirs:
+      app
+  default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -threaded -rtsopts -with-rtsopts=-T
+  cpp-options: -DDEVELOPMENT=0 -DDOCKERIZED=0
+  build-depends:
+      base
+    , load-env
+    , restyled
+  default-language: Haskell2010
+
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Restyled.AuthenticationSpec
+      Restyled.Backend.MarketplaceSpec
+      Restyled.Backend.ReconcileSpec
+      Restyled.Backend.RestyleMachineSpec
+      Restyled.Handlers.Admin.ReposSpec
+      Restyled.Handlers.AdminSpec
+      Restyled.Handlers.CommonSpec
+      Restyled.Handlers.HomeSpec
+      Restyled.Handlers.ProfileSpec
+      Restyled.Handlers.ReposSpec
+      Restyled.Handlers.WebhooksSpec
+      Restyled.Models.UserSpec
+      Restyled.Test
+      Restyled.Test.Authentication
+      Restyled.Test.Expectations
+      Restyled.Test.Factories
+      Restyled.Test.Lens
+      Restyled.Test.Yesod
+      Restyled.Widgets.ContainsURLsSpec
+      Restyled.Widgets.JobSpec
+      RIO.Process.FollowSpec
+      Test.Hspec.Lifted
+      Paths_restyled
+  hs-source-dirs:
+      test
+  default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists
+  cpp-options: -DDEVELOPMENT=0 -DDOCKERIZED=0
+  build-depends:
+      QuickCheck
+    , base
+    , bytestring
+    , filepath
+    , github
+    , hedis
+    , hspec
+    , hspec-core
+    , hspec-expectations-lifted
+    , http-types
+    , lens
+    , load-env
+    , megaparsec
+    , monad-logger
+    , persistent
+    , restyled
+    , rio
+    , shakespeare
+    , text
+    , time
+    , yesod-auth
+    , yesod-core
+    , yesod-test
+  default-language: Haskell2010

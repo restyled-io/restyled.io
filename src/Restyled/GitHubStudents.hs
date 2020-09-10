@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
 module Restyled.GitHubStudents
@@ -8,7 +7,6 @@ where
 
 import Restyled.Prelude hiding (id)
 
-import Control.Lens ((^?))
 import Data.Aeson.Lens
 import qualified Data.Text as T
 import Network.HTTP.Simple

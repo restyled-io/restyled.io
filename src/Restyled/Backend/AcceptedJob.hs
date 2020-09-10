@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 -- | Type and handler for Jobs that we accept or ignored
 module Restyled.Backend.AcceptedJob
     ( AcceptedJob(..)

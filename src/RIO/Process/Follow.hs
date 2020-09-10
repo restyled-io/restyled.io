@@ -6,6 +6,7 @@ where
 
 import RIO
 
+import GHC.IO.Exception (IOError)
 import RIO.Process
 import System.IO (hGetLine)
 import System.IO.Error (isEOFError)
@@ -71,6 +72,7 @@ setPipes stdinSpec =
 followPipe :: MonadUnliftIO m => Handle -> (String -> m ()) -> m ()
 followPipe h act = handle handleEOF $ forever $ act =<< liftIO (hGetLine h)
   where
+    handleEOF :: MonadIO m => IOError -> m ()
     handleEOF ex
         | isEOFError ex = pure ()
         | otherwise = throwIO ex

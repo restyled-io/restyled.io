@@ -72,6 +72,8 @@ fetchGitHubIdentityForUser User {..} =
             <*> fetchMarketplaceData (nameToName githubUsername)
   where
     mDetails = (,) <$> userGithubUserId <*> userGithubUsername
+
+    avatarUrl :: GitHubUserId -> Text
     avatarUrl gid =
         "https://avatars0.githubusercontent.com/u/" <> toPathPart gid <> "?v=4"
 

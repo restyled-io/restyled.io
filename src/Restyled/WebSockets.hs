@@ -42,6 +42,10 @@ withAsyncWebSockets f = do
     webSockets $ loop c
     wait a
   where
+    loop
+        :: (MonadIO m, WS.WebSocketsData a)
+        => Chan (Message a)
+        -> ReaderT WS.Connection m ()
     loop c = do
         msg <- readChan c
 

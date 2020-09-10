@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-missing-local-signatures #-}
+
 module RIO.Process.FollowSpec
     ( spec
     )

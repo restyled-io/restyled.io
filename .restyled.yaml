@@ -1,8 +1,17 @@
----
+remote_files:
+  - url: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/config/brittany/config.yaml
+    path: brittany.yaml
+  - url: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
+    path: .hlint.yaml
+  - url: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/stylish-haskell.yaml
+    path: .stylish-haskell.yaml
+
+restylers_version: dev
+
 restylers:
+  - lint
   - stylish-haskell
-  - brittany:
-      image: restyled/restyler-brittany:v0.12.0.0
+  - brittany
   - prettier:
       # Explicitly set parser so it works on .julius
       arguments:
@@ -11,18 +20,4 @@ restylers:
       include:
         - "**/*.js"
         - "**/*.julius"
-  - hlint:
-      include:
-        - "**/*.hs"
-
-        # apply-refact cannot handle TypeApplications
-        - "!src/Restyled/Handlers/Marketplace.hs"
-        - "!src/Restyled/Handlers/PrivacyPolicy.hs"
-        - "!src/Restyled/Handlers/Webhooks.hs"
-        - "!src/Restyled/StreamJobLogLines.hs"
-
-        # apply-refact cannot handle something here
-        - "!src/Restyled/Env.hs"
-
-        # apply-refact cannot handle forall
-        - "!test/Restyled/Test/Yesod.hs"
+  - "*"

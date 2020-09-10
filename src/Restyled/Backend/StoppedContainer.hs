@@ -16,7 +16,7 @@ data StoppedContainer = StoppedContainer
     , scFinishedAt :: UTCTime
     , scExitCode :: Int
     }
-    deriving (Eq, Show)
+    deriving stock (Eq, Show)
 
 instance FromJSON StoppedContainer where
     parseJSON = withObject "Container" $ \o -> do

@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-
 module Restyled.Handlers.Admin.Machines.State
     ( getAdminMachinesStateR
     )

@@ -21,10 +21,10 @@ import Text.Megaparsec.Char
 data ContentPart
     = ContentPart Text
     | URLPart Text
-    deriving (Eq, Show)
+    deriving stock (Eq, Show)
 
 newtype ContainsURLs = ContainsURLs [ContentPart]
-    deriving (Eq, Show)
+    deriving stock (Eq, Show)
 
 renderWithURLs :: Text -> Widget
 renderWithURLs = renderContainsURLs . containsURLs

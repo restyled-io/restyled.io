@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 -- | JSON error representation used in API responses.
 module Restyled.ApiError
     ( ApiError(..)

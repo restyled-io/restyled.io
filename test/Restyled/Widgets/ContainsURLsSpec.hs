@@ -33,7 +33,7 @@ shouldParseTo input expected =
         $ parse contentPartsP "" input
 
 newtype Parsed = Parsed ContainsURLs
-    deriving Show
+    deriving stock Show
 
 instance Arbitrary Parsed where
     arbitrary = do
@@ -60,6 +60,8 @@ urlPart :: Gen ContentPart
 urlPart = URLPart <$> url
   where
     url = (<>) <$> scheme <*> withoutSpaces
+
+    scheme :: Gen Text
     scheme = elements ["http://", "https://"]
 
 withoutSpaces :: Gen Text

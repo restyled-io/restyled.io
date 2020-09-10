@@ -1,64 +1,49 @@
----
 name: restyled
 version: 0.1.1.0
 license: MIT
 
 default-extensions:
   - BangPatterns
-  - BinaryLiterals
-  - ConstraintKinds
   - DataKinds
-  - DefaultSignatures
   - DeriveAnyClass
-  - DeriveDataTypeable
   - DeriveFoldable
   - DeriveFunctor
   - DeriveGeneric
+  - DeriveLift
   - DeriveTraversable
   - DerivingStrategies
-  - DoAndIfThenElse
-  - EmptyDataDecls
-  - ExistentialQuantification
   - FlexibleContexts
   - FlexibleInstances
-  - FunctionalDependencies
   - GADTs
   - GeneralizedNewtypeDeriving
-  - InstanceSigs
-  - KindSignatures
+  - LambdaCase
   - MultiParamTypeClasses
-  - MultiWayIf
-  - NamedFieldPuns
   - NoImplicitPrelude
+  - NoMonomorphismRestriction
   - OverloadedStrings
-  - PartialTypeSignatures
-  - PatternGuards
-  - PolyKinds
   - RankNTypes
   - RecordWildCards
   - ScopedTypeVariables
   - StandaloneDeriving
-  - TupleSections
   - TypeApplications
   - TypeFamilies
-  - TypeSynonymInstances
+
+  # Needed here just so HLint doesn't strip it
   - ViewPatterns
 
-  # Forcing addition of these in-module because of broken tooling
-  # - LambdaCase
+ghc-options: -Weverything
+  -Wno-unsafe
+  -Wno-missing-import-lists
 
-ghc-options: -Wall
-  -Wcompat
-  -Widentities
-  -Wincomplete-record-updates
-  -Wincomplete-uni-patterns
-  -Wpartial-fields
-  -Wredundant-constraints
+cpp-options:
+  -DDEVELOPMENT=0
+  -DDOCKERIZED=0
 
 dependencies:
   - base
 
 library:
+  source-dirs: src
   dependencies:
     - aeson
     - aeson-casing
@@ -121,14 +106,13 @@ library:
     - websockets
     - yesod
     - yesod-auth
-    - yesod-auth-oauth2
+    - yesod-auth-oauth2 >= 0.6.1.5
     - yesod-core
     - yesod-form
     - yesod-paginator >= 1.1.0.2
     - yesod-persistent
     - yesod-static
     - yesod-websockets
-  source-dirs: src
 
 executables:
   restyled.io:

@@ -1,5 +1,3 @@
-{-# LANGUAGE DerivingVia #-}
-
 module Restyled.Backend.RestyleMachine
     ( withRestyleMachine
     , withRestyleMachineEnv
@@ -48,7 +46,10 @@ withRestyleMachine f = do
         mMachine <$ traverse_ increment mMachine
     f machine `finally` runDB (decrement machine)
   where
+    increment :: MonadIO m => Entity RestyleMachine -> SqlPersistT m ()
     increment = flip update [RestyleMachineJobCount +=. 1] . entityKey
+
+    decrement :: MonadIO m => Entity RestyleMachine -> SqlPersistT m ()
     decrement = flip update [RestyleMachineJobCount -=. 1] . entityKey
 
 throttleWarn :: HasLogFunc env => RIO env (Maybe a) -> RIO env a

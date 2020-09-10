@@ -20,4 +20,4 @@ data Payload = Payload
     , pInstallationId :: InstallationId
     , pPullRequest :: PullRequestNum
     }
-    deriving Show
+    deriving stock Show
