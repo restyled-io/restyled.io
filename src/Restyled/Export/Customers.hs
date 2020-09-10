@@ -1,3 +1,6 @@
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TupleSections #-}
+
 module Restyled.Export.Customers
     ( Customer(..)
     , fetchCustomers

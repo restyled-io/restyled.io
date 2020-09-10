@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Restyled.Test.Expectations
     ( shouldRedirectTo
     , expectationFailure

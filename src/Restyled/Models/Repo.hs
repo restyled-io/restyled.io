@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Restyled.Models.Repo
     (
     -- * Virtual attributes

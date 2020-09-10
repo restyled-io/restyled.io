@@ -10,7 +10,7 @@ where
 
 import Restyled.Prelude hiding (fieldLens)
 
-import Control.Lens ((.~), (?~), (^..), (^?))
+import Control.Lens ((?~))
 import qualified Database.Persist as P
 
 fieldLens
@@ -21,6 +21,7 @@ fieldLens field =
 unsafeEntityLens :: Lens' record (Entity record)
 unsafeEntityLens = lens (Entity (error err)) (\_ entity -> entityVal entity)
   where
+    err :: String
     err = "Cannot access EntityKey of Entity constructed unsafely without one"
 
 -- entityKeyLens :: Lens' (Entity record) (Key record)

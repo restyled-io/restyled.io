@@ -10,9 +10,16 @@ import Restyled.Backend.Marketplace
 spec :: Spec
 spec = withApp $ do
     describe "marketplacePlanAllows" $ do
-        let shouldAllow repo = do
+        let shouldAllow :: MonadIO m => Entity Repo -> SqlPersistT m ()
+            shouldAllow repo = do
                 allows <- marketplacePlanAllows repo
                 allows `shouldBe` MarketplacePlanAllows
+
+            shouldForbid
+                :: MonadIO m
+                => Entity Repo
+                -> MarketplacePlanLimitation
+                -> SqlPersistT m ()
             shouldForbid repo with = do
                 allows <- marketplacePlanAllows repo
                 allows `shouldBe` MarketplacePlanForbids with

@@ -16,7 +16,7 @@ data GitHubUser = GitHubUser
     , ghuId :: GitHubUserId
     , ghuLogin :: GitHubUserName
     }
-    deriving (Eq, Show, Generic)
+    deriving stock (Eq, Show, Generic)
 
 instance FromJSON GitHubUser where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase
@@ -26,7 +26,7 @@ data GitLabUser = GitLabUser
     , gluId :: GitLabUserId
     , glUsername :: GitLabUserName
     }
-    deriving (Eq, Show, Generic)
+    deriving stock (Eq, Show, Generic)
 
 instance FromJSON GitLabUser where
     parseJSON = genericParseJSON $ aesonPrefix snakeCase

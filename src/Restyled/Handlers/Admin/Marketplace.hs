@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TupleSections #-}
 
 module Restyled.Handlers.Admin.Marketplace
     ( getAdminMarketplaceR
@@ -27,7 +28,9 @@ mpwaDescription = marketplacePlanDescription . entityVal . mpwaPlan
 
 mpwaOwnerNames :: MarketplacePlanWithAccounts -> [OwnerName]
 mpwaOwnerNames = map (accountOwner . entityVal) . mpwaAccounts
-    where accountOwner = nameToName . marketplaceAccountGithubLogin
+  where
+    accountOwner :: MarketplaceAccount -> OwnerName
+    accountOwner = nameToName . marketplaceAccountGithubLogin
 
 getAdminMarketplaceR :: Handler Html
 getAdminMarketplaceR = do

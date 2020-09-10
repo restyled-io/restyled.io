@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Restyled.PrivateRepoAllowance
     ( PrivateRepoAllowance(..)
     , privateRepoAllowance

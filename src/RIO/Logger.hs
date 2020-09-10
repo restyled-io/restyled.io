@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module RIO.Logger
     (
     -- * Building @'LogFunc'@

@@ -28,7 +28,9 @@ machineForm =
     renderDivs
         $ createMachineGetRestyleMachine
         <$> areq jsonField "Machine JSON" { fsAttrs = attrs } Nothing
-    where attrs = [("placeholder", createMachinePlaceholder), ("rows", "30")]
+  where
+    attrs :: [(Text, Text)]
+    attrs = [("placeholder", createMachinePlaceholder), ("rows", "30")]
 
 getAdminMachinesR :: Handler TypedContent
 getAdminMachinesR = do

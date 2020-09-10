@@ -1,5 +1,6 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -Wno-missing-deriving-strategies #-}
+{-# OPTIONS_GHC -Wno-missing-local-signatures #-}
 
 module Restyled.Foundation
     ( module Restyled.Foundation

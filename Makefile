@@ -39,22 +39,21 @@ db.console.prod:
 
 .PHONY: setup
 setup:
-	stack setup $(STACK_ARGUMENTS)
-	# Avoid ExitFailure (-9) (THIS MAY INDICATE OUT OF MEMORY)
-	stack build $(STACK_ARGUMENTS) -j 1 Cabal
-	stack build $(STACK_ARGUMENTS) --dependencies-only --test --no-run-tests
-	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
+	stack setup
+	stack build --dependencies-only --test --no-run-tests
+	stack install --copy-compiler-tool \
 	  dbmigrations-postgresql
 
 .PHONY: setup.lint
 setup.lint:
-	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
+	stack install --copy-compiler-tool \
 	  hlint \
 	  weeder
 
 .PHONY: setup.tools
 setup.tools:
-	stack install $(STACK_ARGUMENTS) --copy-compiler-tool \
+	stack install --copy-compiler-tool \
+	  dhall \
 	  brittany \
 	  fast-tags \
 	  stylish-haskell
@@ -68,22 +67,22 @@ setup.ngrok:
 
 .PHONY: build
 build:
-	stack build $(STACK_ARGUMENTS) --pedantic --test --no-run-tests
+	stack build --pedantic --test --no-run-tests
 
 .PHONY: lint
 lint:
 	find app src test -name '*.hs' \
 	  -not -name 'Foundation.hs' \
-	  -exec stack exec $(STACK_ARGUMENTS) hlint {} +
-	stack exec $(STACK_ARGUMENTS) weeder .
+	  -exec stack exec hlint {} +
+	stack exec weeder
 
 .PHONY: test
 test:
-	stack build $(STACK_ARGUMENTS) --test
+	stack build --test
 
 .PHONY: watch
 watch:
-	stack build $(STACK_ARGUMENTS) \
+	stack build \
 	  --fast --pedantic --test --file-watch \
 	  --exec bin/restyled-restart \
 	  --ghc-options -DDEVELOPMENT

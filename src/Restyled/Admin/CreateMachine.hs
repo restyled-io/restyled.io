@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-
 module Restyled.Admin.CreateMachine
     ( createMachinePlaceholder
     , createMachineGetRestyleMachine

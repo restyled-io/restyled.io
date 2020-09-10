@@ -54,7 +54,10 @@ $newline never
     , fieldEnctype = UrlEncoded
     }
   where
+    parseVal :: FromJSON a => Text -> Either FormMessage a
     parseVal = first (MsgInvalidEntry . pack) . eitherDecodeStrict . encodeUtf8
+
+    showVal :: ToJSON a => Either e a -> Text
     showVal = either (const "") $ decodeUtf8 . encodeStrict
 
 parseEpoch :: Text -> Either FormMessage UTCTime

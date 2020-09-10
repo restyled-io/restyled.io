@@ -1,3 +1,5 @@
+{-# LANGUAGE ConstraintKinds #-}
+
 module Restyled.Prelude
     (
     -- * Errors
@@ -35,7 +37,7 @@ module Restyled.Prelude
     )
 where
 
-import RIO as X hiding (Handler, first, second)
+import RIO as X hiding (Handler)
 
 import Control.Error.Util as X
     (exceptT, hoistMaybe, hush, hushT, note, noteT, (??))
@@ -46,7 +48,6 @@ import Control.Monad.Logger as X
 import Control.Monad.Trans.Maybe as X
 import Data.Aeson as X hiding (Result(..))
 import Data.Aeson.Casing as X
-import Data.Bifunctor as X (Bifunctor, bimap, first, second)
 import Data.Bitraversable as X (bimapM)
 import Data.Char as X (isSpace, toLower)
 import Data.Either as X (fromLeft, fromRight)

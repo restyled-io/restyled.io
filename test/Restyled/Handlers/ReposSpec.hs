@@ -40,7 +40,10 @@ itRequiresRepositoryAccess path = do
 
         statusIs 404
   where
+    owner :: OwnerName
     owner = "foo"
+
+    name :: RepoName
     name = "bar"
 
 publicRepo :: OwnerName -> RepoName -> Repo

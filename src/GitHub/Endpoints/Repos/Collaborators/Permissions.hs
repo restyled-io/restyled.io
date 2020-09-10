@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module GitHub.Endpoints.Repos.Collaborators.Permissions
     ( CollaboratorPermission(..)
     , CollaboratorPermissions(..)

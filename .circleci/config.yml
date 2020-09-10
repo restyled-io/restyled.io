@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  stack-build: pbrisbin/stack-build@3.0.0
+  stack-build: pbrisbin/stack-build@4.0.0
   docker-build-cached: pbrisbin/docker-build-cached@1.0.0
   aws-cli: circleci/aws-cli@1.2.1
   heroku-container: pbrisbin/heroku-container@1.0.0

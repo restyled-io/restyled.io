@@ -1,6 +1,7 @@
 {-# LANGUAGE NoDeriveAnyClass #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-missing-deriving-strategies #-}
 
 -- | Entities defined via @config/models@
 module Restyled.Models.DB

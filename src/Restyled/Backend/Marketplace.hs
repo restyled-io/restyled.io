@@ -169,13 +169,13 @@ deleteUnsynchronized synchronizedAccountIds = do
 data MarketplacePlanAllows
     = MarketplacePlanAllows
     | MarketplacePlanForbids MarketplacePlanLimitation
-    deriving (Eq, Show)
+    deriving stock (Eq, Show)
 
 data MarketplacePlanLimitation
     = MarketplacePlanNotFound
     | MarketplacePlanPublicOnly
     | MarketplacePlanMaxRepos
-    deriving (Eq, Show)
+    deriving stock (Eq, Show)
 
 marketplacePlanAllows
     :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows

@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Restyled.Backend.Webhook
     ( enqueueWebhook
     , awaitWebhook

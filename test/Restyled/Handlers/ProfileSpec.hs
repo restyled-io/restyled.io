@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module Restyled.Handlers.ProfileSpec
     ( spec
     )

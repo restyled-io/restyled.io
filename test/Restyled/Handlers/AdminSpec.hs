@@ -13,7 +13,8 @@ spec :: Spec
 spec = withApp $ do
     describe "AdminP" $ do
         -- Just a simple example page
-        let getAdmin = get $ AdminP $ AdminMachinesP AdminMachinesR
+        let getAdmin :: YesodExample App ()
+            getAdmin = get $ AdminP $ AdminMachinesP AdminMachinesR
 
         it "404s for un-authenticated users" $ do
             getAdmin
