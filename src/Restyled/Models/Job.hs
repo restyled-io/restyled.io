@@ -2,11 +2,8 @@
 
 module Restyled.Models.Job
     (
-    -- * Virtual fields
-      jobDuration
-
     -- * Creating Jobs
-    , insertJob
+      insertJob
 
     -- * Queries
     , fetchJobIsInProgress
@@ -19,7 +16,6 @@ module Restyled.Models.Job
     , fetchJobOutput
     , captureJobLogLine
     , fetchLastJobLogLineCreatedAt
-    , compressJobOutput
 
     -- * Completing Jobs
     , completeJobSkipped
@@ -31,10 +27,6 @@ where
 import Restyled.Prelude
 
 import Restyled.Models.DB
-
-jobDuration :: Entity Job -> Maybe NominalDiffTime
-jobDuration (Entity _ Job {..}) =
-    (`diffUTCTime` jobCreatedAt) <$> jobCompletedAt
 
 insertJob
     :: MonadIO m => Entity Repo -> PullRequestNum -> SqlPersistT m (Entity Job)
@@ -115,12 +107,6 @@ fetchLastJobLogLineCreatedAt jobId =
     jobLogLineCreatedAt . entityVal <$$> selectFirst
         [JobLogLineJob ==. jobId]
         [Desc JobLogLineCreatedAt]
-
-compressJobOutput :: MonadIO m => JobId -> SqlPersistT m ()
-compressJobOutput jobId = do
-    logLines <- fetchJobLogLines jobId 0
-    update jobId [JobLog =. Just (JSONB logLines)]
-    deleteWhere [JobLogLineJob ==. jobId]
 
 completeJobSkipped
     :: MonadIO m => String -> Entity Job -> SqlPersistT m (Entity Job)

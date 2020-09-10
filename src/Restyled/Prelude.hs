@@ -3,8 +3,7 @@
 module Restyled.Prelude
     (
     -- * Errors
-      fromJustNoteM
-    , fromLeftM
+      fromLeftM
     , untryIO
 
     -- * Persist
@@ -12,15 +11,8 @@ module Restyled.Prelude
     , overEntity
     , replaceEntity
     , selectFirstT
-    , getT
     , getEntityT
     , getByT
-
-    -- * ExceptT
-    , bimapMExceptT
-
-    -- * Bufunctor
-    , both
 
     -- * IO
     , setLineBuffering
@@ -74,9 +66,6 @@ import qualified Data.Text.Lazy as TL
 import Formatting (Format, format, (%))
 import qualified Formatting.Formatters as Formatters
 
-fromJustNoteM :: MonadIO m => String -> Maybe a -> m a
-fromJustNoteM msg = fromMaybeM (throwString msg) . pure
-
 fromLeftM :: Monad m => (a -> m b) -> m (Either a b) -> m b
 fromLeftM f me = either f pure =<< me
 
@@ -103,9 +92,6 @@ selectFirstT
     -> MaybeT (SqlPersistT m) (Entity a)
 selectFirstT x = MaybeT . selectFirst x
 
-getT :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) a
-getT = MaybeT . get
-
 getEntityT
     :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) (Entity a)
 getEntityT = MaybeT . getEntity
@@ -113,16 +99,6 @@ getEntityT = MaybeT . getEntity
 getByT
     :: (MonadIO m, SqlEntity a) => Unique a -> MaybeT (SqlPersistT m) (Entity a)
 getByT = MaybeT . getBy
-
-bimapMExceptT
-    :: Monad m => (e -> m f) -> (a -> m b) -> ExceptT e m a -> ExceptT f m b
-bimapMExceptT f g (ExceptT m) = ExceptT $ h =<< m
-  where
-    h (Left e) = Left <$> f e
-    h (Right a) = Right <$> g a
-
-both :: Bifunctor p => (a -> b) -> p a a -> p b b
-both f = bimap f f
 
 -- | Set output handles to line buffering
 --
