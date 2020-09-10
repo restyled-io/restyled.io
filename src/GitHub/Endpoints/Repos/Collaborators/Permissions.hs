@@ -3,7 +3,7 @@ module GitHub.Endpoints.Repos.Collaborators.Permissions
     , CollaboratorPermissions(..)
     , collaboratorCanRead
     , collaboratorPermissions
-    , collaboratorPermissions'
+    -- , collaboratorPermissions'
     , collaboratorPermissionsR
     )
 where
@@ -55,13 +55,13 @@ collaboratorPermissions
 collaboratorPermissions auth owner repo user =
     executeRequest auth $ collaboratorPermissionsR owner repo user
 
-collaboratorPermissions'
-    :: Name Owner
-    -> Name Repo
-    -> Name User
-    -> IO (Either Error CollaboratorPermissions)
-collaboratorPermissions' owner repo user =
-    executeRequest' $ collaboratorPermissionsR owner repo user
+-- collaboratorPermissions'
+--     :: Name Owner
+--     -> Name Repo
+--     -> Name User
+--     -> IO (Either Error CollaboratorPermissions)
+-- collaboratorPermissions' owner repo user =
+--     executeRequest' $ collaboratorPermissionsR owner repo user
 
 collaboratorPermissionsR
     :: Name Owner -> Name Repo -> Name User -> Request k CollaboratorPermissions
