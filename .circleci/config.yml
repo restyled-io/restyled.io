@@ -54,12 +54,16 @@ workflows:
           name: build
           install-stack: false
           upgrade-stack: true
+          # The docker executor comes with lower memory, so we have to be
+          # careful to build some heavy deps non-concurrently first.
           before-dependencies:
             - run: stack build --no-terminal -j 1 Cabal aeson haskell-src-exts
           after-dependencies:
             - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
           before-test:
             - run: db/migrate test upgrade
+          hlint-yaml-url:
+            https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
           executor: default
 
       - docker-build-cached/build-and-release:
