@@ -2,8 +2,12 @@
 
 module Restyled.Models.Job
     (
+    -- * Formatting
+      jobPath
+    , jobOutcome
+
     -- * Creating Jobs
-      insertJob
+    , insertJob
 
     -- * Queries
     , fetchJobIsInProgress
