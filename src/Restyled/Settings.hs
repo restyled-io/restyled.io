@@ -28,7 +28,7 @@ import RIO.Handler
 import Yesod.Auth.Dummy
 import Yesod.Core.Types (HandlerData(..))
 
-#if DEVELOPMENT
+#ifdef DEVELOPMENT
 import Yesod.Default.Util (widgetFileReload)
 #else
 import Yesod.Default.Util (widgetFileNoReload)

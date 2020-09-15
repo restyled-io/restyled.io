@@ -12,7 +12,7 @@ import Restyled.Prelude
 
 import qualified Data.ByteString.Char8 as C8
 import Data.FileEmbed (embedFile)
-#if !DOCKERIZED
+#ifndef DOCKERIZED
 import Development.GitRev (gitCommitDate, gitHash)
 #endif
 import Restyled.Foundation
@@ -25,7 +25,7 @@ getRevisionR = pure . TypedContent typePlain $ toContent appRevision
 -- brittany-disable-next-binding
 appRevision :: ByteString
 appRevision =
-#if DOCKERIZED
+#ifdef DOCKERIZED
     $(embedFile "config/revision")
 #else
     $(gitHash) <> " - " <> $(gitCommitDate)

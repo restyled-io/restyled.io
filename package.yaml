@@ -35,10 +35,6 @@ ghc-options: -Weverything
   -Wno-unsafe
   -Wno-missing-import-lists
 
-cpp-options:
-  -DDEVELOPMENT=0
-  -DDOCKERIZED=0
-
 dependencies:
   - base
 
