@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e81a52c1d0c45628bfc1048e189ffc08d139b2174b04f8cbba636a65ca073273
+-- hash: 8cc2211c1cd2a85a096be3452782a2fb063d8a979ae4c2101acdc251721bc2cb
 
 name:           restyled
 version:        0.1.1.0
@@ -104,7 +104,6 @@ library
       src
   default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
   ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists
-  cpp-options: -DDEVELOPMENT=0 -DDOCKERIZED=0
   build-depends:
       aeson
     , aeson-casing
@@ -185,7 +184,6 @@ executable restyled.io
       app
   default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
   ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -threaded -rtsopts -with-rtsopts=-T
-  cpp-options: -DDEVELOPMENT=0 -DDOCKERIZED=0
   build-depends:
       base
     , load-env
@@ -223,7 +221,6 @@ test-suite test
       test
   default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
   ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists
-  cpp-options: -DDEVELOPMENT=0 -DDOCKERIZED=0
   build-depends:
       QuickCheck
     , base
