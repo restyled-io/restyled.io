@@ -9,7 +9,7 @@ remote_files:
 restylers_version: dev
 
 restylers:
-  - lint
+  - hlint
   - stylish-haskell
   - brittany
   - prettier:
