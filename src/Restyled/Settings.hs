@@ -139,7 +139,7 @@ defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 widgetFile :: String -> Q Exp
 widgetFile =
-#if DEVELOPMENT
+#ifdef DEVELOPMENT
     widgetFileReload
 #else
     widgetFileNoReload
