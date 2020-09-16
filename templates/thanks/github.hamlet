@@ -20,7 +20,7 @@
     <li>
       To change how things are actually <em>styled</em>, you're going to want to
       learn about the
-      <a href=https://github.com/restyled-io/restyled.io/wiki/Available-Restylers#available-now>
+      <a href=https://docs.restyled.io/available-restylers/>
         individual auto-formatters
       that we run for the kinds of files you edit. If you already have a
       <code>.prettier.json
