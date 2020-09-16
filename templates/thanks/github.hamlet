@@ -14,7 +14,7 @@
     <li>
       To change how Restyled behaves (any files to exclude, which restylers to
       run, if comments should be left, etc), see the
-      <a href=https://github.com/restyled-io/restyled.io/wiki/Configuration-Reference>
+      <a href=https://github.com/restyled-io/restyled.io/wiki/Configuring-Restyled>
         Configuration Reference
 
     <li>
