@@ -10,6 +10,7 @@ import Restyled.Prelude
 import Restyled.Backend.Container
 import Restyled.Backend.RestyleMachine
 import Restyled.Models
+import Restyled.TimeRange
 
 newtype StaleJobs = StaleJobs
     { unStaleJobs :: [Entity Job]
@@ -26,18 +27,20 @@ newtype StaleJobs = StaleJobs
 --
 checkConcurrentJobs
     :: (MonadUnliftIO m, MonadReader env m, HasDB env)
-    => Entity Job
+    => TimeRange
+    -- ^ Time range to check within
+    -> Entity Job
     -- ^ Job about to run
     -> (Entity Job -> e)
     -- ^ Build the error to throw if stale, given oldest newer Job
     -> ExceptT e m StaleJobs
     -- ^ Returns any older Jobs, for potential cancellation
-checkConcurrentJobs job errStale = do
+checkConcurrentJobs range job errStale = do
     (newer, older) <-
         lift
         $ runDB
         $ partition (`isNewerThan` job)
-        <$> fetchJobsConcurrentWith job
+        <$> fetchJobsConcurrentWith range job
 
     case newer of
         [] -> pure $ StaleJobs older
@@ -110,14 +113,17 @@ cancelJobOnMachine jobId machine = do
             <> " "
             <> fromString err
 
-fetchJobsConcurrentWith :: MonadIO m => Entity Job -> SqlPersistT m [Entity Job]
-fetchJobsConcurrentWith (Entity jobId job) = selectList
-    [ JobOwner ==. jobOwner job
-    , JobRepo ==. jobRepo job
-    , JobPullRequest ==. jobPullRequest job
-    , JobCompletedAt ==. Nothing
-    , JobId !=. jobId
-    ]
+fetchJobsConcurrentWith
+    :: MonadIO m => TimeRange -> Entity Job -> SqlPersistT m [Entity Job]
+fetchJobsConcurrentWith range (Entity jobId job) = selectList
+    ([ JobOwner ==. jobOwner job
+     , JobRepo ==. jobRepo job
+     , JobPullRequest ==. jobPullRequest job
+     , JobCompletedAt ==. Nothing
+     , JobId !=. jobId
+     ]
+    <> timeRangeFilters JobCreatedAt range
+    )
     [Asc JobCreatedAt]
 
 fetchActiveRestyleMachines :: MonadIO m => SqlPersistT m [Entity RestyleMachine]

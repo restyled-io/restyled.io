@@ -2,8 +2,10 @@ module Restyled.TimeRange
     ( TimeRange
     , timeRangeBefore
     , timeRangeFromMinutesAgo
+    , timeRangeFromHoursAgo
     , rawSqlWithTimeRange
     , withinTimeRange
+    , timeRangeFilters
     )
 where
 
@@ -32,6 +34,9 @@ timeRangeFromMinutesAgo minutes = do
     now <- getCurrentTime
     pure $ timeRangeToVia now $ subtractMinutes minutes
 
+timeRangeFromHoursAgo :: MonadIO m => Int -> m TimeRange
+timeRangeFromHoursAgo = timeRangeFromMinutesAgo . (* 60)
+
 timeRangeToVia :: UTCTime -> (UTCTime -> UTCTime) -> TimeRange
 timeRangeToVia tmTo f = let tmFrom = f tmTo in TimeRange { .. }
 
@@ -49,3 +54,6 @@ withinTimeRange field TimeRange {..} =
     field E.>=. E.val tmFrom E.&&. field E.<=. E.val tmTo
 
 infix 4 `withinTimeRange`
+
+timeRangeFilters :: EntityField e UTCTime -> TimeRange -> [Filter e]
+timeRangeFilters field TimeRange {..} = [field >=. tmFrom, field <=. tmTo]

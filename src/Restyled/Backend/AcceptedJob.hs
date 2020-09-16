@@ -14,6 +14,7 @@ import Restyled.Backend.AcceptedWebhook
 import Restyled.Backend.ConcurrentJobs
 import Restyled.Backend.Marketplace
 import Restyled.Models
+import Restyled.TimeRange
 
 data IgnoredJobReason
     = NonGitHubRepo Repo
@@ -36,7 +37,8 @@ acceptJob AcceptedWebhook {..} = do
     when (repoSvcs repo /= GitHubSVCS) $ throwError $ NonGitHubRepo repo
     unless (repoEnabled repo) $ throwError $ ManualRestriction repo
     whenMarketplacePlanForbids allows $ throwError . PlanLimitation repo
-    staleJobs <- checkConcurrentJobs awJob NewerJobInProgress
+    range <- timeRangeFromHoursAgo 6
+    staleJobs <- checkConcurrentJobs range awJob NewerJobInProgress
     pure $ AcceptedJob awRepo awJob staleJobs
   where
     repo = entityVal awRepo
