@@ -86,8 +86,8 @@ cancelStaleJobs = go . unStaleJobs
             <> displayShow (length machines)
             <> " active Restyle Machine(s)"
 
-        for_ (map entityKey jobs) $ \jobId -> do
-            logInfo $ "Cancelling Job #" <> display (toPathPiece jobId)
+        for_ jobs $ \job@(Entity jobId _) -> do
+            logInfo $ "Cancelling " <> display job
             traverse_ (cancelJobOnMachine jobId . entityVal) machines
 
 cancelJobOnMachine

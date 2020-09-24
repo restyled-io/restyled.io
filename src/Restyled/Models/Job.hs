@@ -3,8 +3,7 @@
 module Restyled.Models.Job
     (
     -- * Formatting
-      jobPath
-    , jobOutcome
+      jobOutcome
 
     -- * Creating Jobs
     , insertJob
@@ -34,10 +33,6 @@ import qualified Data.Text.Lazy as TL
 import Formatting (format)
 import Formatting.Time (diff)
 import Restyled.Models.DB
-import Restyled.Models.Repo (repoPullPath)
-
-jobPath :: Entity Job -> Text
-jobPath (Entity _ Job {..}) = repoPullPath jobOwner jobRepo jobPullRequest
 
 jobOutcome :: Job -> Text
 jobOutcome Job {..} = fromMaybe "N/A" $ do

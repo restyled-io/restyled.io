@@ -56,7 +56,7 @@ processWebhook execRestyler body =
         -- pattern.
         lift $ cancelStaleJobs $ ajStaleJobs job
 
-        logDebug $ "Executing Restyler for " <> display (jobPath acceptedJob)
+        logDebug $ display acceptedJob <> ": executing Restyler"
         eitherT failure success $ tryExecRestyler execRestyler job
 
 restyleMachineEnv
@@ -76,28 +76,23 @@ fromNotProcessed = \case
         logDebug $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason
     JobIgnored job reason -> do
         logWarn
-            $ "Job ignored for "
-            <> display (jobPath job)
-            <> ": "
+            $ display job
+            <> " ignored ("
             <> fromString (ignoredJobReasonToLogMessage reason)
+            <> ")"
         void $ runDB $ completeJobSkipped
             (ignoredJobReasonToJobLogLine reason)
             job
     ExecRestylerFailure job ex -> do
-        logError
-            $ "Exec failure for "
-            <> display (jobPath job)
-            <> ": "
-            <> displayShow ex
+        logError $ display job <> " exec failure (" <> displayShow ex <> ")"
         void $ runDB $ completeJobErrored (show ex) job
 
 fromProcessed :: (HasLogFunc env, HasDB env) => JobProcessed -> RIO env ()
 fromProcessed (ExecRestylerSuccess job ec) = do
     updatedJob <- runDB $ completeJob ec job
     logInfo
-        $ "Job completed for "
-        <> display (jobPath job)
-        <> " ("
+        $ display updatedJob
+        <> " completed ("
         <> display (jobOutcome $ entityVal updatedJob)
         <> ")"
 

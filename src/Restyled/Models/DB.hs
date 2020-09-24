@@ -15,3 +15,14 @@ import Database.Persist.Quasi
 import Database.Persist.TH
 
 mkPersist sqlSettings $(persistFileWith lowerCaseSettings "config/models")
+
+instance Display (Entity Job) where
+    display (Entity jobId Job {..}) =
+        "Job #"
+            <> display (toPathPiece jobId)
+            <> " for "
+            <> display jobOwner
+            <> "/"
+            <> display jobRepo
+            <> "#"
+            <> display jobPullRequest
