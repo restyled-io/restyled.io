@@ -72,8 +72,14 @@ getAdminMarketplacePlansR = do
         intField
         "githubId"
 
+    let
+        -- Pass githubId=-1 to query for non-GH Plans. TODO: Custom Field?
+        githubId = case mpqGitHubId of
+            -1 -> Nothing
+            x -> Just x
+
     runDB $ toJSON <$> selectList
-        [MarketplacePlanGithubId ==. mpqGitHubId]
+        [MarketplacePlanGithubId ==. githubId]
         [Asc MarketplacePlanName]
 
 newtype MarketplaceAccountsQuery = MarketplaceAccountsQuery

@@ -9,7 +9,7 @@ import Restyled.Prelude
 import Restyled.ApiError
 import Restyled.Foundation
 import Restyled.Models
-import Restyled.PrivateRepoAllowance
+import Restyled.PrivateRepoEnabled
 import Restyled.Yesod
 
 postRepoMarketplaceClaimR :: OwnerName -> RepoName -> Handler TypedContent

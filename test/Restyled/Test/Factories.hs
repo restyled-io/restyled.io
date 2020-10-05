@@ -9,6 +9,7 @@ where
 import Restyled.Prelude
 
 import Restyled.Models
+import Restyled.PrivateRepoAllowance
 
 buildRepo :: OwnerName -> RepoName -> Repo
 buildRepo owner name = Repo
@@ -37,7 +38,8 @@ buildPrivateRepo owner name = Repo
 -- | TODO: this should be Fixture, not Factory because it's a singleton
 buildPrivateMarketplacePlan :: MarketplacePlan
 buildPrivateMarketplacePlan = MarketplacePlan
-    { marketplacePlanGithubId = 2695
+    { marketplacePlanGithubId = Just 2695
+    , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceLimited 1
     , marketplacePlanName = "Solo"
     , marketplacePlanDescription = ""
     }

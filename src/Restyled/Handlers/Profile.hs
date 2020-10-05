@@ -99,7 +99,7 @@ getMarketplaceAction GitHubIdentity {..} (Entity repoId Repo {..}) = do
 
 isLimitedPlan :: Entity MarketplacePlan -> Bool
 isLimitedPlan (Entity _ MarketplacePlan {..}) =
-    case privateRepoAllowance marketplacePlanGithubId of
+    case marketplacePlanPrivateRepoAllowance of
         PrivateRepoAllowanceNone -> False
         PrivateRepoAllowanceUnlimited -> False
         PrivateRepoAllowanceLimited _ -> True

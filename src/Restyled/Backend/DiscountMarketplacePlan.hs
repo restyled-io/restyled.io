@@ -9,6 +9,7 @@ where
 import Restyled.Prelude
 
 import Restyled.Models
+import Restyled.PrivateRepoAllowance
 
 fetchDiscountMarketplacePlan
     :: MonadIO m => SqlPersistT m (Entity MarketplacePlan)
@@ -19,7 +20,8 @@ fetchDiscountMarketplacePlan = upsert
     ]
   where
     plan@MarketplacePlan {..} = MarketplacePlan
-        { marketplacePlanGithubId = 0
+        { marketplacePlanGithubId = Nothing
+        , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceUnlimited
         , marketplacePlanName = "Friends & Family"
         , marketplacePlanDescription = "Manually managed discount plan"
         }
