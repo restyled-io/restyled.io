@@ -28,7 +28,8 @@ path=$DBM_MIGRATION_STORE/$name.txt
 stack exec -- moo-postgresql new "$name"
 
 {
-  echo '# vim: ft=yaml'
+  # don't confuse vim itself
+  printf '# %s ft=yaml\n' 'vim:'
   sed 's/^\(Description:\).*$/\1 '"$description"'/' "$path"
 } | sponge "$path"
 
