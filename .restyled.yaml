@@ -20,4 +20,6 @@ restylers:
       include:
         - "**/*.js"
         - "**/*.julius"
+  - shellharden:
+      enabled: false
   - "*"
