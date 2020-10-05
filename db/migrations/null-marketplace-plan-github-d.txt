@@ -1,0 +1,14 @@
+# vim: ft=yaml
+Description: Null marketplace_plan.githubId
+Created: 2020-10-05 15:26:41.746241895 UTC
+Depends: migrate-plans create-marketplace-plan
+Apply: |
+  ALTER TABLE marketplace_plan
+    ALTER COLUMN github_id DROP NOT NULL
+Revert: |
+  UPDATE marketplace_plan
+  SET github_id = 0
+  WHERE github_id IS NULL;
+
+  ALTER TABLE marketplace_plan
+    ALTER COLUMN github_id SET NOT NULL
