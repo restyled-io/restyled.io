@@ -1,7 +1,7 @@
 # vim: ft=yaml
 Description: Migration old plan records to marketplace_account
 Created: 2019-03-22 19:49:21.393490067 UTC
-Depends: add-marketplace-account create-marketplace-plan
+Depends: create-plan add-marketplace-account create-marketplace-plan
 Apply: |
   INSERT INTO marketplace_plan
     (github_id, name, description) VALUES
