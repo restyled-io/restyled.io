@@ -12,6 +12,8 @@
         <div .right>
           $if isPrivateRepoPlan $ entityVal $ mpwaPlan plan
             <i .fas .fa-lock>
-        #{marketplacePlanGithubId $ entityVal $ mpwaPlan plan}:
-        #{marketplacePlanName $ entityVal $ mpwaPlan plan}
+        $maybe x <- marketplacePlanGithubId $ entityVal $ mpwaPlan plan
+          [#{x}] #{marketplacePlanName $ entityVal $ mpwaPlan plan}
+        $nothing
+          #{marketplacePlanName $ entityVal $ mpwaPlan plan}
       ^{accountsList (Just $ mpwaDescription plan) $ mpwaOwnerNames plan}

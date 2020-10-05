@@ -13,6 +13,7 @@ import Restyled.Prelude
 
 import Database.Persist.Quasi
 import Database.Persist.TH
+import Restyled.PrivateRepoAllowance
 
 mkPersist sqlSettings $(persistFileWith lowerCaseSettings "config/models")
 
