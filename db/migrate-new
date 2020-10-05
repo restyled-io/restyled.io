@@ -21,7 +21,7 @@ if [ "$#" -eq 0 ]; then
   exit 64
 fi
 
-description=$*
+description="$@"
 name=$(echo "$description" | sed 's/.*/\l&/g; s/[^a-z0-9]/-/g')
 path=$DBM_MIGRATION_STORE/$name.txt
 
