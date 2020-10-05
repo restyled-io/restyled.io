@@ -19,6 +19,7 @@ import Restyled.Prelude
 import Restyled.Backend.DiscountMarketplacePlan
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.PrivateRepoEnabled
 import Restyled.Settings
 
 import qualified Data.Vector as V
@@ -115,8 +116,11 @@ logPlanChange plan newCount oldCount = case newCount `compare` oldCount of
 synchronizePlan
     :: MonadIO m => GH.MarketplacePlan -> SqlPersistT m MarketplacePlanId
 synchronizePlan plan = entityKey <$> upsert
+    -- Initialize unknown plans as non-private, we'll manually change that after
+    -- it gets created on the first sync
     MarketplacePlan
-        { marketplacePlanGithubId = untagId $ GH.marketplacePlanId plan
+        { marketplacePlanGithubId = Just $ untagId $ GH.marketplacePlanId plan
+        , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceNone
         , marketplacePlanName = GH.marketplacePlanName plan
         , marketplacePlanDescription = GH.marketplacePlanDescription plan
         }
@@ -206,7 +210,7 @@ whenMarketplacePlanForbids (MarketplacePlanForbids limitation) f = f limitation
 
 isPrivateRepoPlan :: MarketplacePlan -> Bool
 isPrivateRepoPlan MarketplacePlan {..} =
-    case privateRepoAllowance marketplacePlanGithubId of
+    case marketplacePlanPrivateRepoAllowance of
         PrivateRepoAllowanceNone -> False
         PrivateRepoAllowanceUnlimited -> True
         PrivateRepoAllowanceLimited _ -> True

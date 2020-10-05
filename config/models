@@ -71,11 +71,12 @@ RestyleMachine json
   deriving Eq Show
 
 MarketplacePlan json
-  githubId Int
+  githubId Int Maybe
   name Text
   description Text
+  privateRepoAllowance PrivateRepoAllowance
 
-  UniqueMarketplacePlan githubId
+  UniqueMarketplacePlan githubId !force
   deriving Eq Show
 
 MarketplaceAccount json

@@ -2,7 +2,7 @@
   <header>
     <div .right>
       $maybe Entity _ plan <- mdPlan <$> ghiMarketplaceData
-        $if marketplacePlanGithubId plan /= 0
+        $if isJust (marketplacePlanGithubId plan)
           $# edit plan directly in Marketplace
           <a href=https://github.com/marketplace/restyled-io>
             #{marketplacePlanName plan}
