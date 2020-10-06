@@ -16,7 +16,6 @@ where
 
 import Restyled.Prelude
 
-import Restyled.Backend.DiscountMarketplacePlan
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.PrivateRepoEnabled
@@ -153,10 +152,16 @@ synchronizeAccount planId account = entityKey <$> upsert
 deleteUnsynchronized
     :: HasLogFunc env => [MarketplaceAccountId] -> SqlPersistT (RIO env) ()
 deleteUnsynchronized synchronizedAccountIds = do
-    planId <- entityKey <$> fetchDiscountMarketplacePlan
+    -- TODO, remove the Just 0 once we update the F&F plan
+    nonGitHubPlanIds <- selectKeysList
+        ([MarketplacePlanGithubId ==. Nothing]
+        ||. [MarketplacePlanGithubId ==. Just 0]
+        )
+        []
+
     unsynchronizedAccounts <- selectList
         [ MarketplaceAccountId /<-. synchronizedAccountIds
-        , MarketplaceAccountMarketplacePlan !=. planId
+        , MarketplaceAccountMarketplacePlan /<-. nonGitHubPlanIds
         ]
         []
 

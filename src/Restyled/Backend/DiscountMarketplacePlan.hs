@@ -13,14 +13,20 @@ import Restyled.PrivateRepoAllowance
 
 fetchDiscountMarketplacePlan
     :: MonadIO m => SqlPersistT m (Entity MarketplacePlan)
-fetchDiscountMarketplacePlan = upsert
-    plan
-    [ MarketplacePlanName =. marketplacePlanName
-    , MarketplacePlanDescription =. marketplacePlanDescription
-    ]
+fetchDiscountMarketplacePlan = do
+    -- Unsafe UPSERT required because github_id is a nullable index. Should be
+    -- fine since we always expect this to exist.
+    mPlan <- selectFirst
+        [ MarketplacePlanGithubId ==. marketplacePlanGithubId
+        , MarketplacePlanName ==. marketplacePlanName
+        , MarketplacePlanDescription ==. marketplacePlanDescription
+        ]
+        []
+
+    maybe (insertEntity plan) pure mPlan
   where
     plan@MarketplacePlan {..} = MarketplacePlan
-        { marketplacePlanGithubId = Nothing
+        { marketplacePlanGithubId = Just 0
         , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceUnlimited
         , marketplacePlanName = "Friends & Family"
         , marketplacePlanDescription = "Manually managed discount plan"
