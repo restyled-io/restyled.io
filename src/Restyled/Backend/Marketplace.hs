@@ -152,21 +152,16 @@ synchronizeAccount planId account = entityKey <$> upsert
 deleteUnsynchronized
     :: HasLogFunc env => [MarketplaceAccountId] -> SqlPersistT (RIO env) ()
 deleteUnsynchronized synchronizedAccountIds = do
-    -- TODO, remove the Just 0 once we update the F&F plan
-    nonGitHubPlanIds <- selectKeysList
-        ([MarketplacePlanGithubId ==. Nothing]
-        ||. [MarketplacePlanGithubId ==. Just 0]
-        )
-        []
-
+    nonGitHubPlanIds <- selectKeysList [MarketplacePlanGithubId ==. Nothing] []
     unsynchronizedAccounts <- selectList
         [ MarketplaceAccountId /<-. synchronizedAccountIds
         , MarketplaceAccountMarketplacePlan /<-. nonGitHubPlanIds
         ]
         []
 
-    lift
-        $ logDebug
+    unless (null unsynchronizedAccounts)
+        $ lift
+        $ logWarn
         $ "Deleting "
         <> displayShow (length unsynchronizedAccounts)
         <> " unsynchronized accounts"
