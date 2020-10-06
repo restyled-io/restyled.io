@@ -26,7 +26,7 @@ fetchDiscountMarketplacePlan = do
     maybe (insertEntity plan) pure mPlan
   where
     plan@MarketplacePlan {..} = MarketplacePlan
-        { marketplacePlanGithubId = Just 0
+        { marketplacePlanGithubId = Nothing
         , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceUnlimited
         , marketplacePlanName = "Friends & Family"
         , marketplacePlanDescription = "Manually managed discount plan"
