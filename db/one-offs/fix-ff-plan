@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+values=''
+ff_plan_id=342
+
+while read -r org; do
+  if [ -z "$values" ]; then
+    values="('$org', 'User', $ff_plan_id)"
+  else
+    values="$values, ('$org', 'User', $ff_plan_id)"
+  fi
+done
+
+heroku pg:psql --app restyled-io <<EOM
+  INSERT INTO marketplace_account (github_login, github_type, marketplace_plan)
+  VALUES $values;
+EOM
