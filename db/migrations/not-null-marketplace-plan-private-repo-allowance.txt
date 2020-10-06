@@ -1,0 +1,10 @@
+# vim: ft=yaml
+Description: Not null marketplace_plan.private_repo_allowance
+Created: 2020-10-06 14:39:50.489188251 UTC
+Depends: add-marketplace-plan-private-repo-allowance
+Apply: |
+  ALTER TABLE marketplace_plan
+    ALTER COLUMN private_repo_allowance SET NOT NULL
+Revert: |
+  ALTER TABLE marketplace_plan
+    ALTER COLUMN private_repo_allowance DROP NOT NULL
