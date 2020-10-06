@@ -39,7 +39,8 @@ createMachineGetRestyleMachine
     => CreateMachine
     -> m RestyleMachine
 createMachineGetRestyleMachine CreateMachine {..} = do
-    ec <- withRestyleMachineEnv machine $ proc "docker" ["info"] runProcess
+    (ec, _stderr, _stdout) <- withRestyleMachineEnv machine
+        $ proc "docker" ["info"] readProcess
     pure machine { restyleMachineEnabled = ec == ExitSuccess }
   where
     machine = RestyleMachine
