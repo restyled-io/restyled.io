@@ -90,6 +90,7 @@ instance Yesod App where
     isAuthorized HomeR _ = pure Authorized
     isAuthorized RevisionR _ = pure Authorized
     isAuthorized RobotsR _ = pure Authorized
+    isAuthorized (OffersP _) _ = pure Authorized
     isAuthorized ThanksGitHubR _ = pure Authorized
     isAuthorized ThanksGitHubSetupR _ = pure Authorized
     isAuthorized (GitHubStudentsP _) _ = pure Authorized

@@ -10,6 +10,12 @@
 /thanks/github ThanksGitHubR GET
 /thanks/github-setup ThanksGitHubSetupR GET
 
+/offers OffersP:
+  /#OfferId OfferP:
+    / OfferR GET
+    /claim OfferClaimP:
+      / OfferClaimR POST
+
 /github-students GitHubStudentsP:
   / GitHubStudentsR GET
   /thanks GitHubStudentsThanksR GET

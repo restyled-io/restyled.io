@@ -26,6 +26,7 @@ import Restyled.Handlers.Common
 import Restyled.Handlers.GitHubStudents
 import Restyled.Handlers.Home
 import Restyled.Handlers.Marketplace
+import Restyled.Handlers.Offers
 import Restyled.Handlers.PrivacyPolicy
 import Restyled.Handlers.Profile
 import Restyled.Handlers.Repos

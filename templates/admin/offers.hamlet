@@ -5,6 +5,7 @@
       <th>Name
       <th>Details
       <th>Purchase URL
+      <th>Claim URL
       <th>Codes
       <th>
 
@@ -14,6 +15,9 @@
           <td>#{offerName offer}
           <td>#{offerDetails offer }
           <td>#{offerPurchaseUrl offer}
+          <td>
+            <a href=@{OffersP $ OfferP offerId OfferR}>
+              @{OffersP $ OfferP offerId OfferR}
           <td>
             <a href=@{AdminP $ AdminOffersP $ AdminOfferP offerId $ AdminOfferClaimsP AdminOfferClaimsR}>
               Download
