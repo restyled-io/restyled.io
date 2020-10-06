@@ -53,7 +53,12 @@ spec = withApp $ do
             (planId, accountId, repoId) <- runDB $ do
                 planId <- insert buildPrivateMarketplacePlan
                 (planId, , )
-                    <$> insert (buildMarketplaceAccount 123 "pbrisbin" planId)
+                    <$> insert
+                            (buildMarketplaceAccount
+                                (Just 123)
+                                "pbrisbin"
+                                planId
+                            )
                     <*> insert (buildPrivateRepo "pbrisbin" "private")
             void
                 $ authenticateAsWith "me@example.com"
@@ -86,7 +91,12 @@ spec = withApp $ do
             (planId, accountId, repoId) <- runDB $ do
                 planId <- insert buildPrivateMarketplacePlan
                 (planId, , )
-                    <$> insert (buildMarketplaceAccount 456 "yesodweb" planId)
+                    <$> insert
+                            (buildMarketplaceAccount
+                                (Just 456)
+                                "yesodweb"
+                                planId
+                            )
                     <*> insert (buildPrivateRepo "yesodweb" "yesod")
             void
                 $ authenticateAsWith "me@example.com"
