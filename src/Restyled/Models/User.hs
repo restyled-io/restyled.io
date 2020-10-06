@@ -20,9 +20,8 @@ userIsAdmin AppSettings {..} = maybe False (`elem` appAdmins) . userEmail
 fetchMarketplaceAccountForUserT
     :: MonadIO m => User -> MaybeT (SqlPersistT m) (Entity MarketplaceAccount)
 fetchMarketplaceAccountForUserT User {..} = do
-    githubId <- hoistMaybe userGithubUserId
     githubLogin <- hoistMaybe userGithubUsername
-    getByT $ UniqueMarketplaceAccount githubId githubLogin
+    fetchMarketplaceAccountForLoginT githubLogin
 
 fetchMarketplaceAccountForLoginT
     :: MonadIO m

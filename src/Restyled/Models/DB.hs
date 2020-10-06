@@ -17,6 +17,22 @@ import Restyled.PrivateRepoAllowance
 
 mkPersist sqlSettings $(persistFileWith lowerCaseSettings "config/models")
 
+instance Display (Entity User) where
+    display (Entity userId User {..}) =
+        "User #"
+            <> display (toPathPiece userId)
+            <> " "
+            <> maybe "<GitHub unknown>" display userGithubUsername
+
+instance Display (Entity Repo) where
+    display (Entity repoId Repo {..}) =
+        "Repo #"
+            <> display (toPathPiece repoId)
+            <> " "
+            <> display repoOwner
+            <> "/"
+            <> display repoName
+
 instance Display (Entity Job) where
     display (Entity jobId Job {..}) =
         "Job #"

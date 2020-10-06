@@ -17,7 +17,13 @@ postRepoMarketplaceClaimR owner name = do
     mEnabled <- runDB $ do
         user <- requireAuth
         repo <- getBy404 $ UniqueRepo GitHubSVCS owner name
-        enableMarketplaceRepoForUser repo user
+        logInfoN
+            $ utf8BuilderToText
+            $ "[Marketplace claim]: "
+            <> display user
+            <> " enabling "
+            <> display repo
+        enableMarketplaceRepo repo
 
     case mEnabled of
         Nothing -> notFound
@@ -34,7 +40,13 @@ deleteRepoMarketplaceClaimR owner name = do
     runDB $ do
         user <- requireAuth
         repo <- getBy404 $ UniqueRepo GitHubSVCS owner name
-        disableMarketplaceRepoForUser repo user
+        logInfoN
+            $ utf8BuilderToText
+            $ "[Marketplace claim]: "
+            <> display user
+            <> " disabling "
+            <> display repo
+        disableMarketplaceRepo repo
 
     setMessage "Repository disabled"
     redirectOr $ sendResponseStatus status204 ()
