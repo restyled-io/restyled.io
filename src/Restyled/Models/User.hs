@@ -27,5 +27,4 @@ fetchMarketplaceAccountForLoginT
     :: MonadIO m
     => GitHubUserName
     -> MaybeT (SqlPersistT m) (Entity MarketplaceAccount)
-fetchMarketplaceAccountForLoginT username =
-    selectFirstT [MarketplaceAccountGithubLogin ==. username] []
+fetchMarketplaceAccountForLoginT = getByT . UniqueMarketplaceAccount

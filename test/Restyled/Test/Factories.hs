@@ -47,7 +47,7 @@ buildPrivateMarketplacePlan = MarketplacePlan
 buildMarketplaceAccount
     :: GitHubUserId -> GitHubUserName -> MarketplacePlanId -> MarketplaceAccount
 buildMarketplaceAccount userId userName planId = MarketplaceAccount
-    { marketplaceAccountGithubId = userId
+    { marketplaceAccountGithubId = Just userId
     , marketplaceAccountGithubLogin = userName
     , marketplaceAccountMarketplacePlan = planId
     , marketplaceAccountGithubType = "User"

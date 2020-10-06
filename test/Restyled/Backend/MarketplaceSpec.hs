@@ -90,7 +90,7 @@ insertAccountOnPlan username mPlanGitHubId planAllowance = do
         , marketplacePlanDescription = ""
         }
     insert_ MarketplaceAccount
-        { marketplaceAccountGithubId = 123
+        { marketplaceAccountGithubId = Nothing
         , marketplaceAccountGithubLogin = username
         , marketplaceAccountMarketplacePlan = planId
         , marketplaceAccountGithubType = "User"

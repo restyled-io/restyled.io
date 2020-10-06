@@ -80,7 +80,7 @@ MarketplacePlan json
   deriving Eq Show
 
 MarketplaceAccount json
-  githubId GitHubUserId
+  githubId GitHubUserId Maybe
   githubLogin GitHubUserName
   githubType Text -- User vs Org
 
@@ -89,7 +89,7 @@ MarketplaceAccount json
 
   marketplacePlan MarketplacePlanId
 
-  UniqueMarketplaceAccount githubId githubLogin
+  UniqueMarketplaceAccount githubLogin
   deriving Eq Show
 
 MarketplaceEnabledRepo

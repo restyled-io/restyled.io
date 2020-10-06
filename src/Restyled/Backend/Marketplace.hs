@@ -134,7 +134,7 @@ synchronizeAccount
     -> SqlPersistT m MarketplaceAccountId
 synchronizeAccount planId account = entityKey <$> upsert
     MarketplaceAccount
-        { marketplaceAccountGithubId = GH.marketplaceAccountId account
+        { marketplaceAccountGithubId = Just $ GH.marketplaceAccountId account
         , marketplaceAccountGithubLogin = GH.marketplaceAccountLogin account
         , marketplaceAccountGithubType = GH.marketplaceAccountType account
         , marketplaceAccountEmail = GH.marketplaceAccountEmail account

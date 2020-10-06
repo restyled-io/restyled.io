@@ -47,7 +47,7 @@ displayGitHubStudent GitHubStudent { id, login } verified = T.unwords
 handleGitHubStudent :: MonadIO m => GitHubStudent -> Bool -> SqlPersistT m ()
 handleGitHubStudent GitHubStudent { id, login } verified
     | verified = giftDiscountMarketplacePlan id login
-    | otherwise = ungiftDiscountMarketplacePlan id login
+    | otherwise = ungiftDiscountMarketplacePlan login
 
 verifyIsGitHubStudent
     :: (MonadIO m, MonadLogger m) => OAuth2.AccessToken -> m Bool

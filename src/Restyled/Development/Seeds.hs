@@ -43,7 +43,7 @@ seedDB = do
 
     void $ upsert
         MarketplaceAccount
-            { marketplaceAccountGithubId = 50812
+            { marketplaceAccountGithubId = Just 50812
             , marketplaceAccountGithubLogin = "pbrisbin"
             , marketplaceAccountMarketplacePlan = discountPlanId
             , marketplaceAccountGithubType = "User"

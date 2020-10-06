@@ -12,6 +12,7 @@ module Restyled.Prelude
     , replaceEntity
     , selectFirstT
     , getEntityT
+    , getByT
 
     -- * ExceptT
     , eitherT
@@ -97,6 +98,10 @@ selectFirstT x = MaybeT . selectFirst x
 getEntityT
     :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) (Entity a)
 getEntityT = MaybeT . getEntity
+
+getByT
+    :: (MonadIO m, SqlEntity a) => Unique a -> MaybeT (SqlPersistT m) (Entity a)
+getByT = MaybeT . getBy
 
 eitherT
     :: Functor f => (e -> e') -> (a -> a') -> ExceptT e f a -> ExceptT e' f a'

@@ -46,7 +46,7 @@ giftDiscountMarketplacePlan githubId githubLogin = do
 
     void $ upsert
         MarketplaceAccount
-            { marketplaceAccountGithubId = githubId
+            { marketplaceAccountGithubId = Just githubId
             , marketplaceAccountGithubLogin = githubLogin
             , marketplaceAccountMarketplacePlan = planId
             , marketplaceAccountGithubType = "User"
@@ -55,13 +55,11 @@ giftDiscountMarketplacePlan githubId githubLogin = do
             }
         [MarketplaceAccountMarketplacePlan =. planId]
 
-ungiftDiscountMarketplacePlan
-    :: MonadIO m => GitHubUserId -> GitHubUserName -> SqlPersistT m ()
-ungiftDiscountMarketplacePlan githubId githubLogin = do
+ungiftDiscountMarketplacePlan :: MonadIO m => GitHubUserName -> SqlPersistT m ()
+ungiftDiscountMarketplacePlan githubLogin = do
     planId <- entityKey <$> fetchDiscountMarketplacePlan
 
     deleteWhere
-        [ MarketplaceAccountGithubId ==. githubId
-        , MarketplaceAccountGithubLogin ==. githubLogin
+        [ MarketplaceAccountGithubLogin ==. githubLogin
         , MarketplaceAccountMarketplacePlan ==. planId
         ]
