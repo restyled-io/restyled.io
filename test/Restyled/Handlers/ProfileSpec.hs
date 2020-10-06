@@ -49,7 +49,7 @@ spec = withApp $ do
             htmlAnyContain ".profile-repo" "freckle/foo"
             htmlAnyContain ".profile-repo" "yesodweb/bar"
 
-        it "supports enable/disable for private repo plans" $ do
+        it "supports enable/disable for private repo plans (User)" $ do
             (planId, accountId, repoId) <- runDB $ do
                 planId <- insert buildPrivateMarketplacePlan
                 (planId, , )
@@ -74,6 +74,39 @@ spec = withApp $ do
             void followRedirect
 
             htmlAnyContain ".profile-repo" "pbrisbin/private"
+            htmlAnyContain ".profile-repo" "Disable"
+
+            enabled <- runDB $ getBy $ UniqueMarketplaceEnabledRepo
+                planId
+                accountId
+                repoId
+            void enabled `shouldBe` Just ()
+
+        it "supports enable/disable for private repo plans (Org)" $ do
+            (planId, accountId, repoId) <- runDB $ do
+                planId <- insert buildPrivateMarketplacePlan
+                (planId, , )
+                    <$> insert (buildMarketplaceAccount 456 "yesodweb" planId)
+                    <*> insert (buildPrivateRepo "yesodweb" "yesod")
+            void
+                $ authenticateAsWith "me@example.com"
+                $ (fieldLens UserGithubUserId ?~ 123)
+                . (fieldLens UserGithubUsername ?~ "pbrisbin")
+            cacheCallaboratorCanRead repoId "pbrisbin" True
+            cacheGitHubOrgs "pbrisbin" ["yesodweb"]
+
+            get ProfileR
+
+            statusIs 200
+            htmlAnyContain ".profile-repo" "yesodweb/yesod"
+            htmlAnyContain ".profile-repo" "Enable"
+
+            -- clickOn $ ".profile-repo-" <> toPathPiece repoId <> " .enable"
+            post $ RepoP "yesodweb" "yesod" $ RepoMarketplaceP
+                RepoMarketplaceClaimR
+            void followRedirect
+
+            htmlAnyContain ".profile-repo" "yesodweb/yesod"
             htmlAnyContain ".profile-repo" "Disable"
 
             enabled <- runDB $ getBy $ UniqueMarketplaceEnabledRepo
