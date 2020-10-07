@@ -10,7 +10,6 @@ where
 
 import Restyled.Prelude
 
-import qualified Data.Text as T
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Offers
@@ -28,27 +27,28 @@ createOfferForm =
         <*> areq intField "Claims" (Just 100)
 
 getAdminOffersR :: Handler Html
-getAdminOffersR = adminOffersR
-
-postAdminOffersR :: Handler Html
-postAdminOffersR = adminOffersR
-
-adminOffersR :: Handler Html
-adminOffersR = do
-    ((result, widget), enctype) <- runFormPost createOfferForm
-
-    case result of
-        FormMissing -> pure ()
-        FormSuccess co -> do
-            runDB $ createOffer co
-            setMessage "Offer created"
-        FormFailure es -> do
-            setMessage $ toHtml $ T.intercalate ", " es
-
+getAdminOffersR = do
+    (widget, enctype) <- generateFormPost createOfferForm
     offers <- runDB $ selectList [] [Asc OfferName]
     adminLayout $ do
         setTitle "Offers"
         $(widgetFile "admin/offers")
+
+postAdminOffersR :: Handler Html
+postAdminOffersR = do
+    ((result, widget), enctype) <- runFormPost createOfferForm
+
+    case result of
+        FormSuccess co -> do
+            runDB $ createOffer co
+            setMessage "Offer created"
+            redirect $ AdminP $ AdminOffersP AdminOffersR
+        _ -> do
+            setMessage "Form errors"
+            offers <- runDB $ selectList [] [Asc OfferName]
+            adminLayout $ do
+                setTitle "Offers"
+                $(widgetFile "admin/offers")
 
 deleteAdminOfferR :: OfferId -> Handler Html
 deleteAdminOfferR offerId = do
