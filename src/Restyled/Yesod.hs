@@ -8,6 +8,9 @@ module Restyled.Yesod
     -- * Fields
     , jsonField
 
+    -- * TypedContent
+    , sendResponseCSV
+
     -- * Re-exports
     , module X
     )
@@ -26,6 +29,9 @@ import Yesod.Form as X
 import Yesod.Paginator as X
 import Yesod.Persist as X (get404, getBy404)
 
+import Data.Csv (DefaultOrdered(..), ToNamedRecord)
+import qualified Data.Csv as Csv
+import Data.Csv.Builder (encodeHeaderWith, encodeNamedRecordWith)
 import Restyled.Prelude
 
 getEntity404
@@ -53,3 +59,19 @@ $newline never
 
     showVal :: ToJSON a => Either e a -> Text
     showVal = either (const "") $ decodeUtf8 . encodeStrict
+
+sendResponseCSV
+    :: forall m t a r
+     . (MonadHandler m, Foldable t, DefaultOrdered a, ToNamedRecord a)
+    => t a
+    -> m r
+sendResponseCSV =
+    sendResponse . TypedContent typeCsv . flip ContentBuilder Nothing . foldl'
+        (\b a -> b <> encodeNamedRecordWith ops hdr a)
+        (encodeHeaderWith ops hdr)
+  where
+    hdr = Csv.headerOrder @a undefined
+    ops = Csv.defaultEncodeOptions { Csv.encUseCrLf = False }
+
+typeCsv :: ContentType
+typeCsv = "text/csv; charset=utf-8"

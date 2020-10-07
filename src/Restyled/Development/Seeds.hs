@@ -42,6 +42,15 @@ seedDB = do
     Entity discountPlanId _ <- fetchDiscountMarketplacePlan
 
     void $ upsert
+        Offer
+            { offerName = "Friends & Family"
+            , offerDetails = "Exclusive offer for Friends of the Po- Restyled."
+            , offerPurchaseUrl = "https://example.com"
+            , offerMarketplacePlan = discountPlanId
+            }
+        [OfferMarketplacePlan =. discountPlanId]
+
+    void $ upsert
         MarketplaceAccount
             { marketplaceAccountGithubId = Just 50812
             , marketplaceAccountGithubLogin = "pbrisbin"

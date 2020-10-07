@@ -52,6 +52,12 @@
       / AdminMarketplaceAccountsR GET
       /#MarketplaceAccountId AdminMarketplaceAccountP:
         / AdminMarketplaceAccountR PATCH
+  /offers AdminOffersP:
+    / AdminOffersR GET POST
+    /#OfferId AdminOfferP:
+      / AdminOfferR DELETE
+      /claims AdminOfferClaimsP:
+        / AdminOfferClaimsR GET
   /tokens AdminTokensP:
     / AdminTokensR GET POST
     /#ApiTokenId AdminTokenR DELETE

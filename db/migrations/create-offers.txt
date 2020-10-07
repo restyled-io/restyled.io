@@ -1,0 +1,15 @@
+# vim: ft=yaml
+Description: Create offers
+Created: 2020-10-05 20:25:23.269669821 UTC
+Depends: create-marketplace-plan
+Apply: |
+  CREATE TABLE offer
+    ( id SERIAL PRIMARY KEY
+    , name text NOT NULL
+    , details text NOT NULL
+    , purchase_url text NOT NULL
+    , marketplace_plan integer REFERENCES marketplace_plan(id) NOT NULL
+    );
+  CREATE UNIQUE INDEX ON offer (name);
+Revert: |
+  DROP TABLE IF EXISTS offer

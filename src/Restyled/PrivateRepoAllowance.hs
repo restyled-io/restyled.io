@@ -1,5 +1,6 @@
 module Restyled.PrivateRepoAllowance
     ( PrivateRepoAllowance(..)
+    , fromNumeric
     )
 where
 

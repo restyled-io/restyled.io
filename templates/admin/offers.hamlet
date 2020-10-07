@@ -1,0 +1,37 @@
+<section>
+  <h2 .uncenter>Offers
+  <table>
+    <thead>
+      <th>Name
+      <th>Details
+      <th>Purchase URL
+      <th>Codes
+      <th>
+
+    <tbody>
+      $forall Entity offerId offer <- offers
+        <tr>
+          <td>#{offerName offer}
+          <td>#{offerDetails offer }
+          <td>#{offerPurchaseUrl offer}
+          <td>
+            <a href=@{AdminP $ AdminOffersP $ AdminOfferP offerId $ AdminOfferClaimsP AdminOfferClaimsR}>
+              Download
+          <td>
+            <form
+              method=post
+              action=@{AdminP $ AdminOffersP $ AdminOfferP offerId AdminOfferR}
+              onsubmit="return confirm('Are you sure?');"
+              >
+              <input type=hidden name=_method value=DELETE />
+              <input .warning type=submit value="Delete" />
+
+<section .action>
+  <h2 .uncenter>New Offer
+  <form
+    method=post
+    action=@{AdminP $ AdminOffersP AdminOffersR}
+    enctype=#{enctype}
+    >
+    ^{widget}
+    <button type=submit>Create

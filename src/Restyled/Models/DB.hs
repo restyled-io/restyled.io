@@ -11,6 +11,9 @@ where
 
 import Restyled.Prelude
 
+import qualified Data.Csv as Csv
+import Data.Time.ISO8601 (formatISO8601)
+import qualified Data.Vector as V
 import Database.Persist.Quasi
 import Database.Persist.TH
 import Restyled.PrivateRepoAllowance
@@ -43,3 +46,21 @@ instance Display (Entity Job) where
             <> display jobRepo
             <> "#"
             <> display jobPullRequest
+
+newtype UTCTimeCsv = UTCTimeCsv UTCTime
+
+instance Csv.ToField UTCTimeCsv where
+    toField (UTCTimeCsv t) = Csv.toField $ formatISO8601 t
+
+instance Csv.DefaultOrdered (Entity OfferClaim) where
+    headerOrder _ =
+        V.fromList ["id", "code", "createdAt", "claimedAt", "claimedFor"]
+
+instance Csv.ToNamedRecord (Entity OfferClaim) where
+    toNamedRecord (Entity claimId OfferClaim {..}) = Csv.namedRecord
+        [ "id" Csv..= toPathPiece claimId
+        , "code" Csv..= offerClaimCode
+        , "createdAt" Csv..= UTCTimeCsv offerClaimCreatedAt
+        , "claimedAt" Csv..= (UTCTimeCsv <$> offerClaimClaimedAt)
+        , "claimedFor" Csv..= offerClaimClaimedFor
+        ]

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 49853c5935119c11a0d2b550357c52c3356fcb6973dd2613ce269d26869c3614
+-- hash: 7482c432c7ed16c3d5868f9e155a818e1764bb6f75833749f8442bfc2eabaad2
 
 name:           restyled
 version:        0.1.1.0
@@ -57,6 +57,7 @@ library
       Restyled.Handlers.Admin.Machines
       Restyled.Handlers.Admin.Machines.State
       Restyled.Handlers.Admin.Marketplace
+      Restyled.Handlers.Admin.Offers
       Restyled.Handlers.Admin.Repos
       Restyled.Handlers.Admin.Token
       Restyled.Handlers.Common
@@ -75,6 +76,7 @@ library
       Restyled.Models.Job
       Restyled.Models.Repo
       Restyled.Models.User
+      Restyled.Offers
       Restyled.Options
       Restyled.Percentage
       Restyled.Prelude
@@ -149,6 +151,7 @@ library
     , persistent-postgresql
     , persistent-qq
     , persistent-template
+    , random
     , rio
     , rio-orphans
     , safe-exceptions

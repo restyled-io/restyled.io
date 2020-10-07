@@ -108,3 +108,23 @@ ApiToken
   lastUsedAt UTCTime Maybe
 
   deriving Eq Show
+
+Offer
+  name Text
+  details Text
+  purchaseUrl Text
+  marketplacePlan MarketplacePlanId
+
+  UniqueOffer name
+  deriving Eq Show
+
+OfferClaim
+  offer OfferId
+  code Text
+
+  createdAt UTCTime
+  claimedAt UTCTime Maybe
+  claimedFor GitHubUserName Maybe
+
+  UniqueOfferClaim offer code
+  deriving Eq Show
