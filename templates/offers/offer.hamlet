@@ -1,6 +1,12 @@
 <header>
   <h1>Redeem Offer
 
+<section>
+  <p>
+    You're redeeming our
+    <strong>#{offerName}
+    offer, #{offerDetails}.
+
 <section .action>
   <p>
     👉 For Restyled to work, you must also install our
