@@ -41,7 +41,7 @@ form .errors {
   font-size: 120%;
 }
 
-.centered {
+.center, .centered {
   text-align: center;
 }
 
@@ -49,7 +49,7 @@ form .errors {
   float: right;
 }
 
-.uncenter {
+.uncenter, .uncentered {
   text-align: inherit !important;
 }
 
@@ -140,8 +140,17 @@ form input[type="number"] {
   border: 1px solid #6c6c6c;
 }
 
+form select {
+  width: 100%;
+  min-width: 18ch;
+  padding: 1ch;
+  margin-bottom: 1em;
+}
+
 form aside input[type="number"],
-form footer input[type="number"] {
+form aside select,
+form footer input[type="number"],
+form footer select {
   margin-bottom: 6px;
 }
 

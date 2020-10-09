@@ -9,13 +9,21 @@
       <a href=@{AdminR}>restyled admin
     <ul>
       <li>
-        <a href=@{AdminP $ AdminMarketplaceP AdminMarketplaceR}>Marketplace
-      <li>
-        <a href=@{AdminP $ AdminReposP AdminReposR}>Repos
-      <li>
-        <a href=@{AdminP $ AdminMachinesP AdminMachinesR}>Machines
-      <li>
         <a href=@{AuthR $ LogoutR}>Log out
+
+$# We've gotten too big for the nav :(
+<section>
+  <p .center>
+    <small>
+      <a href=@{AdminP $ AdminReposP AdminReposR}>Repositories
+      |
+      <a href=@{AdminP $ AdminMachinesP AdminMachinesR}>Restyle Machines
+      |
+      <a href=@{AdminP $ AdminMarketplaceP AdminMarketplaceR}>Accounts
+      |
+      <a href=@{AdminP $ AdminOffersP AdminOffersR}>Offers
+      |
+      <a href=@{AdminP $ AdminTokensP AdminTokensR}>API Tokens
 
 $maybe msg <- mmsg
   <aside #message .info>

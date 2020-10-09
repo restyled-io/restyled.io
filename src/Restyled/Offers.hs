@@ -24,19 +24,22 @@ data CreateOffer = CreateOffer
     { coName :: Text
     , coDetails :: Text
     , coPurchaseUrl :: Text
-    , coPrivateRepos :: Int
     , coClaims :: Int
+    , coPlanId :: Maybe MarketplacePlanId
+    , coPrivateRepos :: Maybe Int
     }
 
 createOffer :: MonadIO m => CreateOffer -> SqlPersistT m ()
 createOffer CreateOffer {..} = do
-    planId <- insert MarketplacePlan
-        { marketplacePlanGithubId = Nothing
-        , marketplacePlanName = coName <> " Plan"
-        , marketplacePlanDescription = ""
-        , marketplacePlanPrivateRepoAllowance = fromNumeric coPrivateRepos
-        }
-
+    planId <- case (coPlanId, coPrivateRepos) of
+        (Nothing, Nothing) -> undefined
+        (Just planId, _) -> pure planId
+        (_, Just repos) -> insert MarketplacePlan
+            { marketplacePlanGithubId = Nothing
+            , marketplacePlanName = coName <> " Plan"
+            , marketplacePlanDescription = ""
+            , marketplacePlanPrivateRepoAllowance = fromNumeric repos
+            }
     offerId <- insert Offer
         { offerName = coName
         , offerDetails = coDetails

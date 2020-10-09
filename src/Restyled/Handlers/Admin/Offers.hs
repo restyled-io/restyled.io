@@ -22,9 +22,16 @@ createOfferForm =
         $ CreateOffer
         <$> areq textField "Name" Nothing
         <*> (unTextarea <$> areq textareaField "Details" Nothing)
-        <*> areq textField "Purchase URL" Nothing
-        <*> areq intField "Private Repos" (Just $ negate 1)
-        <*> areq intField "Claims" (Just 100)
+        <*> areq textField "URL where this Offer can be purchased" Nothing
+        <*> areq intField "Number of claims to generate" (Just 100)
+        <*> (entityKey <$$> aopt selectPlan "Use an existing Plan" Nothing)
+        <*> aopt intField "Or create with with this allowance" Nothing
+  where
+    selectPlan :: Field Handler (Entity MarketplacePlan)
+    selectPlan = selectField $ optionsPersist
+        [MarketplacePlanGithubId ==. Nothing]
+        []
+        marketplacePlanName
 
 getAdminOffersR :: Handler Html
 getAdminOffersR = do
@@ -61,4 +68,5 @@ deleteAdminOfferR offerId = do
 getAdminOfferClaimsR :: OfferId -> Handler TypedContent
 getAdminOfferClaimsR offerId = do
     claims <- runDB $ selectList [OfferClaimOffer ==. offerId] []
+    addContentDispositionFileName "claims.csv"
     sendResponseCSV claims
