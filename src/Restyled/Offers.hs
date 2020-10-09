@@ -110,8 +110,7 @@ claimOffer offerId ClaimDetails {..} = do
         , OfferClaimClaimedFor =. Just cdInstallationLogin
         ]
 
-    -- NB. There's a UNIQUE on our WHERE, so this could only ever be 0 or 1
-    when (n == 0) $ throwError "Invalid Code or already claimed"
+    when (n /= 1) $ throwError "Invalid Code or already claimed"
 
     lift $ insert MarketplaceAccount
         { marketplaceAccountGithubId = Nothing
