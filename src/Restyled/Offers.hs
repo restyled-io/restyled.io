@@ -102,7 +102,10 @@ claimOffer offerId ClaimDetails {..} = do
     Offer {..} <- noteT "Offer does not exist" $ getT offerId
     now <- liftIO getCurrentTime
     n <- lift $ updateWhereCount
-        [OfferClaimOffer ==. offerId, OfferClaimCode ==. cdCode]
+        [ OfferClaimOffer ==. offerId
+        , OfferClaimCode ==. cdCode
+        , OfferClaimClaimedAt ==. Nothing
+        ]
         [ OfferClaimClaimedAt =. Just now
         , OfferClaimClaimedFor =. Just cdInstallationLogin
         ]
