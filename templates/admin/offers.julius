@@ -1,0 +1,32 @@
+$(function() {
+  const modal = $('#modal')
+
+  // We'll add our own elements
+  modal.find('pre').remove()
+
+  function codesListItem(claimCode) {
+    if (claimCode.claimed) {
+      return $(`<li><span class=strikethrough>${claimCode.code}<span></li>`)
+    } else {
+      return $(`<li>${claimCode.code}</li>`)
+    }
+  }
+
+  $(".view-offer-codes").each((_idx, el) => {
+    const $el = $(el)
+    const $codesList = $('<ul class=claim-codes>')
+
+    _.each($el.data('offer-codes'), code => {
+      $codesList.append(codesListItem(code))
+    })
+
+    console.log($codesList)
+
+    $el.click(() => {
+      const content = modal.find('.modal-content')
+      content.find('.claim-codes').remove()
+      content.append($codesList)
+      modal.show()
+    })
+  })
+})

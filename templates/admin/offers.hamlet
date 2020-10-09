@@ -10,7 +10,7 @@
       <th>
 
     <tbody>
-      $forall Entity offerId offer <- offers
+      $forall (Entity offerId offer, codes) <- offers
         <tr>
           <td>#{offerName offer}
           <td>#{offerDetails offer }
@@ -19,6 +19,12 @@
             <a href=@{OffersP $ OfferP offerId OfferR}>
               @{OffersP $ OfferP offerId OfferR}
           <td>
+            <a
+              .view-offer-codes
+              data-offer-codes=#{TL.decodeUtf8 $ encode codes}
+              href=#>
+              View
+            |
             <a href=@{AdminP $ AdminOffersP $ AdminOfferP offerId $ AdminOfferClaimsP AdminOfferClaimsR}>
               Download
           <td>
