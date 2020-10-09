@@ -19,14 +19,27 @@
             <a href=@{OffersP $ OfferP offerId OfferR}>
               @{OffersP $ OfferP offerId OfferR}
           <td>
-            <a
-              .view-offer-codes
-              data-offer-codes=#{TL.decodeUtf8 $ encode codes}
+            <a href=@{AdminP $ AdminOffersP $ AdminOfferP offerId $ AdminOfferClaimsP AdminOfferClaimsR}>
+              Download
+            |
+            <a .view-offer-codes data-offer-codes=#{TL.decodeUtf8 $ encode codes}
               href=#>
               View
             |
-            <a href=@{AdminP $ AdminOffersP $ AdminOfferP offerId $ AdminOfferClaimsP AdminOfferClaimsR}>
-              Download
+            <a .add-offer-codes data-number=10
+              data-url=@{AdminP $ AdminOffersP $ AdminOfferP offerId $ AdminOfferClaimsP AdminOfferClaimsR}
+              href=#>
+              +10
+            |
+            <a .add-offer-codes data-number=100
+              data-url=@{AdminP $ AdminOffersP $ AdminOfferP offerId $ AdminOfferClaimsP AdminOfferClaimsR}
+              href=#>
+              +100
+            |
+            <a .add-offer-codes data-number=1000
+              data-url=@{AdminP $ AdminOffersP $ AdminOfferP offerId $ AdminOfferClaimsP AdminOfferClaimsR}
+              href=#>
+              +1000
           <td>
             <form
               method=post

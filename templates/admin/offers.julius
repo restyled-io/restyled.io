@@ -12,7 +12,7 @@ $(function() {
     }
   }
 
-  $(".view-offer-codes").each((_idx, el) => {
+  $('.view-offer-codes').each((_idx, el) => {
     const $el = $(el)
     const $codesList = $('<ul class=claim-codes>')
 
@@ -20,13 +20,35 @@ $(function() {
       $codesList.append(codesListItem(code))
     })
 
-    console.log($codesList)
-
     $el.click(() => {
       const content = modal.find('.modal-content')
       content.find('.claim-codes').remove()
       content.append($codesList)
       modal.show()
+    })
+  })
+
+  $('.add-offer-codes').each((_idx, el) => {
+    const $el = $(el)
+    const url = $el.data('url')
+    const number = $el.data('number')
+
+    $el.click((e) => {
+      $.ajax({
+        type: 'POST',
+        url: url,
+        data: JSON.stringify({ number: number }),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: () => {
+          console.log('success')
+        },
+        error: () => {
+          console.error('error')
+        }
+      })
+
+      e.preventDefault()
     })
   })
 })

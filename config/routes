@@ -63,7 +63,7 @@
     /#OfferId AdminOfferP:
       / AdminOfferR DELETE
       /claims AdminOfferClaimsP:
-        / AdminOfferClaimsR GET
+        / AdminOfferClaimsR GET POST
   /tokens AdminTokensP:
     / AdminTokensR GET POST
     /#ApiTokenId AdminTokenR DELETE

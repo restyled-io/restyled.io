@@ -3,6 +3,7 @@ module Restyled.Offers
     -- * Creation
       CreateOffer(..)
     , createOffer
+    , addClaimCodes
 
     -- * Claiming
     , ClaimDetails(..)
@@ -47,8 +48,11 @@ createOffer CreateOffer {..} = do
         , offerMarketplacePlan = planId
         }
 
-    (now, codes) <-
-        liftIO $ (,) <$> getCurrentTime <*> generateClaimCodes coClaims
+    addClaimCodes offerId coClaims
+
+addClaimCodes :: MonadIO m => OfferId -> Int -> SqlPersistT m ()
+addClaimCodes offerId n = do
+    (now, codes) <- liftIO $ (,) <$> getCurrentTime <*> generateClaimCodes n
 
     insertMany_ $ do
         code <- codes

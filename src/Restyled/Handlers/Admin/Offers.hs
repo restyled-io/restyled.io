@@ -6,11 +6,13 @@ module Restyled.Handlers.Admin.Offers
     , postAdminOffersR
     , deleteAdminOfferR
     , getAdminOfferClaimsR
+    , postAdminOfferClaimsR
     )
 where
 
-import Restyled.Prelude.Esqueleto
+import Restyled.Prelude.Esqueleto hiding (Value)
 
+import Data.Aeson.Lens
 import qualified Data.Text.Lazy.Encoding as TL
 import qualified Database.Esqueleto as E
 import qualified Database.Persist as P
@@ -74,6 +76,23 @@ getAdminOfferClaimsR offerId = do
     claims <- runDB $ P.selectList [OfferClaimOffer P.==. offerId] []
     addContentDispositionFileName "claims.csv"
     sendResponseCSV claims
+
+postAdminOfferClaimsR :: OfferId -> Handler TypedContent
+postAdminOfferClaimsR offerId = do
+    let defaultN :: Int
+        defaultN = 10
+
+    selectRep $ do
+        provideRep @_ @Value $ do
+            body <- requireCheckJsonBody @_ @Value
+            let n = body ^? key "number" . _Integer
+            runDB $ addClaimCodes offerId $ maybe defaultN fromIntegral n
+            sendStatusJSON status201 $ object ["claims" .= n]
+        provideRep @_ @Html $ do
+            n <- fromMaybe defaultN <$> runInputPost (iopt intField "number")
+            runDB $ addClaimCodes offerId n
+            setMessage $ toHtml $ tshow n <> " claim codes generated"
+            redirect $ AdminP $ AdminOffersP AdminOffersR
 
 data ClaimCode = ClaimCode
     { code :: Text
