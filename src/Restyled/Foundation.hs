@@ -154,24 +154,8 @@ adminLayout widget = do
         addStylesheet $ staticR "css/strapless.css"
         addStylesheet $ staticR "css/main.css"
         addStylesheet $ staticR "css/admin.css"
-        addScriptRemote "https://code.jquery.com/jquery-3.3.1.min.js"
         addScriptRemote "https://underscorejs.org/underscore-min.js"
-        addStylesheetRemote
-            "https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.1/c3.min.css"
-        addScriptRemote
-            "https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.7/d3.min.js"
-        addScriptRemote
-            "https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.1/c3.min.js"
-        addScriptRemote
-            "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
-        addScriptRemote
-            "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"
-
-        addStylesheetRemote
-            "https://unpkg.com/tabulator-tables@4.4.1/dist/css/tabulator.min.css"
-        addScriptRemote
-            "https://unpkg.com/tabulator-tables@4.4.1/dist/js/tabulator.min.js"
-
+        addScriptRemote "https://code.jquery.com/jquery-3.3.1.min.js"
         $(widgetFile "admin-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
