@@ -109,6 +109,8 @@ synchronizePlan plan = entityKey <$> upsert
         , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceNone
         , marketplacePlanName = GH.marketplacePlanName plan
         , marketplacePlanDescription = GH.marketplacePlanDescription plan
+        , marketplacePlanMonthlyRevenue = fromCents
+            $ GH.marketplacePlanMonthlyPriceInCents plan
         }
     [ MarketplacePlanName =. GH.marketplacePlanName plan
     , MarketplacePlanDescription =. GH.marketplacePlanDescription plan

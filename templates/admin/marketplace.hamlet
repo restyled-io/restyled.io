@@ -16,4 +16,7 @@
           [#{x}] #{marketplacePlanName $ entityVal $ mpwaPlan plan}
         $nothing
           #{marketplacePlanName $ entityVal $ mpwaPlan plan}
+      <p>
+        <strong>MRR</strong>:
+        #{mpwaMonthlyRevenue plan}
       ^{accountsList (Just $ mpwaDescription plan) $ mpwaOwnerNames plan}

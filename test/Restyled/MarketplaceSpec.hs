@@ -120,6 +120,7 @@ insertAccountOnPlan username mPlanGitHubId mExpiresAt planAllowance = do
         , marketplacePlanPrivateRepoAllowance = planAllowance
         , marketplacePlanName = ""
         , marketplacePlanDescription = ""
+        , marketplacePlanMonthlyRevenue = fromCents 0
         }
     insert_ MarketplaceAccount
         { marketplaceAccountGithubId = Nothing

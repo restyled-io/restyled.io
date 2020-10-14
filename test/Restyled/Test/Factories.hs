@@ -42,6 +42,7 @@ buildPrivateMarketplacePlan = MarketplacePlan
     , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceLimited 1
     , marketplacePlanName = "Solo"
     , marketplacePlanDescription = ""
+    , marketplacePlanMonthlyRevenue = fromCents 0
     }
 
 buildMarketplaceAccount

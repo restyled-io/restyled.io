@@ -11,7 +11,7 @@ where
 
 import Restyled.Prelude
 
-import Data.List (nub)
+import Data.List (genericLength, nub)
 import Restyled.Foundation
 import Restyled.Marketplace (isPrivateRepoPlan)
 import Restyled.Models
@@ -31,6 +31,11 @@ mpwaOwnerNames = map (accountOwner . entityVal) . mpwaAccounts
   where
     accountOwner :: MarketplaceAccount -> OwnerName
     accountOwner = nameToName . marketplaceAccountGithubLogin
+
+mpwaMonthlyRevenue :: MarketplacePlanWithAccounts -> UsCents
+mpwaMonthlyRevenue MarketplacePlanWithAccounts {..} =
+    genericLength mpwaAccounts
+        * marketplacePlanMonthlyRevenue (entityVal mpwaPlan)
 
 getAdminMarketplaceR :: Handler Html
 getAdminMarketplaceR = do

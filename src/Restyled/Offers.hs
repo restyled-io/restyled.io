@@ -40,6 +40,7 @@ createOffer CreateOffer {..} = do
             , marketplacePlanName = coName <> " Plan"
             , marketplacePlanDescription = ""
             , marketplacePlanPrivateRepoAllowance = fromNumeric repos
+            , marketplacePlanMonthlyRevenue = fromCents 0
             }
     offerId <- insert Offer
         { offerName = coName
