@@ -9,6 +9,7 @@ import Data.Semigroup (Sum(..))
 import qualified Restyled.Backend.Webhook as Webhook
 import Restyled.Foundation
 import Restyled.Metrics
+import Restyled.Time
 import Restyled.TimeRange
 import Restyled.Yesod
 
@@ -39,7 +40,7 @@ getSystemMetricsR :: Handler Value
 getSystemMetricsR = do
     depth <- runRedis Webhook.queueDepth
     mMins <- runInputGet $ iopt intField "since-minutes"
-    range <- timeRangeFromMinutesAgo $ min (6 * 60) $ fromMaybe 5 mMins
+    range <- timeRangeFromAgo $ Minutes $ min (6 * 60) $ fromMaybe 5 mMins
     JobMetrics {..} <- runDB $ fetchJobMetrics range
 
     let succeeded = getSum jmSucceeded

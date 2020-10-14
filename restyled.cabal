@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4aba05f814094493589df700ed4d32af39442918d14ac4a2b083503784d6833c
+-- hash: 8c4f1afd74dced7240247486eef85b62840364d9911b9bbec18fc6a2e5ea92ce
 
 name:           restyled
 version:        0.1.1.0
@@ -87,6 +87,7 @@ library
       Restyled.Routes
       Restyled.Settings
       Restyled.StreamJobLogLines
+      Restyled.Time
       Restyled.TimeRange
       Restyled.WebSockets
       Restyled.Widgets.ContainsURLs
@@ -220,6 +221,7 @@ test-suite test
       Restyled.Test.Factories
       Restyled.Test.Lens
       Restyled.Test.Yesod
+      Restyled.TimeSpec
       Restyled.Widgets.ContainsURLsSpec
       Restyled.Widgets.JobSpec
       RIO.Process.FollowSpec

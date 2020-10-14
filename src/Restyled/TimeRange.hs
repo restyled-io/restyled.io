@@ -1,8 +1,7 @@
 module Restyled.TimeRange
     ( TimeRange
     , timeRangeBefore
-    , timeRangeFromMinutesAgo
-    , timeRangeFromHoursAgo
+    , timeRangeFromAgo
     , withinTimeRange
     , timeRangeFilters
     )
@@ -11,6 +10,7 @@ where
 import Restyled.Prelude
 
 import qualified Database.Esqueleto as E
+import Restyled.Time
 
 data TimeRange = TimeRange
     { tmFrom :: UTCTime
@@ -27,19 +27,13 @@ timeRangeBefore TimeRange {..} = TimeRange
     }
     where diff = diffUTCTime tmTo tmFrom
 
-timeRangeFromMinutesAgo :: MonadIO m => Int -> m TimeRange
-timeRangeFromMinutesAgo minutes = do
+timeRangeFromAgo :: (MonadIO m, HasSeconds t) => t -> m TimeRange
+timeRangeFromAgo t = do
     now <- getCurrentTime
-    pure $ timeRangeToVia now $ subtractMinutes minutes
-
-timeRangeFromHoursAgo :: MonadIO m => Int -> m TimeRange
-timeRangeFromHoursAgo = timeRangeFromMinutesAgo . (* 60)
+    pure $ timeRangeToVia now $ subtractTime t
 
 timeRangeToVia :: UTCTime -> (UTCTime -> UTCTime) -> TimeRange
 timeRangeToVia tmTo f = let tmFrom = f tmTo in TimeRange { .. }
-
-subtractMinutes :: Int -> UTCTime -> UTCTime
-subtractMinutes minutes = addUTCTime $ fromIntegral $ negate $ minutes * 60
 
 withinTimeRange
     :: E.SqlExpr (E.Value UTCTime) -> TimeRange -> E.SqlExpr (E.Value Bool)

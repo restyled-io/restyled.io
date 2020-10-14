@@ -22,6 +22,7 @@ import Restyled.Models
 import Restyled.Percentage
 import Restyled.Routes
 import Restyled.Settings
+import Restyled.Time
 import Restyled.TimeRange
 import Restyled.Yesod
 import Text.Blaze (ToMarkup(..))
@@ -191,10 +192,10 @@ getAdminStatsTimeRange = do
         (selectFieldList rangeOptions)
         "range"
 
-    timeRange <- timeRangeFromMinutesAgo $ case range of
-        Day -> 60 * 24
-        Week -> 60 * 24 * 7
-        Month -> 60 * 24 * 31
-        Year -> 60 * 24 * 365
+    timeRange <- timeRangeFromAgo $ case range of
+        Day -> Days 1
+        Week -> Days 7
+        Month -> Days 31
+        Year -> Days 365
 
     pure (range, timeRange)
