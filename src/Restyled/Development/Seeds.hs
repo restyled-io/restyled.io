@@ -45,6 +45,7 @@ seedDB = do
         , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceUnlimited
         , marketplacePlanName = "Friends & Family"
         , marketplacePlanDescription = "Manually managed discount plan"
+        , marketplacePlanMonthlyRevenue = fromCents 0
         }
 
     void $ upsert

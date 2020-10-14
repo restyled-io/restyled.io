@@ -75,6 +75,7 @@ MarketplacePlan json
   name Text
   description Text
   privateRepoAllowance PrivateRepoAllowance
+  monthlyRevenue UsCents
 
   UniqueMarketplacePlan githubId !force
   deriving Eq Show

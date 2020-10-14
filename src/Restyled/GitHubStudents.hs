@@ -101,4 +101,5 @@ githubStudentsPlan = MarketplacePlan
     , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceUnlimited
     , marketplacePlanName = "GitHub Students"
     , marketplacePlanDescription = "Free Unlimited for verified GitHub Students"
+    , marketplacePlanMonthlyRevenue = fromCents 0
     }
