@@ -8,8 +8,10 @@ where
 
 import Restyled.Prelude
 
-import Restyled.Backend.DiscountMarketplacePlan
 import Restyled.Foundation
+import Restyled.GitHubStudents
+import Restyled.Marketplace
+import Restyled.Models
 import Restyled.Settings
 import Restyled.Yesod
 
@@ -30,7 +32,9 @@ getGitHubStudentsThanksR = do
 
     wasGifted <- runDB $ (fakeVerified ||) <$> do
         mUser <- entityVal <$$> maybeAuth
-        maybe (pure False) fetchUserHasDiscountMarketplacePlan mUser
+        planId <- entityKey <$> findOrCreateMarketplacePlan githubStudentsPlan
+        let mLogin = userGithubUsername =<< mUser
+        maybe (pure False) (fetchUserHasMarketplacePlan planId) mLogin
 
     defaultLayout $ do
         setTitle "Restyled for GitHub Students"

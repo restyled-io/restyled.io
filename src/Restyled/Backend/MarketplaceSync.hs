@@ -1,29 +1,16 @@
-module Restyled.Backend.Marketplace
-    (
-    -- * Checking purchased features
-      MarketplacePlanAllows(..)
-    , marketplacePlanAllows
-    , MarketplacePlanLimitation(..)
-    , whenMarketplacePlanForbids
-
-    -- * Helpers useful outside this module
-    , isPrivateRepoPlan
-
-    -- * Sync
-    , runSynchronize
+module Restyled.Backend.MarketplaceSync
+    ( runSynchronize
     )
 where
 
 import Restyled.Prelude
 
-import Restyled.Models
-import Restyled.PrivateRepoAllowance
-import Restyled.PrivateRepoEnabled
-import Restyled.Settings
-
 import qualified Data.Vector as V
 import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
+import Restyled.Models
+import Restyled.PrivateRepoAllowance
+import Restyled.Settings
 
 runSynchronize
     :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
@@ -169,51 +156,6 @@ deleteUnsynchronized synchronizedAccountIds = do
     let accountIds = map entityKey unsynchronizedAccounts
     deleteWhere [MarketplaceEnabledRepoMarketplaceAccount <-. accountIds]
     deleteWhere [MarketplaceAccountId <-. accountIds]
-
-data MarketplacePlanAllows
-    = MarketplacePlanAllows
-    | MarketplacePlanForbids MarketplacePlanLimitation
-    deriving stock (Eq, Show)
-
-data MarketplacePlanLimitation
-    = MarketplacePlanNotFound
-    | MarketplacePlanPublicOnly
-    | MarketplacePlanMaxRepos
-    deriving stock (Eq, Show)
-
-marketplacePlanAllows
-    :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
-marketplacePlanAllows repo@(Entity _ Repo {..})
-    | repoIsPrivate = marketplacePlanAllowsPrivate repo
-    | otherwise = pure MarketplacePlanAllows
-
-marketplacePlanAllowsPrivate
-    :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
-marketplacePlanAllowsPrivate repo = do
-    mEnabled <- enableMarketplaceRepo repo
-
-    pure $ case mEnabled of
-        Nothing -> MarketplacePlanForbids MarketplacePlanNotFound
-        Just PrivateRepoEnabled -> MarketplacePlanAllows
-        Just PrivateRepoNotAllowed ->
-            MarketplacePlanForbids MarketplacePlanPublicOnly
-        Just PrivateRepoLimited ->
-            MarketplacePlanForbids MarketplacePlanMaxRepos
-
-whenMarketplacePlanForbids
-    :: Applicative f
-    => MarketplacePlanAllows
-    -> (MarketplacePlanLimitation -> f ())
-    -> f ()
-whenMarketplacePlanForbids MarketplacePlanAllows _ = pure ()
-whenMarketplacePlanForbids (MarketplacePlanForbids limitation) f = f limitation
-
-isPrivateRepoPlan :: MarketplacePlan -> Bool
-isPrivateRepoPlan MarketplacePlan {..} =
-    case marketplacePlanPrivateRepoAllowance of
-        PrivateRepoAllowanceNone -> False
-        PrivateRepoAllowanceUnlimited -> True
-        PrivateRepoAllowanceLimited _ -> True
 
 vconcat :: Vector (Vector a) -> [a]
 vconcat = V.toList . V.concat . V.toList

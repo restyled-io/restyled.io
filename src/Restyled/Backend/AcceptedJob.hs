@@ -12,7 +12,7 @@ import Restyled.Prelude
 
 import Restyled.Backend.AcceptedWebhook
 import Restyled.Backend.ConcurrentJobs
-import Restyled.Backend.Marketplace
+import Restyled.Marketplace
 import Restyled.Models
 import Restyled.Time
 import Restyled.TimeRange
