@@ -6,8 +6,9 @@ where
 import Restyled.Prelude
 
 import qualified Prelude as Unsafe
-import Restyled.Backend.DiscountMarketplacePlan
+import Restyled.Marketplace
 import Restyled.Models
+import Restyled.PrivateRepoAllowance
 
 seedDB :: MonadIO m => SqlPersistT m ()
 seedDB = do
@@ -39,7 +40,12 @@ seedDB = do
     seedJob restyler 1 now Nothing restylingOutput
     seedJob restyler 2 now (Just 10) configErrorOutput1
 
-    Entity discountPlanId _ <- fetchDiscountMarketplacePlan
+    Entity discountPlanId _ <- findOrCreateMarketplacePlan MarketplacePlan
+        { marketplacePlanGithubId = Nothing
+        , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceUnlimited
+        , marketplacePlanName = "Friends & Family"
+        , marketplacePlanDescription = "Manually managed discount plan"
+        }
 
     void $ upsert
         Offer

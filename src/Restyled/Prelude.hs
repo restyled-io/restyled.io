@@ -9,6 +9,7 @@ module Restyled.Prelude
     -- * Persist
     , SqlEntity
     , overEntity
+    , selectExists
     , replaceEntity
     , selectFirstT
     , getEntityT
@@ -88,6 +89,9 @@ overEntity e f = e { entityVal = f $ entityVal e }
 replaceEntity
     :: (MonadIO m, SqlEntity a) => Entity a -> SqlPersistT m (Entity a)
 replaceEntity e@(Entity k v) = e <$ replace k v
+
+selectExists :: (MonadIO m, SqlEntity a) => [Filter a] -> SqlPersistT m Bool
+selectExists x = isJust <$> selectFirst x []
 
 selectFirstT
     :: (MonadIO m, SqlEntity a)

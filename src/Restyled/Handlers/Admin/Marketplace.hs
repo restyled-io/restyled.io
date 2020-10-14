@@ -12,8 +12,8 @@ where
 import Restyled.Prelude
 
 import Data.List (nub)
-import Restyled.Backend.Marketplace (isPrivateRepoPlan)
 import Restyled.Foundation
+import Restyled.Marketplace (isPrivateRepoPlan)
 import Restyled.Models
 import Restyled.Settings
 import Restyled.Yesod

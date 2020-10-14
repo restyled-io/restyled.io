@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3d17edfaa38b6ebee5874c2336ad8dd09344e2ba6982a8b6a92ae0f9f08c5d81
+-- hash: 6cafd6642885e2eb2f75ef900e60b5010566be18cfaf019d48b17ef41b2dd2c0
 
 name:           restyled
 version:        0.1.1.0
@@ -36,12 +36,11 @@ library
       Restyled.Backend.Application
       Restyled.Backend.ConcurrentJobs
       Restyled.Backend.Container
-      Restyled.Backend.DiscountMarketplacePlan
       Restyled.Backend.DockerRunArgs
       Restyled.Backend.DockerRunJob
       Restyled.Backend.ExecRestyler
       Restyled.Backend.Foundation
-      Restyled.Backend.Marketplace
+      Restyled.Backend.MarketplaceSync
       Restyled.Backend.Reconcile
       Restyled.Backend.RestyleMachine
       Restyled.Backend.Webhook
@@ -71,6 +70,7 @@ library
       Restyled.Handlers.System.Metrics
       Restyled.Handlers.Thanks
       Restyled.Handlers.Webhooks
+      Restyled.Marketplace
       Restyled.Metrics
       Restyled.Models
       Restyled.Models.DB
@@ -202,7 +202,6 @@ test-suite test
   main-is: Spec.hs
   other-modules:
       Restyled.AuthenticationSpec
-      Restyled.Backend.MarketplaceSpec
       Restyled.Backend.ReconcileSpec
       Restyled.Backend.RestyleMachineSpec
       Restyled.Handlers.Admin.ReposSpec
@@ -212,6 +211,7 @@ test-suite test
       Restyled.Handlers.ProfileSpec
       Restyled.Handlers.ReposSpec
       Restyled.Handlers.WebhooksSpec
+      Restyled.MarketplaceSpec
       Restyled.MetricsSpec
       Restyled.Models.UserSpec
       Restyled.OffersSpec

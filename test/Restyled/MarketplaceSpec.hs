@@ -1,11 +1,11 @@
-module Restyled.Backend.MarketplaceSpec
+module Restyled.MarketplaceSpec
     ( spec
     )
 where
 
 import Restyled.Test
 
-import Restyled.Backend.Marketplace
+import Restyled.Marketplace
 import Restyled.PrivateRepoAllowance
 
 spec :: Spec

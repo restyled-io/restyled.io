@@ -7,7 +7,7 @@ where
 
 import Restyled.Prelude
 
-import Restyled.Backend.Marketplace
+import Restyled.Marketplace
 import Restyled.Models
 
 data AcceptedWebhook = AcceptedWebhook
