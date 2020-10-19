@@ -112,8 +112,17 @@ getContainerIdsBy
        )
     => [String]
     -> m [String]
-getContainerIdsBy filters =
-    lines . LBS8.unpack <$> proc "docker" args readProcessStdout_
+getContainerIdsBy filters = do
+    (ec, out, err) <- proc "docker" args readProcess
+
+    if ec == ExitSuccess
+        then pure $ lines $ LBS8.unpack out
+        else [] <$ logWarn
+            ("getContainerIdsBy: docker-ps exited "
+            <> displayShow ec
+            <> ", with stderr "
+            <> displayShow err
+            )
   where
     args = ["ps", "--format", "{{.ID}}"] <> filterArgs
     filterArgs = concatMap (\f -> "--filter" : [f]) filters
@@ -127,8 +136,17 @@ inspectContainers
        )
     => [String]
     -> m (Either String [a])
-inspectContainers containerIds =
-    eitherDecode <$> proc "docker" ("inspect" : containerIds) readProcessStdout_
+inspectContainers containerIds = do
+    (ec, out, err) <- proc "docker" ("inspect" : containerIds) readProcess
+
+    if ec == ExitSuccess
+        then pure $ eitherDecode out
+        else Right [] <$ logWarn
+            ("inspectContainers: docker-inspect exited "
+            <> displayShow ec
+            <> ", with stderr "
+            <> displayShow err
+            )
 
 signalContainer
     :: ( MonadUnliftIO m
