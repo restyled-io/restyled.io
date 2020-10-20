@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Admin.Machines
@@ -78,28 +79,41 @@ postAdminMachinesR = selectRep $ do
 getAdminMachineR :: RestyleMachineId -> Handler Value
 getAdminMachineR machineId = runDB $ toJSON <$> getEntity404 machineId
 
-newtype AdminMachinePatch = AdminMachinePatch
+data AdminMachinePatch = AdminMachinePatch
     { enabled :: Maybe Bool
+    , reconciling :: Maybe Bool
     }
     deriving stock Generic
     deriving anyclass FromJSON
 
+patchAdminMachine
+    :: RestyleMachineId -> AdminMachinePatch -> Handler (Entity RestyleMachine)
+patchAdminMachine machineId AdminMachinePatch { enabled, reconciling } = do
+    machine <- runDB $ do
+        -- Don't update reconciling here, let the reconcile routine handle that
+        -- itself, in a race-free way.
+        let updates = catMaybes [(RestyleMachineEnabled =.) <$> enabled]
+        unless (null updates) $ update machineId updates
+        getEntity404 machineId
+    machine <$ when
+        (reconciling == Just True)
+        (safelyReconcile 10 $ Just [machine])
+
 patchAdminMachineR :: RestyleMachineId -> Handler TypedContent
 patchAdminMachineR machineId = selectRep $ do
     provideRep @_ @Html $ do
-        enabled <- runInputPost $ ireq boolField "enabled"
-        runDB $ do
-            void $ get404 machineId
-            update machineId [RestyleMachineEnabled =. enabled]
-        setMessage $ "Machine " <> if enabled then "enabled" else "disabled"
+        body <-
+            runInputPost
+            $ AdminMachinePatch
+            <$> iopt boolField "enabled"
+            <*> iopt boolField "reconciling"
+        void $ patchAdminMachine machineId body
+        setMessage "Machine updated"
         redirect $ AdminP $ AdminMachinesP AdminMachinesR
 
     provideRep @_ @Value $ do
-        AdminMachinePatch {..} <- requireCheckJsonBody
-        runDB $ do
-            update machineId
-                $ catMaybes [(RestyleMachineEnabled =.) <$> enabled]
-            toJSON <$> getEntity404 machineId
+        body <- requireCheckJsonBody
+        toJSON <$> patchAdminMachine machineId body
 
 deleteAdminMachineR :: RestyleMachineId -> Handler TypedContent
 deleteAdminMachineR machineId = do

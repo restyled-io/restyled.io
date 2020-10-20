@@ -11,6 +11,11 @@
         #{restyleMachineName machine} (#{restyleMachineHost machine})
 
       <section>
+        <p>
+          <strong>Job count</strong>: #{restyleMachineJobCount machine}
+          $if restyleMachineReconciling machine
+            (reconciling)
+
         <details>
           <summary>Certificate Authority
           <pre>
@@ -33,11 +38,19 @@
           >
           <input type=submit value="Docker Info" />
 
+        <!-- <form -->
+        <!--   .form-websockets -->
+        <!--   action=@{AdminP $ AdminMachinesP $ AdminMachinePruneR machineId} -->
+        <!--   > -->
+        <!--   <input type=submit value="Prune" /> -->
+
         <form
-          .form-websockets
-          action=@{AdminP $ AdminMachinesP $ AdminMachinePruneR machineId}
+          method=post
+          action=@{AdminP $ AdminMachinesP $ AdminMachineR machineId}
           >
-          <input type=submit value="Prune" />
+          <input type=hidden name=_method value=PATCH />
+          <input type=hidden name=reconciling value=true />
+          <input type=submit value="Reconcile" />
 
         <form
           method=post
