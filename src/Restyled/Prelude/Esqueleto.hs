@@ -1,6 +1,7 @@
 module Restyled.Prelude.Esqueleto
     ( module X
     , selectMap
+    , selectFoldMap
     , aggregate
     , refineNotNull
     , unValue2
@@ -44,6 +45,13 @@ import Database.Esqueleto.PostgreSQL
 selectMap
     :: (MonadIO m, SqlSelect a r) => (r -> b) -> SqlQuery a -> SqlPersistT m [b]
 selectMap f = fmap (map f) . select
+
+selectFoldMap
+    :: (MonadIO m, SqlSelect a r, Monoid b)
+    => (r -> b)
+    -> SqlQuery a
+    -> SqlPersistT m b
+selectFoldMap f = fmap (foldMap f) . select
 
 aggregate
     :: (PersistField a, PersistField [a])

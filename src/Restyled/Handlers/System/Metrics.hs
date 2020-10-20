@@ -44,7 +44,9 @@ getSystemMetricsR = do
 
     let succeeded = getSum jmSucceeded
         failed = getSum jmFailed
+        failedUnknown = getSum jmFailedUnknown
         completed = succeeded + failed
+        unfinished = getSum jmUnfinished
 
         successPercent :: Maybe Double
         successPercent
@@ -58,6 +60,8 @@ getSystemMetricsR = do
             [ Just $ toJSON $ metric "QueueDepth" depth
             , Just $ toJSON $ metric "JobsSucceeded" succeeded
             , Just $ toJSON $ metric "JobsFailed" failed
+            , Just $ toJSON $ metric "JobsFailedUnknown" failedUnknown
+            , Just $ toJSON $ metric "JobsUnfinished" unfinished
             , toJSON . metricUnit Percent "JobsSuccessRate" <$> successPercent
             ]
 

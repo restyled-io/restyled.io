@@ -1,22 +1,21 @@
-{-# LANGUAGE QuasiQuotes #-}
-
 module Restyled.Metrics
     ( JobMetrics(..)
     , fetchJobMetrics
     )
 where
 
-import Restyled.Prelude hiding (count)
+import Restyled.Prelude.Esqueleto
 
 import Data.Semigroup (Sum(..))
 import Data.Semigroup.Generic
-import Database.Persist.Sql (Single(..))
+import qualified Database.Esqueleto as E
+import Restyled.Models
 import Restyled.TimeRange
-import Text.Shakespeare.Text (st)
 
 data JobMetrics = JobMetrics
     { jmSucceeded :: Sum Int
     , jmFailed :: Sum Int
+    , jmFailedUnknown :: Sum Int
     , jmUnfinished :: Sum Int
     , jmTotal :: Sum Int
     }
@@ -29,42 +28,28 @@ instance Monoid JobMetrics where
     mempty = gmempty
 
 fetchJobMetrics :: MonadIO m => TimeRange -> SqlPersistT m JobMetrics
-fetchJobMetrics range = fromRows <$> rawSqlWithTimeRange
-    range
-    [st|
-            SELECT
-                CASE
-                    WHEN exit_code IS NULL THEN '#{unfinished}'
-                    WHEN exit_code = 0 THEN '#{succeeded}'
-                    ELSE '#{failed}'
-                END,
-                COUNT(*)
-            FROM job
-            WHERE #{dateField} >= ?
-              AND #{dateField} <= ?
-            GROUP BY 1
-        |]
+fetchJobMetrics range = selectFoldMap (convert . unValue5) $ from $ \jobs -> do
+    let dateField =
+            coalesceDefault [jobs ^. JobCompletedAt] (jobs ^. JobCreatedAt)
+        caseExitCode check = case_
+            [when_ (check $ jobs ^. JobExitCode) then_ $ val (1 :: Int)]
+            (else_ $ val 0)
 
-fromRows :: [(Single Text, Single Int)] -> JobMetrics
-fromRows = foldMap (fromPair . bimap unSingle unSingle)
+    where_ $ withinTimeRange dateField range
 
-fromPair :: (Text, Int) -> JobMetrics
-fromPair (status, count)
-    | status == succeeded = JobMetrics (Sum count) 0 0 (Sum count)
-    | status == failed = JobMetrics 0 (Sum count) 0 (Sum count)
-    | status == unfinished = JobMetrics 0 0 (Sum count) (Sum count)
-    | otherwise = JobMetrics 0 0 0 0
-
-
-dateField :: Text
-dateField = "COALESCE(completed_at, created_at)"
-
--- | Avoid typo-bugs by using this anywhere the textual value is needed
-succeeded :: Text
-succeeded = "Succeeded"
-
-failed :: Text
-failed = "Failed"
-
-unfinished :: Text
-unfinished = "Unfinished"
+    pure
+        ( count $ caseExitCode (==. just (val 0))
+        , count
+            $ caseExitCode (\c -> not_ (E.isNothing c) &&. c !=. just (val 0))
+        , count $ caseExitCode (==. just (val 99))
+        , count $ caseExitCode E.isNothing
+        , countRows
+        )
+  where
+    convert (succeeded, failed, unknown, unfinished, total) = JobMetrics
+        { jmSucceeded = Sum succeeded
+        , jmFailed = Sum failed
+        , jmFailedUnknown = Sum unknown
+        , jmUnfinished = Sum unfinished
+        , jmTotal = Sum total
+        }
