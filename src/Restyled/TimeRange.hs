@@ -3,7 +3,6 @@ module Restyled.TimeRange
     , timeRangeBefore
     , timeRangeFromMinutesAgo
     , timeRangeFromHoursAgo
-    , rawSqlWithTimeRange
     , withinTimeRange
     , timeRangeFilters
     )
@@ -12,7 +11,6 @@ where
 import Restyled.Prelude
 
 import qualified Database.Esqueleto as E
-import Database.Persist.Sql (RawSql, rawSql)
 
 data TimeRange = TimeRange
     { tmFrom :: UTCTime
@@ -42,11 +40,6 @@ timeRangeToVia tmTo f = let tmFrom = f tmTo in TimeRange { .. }
 
 subtractMinutes :: Int -> UTCTime -> UTCTime
 subtractMinutes minutes = addUTCTime $ fromIntegral $ negate $ minutes * 60
-
-rawSqlWithTimeRange
-    :: (RawSql a, MonadIO m) => TimeRange -> Text -> SqlPersistT m [a]
-rawSqlWithTimeRange TimeRange {..} =
-    flip rawSql [PersistUTCTime tmFrom, PersistUTCTime tmTo]
 
 withinTimeRange
     :: E.SqlExpr (E.Value UTCTime) -> TimeRange -> E.SqlExpr (E.Value Bool)
