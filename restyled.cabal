@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: def095ce72bf6dceb3fcfbc063f0f31e2fbf5cf41ce305dce7ff51a0553ba01b
+-- hash: 4aba05f814094493589df700ed4d32af39442918d14ac4a2b083503784d6833c
 
 name:           restyled
 version:        0.1.1.0
@@ -211,6 +211,7 @@ test-suite test
       Restyled.Handlers.ProfileSpec
       Restyled.Handlers.ReposSpec
       Restyled.Handlers.WebhooksSpec
+      Restyled.MetricsSpec
       Restyled.Models.UserSpec
       Restyled.OffersSpec
       Restyled.Test

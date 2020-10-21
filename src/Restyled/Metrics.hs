@@ -31,18 +31,20 @@ fetchJobMetrics :: MonadIO m => TimeRange -> SqlPersistT m JobMetrics
 fetchJobMetrics range = selectFoldMap (convert . unValue5) $ from $ \jobs -> do
     let dateField =
             coalesceDefault [jobs ^. JobCompletedAt] (jobs ^. JobCreatedAt)
+
         caseExitCode check = case_
             [when_ (check $ jobs ^. JobExitCode) then_ $ val (1 :: Int)]
             (else_ $ val 0)
 
+        sumExitCode check = coalesceDefault [sum_ $ caseExitCode check] (val 0)
+
     where_ $ withinTimeRange dateField range
 
     pure
-        ( count $ caseExitCode (==. just (val 0))
-        , count
-            $ caseExitCode (\c -> not_ (E.isNothing c) &&. c !=. just (val 0))
-        , count $ caseExitCode (==. just (val 99))
-        , count $ caseExitCode E.isNothing
+        ( sumExitCode (==. just (val 0))
+        , sumExitCode (\c -> not_ (E.isNothing c) &&. c !=. just (val 0))
+        , sumExitCode (==. just (val 99))
+        , sumExitCode E.isNothing
         , countRows
         )
   where
