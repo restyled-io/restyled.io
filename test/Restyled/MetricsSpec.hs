@@ -7,6 +7,7 @@ import Restyled.Test
 
 import Data.Semigroup (Sum(..))
 import Restyled.Metrics
+import Restyled.Time
 import Restyled.TimeRange
 
 spec :: Spec
@@ -15,7 +16,7 @@ spec = withApp $ do
         it "returns counts of Jobs in various states" $ do
             JobMetrics {..} <- runDB $ do
                 now <- liftIO getCurrentTime
-                range <- timeRangeFromMinutesAgo 5
+                range <- timeRangeFromAgo $ Minutes 5
                 repo <- insertEntity $ buildRepo "pbrisbin" "test"
                 insertMany_
                     [ buildCompleteJob repo now now 0
