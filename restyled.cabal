@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8c4f1afd74dced7240247486eef85b62840364d9911b9bbec18fc6a2e5ea92ce
+-- hash: 3d17edfaa38b6ebee5874c2336ad8dd09344e2ba6982a8b6a92ae0f9f08c5d81
 
 name:           restyled
 version:        0.1.1.0
@@ -109,7 +109,7 @@ library
   hs-source-dirs:
       src
   default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
   build-depends:
       aeson
     , aeson-casing
@@ -190,7 +190,7 @@ executable restyled.io
   hs-source-dirs:
       app
   default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -threaded -rtsopts -with-rtsopts=-T
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -threaded -rtsopts -with-rtsopts=-T
   build-depends:
       base
     , load-env
@@ -230,7 +230,7 @@ test-suite test
   hs-source-dirs:
       test
   default-extensions: BangPatterns DataKinds DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable DerivingStrategies FlexibleContexts FlexibleInstances GADTs GeneralizedNewtypeDeriving LambdaCase MultiParamTypeClasses NoImplicitPrelude NoMonomorphismRestriction OverloadedStrings RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TypeApplications TypeFamilies ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
   build-depends:
       QuickCheck
     , base
