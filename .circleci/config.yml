@@ -65,7 +65,7 @@ workflows:
           hlint-yaml-url:
             https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
           executor: default
-          cache-prefix: v3
+          cache-prefix: v4
 
       - docker-build-cached/build-and-release:
           name: image
