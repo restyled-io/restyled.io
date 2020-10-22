@@ -4,7 +4,6 @@ module Restyled.Time
     , Hours(Hours)
     , Minutes(Minutes)
     , Seconds(Seconds)
-    , addTime
     , subtractTime
     )
 where
@@ -42,9 +41,6 @@ newtype Seconds = Seconds
 
 instance HasSeconds Seconds where
     toSeconds = id
-
-addTime :: HasSeconds t => t -> UTCTime -> UTCTime
-addTime = addUTCTime . fromIntegral . unSeconds . toSeconds
 
 subtractTime :: HasSeconds t => t -> UTCTime -> UTCTime
 subtractTime = addUTCTime . negate . fromIntegral . unSeconds . toSeconds
