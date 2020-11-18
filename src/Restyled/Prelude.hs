@@ -47,7 +47,6 @@ import Data.Aeson as X hiding (Result(..))
 import Data.Aeson.Casing as X
 import Data.Bitraversable as X (bimapM)
 import Data.Char as X (isSpace, toLower)
-import Data.Either as X (fromLeft, fromRight)
 import Data.Functor.Syntax as X ((<$$>))
 import Data.List.Extra as X (sortOn)
 import Data.Proxy as X
