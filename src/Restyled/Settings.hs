@@ -8,7 +8,6 @@ module Restyled.Settings
     , AppSettings(..)
     , HasSettings(..)
     , loadSettings
-
     , addAuthBackDoor
 
     -- * Compile-time settings
@@ -30,7 +29,7 @@ import Yesod.Auth.Dummy
 import Yesod.Core.Types (HandlerData(..))
 
 #ifdef DEVELOPMENT
-import Yesod.Default.Util (widgetFileReload)
+import Yesod.Default.UtilwidgetFileReload
 #else
 import Yesod.Default.Util (widgetFileNoReload)
 #endif
