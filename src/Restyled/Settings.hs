@@ -114,11 +114,8 @@ loadSettings =
             <*> optional (var nonempty "GITLAB_OAUTH_CLIENT_SECRET" mempty)
             )
         <*> (liftA2 OAuthKeys
-            <$> optional
-                    (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_ID" mempty)
-            <*> optional
-                    (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_SECRET" mempty
-                    )
+            <$> optional (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_ID" mempty)
+            <*> optional (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_SECRET" mempty)
             )
         <*> (restylerImage
             <$> var str "RESTYLER_IMAGE" (def "restyled/restyler")
