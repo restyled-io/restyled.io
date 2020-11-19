@@ -6,6 +6,7 @@ where
 import Restyled.Test
 
 import qualified Database.Persist as P
+import Restyled.RestylerImage
 
 spec :: Spec
 spec = withApp $ do
@@ -15,7 +16,7 @@ spec = withApp $ do
             void authenticateAsAdmin
 
             patchJSON (AdminP $ AdminReposP $ AdminRepoR repoId) $ object
-                ["enabled" .= False, "restylerImage" .= betaRestyler]
+                ["enabled" .= False, "restylerImage" .= betaRestylerJSON]
 
             statusIs 200
             Just updated <- runDB $ P.get repoId
@@ -48,5 +49,8 @@ spec = withApp $ do
 buildRepoBeta :: Repo
 buildRepoBeta = (buildRepo "x" "y") { repoRestylerImage = Just betaRestyler }
 
-betaRestyler :: Text
-betaRestyler = "restyled/restyler:beta"
+betaRestyler :: RestylerImage
+betaRestyler = restylerImage "restyled/restyler" $ Just "beta"
+
+betaRestylerJSON :: Text
+betaRestylerJSON = "restyled/restyler:beta"
