@@ -6,6 +6,7 @@ where
 import Restyled.Test
 
 import qualified Prelude as Unsafe
+import Restyled.RestylerImage
 
 data AdminSettings = AdminSettings
     { asAppSettings :: AppSettings
@@ -75,8 +76,7 @@ emptySettings = AppSettings
     , appGitHubRateLimitToken = error "unused"
     , appGitLabOAuthKeys = Nothing
     , appGitHubStudentsOAuthKeys = Nothing
-    , appRestylerImage = ""
-    , appRestylerTag = Nothing
+    , appRestylerImage = restylerImage "restyled/restyler" Nothing
     , appAdmins = []
     , appAllowDummyAuth = error "unused"
     , appFavicon = error "unused"

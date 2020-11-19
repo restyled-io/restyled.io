@@ -14,6 +14,7 @@ import Restyled.Prelude
 import Restyled.Admin.RepoSearch
 import Restyled.Foundation
 import Restyled.Models
+import Restyled.RestylerImage hiding (restylerImage)
 import Restyled.Routes
 import Restyled.Settings
 import Restyled.Widgets.Repo
@@ -35,7 +36,7 @@ getAdminRepoR repoId = runDB $ toJSON <$> getEntity404 repoId
 data AdminRepoPatch = AdminRepoPatch
     { debugEnabled :: Maybe Bool
     , enabled :: Maybe Bool
-    , restylerImage :: Maybe (Maybe Text)
+    , restylerImage :: Maybe (Maybe RestylerImage)
     }
 
 -- brittany-disable-next-binding

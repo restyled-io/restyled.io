@@ -23,6 +23,7 @@ import Database.Redis (ConnectInfo(..), defaultConnectInfo)
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
 import Restyled.Env
+import Restyled.RestylerImage
 import Restyled.Yesod hiding (LogLevel(..))
 import RIO.Handler
 import Yesod.Auth.Dummy
@@ -61,8 +62,7 @@ data AppSettings = AppSettings
     , appGitHubRateLimitToken :: ByteString
     , appGitLabOAuthKeys :: Maybe OAuthKeys
     , appGitHubStudentsOAuthKeys :: Maybe OAuthKeys
-    , appRestylerImage :: String
-    , appRestylerTag :: Maybe String
+    , appRestylerImage :: RestylerImage
     , appAdmins :: [Text]
     , appAllowDummyAuth :: Bool
     , appFavicon :: FilePath
@@ -120,8 +120,10 @@ loadSettings =
                     (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_SECRET" mempty
                     )
             )
-        <*> var str "RESTYLER_IMAGE" (def "restyled/restyler")
-        <*> optional (var str "RESTYLER_TAG" mempty)
+        <*> (restylerImage
+            <$> var str "RESTYLER_IMAGE" (def "restyled/restyler")
+            <*> optional (var str "RESTYLER_TAG" mempty)
+            )
         <*> var (splitOn ',') "ADMIN_EMAILS" (def [])
         <*> switch "AUTH_DUMMY_LOGIN" mempty
         <*> var str "FAVICON" (def "config/favicon.ico")
