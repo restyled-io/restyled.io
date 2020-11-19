@@ -68,7 +68,14 @@ To process real `restyled-io/demo` Pull Requests:
 
    - Open a PR on `restyled-io/demo`,
    - Re-deliver an existing Webhook, or
-   - Use `../ops/tools/curl-webhook`, possibly with files under `fixtures/`
+   - Use `curl`, probably with files in `fixtures/`:
+
+     ```console
+     curl \
+       --header "Accept: application/json" \
+       --header "Content-Type: application/json" \
+       --data @"path/to.json" "https://restyled.ngrok.io/webhooks"
+     ```
 
 ## LICENSE
 
