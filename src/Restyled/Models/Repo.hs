@@ -166,9 +166,8 @@ upsertRepo repo@Repo {..} = upsert
 --   Restyle Machines needlessly.
 --
 -- __TODO__: it would be better to ignore this after accepting the Webhook, so
--- we could set a skipped-job and provide feedback to there users. In order to
--- accomplish this, we'll need to send author information deeping into the
--- system.
+-- we could set a skipped-job and provide feedback to users. In order to
+-- accomplish this, we'd need to send author information deeper into the system.
 --
 ignoredBots :: [Text]
 ignoredBots = ["pull[bot]"]
