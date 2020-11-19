@@ -17,6 +17,7 @@ import qualified Data.Vector as V
 import Database.Persist.Quasi
 import Database.Persist.TH
 import Restyled.PrivateRepoAllowance
+import Restyled.RestylerImage
 
 mkPersist sqlSettings $(persistFileWith lowerCaseSettings "config/models")
 

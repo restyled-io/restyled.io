@@ -6,6 +6,7 @@ where
 import Restyled.Prelude
 
 import Restyled.Models
+import Restyled.RestylerImage
 import Restyled.Settings
 
 -- brittany-disable-next-binding
@@ -18,12 +19,14 @@ dockerRunArgs settings token repo job =
     , "--env", "GITHUB_ACCESS_TOKEN=" <> unpack (atToken token)
     , "--volume", "/tmp:/tmp"
     , "--volume", "/var/run/docker.sock:/var/run/docker.sock"
-    , maybe settingsImage unpack (repoRestylerImage repo)
+    , image
     , "--job-url", jobUrl settings job, jobPrSpec job
     ]
-  where
-    settingsImage = appRestylerImage settings
-        <> maybe "" (":" <>) (appRestylerTag settings)
+ where
+    image = unpack
+        $ unRestylerImage
+        $ fromMaybe (appRestylerImage settings)
+        $ repoRestylerImage repo
 
 jobUrl :: AppSettings -> Entity Job -> String
 jobUrl AppSettings {..} (Entity jobId Job {..}) =
