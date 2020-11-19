@@ -11,7 +11,10 @@ restylers_version: dev
 restylers:
   - hlint
   - stylish-haskell
-  - brittany
+  - brittany:
+      include:
+        - "**/*.hs"
+        - "!src/Restyled/Settings.hs" # CPP
   - prettier:
       # Explicitly set parser so it works on .julius
       arguments:
