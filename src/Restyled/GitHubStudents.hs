@@ -16,6 +16,7 @@ import qualified Network.OAuth.OAuth2 as OAuth2
 import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.Time
 import Restyled.Yesod
 import qualified Yesod.Auth.OAuth2.GitHubStudents as GitHubStudents
 
@@ -56,16 +57,21 @@ handleGitHubStudent GitHubStudent { id, login, email } verified =
         | verified = addAccount planId
         | otherwise = removeAccount planId
 
-    addAccount (Entity planId _) = void $ upsert
-        MarketplaceAccount
-            { marketplaceAccountGithubId = Just id
-            , marketplaceAccountGithubLogin = login
-            , marketplaceAccountMarketplacePlan = planId
-            , marketplaceAccountGithubType = "User"
-            , marketplaceAccountEmail = email
-            , marketplaceAccountBillingEmail = email
-            }
-        [MarketplaceAccountMarketplacePlan =. planId]
+    addAccount (Entity planId _) = do
+        nextYear <- addTime (Years 1) <$> getCurrentTime
+        void $ upsert
+            MarketplaceAccount
+                { marketplaceAccountGithubId = Just id
+                , marketplaceAccountGithubLogin = login
+                , marketplaceAccountMarketplacePlan = planId
+                , marketplaceAccountGithubType = "User"
+                , marketplaceAccountEmail = email
+                , marketplaceAccountBillingEmail = email
+                , marketplaceAccountExpiresAt = Just nextYear
+                }
+            [ MarketplaceAccountMarketplacePlan =. planId
+            , MarketplaceAccountExpiresAt =. Just nextYear
+            ]
 
     removeAccount (Entity planId _) = deleteWhere
         [ MarketplaceAccountGithubLogin ==. login

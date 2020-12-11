@@ -128,6 +128,7 @@ synchronizeAccount planId account = entityKey <$> upsert
         , marketplaceAccountBillingEmail =
             GH.marketplaceAccountOrganizationBillingEmail account
         , marketplaceAccountMarketplacePlan = planId
+        , marketplaceAccountExpiresAt = Nothing
         }
     [ MarketplaceAccountGithubType =. GH.marketplaceAccountType account
     , MarketplaceAccountEmail =. GH.marketplaceAccountEmail account

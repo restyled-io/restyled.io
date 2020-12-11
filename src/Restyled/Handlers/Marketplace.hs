@@ -34,6 +34,8 @@ postRepoMarketplaceClaimR owner name = do
             badRequest "Plan does not support private repositories"
         Just PrivateRepoLimited ->
             badRequest "Plan has reached private repositories limit"
+        Just (PrivateRepoAccountExpired _) ->
+            badRequest "Plan account has expired"
 
 deleteRepoMarketplaceClaimR :: OwnerName -> RepoName -> Handler TypedContent
 deleteRepoMarketplaceClaimR owner name = do

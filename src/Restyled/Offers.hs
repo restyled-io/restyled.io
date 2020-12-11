@@ -116,6 +116,7 @@ claimOffer offerId ClaimDetails {..} = do
 
     when (n /= 1) $ throwError "Invalid Code or already claimed"
 
+    -- TODO: Implement offer expiry and match it here
     lift $ insert MarketplaceAccount
         { marketplaceAccountGithubId = Nothing
         , marketplaceAccountGithubLogin = cdInstallationLogin
@@ -123,4 +124,5 @@ claimOffer offerId ClaimDetails {..} = do
         , marketplaceAccountEmail = cdEmail
         , marketplaceAccountBillingEmail = cdEmail
         , marketplaceAccountMarketplacePlan = offerMarketplacePlan
+        , marketplaceAccountExpiresAt = Nothing
         }

@@ -1,9 +1,11 @@
 module Restyled.Time
     ( HasSeconds(..)
+    , Years(Years)
     , Days(Days)
     , Hours(Hours)
     , Minutes(Minutes)
     , Seconds(Seconds)
+    , addTime
     , subtractTime
     )
 where
@@ -12,6 +14,13 @@ import Restyled.Prelude
 
 class HasSeconds t where
     toSeconds :: t -> Seconds
+
+newtype Years = Years
+    { unYears :: Int
+    }
+
+instance HasSeconds Years where
+    toSeconds = toSeconds . Days . (365 *) . unYears
 
 newtype Days = Days
     { unDays :: Int
@@ -41,6 +50,9 @@ newtype Seconds = Seconds
 
 instance HasSeconds Seconds where
     toSeconds = id
+
+addTime :: HasSeconds t => t -> UTCTime -> UTCTime
+addTime = addUTCTime . fromIntegral . unSeconds . toSeconds
 
 subtractTime :: HasSeconds t => t -> UTCTime -> UTCTime
 subtractTime = addUTCTime . negate . fromIntegral . unSeconds . toSeconds
