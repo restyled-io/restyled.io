@@ -5,7 +5,8 @@ module Restyled.Backend.AcceptedJob
     , IgnoredJobReason(..)
     , ignoredJobReasonToLogMessage
     , ignoredJobReasonToJobLogLine
-    ) where
+    )
+where
 
 import Restyled.Prelude
 
