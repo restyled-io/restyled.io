@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+DBM_MIGRATION_STORE=$(cd "$(dirname "$0")" && pwd)/migrations
+
+DBM_DATABASE=$(curl --silent --fail --show-error \
+  --header "Authorization: Bearer $HEROKU_API_KEY" \
+  --header "Accept: application/vnd.heroku+json; version=3" \
+  https://api.heroku.com/apps/restyled-io/config-vars |
+  jq --raw-output '.DATABASE_URL')
+
+if [ -z "$DBM_DATABASE" ]; then
+  echo "Unable to determine Database URL" >&2
+  exit 1
+fi
+
+tmp=$(mktemp)
+trap 'rm -f -- "$tmp"' EXIT
+
+export DBM_DATABASE
+export DBM_MIGRATION_STORE
+stack exec -- moo-postgresql upgrade-list 2>&1 | tee "$tmp"
+
+if [ "${1:-''}" = '--check' ] && ! grep -Fqx 'Database is up to date.' "$tmp"; then
+  echo "Failing due to pending prod migrations (--check)" >&2
+  exit 1
+fi

@@ -62,10 +62,15 @@ workflows:
             - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
           before-test:
             - run: db/migrate test upgrade
+          after-test:
+            - run: db/pending-prod-migrations --check
           hlint-yaml-url:
             https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
           executor: default
           cache-prefix: v5
+
+          # Need HEROKU_API_KEY for db/pending-prod-migrations
+          context: deploy-heroku
 
       - docker-build-cached/build-and-release:
           name: image
@@ -74,6 +79,7 @@ workflows:
           image: restyled/restyled.io
           build-stages: builder
           extra-build-arguments: '--build-arg "REVISION=$CIRCLE_SHA1"'
+          context: deploy-dockerhub
 
       - heroku-container/push-and-release:
           <<: *master_only
@@ -101,3 +107,4 @@ workflows:
           requires: [release-frontend, release-backend]
           title: 'Restyled deployments'
           message: 'restyled.io deployed at ${CIRCLE_SHA1:0:10}'
+          context: pushover
