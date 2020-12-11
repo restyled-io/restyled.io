@@ -45,7 +45,10 @@ buildPrivateMarketplacePlan = MarketplacePlan
     }
 
 buildMarketplaceAccount
-    :: Maybe GitHubUserId -> GitHubUserName -> MarketplacePlanId -> MarketplaceAccount
+    :: Maybe GitHubUserId
+    -> GitHubUserName
+    -> MarketplacePlanId
+    -> MarketplaceAccount
 buildMarketplaceAccount mUserId userName planId = MarketplaceAccount
     { marketplaceAccountGithubId = mUserId
     , marketplaceAccountGithubLogin = userName
@@ -53,4 +56,5 @@ buildMarketplaceAccount mUserId userName planId = MarketplaceAccount
     , marketplaceAccountGithubType = "User"
     , marketplaceAccountEmail = Nothing
     , marketplaceAccountBillingEmail = Nothing
+    , marketplaceAccountExpiresAt = Nothing
     }
