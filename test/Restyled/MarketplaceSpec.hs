@@ -1,12 +1,12 @@
 module Restyled.MarketplaceSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 
 import Restyled.Marketplace
 import Restyled.PrivateRepoAllowance
+import Restyled.Time
 
 spec :: Spec
 spec = withApp $ do
@@ -19,21 +19,36 @@ spec = withApp $ do
             insertAccountOnPlan
                 "restyled-io"
                 (Just 2553)
+                Nothing
                 PrivateRepoAllowanceUnlimited
             repo <- insertRepo "restyled-io" "restyled.io" True
             shouldAllow repo
+
+        it "disallows private repos on expired plans" $ runDB $ do
+            expiredAt <- subtractTime (Days 1) <$> getCurrentTime
+            insertAccountOnPlan
+                "restyled-io"
+                (Just 2553)
+                (Just expiredAt)
+                PrivateRepoAllowanceUnlimited
+            repo <- insertRepo "restyled-io" "restyled.io" True
+            shouldForbidExpired repo expiredAt
 
         it "disallows private repos without a plan" $ runDB $ do
             repo <- insertRepo "restyled-io" "restyled.io" True
             shouldForbid repo MarketplacePlanNotFound
 
         it "disallows private repos on a public plan" $ runDB $ do
-            insertAccountOnPlan "restyled-io" Nothing PrivateRepoAllowanceNone
+            insertAccountOnPlan
+                "restyled-io"
+                Nothing
+                Nothing
+                PrivateRepoAllowanceNone
             repo <- insertRepo "restyled-io" "restyled.io" True
             shouldForbid repo MarketplacePlanPublicOnly
 
         it "limits repos on a limited plan" $ runDB $ do
-            insertAccountOnPlan "restyled-io" (Just 2695)
+            insertAccountOnPlan "restyled-io" (Just 2695) Nothing
                 $ PrivateRepoAllowanceLimited 1
             privateRepo1 <- insertRepo "restyled-io" "restyled.io" True
             privateRepo2 <- insertRepo "restyled-io" "restyler" True
@@ -59,6 +74,21 @@ shouldForbid repo with = do
     allows <- marketplacePlanAllows repo
     allows `shouldBe` MarketplacePlanForbids with
 
+shouldForbidExpired
+    :: (HasCallStack, MonadIO m) => Entity Repo -> UTCTime -> SqlPersistT m ()
+shouldForbidExpired repo expiredAt = do
+    allows <- marketplacePlanAllows repo
+
+    -- We want to check for the Expired case without actually comparing the
+    -- expiredAt value, since we might fail on ms differences. In the unexpected
+    -- case, we only use shouldBe with that value to provide an informative
+    -- message.
+    case allows of
+        MarketplacePlanForbids (MarketplacePlanAccountExpired _) -> pure ()
+        x -> x `shouldBe` expected
+  where
+    expected = MarketplacePlanForbids $ MarketplacePlanAccountExpired expiredAt
+
 insertRepo
     :: MonadIO m
     => OwnerName
@@ -80,9 +110,10 @@ insertAccountOnPlan
     :: MonadIO m
     => GitHubUserName
     -> Maybe Int
+    -> Maybe UTCTime
     -> PrivateRepoAllowance
     -> SqlPersistT m ()
-insertAccountOnPlan username mPlanGitHubId planAllowance = do
+insertAccountOnPlan username mPlanGitHubId mExpiresAt planAllowance = do
     planId <- insert MarketplacePlan
         { marketplacePlanGithubId = mPlanGitHubId
         , marketplacePlanPrivateRepoAllowance = planAllowance
@@ -96,5 +127,5 @@ insertAccountOnPlan username mPlanGitHubId planAllowance = do
         , marketplaceAccountGithubType = "User"
         , marketplaceAccountEmail = Nothing
         , marketplaceAccountBillingEmail = Nothing
-        , marketplaceAccountExpiresAt = Nothing
+        , marketplaceAccountExpiresAt = mExpiresAt
         }

@@ -2,8 +2,7 @@ module Restyled.PrivateRepoEnabled
     ( PrivateRepoEnabled(..)
     , enableMarketplaceRepo
     , disableMarketplaceRepo
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -15,12 +14,22 @@ data PrivateRepoEnabled
     = PrivateRepoEnabled
     | PrivateRepoNotAllowed
     | PrivateRepoLimited
+    | PrivateRepoAccountExpired UTCTime
 
 enableMarketplaceRepo
     :: MonadIO m => Entity Repo -> SqlPersistT m (Maybe PrivateRepoEnabled)
 enableMarketplaceRepo (Entity repoId repo) = runMaybeT $ do
+    now <- lift getCurrentTime
     account <- fetchMarketplaceAccountForRepoT repo
-    enableMarketplaceRepoIdForAccountT repoId account
+
+    let mExpiresAt = marketplaceAccountExpiresAt $ entityVal account
+        mExpiredAt = do
+            expiresAt <- mExpiresAt
+            expiresAt <$ guard (now > expiresAt)
+
+    case mExpiredAt of
+        Nothing -> enableMarketplaceRepoIdForAccountT repoId account
+        Just expiredAt -> pure $ PrivateRepoAccountExpired expiredAt
 
 enableMarketplaceRepoIdForAccountT
     :: MonadIO m

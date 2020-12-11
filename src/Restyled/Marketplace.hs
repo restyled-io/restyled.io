@@ -10,8 +10,7 @@ module Restyled.Marketplace
     , MarketplacePlanLimitation(..)
     , whenMarketplacePlanForbids
     , isPrivateRepoPlan
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -48,6 +47,7 @@ data MarketplacePlanLimitation
     = MarketplacePlanNotFound
     | MarketplacePlanPublicOnly
     | MarketplacePlanMaxRepos
+    | MarketplacePlanAccountExpired UTCTime
     deriving stock (Eq, Show)
 
 marketplacePlanAllows
@@ -68,6 +68,8 @@ marketplacePlanAllowsPrivate repo = do
             MarketplacePlanForbids MarketplacePlanPublicOnly
         Just PrivateRepoLimited ->
             MarketplacePlanForbids MarketplacePlanMaxRepos
+        Just (PrivateRepoAccountExpired expiredAt) ->
+            MarketplacePlanForbids $ MarketplacePlanAccountExpired expiredAt
 
 whenMarketplacePlanForbids
     :: Applicative f

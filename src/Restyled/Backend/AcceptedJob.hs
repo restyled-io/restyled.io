@@ -5,8 +5,7 @@ module Restyled.Backend.AcceptedJob
     , IgnoredJobReason(..)
     , ignoredJobReasonToLogMessage
     , ignoredJobReasonToJobLogLine
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -53,6 +52,7 @@ ignoredJobReasonToLogMessage = \case
     PlanLimitation _ MarketplacePlanPublicOnly ->
         "Public-only Marketplace Plan"
     PlanLimitation _ MarketplacePlanMaxRepos -> "Maximum private repos in use"
+    PlanLimitation _ (MarketplacePlanAccountExpired _) -> "Account expired"
     NewerJobInProgress _ -> "Newer Job in progress"
 
 ignoredJobReasonToJobLogLine :: IgnoredJobReason -> String
@@ -76,6 +76,14 @@ ignoredJobReasonToJobLogLine = unlines . \case
     PlanLimitation _ MarketplacePlanMaxRepos ->
         [ "You've reached the limit for private repositories on this plan."
         , "Upgrade your plan at https://github.com/marketplace/restyled-io"
+        ]
+    PlanLimitation _ (MarketplacePlanAccountExpired expiredAt) ->
+        [ "Your Account expired at " <> show expiredAt
+        , "You can purchase a new plan at https://github.com/marketplace/restyled-io"
+        , ""
+        , "If you are on our GitHub Students plan, please re-verify at https://restyled.io/github-students"
+        , ""
+        , "If you believe this is an error, please reach out to support@restyled.io"
         ]
     NewerJobInProgress (Entity jobId job) ->
         [ "Newer Job #" <> unpack (toPathPiece jobId) <> " already in progress."
