@@ -1,6 +1,7 @@
 module Restyled.MarketplaceSpec
     ( spec
-    ) where
+    )
+where
 
 import Restyled.Test
 
