@@ -59,3 +59,4 @@ COPY --from=builder /usr/local/bin/docker /usr/local/bin/docker
 # Static
 COPY static /app/static
 RUN mkdir -p /app/static/tmp
+
