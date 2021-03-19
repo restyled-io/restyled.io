@@ -5,8 +5,7 @@ module Restyled.Backend.DockerRunJob
     -- * Useful utility
     -- | TODO: find a new home
     , chomp
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -14,6 +13,7 @@ import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBS8
 import Data.Time.ISO8601 (formatISO8601)
 import Restyled.Backend.DockerRunArgs
+import Restyled.Backend.MissingDaemonError
 import Restyled.Models
 import Restyled.Settings
 
@@ -46,20 +46,35 @@ dockerRunJob
 dockerRunJob (Entity _ repo) job = do
     settings <- view settingsL
     token <- repoInstallationToken settings repo
-    let args = "run" : "--detach" : dockerRunArgs settings token repo job
+    handleAny loggedExitFailure
+        $ handleJust toMissingDaemonError onMissingDaemonError
+        $ runJobContainer job
+        $ "run"
+        : "--detach"
+        : dockerRunArgs settings token repo job
 
-    handleAny loggedExitFailure $ do
-        container <- chomp <$> proc "docker" args readProcessStdout_
+runJobContainer
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasDB env
+       , HasProcessContext env
+       )
+    => Entity Job
+    -> [String]
+    -> m ExitCode
+runJobContainer job args = do
+    container <- chomp <$> proc "docker" args readProcessStdout_
 
-        -- TODO
-        -- capture job "system"
-        --     $ "Running on "
-        --     <> unpack restyleMachineName
-        --     <> " ("
-        --     <> container
-        --     <> ")"
+    -- TODO
+    -- capture job "system"
+    --     $ "Running on "
+    --     <> unpack restyleMachineName
+    --     <> " ("
+    --     <> container
+    --     <> ")"
 
-        followJobContainer Nothing job container
+    followJobContainer Nothing job container
 
 followJobContainer
     :: ( MonadUnliftIO m
