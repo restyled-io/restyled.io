@@ -12,13 +12,13 @@ import Restyled.Prelude
 
 import qualified Data.Map as Map
 import qualified Data.Text.IO as T
-import Restyled.Models
 import RIO.Directory
     ( createDirectoryIfMissing
     , doesDirectoryExist
     , getHomeDirectory
     , removeDirectoryRecursive
     )
+import Restyled.Models
 import System.FilePath ((</>))
 
 -- | Run a process on a @'RestyleMachine'@s
