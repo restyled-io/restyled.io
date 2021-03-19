@@ -44,6 +44,7 @@ library:
   dependencies:
     - aeson
     - aeson-casing
+    - aeson-pretty
     - ansi-terminal
     - blaze-html
     - blaze-markup
