@@ -1,25 +1,25 @@
 module Restyled.Backend.RestyleMachine
     ( withRestyleMachineEnv
+    , getCurrentRestyleMachine
+    , disableRestyleMachine
     , deleteRestyleMachine
 
     -- * Exported for testing
     , withExtraEnvVars
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
 import qualified Data.Map as Map
 import qualified Data.Text.IO as T
-import Restyled.Models
 import RIO.Directory
     ( createDirectoryIfMissing
     , doesDirectoryExist
     , getHomeDirectory
     , removeDirectoryRecursive
     )
+import Restyled.Models
 import System.FilePath ((</>))
-
 
 -- | Run a process on a @'RestyleMachine'@s
 withRestyleMachineEnv
@@ -37,6 +37,22 @@ withRestyleMachineEnv machine f = do
         , ("DOCKER_TLS_VERIFY", "1")
         ]
         f
+
+getCurrentRestyleMachine
+    :: (MonadIO m, MonadReader env m, HasProcessContext env)
+    => SqlPersistT m (Maybe (Entity RestyleMachine))
+getCurrentRestyleMachine = runMaybeT $ do
+    host <- MaybeT $ lift $ lookupEnvFromContext "DOCKER_HOST"
+    selectFirstT [RestyleMachineHost ==. host] []
+
+disableRestyleMachine :: MonadIO m => RestyleMachineId -> SqlPersistT m Bool
+disableRestyleMachine machineId = do
+    othersExist <- selectExists
+        [RestyleMachineId !=. machineId, RestyleMachineEnabled ==. True]
+
+    if othersExist
+        then True <$ update machineId [RestyleMachineEnabled =. False]
+        else pure False
 
 deleteRestyleMachine :: MonadIO m => Entity RestyleMachine -> SqlPersistT m ()
 deleteRestyleMachine (Entity machineId machine) = do

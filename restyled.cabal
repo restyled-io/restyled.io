@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e216828535fede457603c08e1115259e2f721491e46238695316be6f03d26e88
+-- hash: c71755fa803077437b75116d91da59e7d09c237594ba6da4db37be2bd0316ec2
 
 name:           restyled
 version:        0.1.1.0
@@ -41,6 +41,7 @@ library
       Restyled.Backend.ExecRestyler
       Restyled.Backend.Foundation
       Restyled.Backend.MarketplaceSync
+      Restyled.Backend.MissingDaemonError
       Restyled.Backend.Reconcile
       Restyled.Backend.RestyleMachine
       Restyled.Backend.Webhook
@@ -114,6 +115,7 @@ library
   build-depends:
       aeson
     , aeson-casing
+    , aeson-pretty
     , ansi-terminal
     , base
     , blaze-html

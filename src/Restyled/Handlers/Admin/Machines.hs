@@ -10,8 +10,7 @@ module Restyled.Handlers.Admin.Machines
     , deleteAdminMachineR
     , getAdminMachineInfoR
     , getAdminMachinePruneR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -23,15 +22,6 @@ import Restyled.Models
 import Restyled.Settings
 import Restyled.WebSockets
 import Restyled.Yesod
-
-machineForm :: Form (Handler RestyleMachine)
-machineForm =
-    renderDivs
-        $ createMachineGetRestyleMachine
-        <$> areq jsonField "Machine JSON" { fsAttrs = attrs } Nothing
-  where
-    attrs :: [(Text, Text)]
-    attrs = [("placeholder", createMachinePlaceholder), ("rows", "30")]
 
 getAdminMachinesR :: Handler TypedContent
 getAdminMachinesR = do
@@ -46,7 +36,7 @@ getAdminMachinesR = do
 
 getAdminMachinesNewR :: Handler Html
 getAdminMachinesNewR = do
-    (widget, enctype) <- generateFormPost machineForm
+    (widget, enctype) <- generateFormPost createMachineForm
 
     adminLayout $ do
         setTitle "Restyled Admin / New Machine"
@@ -55,7 +45,7 @@ getAdminMachinesNewR = do
 postAdminMachinesR :: Handler TypedContent
 postAdminMachinesR = selectRep $ do
     provideRep @_ @Html $ do
-        ((result, widget), enctype) <- runFormPost machineForm
+        ((result, widget), enctype) <- runFormPost createMachineForm
 
         case result of
             FormSuccess getMachine -> do

@@ -13,8 +13,7 @@ module Restyled.Yesod
 
     -- * Re-exports
     , module X
-    )
-where
+    ) where
 
 import Network.HTTP.Types.Status as X
 import RIO.Handler as X ()
@@ -39,26 +38,20 @@ getEntity404
 getEntity404 k = Entity k <$> get404 k
 
 jsonField
-    :: ( Monad m
-       , RenderMessage (HandlerSite m) FormMessage
-       , FromJSON a
-       , ToJSON a
-       )
-    => Field m a
-jsonField = Field
+    :: (Monad m, RenderMessage (HandlerSite m) FormMessage, FromJSON a)
+    => (a -> Text)
+    -> Field m a
+jsonField enc = Field
     { fieldParse = parseHelper parseVal
     , fieldView = \theId name attrs val isReq -> toWidget [hamlet|
 $newline never
-<textarea :isReq:required="" id="#{theId}" name="#{name}" *{attrs}>#{showVal val}
+<textarea :isReq:required="" id="#{theId}" name="#{name}" *{attrs}>#{either id enc val}
 |]
     , fieldEnctype = UrlEncoded
     }
   where
     parseVal :: FromJSON a => Text -> Either FormMessage a
     parseVal = first (MsgInvalidEntry . pack) . eitherDecodeStrict . encodeUtf8
-
-    showVal :: ToJSON a => Either e a -> Text
-    showVal = either (const "") $ decodeUtf8 . encodeStrict
 
 sendResponseCSV
     :: forall m t a r

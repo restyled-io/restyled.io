@@ -1,13 +1,16 @@
 module Restyled.Admin.CreateMachine
-    ( createMachinePlaceholder
+    ( createMachineForm
     , createMachineGetRestyleMachine
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
+import Data.Aeson.Encode.Pretty
+import Data.ByteString.Lazy as BSL
 import Restyled.Backend.RestyleMachine
+import Restyled.Foundation
 import Restyled.Models
+import Restyled.Yesod
 
 data CreateMachine = CreateMachine
     { name :: Text
@@ -19,16 +22,34 @@ data CreateMachine = CreateMachine
     deriving stock Generic
     deriving anyclass (FromJSON, ToJSON)
 
-createMachinePlaceholder :: Text
-createMachinePlaceholder = mconcat
-    [ "{"
-    , "\n  \"name\": \"...\","
-    , "\n  \"host\": \"...\","
-    , "\n  \"certificateAuthority\": \"...\","
-    , "\n  \"certificateAuthority\": \"...\","
-    , "\n  \"privateKey\": \"...\","
-    , "\n}"
-    ]
+createMachineForm :: Form (Handler RestyleMachine)
+createMachineForm = renderDivs $ createMachineGetRestyleMachine <$> areq
+    (jsonField encodeCreateMachine)
+    ("Machine JSON" { fsAttrs = [("rows", "30")] })
+    (Just createMachineExample)
+
+encodeCreateMachine :: CreateMachine -> Text
+encodeCreateMachine = decodeUtf8 . BSL.toStrict . encodePretty' c
+  where
+    c = defConfig
+        { confCompare =
+            keyOrder
+                [ "name"
+                , "host"
+                , "certificateAuthority"
+                , "certificate"
+                , "privateKey"
+                ]
+        }
+
+createMachineExample :: CreateMachine
+createMachineExample = CreateMachine
+    { name = "..."
+    , host = "..."
+    , certificateAuthority = ""
+    , certificate = ""
+    , privateKey = ""
+    }
 
 createMachineGetRestyleMachine
     :: ( MonadUnliftIO m
