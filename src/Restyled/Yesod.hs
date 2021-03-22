@@ -7,7 +7,6 @@ module Restyled.Yesod
 
     -- * Fields
     , jsonField
-    , jsonFieldWith
 
     -- * TypedContent
     , sendResponseCSV
@@ -39,19 +38,10 @@ getEntity404
 getEntity404 k = Entity k <$> get404 k
 
 jsonField
-    :: ( Monad m
-       , RenderMessage (HandlerSite m) FormMessage
-       , FromJSON a
-       , ToJSON a
-       )
-    => Field m a
-jsonField = jsonFieldWith $ decodeUtf8 . encodeStrict
-
-jsonFieldWith
     :: (Monad m, RenderMessage (HandlerSite m) FormMessage, FromJSON a)
     => (a -> Text)
     -> Field m a
-jsonFieldWith enc = Field
+jsonField enc = Field
     { fieldParse = parseHelper parseVal
     , fieldView = \theId name attrs val isReq -> toWidget [hamlet|
 $newline never

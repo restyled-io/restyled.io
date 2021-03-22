@@ -24,7 +24,7 @@ data CreateMachine = CreateMachine
 
 createMachineForm :: Form (Handler RestyleMachine)
 createMachineForm = renderDivs $ createMachineGetRestyleMachine <$> areq
-    (jsonFieldWith encodeCreateMachine)
+    (jsonField encodeCreateMachine)
     ("Machine JSON" { fsAttrs = [("rows", "30")] })
     (Just createMachineExample)
 
