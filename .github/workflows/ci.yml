@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: restyled_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          curl --location --output .hlint.yaml \
+            https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
+      - uses: freckle/stack-cache-action@v1
+      - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
+      - run: db/migrate test upgrade
+      - uses: freckle/stack-action@v1.1
+      - run: db/pending-prod-migrations --check
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+  image:
+    runs-on: ubuntu-latest
+
+    outputs:
+      image: ${{ steps.prep.outputs.image }}
+
+    steps:
+      - id: prep
+        run: |
+          image=restyled/restyled.io:$(echo "${{ github.sha }}" | head -c7)
+          echo "::set-output name=image::${image}"
+
+      - id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-image-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-image-
+
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          build-args: |
+            REVISION=${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          push: true
+          tags: ${{ steps.prep.outputs.image }}
+
+      # Avoids ever-growing cache hitting limits
+      - run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+
+    needs: [build, image]
+
+    steps:
+      - run: |
+          cat >Dockerfile.web <<'EOM'
+          FROM ${{ needs.image.outputs.image }}
+          CMD ["/app/restyled.io", "web"]
+          EOM
+
+      - uses: gonuit/heroku-docker-deploy@v1.3.3
+        with:
+          email: ${{ secrets.HEROKU_EMAIL }}
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: restyled-io
+          dockerfile_name: Dockerfile.web
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - run: |
+          cat >/tmp/parameters.json <<'EOM'
+          [ { "ParameterKey": "AppsWebhooksDesiredCount"
+            , "UsePreviousValue": true
+            }
+          , { "ParameterKey": "Environment"
+            , "UsePreviousValue": true
+            }
+          , { "ParameterKey": "RestyledImage"
+            , "UsePreviousValue": "${{ needs.image.outputs.image }}"
+            }
+          , { "ParameterKey": "RestylerImage"
+            , "UsePreviousValue": true
+            }
+          ]
+          EOM
+
+      - uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: prod-services
+          template: https://s3.amazonaws.com/infra.restyled.io/templates/prod/services.yaml
+          parameter-overrides: file:///tmp/parameters.json
+
+      - uses: desiderati/github-action-pushover@v1
+        if: ${{ always() }}
+        with:
+          job-status: ${{ job.status }}
+          pushover-api-token: ${{ secrets.PUSHOVER_API_TOKEN }}
+          pushover-user-key: ${{ secrets.PUSHOVER_USER_KEY }}
