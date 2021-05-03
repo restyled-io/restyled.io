@@ -122,7 +122,7 @@ jobs:
             , "UsePreviousValue": true
             }
           , { "ParameterKey": "RestyledImage"
-            , "UsePreviousValue": "${{ needs.image.outputs.image }}"
+            , "ParameterValue": "${{ needs.image.outputs.image }}"
             }
           , { "ParameterKey": "RestylerImage"
             , "UsePreviousValue": true
