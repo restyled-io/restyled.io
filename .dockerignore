@@ -4,7 +4,6 @@
 .dockerignore
 .env*
 .git
-!.git/refs/heads/master
 .stack-work
 Dockerfile
 Makefile
