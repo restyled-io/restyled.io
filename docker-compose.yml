@@ -10,6 +10,6 @@ services:
       POSTGRES_PASSWORD: password
 
   redis:
-    image: redis
+    image: redis:6.0.13
     ports:
       - 6379:6379
