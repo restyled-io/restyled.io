@@ -115,7 +115,7 @@ jobs:
           committer-name: Restyled Commits
           committer-email: commits@restyled.io
           repository: restyled-io/ops
-          stacks: cg-app/stacks/*/*/services/*.yaml
+          stacks: cg-app/stacks/*/*/prod/services/*.yaml
 
       - uses: desiderati/github-action-pushover@v1
         if: ${{ always() }}
