@@ -9,12 +9,12 @@ remote_files:
 restylers_version: dev
 
 restylers:
-  - hlint
-  - stylish-haskell
   - brittany:
       include:
         - "**/*.hs"
         - "!src/Restyled/Settings.hs" # CPP
+  - hlint
+  - stylish-haskell
   - prettier:
       # Explicitly set parser so it works on .julius
       arguments:
