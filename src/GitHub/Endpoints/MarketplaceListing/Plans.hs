@@ -6,7 +6,7 @@ module GitHub.Endpoints.MarketplaceListing.Plans
 
 import Prelude
 
-import Data.Aeson ((.:), FromJSON(..), withObject)
+import Data.Aeson (FromJSON(..), withObject, (.:))
 import Data.Text (Text)
 import Data.Vector (Vector)
 import GitHub.Auth
