@@ -3,8 +3,7 @@ module Restyled.Test.Factories
     , buildPrivateRepo
     , buildPrivateMarketplacePlan
     , buildMarketplaceAccount
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -43,6 +42,7 @@ buildPrivateMarketplacePlan = MarketplacePlan
     , marketplacePlanName = "Solo"
     , marketplacePlanDescription = ""
     , marketplacePlanMonthlyRevenue = fromCents 0
+    , marketplacePlanRetired = False
     }
 
 buildMarketplaceAccount
