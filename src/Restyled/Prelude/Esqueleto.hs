@@ -7,8 +7,7 @@ module Restyled.Prelude.Esqueleto
     , unValue2
     , unValue3
     , unValue5
-    )
-where
+    ) where
 
 import Restyled.Prelude as X hiding
     ( LogFunc
@@ -16,6 +15,7 @@ import Restyled.Prelude as X hiding
     , Value
     , count
     , delete
+    , exists
     , isNothing
     , on
     , selectSource
@@ -39,7 +39,8 @@ import Restyled.Prelude as X hiding
 
 import Database.Esqueleto as X
 
-import Database.Esqueleto.Internal.Sql (SqlSelect, veryUnsafeCoerceSqlExprValue)
+import Database.Esqueleto.Internal.Internal
+    (SqlSelect, veryUnsafeCoerceSqlExprValue)
 import Database.Esqueleto.PostgreSQL
 
 selectMap

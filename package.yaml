@@ -35,6 +35,8 @@ ghc-options: -Weverything
   -Wno-unsafe
   -Wno-missing-import-lists
   -Wno-all-missed-specialisations
+  -Wno-missing-safe-haskell-mode
+  -Wno-prepositive-qualified-module
 
 dependencies:
   - base
@@ -74,7 +76,6 @@ library:
     - jwt
     - lens
     - lens-aeson
-    - load-env
     - megaparsec
     - monad-logger
     - mtl
@@ -105,10 +106,10 @@ library:
     - websockets
     - yesod
     - yesod-auth
-    - yesod-auth-oauth2 >= 0.6.1.5
+    - yesod-auth-oauth2
     - yesod-core
     - yesod-form
-    - yesod-paginator >= 1.1.0.2
+    - yesod-paginator
     - yesod-persistent
     - yesod-static
     - yesod-websockets
