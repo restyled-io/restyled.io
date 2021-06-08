@@ -3,8 +3,7 @@
 module Restyled.GitHubStudents
     ( giftGitHubStudents
     , githubStudentsPlan
-    )
-where
+    ) where
 
 import Restyled.Prelude hiding (id)
 
@@ -102,4 +101,5 @@ githubStudentsPlan = MarketplacePlan
     , marketplacePlanName = "GitHub Students"
     , marketplacePlanDescription = "Free Unlimited for verified GitHub Students"
     , marketplacePlanMonthlyRevenue = fromCents 0
+    , marketplacePlanRetired = False
     }

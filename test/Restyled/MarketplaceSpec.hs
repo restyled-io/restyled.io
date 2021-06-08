@@ -1,7 +1,6 @@
 module Restyled.MarketplaceSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 
@@ -121,6 +120,7 @@ insertAccountOnPlan username mPlanGitHubId mExpiresAt planAllowance = do
         , marketplacePlanName = ""
         , marketplacePlanDescription = ""
         , marketplacePlanMonthlyRevenue = fromCents 0
+        , marketplacePlanRetired = False
         }
     insert_ MarketplaceAccount
         { marketplaceAccountGithubId = Nothing

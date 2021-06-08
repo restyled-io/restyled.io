@@ -6,8 +6,7 @@ module Restyled.Handlers.Admin.Marketplace
     , getAdminMarketplacePlansR
     , getAdminMarketplaceAccountsR
     , patchAdminMarketplaceAccountR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -40,7 +39,12 @@ mpwaMonthlyRevenue MarketplacePlanWithAccounts {..} =
 getAdminMarketplaceR :: Handler Html
 getAdminMarketplaceR = do
     (plans, noPlanRepoOwners) <- runDB $ do
-        plans' <- selectList [] [Asc MarketplacePlanGithubId]
+        plans' <- selectList
+            []
+            [ Asc MarketplacePlanRetired
+            , Desc MarketplacePlanMonthlyRevenue
+            , Asc MarketplacePlanName
+            ]
         plans <- for plans' $ \plan ->
             MarketplacePlanWithAccounts plan <$> selectList
                 [MarketplaceAccountMarketplacePlan ==. entityKey plan]
