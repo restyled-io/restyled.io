@@ -6,12 +6,11 @@ module Restyled.Handlers.Admin.Marketplace
     , getAdminMarketplacePlansR
     , getAdminMarketplaceAccountsR
     , patchAdminMarketplaceAccountR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
-import Data.List (nub)
+import Data.List (genericLength, nub)
 import Restyled.Foundation
 import Restyled.Marketplace (isPrivateRepoPlan)
 import Restyled.Models
@@ -32,10 +31,20 @@ mpwaOwnerNames = map (accountOwner . entityVal) . mpwaAccounts
     accountOwner :: MarketplaceAccount -> OwnerName
     accountOwner = nameToName . marketplaceAccountGithubLogin
 
+mpwaMonthlyRevenue :: MarketplacePlanWithAccounts -> UsCents
+mpwaMonthlyRevenue MarketplacePlanWithAccounts {..} =
+    genericLength mpwaAccounts
+        * marketplacePlanMonthlyRevenue (entityVal mpwaPlan)
+
 getAdminMarketplaceR :: Handler Html
 getAdminMarketplaceR = do
     (plans, noPlanRepoOwners) <- runDB $ do
-        plans' <- selectList [] [Asc MarketplacePlanGithubId]
+        plans' <- selectList
+            []
+            [ Asc MarketplacePlanRetired
+            , Desc MarketplacePlanMonthlyRevenue
+            , Asc MarketplacePlanName
+            ]
         plans <- for plans' $ \plan ->
             MarketplacePlanWithAccounts plan <$> selectList
                 [MarketplaceAccountMarketplacePlan ==. entityKey plan]

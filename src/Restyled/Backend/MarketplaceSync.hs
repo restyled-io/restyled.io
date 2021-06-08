@@ -1,7 +1,6 @@
 module Restyled.Backend.MarketplaceSync
     ( runSynchronize
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -109,9 +108,15 @@ synchronizePlan plan = entityKey <$> upsert
         , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceNone
         , marketplacePlanName = GH.marketplacePlanName plan
         , marketplacePlanDescription = GH.marketplacePlanDescription plan
+        , marketplacePlanMonthlyRevenue = fromCents
+            $ GH.marketplacePlanMonthlyPriceInCents plan
+        , marketplacePlanRetired = GH.marketplacePlanState plan == "retired"
         }
     [ MarketplacePlanName =. GH.marketplacePlanName plan
     , MarketplacePlanDescription =. GH.marketplacePlanDescription plan
+    , MarketplacePlanMonthlyRevenue
+        =. fromCents (GH.marketplacePlanMonthlyPriceInCents plan)
+    , MarketplacePlanRetired =. GH.marketplacePlanState plan == "retired"
     ]
 
 synchronizeAccount

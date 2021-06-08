@@ -1,4 +1,10 @@
 <section>
+  <p>
+    <strong>
+      Monthly Recurring Revenue
+    #{mrr}
+
+<section>
   <form>
    <aside .right>
       <select #range>

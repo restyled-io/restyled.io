@@ -1,9 +1,14 @@
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DerivingVia #-}
 
 module Restyled.Prelude
     (
+    -- * Newtypes
+      UsCents
+    , fromCents
+
     -- * Errors
-      fromLeftM
+    , fromLeftM
     , untryIO
 
     -- * Persist
@@ -31,8 +36,7 @@ module Restyled.Prelude
 
     -- * Re-exports
     , module X
-    )
-where
+    ) where
 
 import RIO as X hiding (Handler)
 
@@ -67,8 +71,30 @@ import SVCS.Payload as X
 import Web.PathPieces as X
 
 import qualified Data.Text.Lazy as TL
+import Database.Persist.Sql (PersistFieldSql)
 import Formatting (Format, format, (%))
 import qualified Formatting.Formatters as Formatters
+import Text.Blaze (ToMarkup(..))
+
+newtype UsCents = UsCents
+    { _usCents :: Natural
+    }
+    deriving newtype
+        ( Eq
+        , FromJSON
+        , Num
+        , Show
+        , ToJSON
+        )
+    deriving (PersistField, PersistFieldSql) via OverflowNatural
+
+-- TODO: Formatters.fixed 2 + Formatters.commas
+instance ToMarkup UsCents where
+    toMarkup (UsCents c) = mconcat
+        ["$", toMarkup $ round @Double @Int $ fromIntegral c / 100, ".00"]
+
+fromCents :: Natural -> UsCents
+fromCents = UsCents
 
 fromLeftM :: Monad m => (a -> m b) -> m (Either a b) -> m b
 fromLeftM f me = either f pure =<< me
