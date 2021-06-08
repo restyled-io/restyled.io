@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 16a807909e0602ce5dbd725b60b4270fa26378157fb0f9b5d2d4aa048f71e2b4
+-- hash: c72964791d775f892838d157c1cd2e27d7a56e53ee370dc5e5c3967a329ecadb
 
 name:           restyled
 version:        0.1.1.0
@@ -136,7 +136,7 @@ library
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   build-depends:
       aeson
     , aeson-casing
@@ -171,7 +171,6 @@ library
     , jwt
     , lens
     , lens-aeson
-    , load-env
     , megaparsec
     , monad-logger
     , mtl
@@ -202,10 +201,10 @@ library
     , websockets
     , yesod
     , yesod-auth
-    , yesod-auth-oauth2 >=0.6.1.5
+    , yesod-auth-oauth2
     , yesod-core
     , yesod-form
-    , yesod-paginator >=1.1.0.2
+    , yesod-paginator
     , yesod-persistent
     , yesod-static
     , yesod-websockets
@@ -243,7 +242,7 @@ executable restyled.io
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -threaded -rtsopts -with-rtsopts=-T
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -threaded -rtsopts -with-rtsopts=-T
   build-depends:
       base
     , load-env
@@ -308,7 +307,7 @@ test-suite test
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
   build-depends:
       QuickCheck
     , base

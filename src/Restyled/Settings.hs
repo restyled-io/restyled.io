@@ -22,10 +22,10 @@ import qualified Data.Default as Default (def)
 import Database.Redis (ConnectInfo(..), defaultConnectInfo)
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
+import RIO.Handler
 import Restyled.Env
 import Restyled.RestylerImage
 import Restyled.Yesod hiding (LogLevel(..))
-import RIO.Handler
 import Yesod.Auth.Dummy
 import Yesod.Core.Types (HandlerData(..))
 
@@ -94,6 +94,8 @@ loadSettings =
         $ AppSettings
         <$> (PostgresConf
             <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
+            <*> var auto "PGPOOLSTRIPES" (def 2)
+            <*> var auto "PGPOOLIDLETIMEOUT" (def 30)
             <*> var auto "PGPOOLSIZE" (def 10)
             )
         <*> var connectInfo "REDIS_URL" (def defaultConnectInfo)
