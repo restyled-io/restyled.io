@@ -3,6 +3,7 @@
   , "^Paths_.*"
   , "^Restyled\\.Handlers\\..*(get|patch|put|post|delete|options).*R\$"
   , "^Restyled\\.Handlers\\.Admin\\.Marketplace\\.mpwaDescription\$"
+  , "^Restyled\\.Handlers\\.Admin\\.Marketplace\\.mpwaMonthlyRevenue\$"
   , "^Restyled\\.Handlers\\.Profile\\.getMarketplaceAction\$"
   , "^Restyled\\.Handlers\\.Profile\\.githubIdentityCard\$"
   , "^Restyled\\.Handlers\\.Profile\\.isLimitedPlan\$"
