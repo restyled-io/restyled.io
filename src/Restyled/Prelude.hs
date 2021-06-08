@@ -1,4 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DerivingVia #-}
 
 module Restyled.Prelude
     (
@@ -35,8 +36,7 @@ module Restyled.Prelude
 
     -- * Re-exports
     , module X
-    )
-where
+    ) where
 
 import RIO as X hiding (Handler)
 
@@ -83,11 +83,10 @@ newtype UsCents = UsCents
         ( Eq
         , FromJSON
         , Num
-        , PersistField
-        , PersistFieldSql
         , Show
         , ToJSON
         )
+    deriving (PersistField, PersistFieldSql) via OverflowNatural
 
 -- TODO: Formatters.fixed 2 + Formatters.commas
 instance ToMarkup UsCents where
