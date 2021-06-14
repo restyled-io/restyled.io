@@ -167,10 +167,20 @@ deleteUnsynchronized synchronizedAccountIds = do
 vconcat :: Vector (Vector a) -> [a]
 vconcat = V.toList . V.concat . V.toList
 
-retryWithBackoff :: (MonadIO m, Exception e) => IO (Either e a) -> m a
+retryWithBackoff
+    :: (MonadIO m, MonadReader env m, HasLogFunc env, Exception e)
+    => IO (Either e a)
+    -> m a
 retryWithBackoff f = do
     result <- retrying
         (exponentialBackoff 1000000 <> limitRetries 5)
-        (\_ -> pure . isLeft)
+        (\_ -> either (\ex -> True <$ logRetry ex) (const $ pure False))
         (\_ -> liftIO f)
     either throwIO pure result
+  where
+    logRetry
+        :: (MonadIO m, MonadReader env m, HasLogFunc env, Exception e)
+        => e
+        -> m ()
+    logRetry ex =
+        logWarn $ "Retrying (" <> fromString (displayException ex) <> ")"
