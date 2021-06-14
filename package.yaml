@@ -86,6 +86,7 @@ library:
     - persistent-qq
     - persistent-template
     - random
+    - retry
     - rio
     - rio-orphans
     - safe-exceptions

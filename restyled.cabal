@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c72964791d775f892838d157c1cd2e27d7a56e53ee370dc5e5c3967a329ecadb
+-- hash: 9b8ca9ea909a8b24bc24f4e19d4f139dc68370949950c4a421ceb3f02b82ef93
 
 name:           restyled
 version:        0.1.1.0
@@ -181,6 +181,7 @@ library
     , persistent-qq
     , persistent-template
     , random
+    , retry
     , rio
     , rio-orphans
     , safe-exceptions
