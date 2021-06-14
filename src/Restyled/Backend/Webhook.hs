@@ -3,8 +3,7 @@ module Restyled.Backend.Webhook
     , awaitWebhook
     , processWebhook
     , queueDepth
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -122,7 +121,8 @@ throttleWarn act = do
     delaySeconds :: Int
     delaySeconds = 60
 
-fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
+fromNotProcessed
+    :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
 fromNotProcessed = \case
     WebhookIgnored reason ->
         logDebug $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason
