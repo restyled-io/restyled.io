@@ -108,7 +108,7 @@ throttleWarn act = do
     mVal <- act
     case mVal of
         Nothing -> do
-            logError "No Restyle Machine available, sleeping 1m"
+            logWarn "No Restyle Machine available, sleeping 1m"
 
             -- Pause for some time, but also run a reconcile while we wait
             a <- async $ threadDelay $ delaySeconds * 1000000
