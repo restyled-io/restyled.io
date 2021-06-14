@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 429158d756bec3236d6c0ed7ef3cf8cf7c5dfee6e9a54a7f808e63bb4a2d608b
+-- hash: 3a34f23338c6e2facc056d82bde274d6b08581dfb0f66e2de3a25c7420ad8018
 
 name:           restyled
 version:        0.1.1.0
@@ -182,6 +182,7 @@ library
     , persistent-template
     , postgresql-simple
     , random
+    , retry
     , rio
     , rio-orphans
     , safe-exceptions
