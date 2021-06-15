@@ -4,8 +4,7 @@ module Restyled.Backend.Foundation
     , loadBackendHandle
     , runDB
     , runRedis
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -46,8 +45,9 @@ loadBackendHandle h settings@AppSettings {..} = do
     logFunc <- terminalLogFunc h appLogLevel
 
     runRIO logFunc $ logInfo "Starting up..."
+    let createPool = createConnectionPool appDatabaseConf appStatementTimeout
 
     Backend logFunc settings
         <$> mkDefaultProcessContext
-        <*> runRIO logFunc (createConnectionPool appDatabaseConf)
+        <*> runRIO logFunc createPool
         <*> checkedConnect appRedisConf

@@ -1,7 +1,6 @@
 module Restyled.Models.UserSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 
@@ -64,6 +63,7 @@ spec = do
 emptySettings :: AppSettings
 emptySettings = AppSettings
     { appDatabaseConf = error "unused"
+    , appStatementTimeout = error "unused"
     , appRedisConf = error "unused"
     , appRoot = error "unused"
     , appHost = error "unused"
