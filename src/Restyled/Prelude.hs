@@ -84,9 +84,10 @@ newtype UsCents = UsCents
         , FromJSON
         , Num
         , Show
+        , PersistField
+        , PersistFieldSql
         , ToJSON
         )
-    deriving (PersistField, PersistFieldSql) via OverflowNatural
 
 -- TODO: Formatters.fixed 2 + Formatters.commas
 instance ToMarkup UsCents where

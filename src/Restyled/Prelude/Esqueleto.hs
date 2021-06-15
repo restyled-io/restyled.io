@@ -15,7 +15,6 @@ import Restyled.Prelude as X hiding
     , Value
     , count
     , delete
-    , exists
     , isNothing
     , on
     , selectSource

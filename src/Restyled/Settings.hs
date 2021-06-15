@@ -94,9 +94,7 @@ loadSettings =
         $ AppSettings
         <$> (PostgresConf
             <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
-            <*> var auto "PGPOOLSTRIPES" (def 1)
-            <*> var auto "PGPOOLIDLETIMEOUT" (def 30)
-            <*> var auto "PGPOOLSIZE" (def 2)
+            <*> var auto "PGPOOLSIZE" (def 10)
             )
         <*> var connectInfo "REDIS_URL" (def defaultConnectInfo)
         <*> var str "APPROOT" (def "http://localhost:3000")

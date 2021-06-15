@@ -35,8 +35,6 @@ ghc-options: -Weverything
   -Wno-unsafe
   -Wno-missing-import-lists
   -Wno-all-missed-specialisations
-  -Wno-missing-safe-haskell-mode
-  -Wno-prepositive-qualified-module
 
 dependencies:
   - base
@@ -86,7 +84,6 @@ library:
     - persistent-qq
     - persistent-template
     - random
-    - retry
     - rio
     - rio-orphans
     - safe-exceptions
