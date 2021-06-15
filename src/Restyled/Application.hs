@@ -15,6 +15,7 @@ import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Network.Wai.Middleware.Routed
 import Network.Wai.Middleware.Timeout
+import qualified RIO.NonEmpty as NE
 import Restyled.Foundation
 import Restyled.Handlers.Admin
 import Restyled.Handlers.Admin.Machines
@@ -36,7 +37,6 @@ import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
 import Restyled.Settings
 import Restyled.Yesod
-import qualified RIO.NonEmpty as NE
 
 mkYesodDispatch "App" resourcesApp
 

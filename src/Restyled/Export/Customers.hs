@@ -4,8 +4,7 @@
 module Restyled.Export.Customers
     ( Customer(..)
     , fetchCustomers
-    )
-where
+    ) where
 
 import Restyled.Prelude.Esqueleto
 

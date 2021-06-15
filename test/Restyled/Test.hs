@@ -4,8 +4,7 @@ module Restyled.Test
     ( withApp
     , runDB
     , module X
-    )
-where
+    ) where
 
 import Restyled.Application as X ()
 import Restyled.Foundation as X
@@ -24,12 +23,13 @@ import qualified Data.Text as T
 import Database.Persist.Sql (connEscapeName, rawExecute, rawSql, unSingle)
 import Database.Redis (del, keys)
 import LoadEnv (loadEnvFrom)
-import Restyled.Backend.Foundation (loadBackend)
 import qualified RIO.DB as RIO
+import Restyled.Backend.Foundation (loadBackend)
 import Text.Shakespeare.Text (st)
 
 -- | A monomorphic alias just to avoid annotations in specs
-runDB :: HasSqlPool env => SqlPersistT (YesodExample env) a -> YesodExample env a
+runDB
+    :: HasSqlPool env => SqlPersistT (YesodExample env) a -> YesodExample env a
 runDB = RIO.runDB
 
 withApp :: SpecWith (TestApp App) -> Spec
