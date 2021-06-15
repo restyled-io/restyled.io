@@ -27,7 +27,7 @@ onMissingDaemonError
        , MonadReader env m
        , HasLogFunc env
        , HasProcessContext env
-       , HasDB env
+       , HasSqlPool env
        )
     => MissingDaemonError
     -> m ExitCode

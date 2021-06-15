@@ -31,7 +31,7 @@ data AcceptedJob = AcceptedJob
 
 -- | Given an Accepted webhook, accept or ignore that Job
 acceptJob
-    :: (MonadUnliftIO m, MonadReader env m, HasDB env)
+    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
     => AcceptedWebhook
     -> ExceptT IgnoredJobReason m AcceptedJob
 acceptJob AcceptedWebhook {..} = do

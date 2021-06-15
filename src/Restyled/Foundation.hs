@@ -42,8 +42,8 @@ instance HasProcessContext App where
 instance HasSettings App where
     settingsL = backendL . settingsL
 
-instance HasDB App where
-    dbConnectionPoolL = backendL . dbConnectionPoolL
+instance HasSqlPool App where
+    sqlPoolL = backendL . sqlPoolL
 
 instance HasRedis App where
     redisConnectionL = backendL . redisConnectionL

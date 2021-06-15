@@ -1,5 +1,5 @@
 module RIO.DB
-    ( HasDB(..)
+    ( HasSqlPool(..)
     , runDB
 
     -- * Construction
@@ -18,15 +18,16 @@ import Database.Persist.Postgresql
     (PostgresConf(..), createPostgresqlPool, createPostgresqlPoolModified)
 import Database.Persist.Sql (ConnectionPool, SqlPersistT, runSqlPool)
 import Database.PostgreSQL.Simple (Connection, execute)
-import RIO.Orphans ()
 
-class HasDB env where
-    dbConnectionPoolL :: Lens' env ConnectionPool
+class HasSqlPool env where
+    sqlPoolL :: Lens' env ConnectionPool
 
 runDB
-    :: (MonadUnliftIO m, MonadReader env m, HasDB env) => SqlPersistT m a -> m a
+    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
+    => SqlPersistT m a
+    -> m a
 runDB action = do
-    pool <- view dbConnectionPoolL
+    pool <- view sqlPoolL
     runSqlPool action pool
 
 createConnectionPool

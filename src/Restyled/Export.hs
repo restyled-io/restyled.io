@@ -22,7 +22,7 @@ exportOptions = subparser
     $ command "customers" (info (pure ExportCustomers) mempty)
 
 runExport
-    :: (HasLogFunc env, HasSettings env, HasDB env, HasRedis env)
+    :: (HasLogFunc env, HasSettings env, HasSqlPool env, HasRedis env)
     => ExportOptions
     -> RIO env ()
 runExport ExportCustomers = putCsv =<< fetchCustomers

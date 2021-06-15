@@ -34,7 +34,7 @@ fetchCustomers
        , MonadCache m
        , MonadReader env m
        , HasSettings env
-       , HasDB env
+       , HasSqlPool env
        )
     => m [Customer]
 fetchCustomers = do
@@ -79,7 +79,7 @@ fetchEmailLookup
        , MonadCache m
        , MonadReader env m
        , HasSettings env
-       , HasDB env
+       , HasSqlPool env
        )
     => m (Map GitHubUserName (First Text))
 fetchEmailLookup = do

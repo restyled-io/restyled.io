@@ -35,7 +35,7 @@ dockerRunJob
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasSettings env
        , HasProcessContext env
        )
@@ -57,7 +57,7 @@ runJobContainer
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasProcessContext env
        )
     => Entity Job
@@ -80,7 +80,7 @@ followJobContainer
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasProcessContext env
        )
     => Maybe UTCTime
@@ -107,7 +107,7 @@ followJobContainer mTimestamp job container = do
     exitCode <$ proc "docker" ["rm", container] readProcess
 
 capture
-    :: (MonadUnliftIO m, MonadReader env m, HasLogFunc env, HasDB env)
+    :: (MonadUnliftIO m, MonadReader env m, HasLogFunc env, HasSqlPool env)
     => Entity Job
     -> Text
     -> String

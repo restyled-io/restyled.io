@@ -19,8 +19,8 @@ instance HasLogFunc env => HasLogFunc (HandlerData child env) where
 instance HasProcessContext env => HasProcessContext (HandlerData child env) where
     processContextL = handlerEnvL . siteL . processContextL
 
-instance HasDB env => HasDB (HandlerData child env) where
-    dbConnectionPoolL = handlerEnvL . siteL . dbConnectionPoolL
+instance HasSqlPool env => HasSqlPool (HandlerData child env) where
+    sqlPoolL = handlerEnvL . siteL . sqlPoolL
 
 instance HasRedis env => HasRedis (HandlerData child env) where
     redisConnectionL = handlerEnvL . siteL . redisConnectionL

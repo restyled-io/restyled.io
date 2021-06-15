@@ -34,7 +34,7 @@ safelyReconcile
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasProcessContext env
        )
     => Int
@@ -57,7 +57,7 @@ runReconcile
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasProcessContext env
        )
     => [Entity RestyleMachine]
@@ -94,7 +94,7 @@ reconcileMachine
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasProcessContext env
        )
     => m ([String], Int)
@@ -108,7 +108,7 @@ reconcileStoppedContainers
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasProcessContext env
        )
     => [StoppedContainer]
@@ -120,7 +120,7 @@ reconcileStoppedContainer
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasProcessContext env
        )
     => StoppedContainer
@@ -140,7 +140,7 @@ reconcileJob
     :: ( MonadUnliftIO m
        , MonadReader env m
        , HasLogFunc env
-       , HasDB env
+       , HasSqlPool env
        , HasProcessContext env
        )
     => Entity Job

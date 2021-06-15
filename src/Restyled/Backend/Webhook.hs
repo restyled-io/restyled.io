@@ -37,7 +37,7 @@ data JobNotProcessed
 data JobProcessed = ExecRestylerSuccess (Entity Job) ExitCode
 
 processWebhook
-    :: (HasSettings env, HasLogFunc env, HasProcessContext env, HasDB env)
+    :: (HasSettings env, HasLogFunc env, HasProcessContext env, HasSqlPool env)
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
@@ -60,7 +60,7 @@ processWebhook execRestyler body =
         eitherT failure success $ tryExecRestyler execRestyler job
 
 restyleMachineEnv
-    :: (HasSettings env, HasLogFunc env, HasProcessContext env, HasDB env)
+    :: (HasSettings env, HasLogFunc env, HasProcessContext env, HasSqlPool env)
     => RIO env a
     -> RIO env a
 restyleMachineEnv act = do
@@ -80,7 +80,7 @@ restyleMachineEnv act = do
 -- available even if they're all empty.
 --
 withRestyleMachine
-    :: (HasSettings env, HasDB env, HasLogFunc env, HasProcessContext env)
+    :: (HasSettings env, HasSqlPool env, HasLogFunc env, HasProcessContext env)
     => (Entity RestyleMachine -> RIO env a)
     -> RIO env a
 withRestyleMachine f = do
@@ -101,7 +101,7 @@ withRestyleMachine f = do
     decrement = flip update [RestyleMachineJobCount -=. 1] . entityKey
 
 throttleWarn
-    :: (HasDB env, HasLogFunc env, HasProcessContext env)
+    :: (HasSqlPool env, HasLogFunc env, HasProcessContext env)
     => RIO env (Maybe a)
     -> RIO env a
 throttleWarn act = do
@@ -122,7 +122,7 @@ throttleWarn act = do
     delaySeconds = 60
 
 fromNotProcessed
-    :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
+    :: (HasLogFunc env, HasSqlPool env) => JobNotProcessed -> RIO env ()
 fromNotProcessed = \case
     WebhookIgnored reason ->
         logDebug $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason
@@ -139,7 +139,7 @@ fromNotProcessed = \case
         logError $ display job <> " exec failure (" <> displayShow ex <> ")"
         void $ runDB $ completeJobErrored (show ex) job
 
-fromProcessed :: (HasLogFunc env, HasDB env) => JobProcessed -> RIO env ()
+fromProcessed :: (HasLogFunc env, HasSqlPool env) => JobProcessed -> RIO env ()
 fromProcessed (ExecRestylerSuccess job ec) = do
     updatedJob <- runDB $ completeJob ec job
     logInfo
