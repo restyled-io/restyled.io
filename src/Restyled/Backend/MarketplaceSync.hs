@@ -1,7 +1,6 @@
 module Restyled.Backend.MarketplaceSync
     ( runSynchronize
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

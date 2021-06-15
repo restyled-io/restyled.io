@@ -6,8 +6,7 @@ module Restyled.Handlers.Admin.Marketplace
     , getAdminMarketplacePlansR
     , getAdminMarketplaceAccountsR
     , patchAdminMarketplaceAccountR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

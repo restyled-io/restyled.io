@@ -7,35 +7,35 @@ module Restyled.Prelude.Esqueleto
     , unValue2
     , unValue3
     , unValue5
-    )
-where
+    ) where
 
-import Restyled.Prelude as X hiding
-    ( LogFunc
-    , SqlEntity
-    , Value
-    , count
-    , delete
-    , isNothing
-    , on
-    , selectSource
-    , set
-    , update
-    , (!=.)
-    , (*=.)
-    , (+=.)
-    , (-=.)
-    , (/=.)
-    , (<&>)
-    , (<.)
-    , (<=.)
-    , (=.)
-    , (==.)
-    , (>.)
-    , (>=.)
-    , (^.)
-    , (||.)
-    )
+import Restyled.Prelude as X
+    hiding
+        ( (!=.)
+        , (*=.)
+        , (+=.)
+        , (-=.)
+        , (/=.)
+        , (<&>)
+        , (<.)
+        , (<=.)
+        , (=.)
+        , (==.)
+        , (>.)
+        , (>=.)
+        , LogFunc
+        , SqlEntity
+        , Value
+        , (^.)
+        , count
+        , delete
+        , isNothing
+        , on
+        , selectSource
+        , set
+        , update
+        , (||.)
+        )
 
 import Database.Esqueleto as X
 

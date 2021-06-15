@@ -3,8 +3,7 @@ module Restyled.Test.Factories
     , buildPrivateRepo
     , buildPrivateMarketplacePlan
     , buildMarketplaceAccount
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

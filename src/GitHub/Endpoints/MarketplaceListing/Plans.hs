@@ -2,12 +2,11 @@ module GitHub.Endpoints.MarketplaceListing.Plans
     ( MarketplacePlan(..)
     , marketplaceListingPlans
     , marketplaceListingPlansR
-    )
-where
+    ) where
 
 import Prelude
 
-import Data.Aeson (FromJSON(..), withObject, (.:))
+import Data.Aeson ((.:), FromJSON(..), withObject)
 import Data.Text (Text)
 import Data.Vector (Vector)
 import GitHub.Auth

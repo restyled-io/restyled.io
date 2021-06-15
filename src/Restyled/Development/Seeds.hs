@@ -1,7 +1,6 @@
 module Restyled.Development.Seeds
     ( seedDB
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

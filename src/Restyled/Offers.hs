@@ -8,8 +8,7 @@ module Restyled.Offers
     -- * Claiming
     , ClaimDetails(..)
     , claimOffer
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

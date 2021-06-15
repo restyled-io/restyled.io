@@ -6,8 +6,7 @@ module Restyled.Handlers.Admin
     ( getAdminR
     , getAdminStatsReposR
     , getAdminStatsJobsR
-    )
-where
+    ) where
 
 import Restyled.Prelude.Esqueleto
 

@@ -1,7 +1,6 @@
 module Restyled.Authentication
     ( authenticateUser
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

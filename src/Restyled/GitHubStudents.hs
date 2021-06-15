@@ -3,8 +3,7 @@
 module Restyled.GitHubStudents
     ( giftGitHubStudents
     , githubStudentsPlan
-    )
-where
+    ) where
 
 import Restyled.Prelude hiding (id)
 
