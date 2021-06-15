@@ -8,7 +8,8 @@ module Restyled.Offers
     -- * Claiming
     , ClaimDetails(..)
     , claimOffer
-    ) where
+    )
+where
 
 import Restyled.Prelude
 
@@ -39,8 +40,6 @@ createOffer CreateOffer {..} = do
             , marketplacePlanName = coName <> " Plan"
             , marketplacePlanDescription = ""
             , marketplacePlanPrivateRepoAllowance = fromNumeric repos
-            , marketplacePlanMonthlyRevenue = fromCents 0
-            , marketplacePlanRetired = False
             }
     offerId <- insert Offer
         { offerName = coName

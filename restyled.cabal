@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9b8ca9ea909a8b24bc24f4e19d4f139dc68370949950c4a421ceb3f02b82ef93
+-- hash: 16a807909e0602ce5dbd725b60b4270fa26378157fb0f9b5d2d4aa048f71e2b4
 
 name:           restyled
 version:        0.1.1.0
@@ -136,7 +136,7 @@ library
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
   build-depends:
       aeson
     , aeson-casing
@@ -171,6 +171,7 @@ library
     , jwt
     , lens
     , lens-aeson
+    , load-env
     , megaparsec
     , monad-logger
     , mtl
@@ -181,7 +182,6 @@ library
     , persistent-qq
     , persistent-template
     , random
-    , retry
     , rio
     , rio-orphans
     , safe-exceptions
@@ -202,10 +202,10 @@ library
     , websockets
     , yesod
     , yesod-auth
-    , yesod-auth-oauth2
+    , yesod-auth-oauth2 >=0.6.1.5
     , yesod-core
     , yesod-form
-    , yesod-paginator
+    , yesod-paginator >=1.1.0.2
     , yesod-persistent
     , yesod-static
     , yesod-websockets
@@ -243,7 +243,7 @@ executable restyled.io
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -threaded -rtsopts -with-rtsopts=-T
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -threaded -rtsopts -with-rtsopts=-T
   build-depends:
       base
     , load-env
@@ -308,7 +308,7 @@ test-suite test
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
   build-depends:
       QuickCheck
     , base

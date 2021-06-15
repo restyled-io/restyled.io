@@ -1,0 +1,11 @@
+- package:
+  - name: jwt
+- package:
+  - name: yesod-auth-oauth2
+- package:
+  - name: restyled
+  - section:
+    - name: library
+    - message:
+      - name: Redundant build-depends entry
+      - depends: load-env

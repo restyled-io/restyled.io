@@ -2,7 +2,8 @@ module GitHub.Endpoints.MarketplaceListing.Plans
     ( MarketplacePlan(..)
     , marketplaceListingPlans
     , marketplaceListingPlansR
-    ) where
+    )
+where
 
 import Prelude
 
@@ -12,14 +13,12 @@ import Data.Vector (Vector)
 import GitHub.Auth
 import GitHub.Data
 import GitHub.Request
-import Numeric.Natural
 
 data MarketplacePlan = MarketplacePlan
     { marketplacePlanId :: Id MarketplacePlan
     , marketplacePlanName :: Text
     , marketplacePlanDescription :: Text
     , marketplacePlanState :: Text
-    , marketplacePlanMonthlyPriceInCents :: Natural
     }
 
 instance FromJSON MarketplacePlan where
@@ -33,8 +32,6 @@ instance FromJSON MarketplacePlan where
             .: "description"
             <*> o
             .: "state"
-            <*> o
-            .: "monthly_price_in_cents"
 
 marketplaceListingPlans
     :: AuthMethod am

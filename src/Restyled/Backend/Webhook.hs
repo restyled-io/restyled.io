@@ -3,7 +3,8 @@ module Restyled.Backend.Webhook
     , awaitWebhook
     , processWebhook
     , queueDepth
-    ) where
+    )
+where
 
 import Restyled.Prelude
 
@@ -108,7 +109,7 @@ throttleWarn act = do
     mVal <- act
     case mVal of
         Nothing -> do
-            logWarn "No Restyle Machine available, sleeping 1m"
+            logError "No Restyle Machine available, sleeping 1m"
 
             -- Pause for some time, but also run a reconcile while we wait
             a <- async $ threadDelay $ delaySeconds * 1000000
@@ -121,8 +122,7 @@ throttleWarn act = do
     delaySeconds :: Int
     delaySeconds = 60
 
-fromNotProcessed
-    :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
+fromNotProcessed :: (HasLogFunc env, HasDB env) => JobNotProcessed -> RIO env ()
 fromNotProcessed = \case
     WebhookIgnored reason ->
         logDebug $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason

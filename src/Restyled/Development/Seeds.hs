@@ -1,6 +1,7 @@
 module Restyled.Development.Seeds
     ( seedDB
-    ) where
+    )
+where
 
 import Restyled.Prelude
 
@@ -44,8 +45,6 @@ seedDB = do
         , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceUnlimited
         , marketplacePlanName = "Friends & Family"
         , marketplacePlanDescription = "Manually managed discount plan"
-        , marketplacePlanMonthlyRevenue = fromCents 0
-        , marketplacePlanRetired = False
         }
 
     void $ upsert

@@ -6,7 +6,8 @@ module Restyled.Handlers.Admin
     ( getAdminR
     , getAdminStatsReposR
     , getAdminStatsJobsR
-    ) where
+    )
+where
 
 import Restyled.Prelude.Esqueleto
 
@@ -27,22 +28,9 @@ import Restyled.Yesod
 import Text.Blaze (ToMarkup(..))
 
 getAdminR :: Handler Html
-getAdminR = do
-    mrr <- runDB fetchMRR
-
-    adminLayout $ do
-        setTitle "Restyled Admin"
-        $(widgetFile "admin/dashboard")
-
--- brittany-disable-next-binding
-
-fetchMRR
-    :: MonadIO m
-    => SqlPersistT m UsCents
-fetchMRR = fmap sum $ selectMap unValue $ from $ \(plans `InnerJoin` accounts) -> do
-    on $ accounts ^. MarketplaceAccountMarketplacePlan ==. plans ^. persistIdField
-    groupBy $ plans ^. persistIdField
-    pure $ plans ^. MarketplacePlanMonthlyRevenue *. count (accounts ^. persistIdField)
+getAdminR = adminLayout $ do
+    setTitle "Restyled Admin"
+    $(widgetFile "admin/dashboard")
 
 data Changed n
     = Increased n

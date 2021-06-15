@@ -1,6 +1,7 @@
 module Restyled.Authentication
     ( authenticateUser
-    ) where
+    )
+where
 
 import Restyled.Prelude
 
@@ -34,7 +35,7 @@ authenticateUser
     :: (AuthId site ~ UserId, MonadLogger m, MonadIO m)
     => Creds site
     -> SqlPersistT m (AuthenticationResult site)
-authenticateUser creds = do
+authenticateUser creds@Creds {..} = do
     mUserId <- findUserForCreds creds
 
     logDebugN $ "Authentication credentials: " <> tshow creds
