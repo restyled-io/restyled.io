@@ -4,8 +4,7 @@
 
 module Restyled.Application
     ( runWaiApp
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
