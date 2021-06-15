@@ -6,13 +6,15 @@ module Restyled.Application
     ( runWaiApp
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude hiding (timeout)
 
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.ForceSSL
 import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
+import Network.Wai.Middleware.Routed
+import Network.Wai.Middleware.Timeout
 import Restyled.Foundation
 import Restyled.Handlers.Admin
 import Restyled.Handlers.Admin.Machines
@@ -34,6 +36,7 @@ import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
 import Restyled.Settings
 import Restyled.Yesod
+import qualified RIO.NonEmpty as NE
 
 mkYesodDispatch "App" resourcesApp
 
@@ -44,11 +47,20 @@ runWaiApp app = do
 
 waiMiddleware :: App -> Middleware
 waiMiddleware app =
-    forceSSL . methodOverridePost . requestLogger . defaultMiddlewaresNoLogging
+    forceSSL
+        . methodOverridePost
+        . requestLogger
+        . defaultMiddlewaresNoLogging
+        . routedMiddleware (not . isWebsocketsLogs) (timeout timeoutSeconds)
   where
     requestLogger
         | appDetailedRequestLogger (app ^. settingsL) = logStdoutDev
         | otherwise = logStdout
+
+    timeoutSeconds = app ^. settingsL . to appRequestTimeout
+
+isWebsocketsLogs :: [Text] -> Bool
+isWebsocketsLogs = maybe False ((== "log") . NE.last) . NE.nonEmpty
 
 warpSettings :: App -> Settings
 warpSettings app =
