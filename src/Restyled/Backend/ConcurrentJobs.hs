@@ -26,7 +26,7 @@ newtype StaleJobs = StaleJobs
 -- push a stale resytling up after the in-progress Job finishes.
 --
 checkConcurrentJobs
-    :: (MonadUnliftIO m, MonadReader env m, HasDB env)
+    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
     => TimeRange
     -- ^ Time range to check within
     -> Entity Job
@@ -63,7 +63,7 @@ cancelStaleJobs
        , MonadReader env m
        , HasLogFunc env
        , HasProcessContext env
-       , HasDB env
+       , HasSqlPool env
        )
     => StaleJobs
     -> m ()
@@ -74,7 +74,7 @@ cancelStaleJobs = go . unStaleJobs
            , MonadReader env m
            , HasLogFunc env
            , HasProcessContext env
-           , HasDB env
+           , HasSqlPool env
            )
         => [Entity Job]
         -> m ()

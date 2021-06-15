@@ -12,7 +12,7 @@ import Restyled.PrivateRepoAllowance
 import Restyled.Settings
 
 runSynchronize
-    :: (HasCallStack, HasLogFunc env, HasSettings env, HasDB env) => RIO env ()
+    :: (HasCallStack, HasLogFunc env, HasSettings env, HasSqlPool env) => RIO env ()
 runSynchronize = do
     AppSettings {..} <- view settingsL
     let useStubbed = appStubMarketplaceListing
@@ -31,7 +31,7 @@ runSynchronize = do
     logInfo "GitHub Marketplace data synchronized"
 
 synchronizePlanAccounts
-    :: (HasLogFunc env, HasSettings env, HasDB env)
+    :: (HasLogFunc env, HasSettings env, HasSqlPool env)
     => GH.MarketplacePlan
     -> MarketplacePlanId
     -> RIO env (Vector MarketplaceAccountId)
@@ -57,7 +57,7 @@ synchronizePlanAccounts plan planId = do
     traverse (runDB . synchronizeAccount planId) accounts
 
 synchronizePlanAccountsError
-    :: (HasLogFunc env, HasDB env)
+    :: (HasLogFunc env, HasSqlPool env)
     => GH.MarketplacePlan
     -> MarketplacePlanId
     -> SomeException

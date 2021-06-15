@@ -17,7 +17,7 @@ data AcceptedWebhook = AcceptedWebhook
     }
 
 acceptWebhook
-    :: HasDB env
+    :: HasSqlPool env
     => ByteString
     -> ExceptT IgnoredWebhookReason (RIO env) AcceptedWebhook
 acceptWebhook body = do

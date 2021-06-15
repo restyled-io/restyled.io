@@ -13,7 +13,7 @@ import Restyled.Settings
 runWebhooks
     :: ( HasLogFunc env
        , HasSettings env
-       , HasDB env
+       , HasSqlPool env
        , HasRedis env
        , HasProcessContext env
        )

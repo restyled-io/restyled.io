@@ -29,7 +29,7 @@ import qualified RIO.DB as RIO
 import Text.Shakespeare.Text (st)
 
 -- | A monomorphic alias just to avoid annotations in specs
-runDB :: HasDB env => SqlPersistT (YesodExample env) a -> YesodExample env a
+runDB :: HasSqlPool env => SqlPersistT (YesodExample env) a -> YesodExample env a
 runDB = RIO.runDB
 
 withApp :: SpecWith (TestApp App) -> Spec
