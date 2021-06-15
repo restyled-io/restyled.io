@@ -2,8 +2,7 @@ module Restyled.Backend.ConcurrentJobs
     ( StaleJobs
     , checkConcurrentJobs
     , cancelStaleJobs
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -126,6 +125,7 @@ fetchJobsConcurrentWith range (Entity jobId job) = selectList
     )
     [Asc JobCreatedAt]
 
-fetchActiveRestyleMachines :: MonadIO m => SqlPersistT m [Entity RestyleMachine]
+fetchActiveRestyleMachines
+    :: MonadIO m => SqlPersistT m [Entity RestyleMachine]
 fetchActiveRestyleMachines =
     selectList [RestyleMachineEnabled ==. True, RestyleMachineJobCount >. 0] []

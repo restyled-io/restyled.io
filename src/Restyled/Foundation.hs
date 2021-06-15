@@ -4,8 +4,7 @@
 
 module Restyled.Foundation
     ( module Restyled.Foundation
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

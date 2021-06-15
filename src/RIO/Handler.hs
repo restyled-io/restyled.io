@@ -3,8 +3,7 @@
 module RIO.Handler
     ( handlerEnvL
     , siteL
-    )
-where
+    ) where
 
 import RIO
 

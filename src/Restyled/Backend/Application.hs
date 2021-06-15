@@ -1,7 +1,6 @@
 module Restyled.Backend.Application
     ( runWebhooks
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
