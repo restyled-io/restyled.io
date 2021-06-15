@@ -9,24 +9,38 @@ module RIO.DB
     -- * Re-export
     , SqlPersistT
     , ConnectionPool
-    )
-where
+    ) where
 
 import RIO
 
-import Database.Persist.Postgresql (PostgresConf(..), createPostgresqlPool)
+import Control.Monad.Logger (MonadLogger)
+import Database.Persist.Postgresql
+    (PostgresConf(..), createPostgresqlPool, createPostgresqlPoolModified)
 import Database.Persist.Sql (ConnectionPool, SqlPersistT, runSqlPool)
+import Database.PostgreSQL.Simple (Connection, execute)
 import RIO.Orphans ()
 
 class HasDB env where
     dbConnectionPoolL :: Lens' env ConnectionPool
 
 runDB
-    :: (HasDB env, MonadReader env m, MonadUnliftIO m) => SqlPersistT m a -> m a
+    :: (MonadUnliftIO m, MonadReader env m, HasDB env) => SqlPersistT m a -> m a
 runDB action = do
     pool <- view dbConnectionPoolL
     runSqlPool action pool
 
-createConnectionPool :: HasLogFunc env => PostgresConf -> RIO env ConnectionPool
-createConnectionPool PostgresConf {..} =
-    createPostgresqlPool pgConnStr pgPoolSize
+createConnectionPool
+    :: (MonadUnliftIO m, MonadLogger m)
+    => PostgresConf
+    -> Maybe Integer
+    -> m ConnectionPool
+createConnectionPool PostgresConf {..} = \case
+    Nothing -> createPostgresqlPool pgConnStr pgPoolSize
+    Just ms -> createPostgresqlPoolModified
+        (setStatementTimeout ms)
+        pgConnStr
+        pgPoolSize
+
+setStatementTimeout :: Integer -> Connection -> IO ()
+setStatementTimeout ms conn =
+    void $ execute conn "SET statement_timeout = ?" [ms]

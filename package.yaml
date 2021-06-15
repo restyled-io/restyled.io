@@ -83,6 +83,7 @@ library:
     - persistent-postgresql
     - persistent-qq
     - persistent-template
+    - postgresql-simple
     - random
     - rio
     - rio-orphans

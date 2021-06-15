@@ -22,10 +22,10 @@ import qualified Data.Default as Default (def)
 import Database.Redis (ConnectInfo(..), defaultConnectInfo)
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
-import RIO.Handler
 import Restyled.Env
 import Restyled.RestylerImage
 import Restyled.Yesod hiding (LogLevel(..))
+import RIO.Handler
 import Yesod.Auth.Dummy
 import Yesod.Core.Types (HandlerData(..))
 
@@ -50,6 +50,7 @@ addOAuth2Plugin mkPlugin = maybe id $ \OAuthKeys {..} ->
 
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
+    , appStatementTimeout :: Maybe Integer
     , appRedisConf :: ConnectInfo
     , appRoot :: Text
     , appHost :: HostPreference
@@ -96,6 +97,7 @@ loadSettings =
             <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
             <*> var auto "PGPOOLSIZE" (def 10)
             )
+        <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
         <*> var connectInfo "REDIS_URL" (def defaultConnectInfo)
         <*> var str "APPROOT" (def "http://localhost:3000")
         <*> var str "HOST" (def "*4")
