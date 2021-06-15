@@ -4,7 +4,6 @@ module Restyled.Backend.MarketplaceSync
 
 import Restyled.Prelude
 
-import Control.Retry (exponentialBackoff, limitRetries, retrying)
 import qualified Data.Vector as V
 import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
@@ -20,7 +19,7 @@ runSynchronize = do
 
     logInfo "Synchronizing GitHub Marketplace data"
     auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
-    plans <- retryWithBackoff $ GH.marketplaceListingPlans auth useStubbed
+    plans <- untryIO $ GH.marketplaceListingPlans auth useStubbed
 
     logDebug $ "Synchronizing " <> displayShow (length plans) <> " plans"
     synchronizedAccountIds <- for plans $ \plan -> do
@@ -42,7 +41,7 @@ synchronizePlanAccounts plan planId = do
     auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
 
     accounts <-
-        retryWithBackoff
+        untryIO
         $ GH.marketplaceListingPlanAccounts auth useStubbed
         $ GH.marketplacePlanId plan
 
@@ -166,21 +165,3 @@ deleteUnsynchronized synchronizedAccountIds = do
 
 vconcat :: Vector (Vector a) -> [a]
 vconcat = V.toList . V.concat . V.toList
-
-retryWithBackoff
-    :: (MonadIO m, MonadReader env m, HasLogFunc env, Exception e)
-    => IO (Either e a)
-    -> m a
-retryWithBackoff f = do
-    result <- retrying
-        (exponentialBackoff 1000000 <> limitRetries 5)
-        (\_ -> either (\ex -> True <$ logRetry ex) (const $ pure False))
-        (\_ -> liftIO f)
-    either throwIO pure result
-  where
-    logRetry
-        :: (MonadIO m, MonadReader env m, HasLogFunc env, Exception e)
-        => e
-        -> m ()
-    logRetry ex =
-        logWarn $ "Retrying (" <> fromString (displayException ex) <> ")"

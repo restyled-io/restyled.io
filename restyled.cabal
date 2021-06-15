@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9b8ca9ea909a8b24bc24f4e19d4f139dc68370949950c4a421ceb3f02b82ef93
+-- hash: ee0e0b185bf86744bb5bbb6e086b5d45cbbbf2c95f0e42654a94307d2c9b5f5e
 
 name:           restyled
 version:        0.1.1.0
@@ -136,7 +136,7 @@ library
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
   build-depends:
       aeson
     , aeson-casing
@@ -181,7 +181,6 @@ library
     , persistent-qq
     , persistent-template
     , random
-    , retry
     , rio
     , rio-orphans
     , safe-exceptions
@@ -243,7 +242,7 @@ executable restyled.io
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -threaded -rtsopts -with-rtsopts=-T
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -threaded -rtsopts -with-rtsopts=-T
   build-depends:
       base
     , load-env
@@ -308,7 +307,7 @@ test-suite test
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module
+  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
   build-depends:
       QuickCheck
     , base
