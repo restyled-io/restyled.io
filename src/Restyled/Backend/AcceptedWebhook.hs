@@ -2,8 +2,7 @@
 module Restyled.Backend.AcceptedWebhook
     ( AcceptedWebhook(..)
     , acceptWebhook
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

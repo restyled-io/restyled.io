@@ -12,7 +12,8 @@ import Restyled.PrivateRepoAllowance
 import Restyled.Settings
 
 runSynchronize
-    :: (HasCallStack, HasLogFunc env, HasSettings env, HasSqlPool env) => RIO env ()
+    :: (HasCallStack, HasLogFunc env, HasSettings env, HasSqlPool env)
+    => RIO env ()
 runSynchronize = do
     AppSettings {..} <- view settingsL
     let useStubbed = appStubMarketplaceListing

@@ -30,8 +30,7 @@ instance HasProcessContext Backend where
         lens backendProcessContext $ \x y -> x { backendProcessContext = y }
 
 instance HasSqlPool Backend where
-    sqlPoolL =
-        lens backendConnPool $ \x y -> x { backendConnPool = y }
+    sqlPoolL = lens backendConnPool $ \x y -> x { backendConnPool = y }
 
 instance HasRedis Backend where
     redisConnectionL =

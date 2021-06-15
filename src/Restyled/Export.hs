@@ -2,8 +2,7 @@ module Restyled.Export
     ( ExportOptions
     , exportOptions
     , runExport
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

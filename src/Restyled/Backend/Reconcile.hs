@@ -3,8 +3,7 @@ module Restyled.Backend.Reconcile
 
     -- * Exported for testing
     , reconcileMachine
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
