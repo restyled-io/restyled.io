@@ -1,0 +1,74 @@
+<header>
+  <h1>
+    #{marketplaceAccountGithubLogin} 
+    <small>
+      $maybe plan <- mPlan
+        #{marketplacePlanName plan} 
+        $if marketplacePlanRetired plan
+          (retired, 
+        $else
+          (
+        #{marketplacePlanMonthlyRevenue plan})
+      $nothing
+        <em>No plan
+
+<section>
+  <h2 .uncenter>Contact
+  $with emails <- catMaybes [marketplaceAccountEmail, marketplaceAccountBillingEmail]
+    $if null emails
+      <p>
+        <em>None
+    $else
+      <ul>
+        $forall email <- emails
+          <li>#{email}
+
+<section>
+  <h2 .uncenter>Jobs (last 90 days)
+  $if null jobs
+    <p>
+      <em>None
+  $else
+    <dl>
+      <dt>Total
+      <dd>#{getSum jmTotal}
+      <dt>Succeeded
+      <dd>
+        #{getSum jmSucceeded} 
+        <small>(#{percent (getSum jmSucceeded) (getSum jmTotal)})
+      <dt>Failed
+      <dd>
+        #{getSum jmFailed} 
+        <small>(#{percent (getSum jmFailed) (getSum jmTotal)})
+      <dt>Unfinished
+      <dd>
+        #{getSum jmUnfinished} 
+        <small>(#{percent (getSum jmUnfinished) (getSum jmTotal)})
+      <dt>Unknown failures
+      <dd>
+        #{getSum jmFailedUnknown} 
+        <small>(#{percent (getSum jmFailedUnknown) (getSum jmTotal)})
+
+    <table>
+      <thead>
+        <th>Created
+        <th>Job
+        <th>Exit Code
+        <th>Duration
+
+      <tbody>
+        $forall Entity jobId job <- jobs
+          <tr>
+            <td>
+              #{format dateDash $ jobCreatedAt job} 
+              #{format hm $ jobCreatedAt job}
+
+            <td>
+              <a href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>
+                #{repoPullPath (jobOwner job) (jobRepo job) (jobPullRequest job)}
+            <td>
+              $maybe ec <- jobExitCode job
+                #{ec}
+            <td>
+              $maybe completedAt <- jobCompletedAt job
+                #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt}

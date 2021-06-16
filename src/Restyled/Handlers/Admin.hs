@@ -12,7 +12,6 @@ import Restyled.Prelude.Esqueleto
 
 import Control.Lens (_1, _3)
 import Data.List (elemIndex)
-import Data.Semigroup (getSum)
 import Formatting (format)
 import Formatting.Formatters as Formatters
 import Restyled.Foundation

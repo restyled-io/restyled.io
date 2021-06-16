@@ -1,15 +1,18 @@
 module Restyled.Metrics
     ( JobMetrics(..)
     , fetchJobMetrics
-    )
-where
+    , buildJobMetrics
+
+    -- * Re-exports
+    , Sum(..)
+    ) where
 
 import Restyled.Prelude.Esqueleto
 
 import Data.Semigroup (Sum(..))
 import Data.Semigroup.Generic
-import qualified Database.Esqueleto as E
 import Restyled.Models
+import qualified Restyled.Prelude as Prelude
 import Restyled.TimeRange
 
 data JobMetrics = JobMetrics
@@ -42,9 +45,9 @@ fetchJobMetrics range = selectFoldMap (convert . unValue5) $ from $ \jobs -> do
 
     pure
         ( sumExitCode (==. just (val 0))
-        , sumExitCode (\c -> not_ (E.isNothing c) &&. c !=. just (val 0))
+        , sumExitCode (\c -> not_ (isNothing c) &&. c !=. just (val 0))
         , sumExitCode (==. just (val 99))
-        , sumExitCode E.isNothing
+        , sumExitCode isNothing
         , countRows
         )
   where
@@ -55,3 +58,21 @@ fetchJobMetrics range = selectFoldMap (convert . unValue5) $ from $ \jobs -> do
         , jmUnfinished = Sum unfinished
         , jmTotal = Sum total
         }
+
+buildJobMetrics :: [Entity Job] -> JobMetrics
+buildJobMetrics = foldMap jobMetric
+
+jobMetric :: Entity Job -> JobMetrics
+jobMetric (Entity _ Job {..}) = JobMetrics
+    { jmSucceeded = sumIfMaybe (== 0) jobExitCode
+    , jmFailed = sumIfMaybe (/= 0) jobExitCode
+    , jmFailedUnknown = sumIfMaybe (== 99) jobExitCode
+    , jmUnfinished = sumIf $ Prelude.isNothing jobCompletedAt
+    , jmTotal = 1
+    }
+  where
+    sumIfMaybe :: (a -> Bool) -> Maybe a -> Sum Int
+    sumIfMaybe p = sumIf . maybe False p
+
+    sumIf :: Bool -> Sum Int
+    sumIf x = if x then 1 else 0

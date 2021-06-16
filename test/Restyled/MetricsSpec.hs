@@ -1,11 +1,9 @@
 module Restyled.MetricsSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 
-import Data.Semigroup (Sum(..))
 import Restyled.Metrics
 import Restyled.Time
 import Restyled.TimeRange

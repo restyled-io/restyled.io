@@ -20,8 +20,8 @@ module Restyled.Routes
     -- * Admin
     , adminStatsReposR
     , adminStatsJobsR
-    )
-where
+    , adminMarketplaceAccountR
+    ) where
 
 import Restyled.Prelude
 
@@ -58,3 +58,10 @@ adminStatsReposR = AdminP $ AdminStatsP $ AdminStatsReposP AdminStatsReposR
 
 adminStatsJobsR :: Route App
 adminStatsJobsR = AdminP $ AdminStatsP $ AdminStatsJobsP AdminStatsJobsR
+
+adminMarketplaceAccountR :: MarketplaceAccountId -> Route App
+adminMarketplaceAccountR accountId =
+    AdminP
+        $ AdminMarketplaceP
+        $ AdminMarketplaceAccountsP
+        $ AdminMarketplaceAccountP accountId AdminMarketplaceAccountR

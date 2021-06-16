@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3a34f23338c6e2facc056d82bde274d6b08581dfb0f66e2de3a25c7420ad8018
+-- hash: e8524284b2c450ae6bb4360183f2b79a9ef167b6c0bb6d7dfa2d8150380ae6c9
 
 name:           restyled
 version:        0.1.1.0
@@ -57,6 +57,8 @@ library
       Restyled.Handlers.Admin.Machines
       Restyled.Handlers.Admin.Machines.State
       Restyled.Handlers.Admin.Marketplace
+      Restyled.Handlers.Admin.Marketplace.Accounts
+      Restyled.Handlers.Admin.Marketplace.Plans
       Restyled.Handlers.Admin.Offers
       Restyled.Handlers.Admin.Repos
       Restyled.Handlers.Admin.Token

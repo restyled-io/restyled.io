@@ -9,5 +9,10 @@
     <details>
       <summary>#{pluralize "account" "accounts" $ length owners}
       <ul>
-        $forall owner <- owners
-          <li>#{owner}
+        $forall (owner, mAccountId) <- owners
+          <li>
+            $maybe accountId <- mAccountId
+              <a href=@{adminMarketplaceAccountR accountId}>
+                #{owner}
+            $nothing
+              #{owner}

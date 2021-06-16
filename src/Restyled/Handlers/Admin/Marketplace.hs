@@ -3,9 +3,6 @@
 
 module Restyled.Handlers.Admin.Marketplace
     ( getAdminMarketplaceR
-    , getAdminMarketplacePlansR
-    , getAdminMarketplaceAccountsR
-    , patchAdminMarketplaceAccountR
     ) where
 
 import Restyled.Prelude
@@ -14,6 +11,7 @@ import Data.List (genericLength, nub)
 import Restyled.Foundation
 import Restyled.Marketplace (isPrivateRepoPlan)
 import Restyled.Models
+import Restyled.Routes
 import Restyled.Settings
 import Restyled.Yesod
 
@@ -27,6 +25,14 @@ mpwaDescription = marketplacePlanDescription . entityVal . mpwaPlan
 
 mpwaOwnerNames :: MarketplacePlanWithAccounts -> [OwnerName]
 mpwaOwnerNames = map (accountOwner . entityVal) . mpwaAccounts
+  where
+    accountOwner :: MarketplaceAccount -> OwnerName
+    accountOwner = nameToName . marketplaceAccountGithubLogin
+
+mpwaOwnerAccounts
+    :: MarketplacePlanWithAccounts -> [(OwnerName, Maybe MarketplaceAccountId)]
+mpwaOwnerAccounts =
+    map (accountOwner . entityVal &&& Just . entityKey) . mpwaAccounts
   where
     accountOwner :: MarketplaceAccount -> OwnerName
     accountOwner = nameToName . marketplaceAccountGithubLogin
@@ -51,7 +57,7 @@ getAdminMarketplaceR = do
                 [Asc MarketplaceAccountGithubId]
 
         let planOwners = concatMap mpwaOwnerNames plans
-        (plans, ) <$> fetchUniqueRepoOwnersExcept planOwners
+        (plans, ) . map (, Nothing) <$> fetchUniqueRepoOwnersExcept planOwners
 
     adminLayout $ do
         setTitle "Admin - Marketplace"
@@ -67,61 +73,7 @@ fetchUniqueRepoOwnersExcept exceptOwners = do
 
 -- brittany-disable-next-binding
 
-accountsList :: Maybe Text -> [OwnerName] -> Widget
+accountsList
+    :: Maybe Text -> [(OwnerName, Maybe MarketplaceAccountId)] -> Widget
 accountsList mDescription owners =
     $(widgetFile "admin/marketplace/accounts-list")
-
-newtype MarketplacePlansQuery = MarketplacePlansQuery
-    { mpqGitHubId :: Int
-    }
-
-getAdminMarketplacePlansR :: Handler Value
-getAdminMarketplacePlansR = do
-    MarketplacePlansQuery {..} <- runInputGet $ MarketplacePlansQuery <$> ireq
-        intField
-        "githubId"
-
-    let
-        -- Pass githubId=-1 to query for non-GH Plans. TODO: Custom Field?
-        githubId = case mpqGitHubId of
-            -1 -> Nothing
-            x -> Just x
-
-    runDB $ toJSON <$> selectList
-        [MarketplacePlanGithubId ==. githubId]
-        [Asc MarketplacePlanName]
-
-newtype MarketplaceAccountsQuery = MarketplaceAccountsQuery
-    { maqGithubLogin :: GitHubUserName
-    }
-
-getAdminMarketplaceAccountsR :: Handler Value
-getAdminMarketplaceAccountsR = do
-    MarketplaceAccountsQuery {..} <-
-        runInputGet
-        $ MarketplaceAccountsQuery
-        <$> (mkUserName <$> ireq textField "githubLogin")
-
-    runDB $ toJSON <$> selectList
-        [MarketplaceAccountGithubLogin ==. maqGithubLogin]
-        [Asc MarketplaceAccountGithubLogin]
-
-newtype MarketplaceAccountPatch = MarketplaceAccountPatch
-    { mapMarketplacePlan :: Maybe MarketplacePlanId
-    }
-
-instance FromJSON MarketplaceAccountPatch where
-    parseJSON = withObject "MarketplaceAccountPatch"
-        $ \o -> MarketplaceAccountPatch <$> o .: "marketplacePlan"
-
-patchAdminMarketplaceAccountR :: MarketplaceAccountId -> Handler Value
-patchAdminMarketplaceAccountR accountId = do
-    MarketplaceAccountPatch {..} <- requireCheckJsonBody
-
-    let
-        updates =
-            [(MarketplaceAccountMarketplacePlan =.) <$> mapMarketplacePlan]
-
-    runDB $ do
-        update accountId $ catMaybes updates
-        toJSON <$> get404 accountId

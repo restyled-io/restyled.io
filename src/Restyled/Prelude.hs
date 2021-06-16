@@ -30,6 +30,7 @@ module Restyled.Prelude
     -- * Formatting
     , pluralize
     , pluralizeWith
+    , percent
 
     -- * Text
     , decodeUtf8
@@ -165,6 +166,10 @@ pluralizeWith
     -> t1
     -> t2
 pluralizeWith f s p n = format (f % " " % Formatters.plural s p) n n
+
+percent :: (Integral n1, Integral n2) => n1 -> n2 -> TL.Text
+percent n1 n2 = format (Formatters.fixed 2 % "%") p
+    where p = fromIntegral @_ @Double n1 / fromIntegral n2 * 100
 
 decodeUtf8 :: ByteString -> Text
 decodeUtf8 = decodeUtf8With lenientDecode

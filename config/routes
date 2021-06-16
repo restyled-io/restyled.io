@@ -57,7 +57,7 @@
     /accounts AdminMarketplaceAccountsP:
       / AdminMarketplaceAccountsR GET
       /#MarketplaceAccountId AdminMarketplaceAccountP:
-        / AdminMarketplaceAccountR PATCH
+        / AdminMarketplaceAccountR GET PATCH
   /offers AdminOffersP:
     / AdminOffersR GET POST
     /#OfferId AdminOfferP:

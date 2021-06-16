@@ -1,11 +1,9 @@
 module Restyled.Handlers.System.Metrics
     ( getSystemMetricsR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
-import Data.Semigroup (Sum(..))
 import qualified Restyled.Backend.Webhook as Webhook
 import Restyled.Foundation
 import Restyled.Metrics
