@@ -13,7 +13,6 @@
   , "^Restyled\\.Routes\\.jobLogR\$"
   , "^Restyled\\.Routes\\.repoR\$"
   , "^Restyled\\.Settings\\.widgetFile\$"
-  , "^Restyled\\.Widgets\\.Repo\\.repoCard\$"
   ]
 , type-class-roots = True
 }

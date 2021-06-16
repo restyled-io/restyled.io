@@ -15,7 +15,7 @@ $# We've gotten too big for the nav :(
 <section>
   <p .center>
     <small>
-      <a href=@{AdminP $ AdminReposP AdminReposR}>Repositories
+      <a href=@{AdminP $ AdminReposP AdminReposSearchR}>Repositories
       |
       <a href=@{AdminP $ AdminMachinesP AdminMachinesR}>Restyle Machines
       |

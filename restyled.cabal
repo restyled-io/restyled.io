@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1df576f85fe6f8c400d4d2b1c0e332fb8d4e906bd5370f934500eaad1b9732b0
+-- hash: a4bc789be2c91cd538bbf5411a9e94034c848daace7bdef889ac3f1a9054a159
 
 name:           restyled
 version:        0.1.1.0
@@ -98,7 +98,6 @@ library
       Restyled.Widgets.ContainsURLs
       Restyled.Widgets.Job
       Restyled.Widgets.JobLogLine
-      Restyled.Widgets.Repo
       Restyled.Yesod
       RIO.DB
       RIO.Handler

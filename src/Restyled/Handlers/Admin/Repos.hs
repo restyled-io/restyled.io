@@ -2,12 +2,10 @@
 
 -- | All repos in the system
 module Restyled.Handlers.Admin.Repos
-    ( getAdminReposR
-    , getAdminRepoR
+    ( getAdminRepoR
     , patchAdminRepoR
     , getAdminReposSearchR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -17,18 +15,7 @@ import Restyled.Models
 import Restyled.RestylerImage hiding (restylerImage)
 import Restyled.Routes
 import Restyled.Settings
-import Restyled.Widgets.Repo
 import Restyled.Yesod
-
-getAdminReposR :: Handler Html
-getAdminReposR = do
-    pages <- runDB $ do
-        pages <- selectPaginated 5 [] [Desc RepoId]
-        traverse repoWithStats pages
-
-    adminLayout $ do
-        setTitle "Restyled Admin / Repos"
-        $(widgetFile "admin/repos")
 
 getAdminRepoR :: RepoId -> Handler Value
 getAdminRepoR repoId = runDB $ toJSON <$> getEntity404 repoId

@@ -40,7 +40,6 @@
 /admin AdminR GET
 /admin AdminP:
   /repos AdminReposP:
-    / AdminReposR GET
     /search AdminReposSearchR GET
     !/#RepoId AdminRepoR PATCH
   /machines AdminMachinesP:
