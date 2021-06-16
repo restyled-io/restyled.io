@@ -1,0 +1,6 @@
+<main>
+  <h1>Server Unavailable
+
+<section>
+  <p>
+    <strong>Reason</strong>: #{message}

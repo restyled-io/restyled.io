@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e8524284b2c450ae6bb4360183f2b79a9ef167b6c0bb6d7dfa2d8150380ae6c9
+-- hash: 1df576f85fe6f8c400d4d2b1c0e332fb8d4e906bd5370f934500eaad1b9732b0
 
 name:           restyled
 version:        0.1.1.0
@@ -89,6 +89,7 @@ library
       Restyled.PrivateRepoEnabled
       Restyled.RestylerImage
       Restyled.Routes
+      Restyled.ServerUnavailable
       Restyled.Settings
       Restyled.StreamJobLogLines
       Restyled.Time

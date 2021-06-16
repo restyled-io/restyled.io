@@ -2,8 +2,7 @@
 module Restyled.ApiError
     ( ApiError(..)
     , sendApiError
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -14,6 +13,7 @@ data ApiError
     = ApiError Text -- ^ Generic message
     | ApiErrorNotFound Bool -- ^ Was the user logged in?
     | ApiErrorBadRequest Text -- ^ Message
+    | ApiErrorUnavailable Text -- ^ Message
 
 data ApiErrorResponse = ApiErrorResponse
     { aerName :: Text
@@ -37,6 +37,11 @@ apiErrorResponse = \case
     ApiErrorBadRequest message -> ApiErrorResponse
         { aerName = "BadRequest"
         , aerStatus = status400
+        , aerMessage = message
+        }
+    ApiErrorUnavailable message -> ApiErrorResponse
+        { aerName = "Unavailable"
+        , aerStatus = status503
         , aerMessage = message
         }
 
