@@ -9,7 +9,6 @@ module Restyled.Foundation
 import Restyled.Prelude
 
 import Data.Text (splitOn)
-import Database.PostgreSQL.Simple (SqlError(..))
 import Restyled.ApiError
 import Restyled.ApiToken
 import Restyled.Authentication
@@ -18,6 +17,7 @@ import Restyled.Backend.Foundation
 import Restyled.Models
 import Restyled.ServerUnavailable
 import Restyled.Settings
+import Restyled.SqlError
 import Restyled.Yesod
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
@@ -133,9 +133,8 @@ instance Yesod App where
     messageLoggerSource app _logger = logFuncLog $ app ^. logFuncL
 
     yesodMiddleware handler =
-        handleJust
-            (\SqlError {..} -> guard $ sqlState == sqlStateQueryCanceled)
-            (\() -> serverUnavailable "Database operation took too long")
+        handleSqlErrorState sqlStateQueryCanceled
+            (\_ -> serverUnavailable "Database operation took too long")
             (defaultYesodMiddleware handler)
 
     defaultMessageWidget title body = $(widgetFile "default-message-widget")
@@ -158,8 +157,6 @@ instance Yesod App where
 
     errorHandler x = defaultErrorHandler x
 
-sqlStateQueryCanceled :: ByteString
-sqlStateQueryCanceled = "57014"
 
 -- | Just like default-layout, but admin-specific nav and CSS
 adminLayout :: Widget -> Handler Html
