@@ -7,6 +7,7 @@ import Restyled.Prelude
 import qualified Restyled.Backend.Webhook as Webhook
 import Restyled.Foundation
 import Restyled.Metrics
+import Restyled.SqlError
 import Restyled.Time
 import Restyled.TimeRange
 import Restyled.Yesod
@@ -39,7 +40,10 @@ getSystemMetricsR = do
     depth <- runRedis Webhook.queueDepth
     mMins <- runInputGet $ iopt intField "since-minutes"
     range <- timeRangeFromAgo $ Minutes $ min (6 * 60) $ fromMaybe 5 mMins
-    JobMetrics {..} <- runDB $ fetchJobMetrics range
+    JobMetrics {..} <-
+        handleSqlError (\ex -> mempty <$ logJobMetricsError ex)
+        $ runDB
+        $ fetchJobMetrics range
 
     let succeeded = getSum jmSucceeded
         failed = getSum jmFailed
@@ -65,3 +69,10 @@ getSystemMetricsR = do
             ]
 
     pure $ object ["range" .= range, "metrics" .= metrics]
+
+-- We're having an issue where our Postgres starts timing out transactions to
+-- our Heroku app. We don't know why, but an inability to get metrics leads to
+-- alarms, and a lack of knowing depth (which we can know without DB data)
+-- prevents scaling.
+logJobMetricsError :: MonadLogger m => SqlError -> m ()
+logJobMetricsError = logErrorN . ("[SystemMetricsR]: " <>) . displaySqlError
