@@ -11,10 +11,6 @@ module Restyled.Models.Repo
     , fetchMarketplaceAccountForRepoT
     , fetchMarketplaceEnabledRepoIds
 
-    -- * Decorated
-    , RepoWithStats(..)
-    , repoWithStats
-
     -- * Repo Webhooks
     , IgnoredWebhookReason(..)
     , reasonToLogMessage
@@ -22,8 +18,7 @@ module Restyled.Models.Repo
 
     -- * Helpers useful to other modules
     , upsertRepo
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -50,33 +45,6 @@ repoInstallationToken
 repoInstallationToken AppSettings {..} Repo {..} = do
     auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
     untryIO $ githubRequest auth $ accessTokenForR repoInstallationId
-
-data RepoWithStats = RepoWithStats
-    { rwsRepo :: Entity Repo
-    , rwsJobCount :: Int
-    , rwsErrorCount :: Int
-    , rwsLastJob :: Maybe (Entity Job)
-    }
-
-repoWithStats :: MonadIO m => Entity Repo -> SqlPersistT m RepoWithStats
-repoWithStats repo =
-    RepoWithStats repo
-        <$> count
-                [ JobOwner ==. repoOwner (entityVal repo)
-                , JobRepo ==. repoName (entityVal repo)
-                ]
-        <*> count
-                [ JobOwner ==. repoOwner (entityVal repo)
-                , JobRepo ==. repoName (entityVal repo)
-                , JobExitCode !=. Just 0
-                , JobExitCode !=. Nothing
-                ]
-        <*> selectFirst
-                [ JobOwner ==. repoOwner (entityVal repo)
-                , JobRepo ==. repoName (entityVal repo)
-                , JobCompletedAt !=. Nothing
-                ]
-                [Desc JobCreatedAt]
 
 -- TODO: naive limiting for now
 fetchReposByOwnerName :: MonadIO m => OwnerName -> SqlPersistT m [Entity Repo]
