@@ -66,6 +66,7 @@ handleGitHubStudent GitHubStudent { id, login, email } verified =
                 , marketplaceAccountGithubType = "User"
                 , marketplaceAccountEmail = email
                 , marketplaceAccountBillingEmail = email
+                , marketplaceAccountTrialEndsAt = Nothing
                 , marketplaceAccountExpiresAt = Just nextYear
                 }
             [ MarketplaceAccountMarketplacePlan =. planId

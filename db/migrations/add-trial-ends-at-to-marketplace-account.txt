@@ -1,0 +1,10 @@
+# vim: ft=yaml
+Description: Add trial_ends_at to marketplace_account
+Created: 2021-06-18 14:52:30.122751007 UTC
+Depends: add-marketplace-account
+Apply: |
+  ALTER TABLE marketplace_account
+    ADD COLUMN trial_ends_at timestamp NULL
+Revert: |
+  ALTER TABLE marketplace_account
+    DROP COLUMN IF EXISTS trial_ends_at timestamp NULL

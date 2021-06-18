@@ -1,8 +1,17 @@
 <section>
   <p>
-    <strong>
-      Monthly Recurring Revenue
-    #{mrr}
+    <strong>MRR</strong>: #{mrr}
+  <p>
+    <strong>Trials</strong>: +#{trialMrr}
+  <ul>
+    $forall (revenue, mEndsAt) <- trialMrrs
+      <li>
+        <strong>+#{revenue}</strong> in
+        <strong>
+          $maybe endsAt <- mEndsAt
+            #{format (diff False) $ diffUTCTime now endsAt}
+          $nothing
+            unknown
 
 <section>
   <form>

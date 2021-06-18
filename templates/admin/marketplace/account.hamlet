@@ -1,16 +1,23 @@
 <header>
   <h1>
-    #{marketplaceAccountGithubLogin} 
-    <small>
-      $maybe plan <- mPlan
-        #{marketplacePlanName plan} 
-        $if marketplacePlanRetired plan
-          (retired, 
-        $else
-          (
-        #{marketplacePlanMonthlyRevenue plan})
-      $nothing
-        <em>No plan
+    #{marketplaceAccountGithubLogin}
+
+<section>
+  <h2 .uncenter>Plan
+  $maybe plan <- mPlan
+    <p>
+      <strong>#{marketplacePlanName plan}</strong>
+      $if marketplacePlanRetired plan
+         (retired)
+    <p>
+      $case accountRevenue now account plan
+        $of RealRevenue revenue
+          <strong>Revenue</strong>: #{revenue}
+        $of TrialRevenue endsAt revenue
+          <strong>Trialing</strong>: #{revenue} after #{format dateDash endsAt}
+  $nothing
+    <p>
+      <em>No plan
 
 <section>
   <h2 .uncenter>Contact

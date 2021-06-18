@@ -65,6 +65,7 @@ seedDB = do
             , marketplaceAccountGithubType = "User"
             , marketplaceAccountEmail = Nothing
             , marketplaceAccountBillingEmail = Nothing
+            , marketplaceAccountTrialEndsAt = Nothing
             , marketplaceAccountExpiresAt = Nothing
             }
         [MarketplaceAccountMarketplacePlan =. discountPlanId]

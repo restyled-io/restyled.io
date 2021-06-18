@@ -57,5 +57,6 @@ buildMarketplaceAccount mUserId userName planId = MarketplaceAccount
     , marketplaceAccountGithubType = "User"
     , marketplaceAccountEmail = Nothing
     , marketplaceAccountBillingEmail = Nothing
+    , marketplaceAccountTrialEndsAt = Nothing
     , marketplaceAccountExpiresAt = Nothing
     }

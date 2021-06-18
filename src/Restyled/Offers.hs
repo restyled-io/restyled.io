@@ -125,5 +125,6 @@ claimOffer offerId ClaimDetails {..} = do
         , marketplaceAccountEmail = cdEmail
         , marketplaceAccountBillingEmail = cdEmail
         , marketplaceAccountMarketplacePlan = offerMarketplacePlan
+        , marketplaceAccountTrialEndsAt = Nothing
         , marketplaceAccountExpiresAt = Nothing
         }

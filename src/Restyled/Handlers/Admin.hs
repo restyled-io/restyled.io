@@ -14,6 +14,7 @@ import Control.Lens (_1, _3)
 import Data.List (elemIndex)
 import Formatting (format)
 import Formatting.Formatters as Formatters
+import Formatting.Time (diff)
 import Restyled.Foundation
 import Restyled.Metrics
 import Restyled.Models
@@ -27,21 +28,37 @@ import Text.Blaze (ToMarkup(..))
 
 getAdminR :: Handler Html
 getAdminR = do
-    mrr <- runDB fetchMRR
+    now <- liftIO getCurrentTime
+    (trialMrrs, mrrs) <- partition (trialing now . snd) <$> runDB fetchMRR
+
+    let trialMrr = sum $ map fst trialMrrs
+        mrr = sum $ map fst mrrs
 
     adminLayout $ do
         setTitle "Restyled Admin"
         $(widgetFile "admin/dashboard")
 
+trialing :: UTCTime -> Maybe UTCTime -> Bool
+trialing asOf = \case
+    Just endsAt | endsAt >= asOf -> True
+    _ -> False
+
 -- brittany-disable-next-binding
 
 fetchMRR
     :: MonadIO m
-    => SqlPersistT m UsCents
-fetchMRR = fmap sum $ selectMap unValue $ from $ \(plans `InnerJoin` accounts) -> do
+    => SqlPersistT m [(UsCents, Maybe UTCTime)]
+fetchMRR = selectMap unValue2 $ from $ \(plans `InnerJoin` accounts) -> do
     on $ accounts ^. MarketplaceAccountMarketplacePlan ==. plans ^. persistIdField
-    groupBy $ plans ^. persistIdField
-    pure $ plans ^. MarketplacePlanMonthlyRevenue *. count (accounts ^. persistIdField)
+    groupBy
+        ( plans ^. persistIdField
+        , accounts ^. MarketplaceAccountTrialEndsAt
+        )
+    orderBy [asc $ accounts ^. MarketplaceAccountTrialEndsAt]
+    pure
+        ( plans ^. MarketplacePlanMonthlyRevenue *. count (accounts ^. persistIdField)
+        , accounts ^. MarketplaceAccountTrialEndsAt
+        )
 
 data Changed n
     = Increased n

@@ -135,6 +135,7 @@ synchronizeAccount planId account = entityKey <$> upsert
         , marketplaceAccountBillingEmail =
             GH.marketplaceAccountOrganizationBillingEmail account
         , marketplaceAccountMarketplacePlan = planId
+        , marketplaceAccountTrialEndsAt = Nothing
         , marketplaceAccountExpiresAt = Nothing
         }
     [ MarketplaceAccountGithubType =. GH.marketplaceAccountType account
@@ -142,6 +143,8 @@ synchronizeAccount planId account = entityKey <$> upsert
     , MarketplaceAccountBillingEmail
         =. GH.marketplaceAccountOrganizationBillingEmail account
     , MarketplaceAccountMarketplacePlan =. planId
+    , MarketplaceAccountTrialEndsAt =. GH.marketplacePurchaseFreeTrialEndsOn
+        (GH.marketplaceAccountMarketplacePurchase account)
     ]
 
 deleteUnsynchronized

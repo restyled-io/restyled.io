@@ -90,6 +90,7 @@ MarketplaceAccount json
   billingEmail Text Maybe
 
   marketplacePlan MarketplacePlanId
+  trialEndsAt UTCTime Maybe
   expiresAt UTCTime Maybe
 
   UniqueMarketplaceAccount githubLogin

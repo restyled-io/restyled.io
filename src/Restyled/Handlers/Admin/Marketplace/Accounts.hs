@@ -37,7 +37,7 @@ getAdminMarketplaceAccountsR = do
 getAdminMarketplaceAccountR :: MarketplaceAccountId -> Handler Html
 getAdminMarketplaceAccountR accountId = do
     now <- liftIO getCurrentTime
-    (jobs, MarketplaceAccount {..}, mPlan) <- runDB $ do
+    (jobs, account@MarketplaceAccount {..}, mPlan) <- runDB $ do
         account <- get404 accountId
         jobs <- selectList
             [ JobOwner ==. nameToName (marketplaceAccountGithubLogin account)
@@ -53,6 +53,18 @@ getAdminMarketplaceAccountR accountId = do
             $ "Admin - Marketplace - "
             <> toHtml marketplaceAccountGithubLogin
         $(widgetFile "admin/marketplace/account")
+
+data AccountRevenue
+    = RealRevenue UsCents
+    | TrialRevenue UTCTime UsCents
+
+accountRevenue
+    :: UTCTime -> MarketplaceAccount -> MarketplacePlan -> AccountRevenue
+accountRevenue now MarketplaceAccount {..} plan =
+    case marketplaceAccountTrialEndsAt of
+        Just endsAt | endsAt >= now ->
+            TrialRevenue endsAt $ marketplacePlanMonthlyRevenue plan
+        _ -> RealRevenue $ marketplacePlanMonthlyRevenue plan
 
 newtype MarketplaceAccountPatch = MarketplaceAccountPatch
     { mapMarketplacePlan :: Maybe MarketplacePlanId

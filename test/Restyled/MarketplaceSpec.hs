@@ -129,5 +129,6 @@ insertAccountOnPlan username mPlanGitHubId mExpiresAt planAllowance = do
         , marketplaceAccountGithubType = "User"
         , marketplaceAccountEmail = Nothing
         , marketplaceAccountBillingEmail = Nothing
+        , marketplaceAccountTrialEndsAt = Nothing
         , marketplaceAccountExpiresAt = mExpiresAt
         }
