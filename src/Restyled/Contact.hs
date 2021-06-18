@@ -61,7 +61,6 @@ fetchMarketplaceAccountContacts
        )
     => MarketplaceAccount
     -> m [Contact]
-
 fetchMarketplaceAccountContacts account@MarketplaceAccount {..} = do
     contacts <- runDB fetchAllUserContacts
     contactsByOrg <- fetchContactsToByOrg contacts
@@ -80,10 +79,8 @@ fetchContactsToByOrg
     => [Contact]
     -> m (HashMap GitHubUserName [Contact])
 fetchContactsToByOrg contacts = do
-    results <- for contacts $ \contact -> do
-        orgs <- case contactGithubUsername contact of
-            Nothing -> pure []
-            Just login -> requestUserNameOrgs login
-
-        pure $ map ((, [contact]) . githubOrgLogin) orgs
+    results <- for contacts $ \contact ->
+        fmap (map ((, [contact]) . githubOrgLogin))
+            $ maybe (pure []) requestUserNameOrgs
+            $ contactGithubUsername contact
     pure $ HashMap.fromListWith (<>) $ concat results
