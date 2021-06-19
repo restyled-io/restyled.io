@@ -70,7 +70,7 @@ fetchMarketplaceAccountContacts account@MarketplaceAccount {..} = do
     pure $ contactsFromMarketplaceAccount account <> accountOrgContacts
 
 fetchContactsToByOrg
-    :: ( MonadIO m
+    :: ( MonadUnliftIO m
        , MonadLogger m
        , MonadCache m
        , MonadReader env m
@@ -79,7 +79,7 @@ fetchContactsToByOrg
     => [Contact]
     -> m (HashMap GitHubUserName [Contact])
 fetchContactsToByOrg contacts = do
-    results <- for contacts $ \contact ->
+    results <- forConcurrently contacts $ \contact ->
         fmap (map ((, [contact]) . githubOrgLogin))
             $ maybe (pure []) requestUserNameOrgs
             $ contactGithubUsername contact
