@@ -21,14 +21,14 @@
 
 <section>
   <h2 .uncenter>Contact
-  <ul>
-    $forall c <- contacts
-      <li>
-        #{contactEmail c} (#{contactType c}
-        $maybe login <- contactGithubUsername c
-          \ #{login}
-        $nothing
-        )
+  $with emails <- catMaybes [marketplaceAccountEmail, marketplaceAccountBillingEmail]
+    $if null emails
+      <p>
+        <em>None
+    $else
+      <ul>
+        $forall email <- emails
+          <li>#{email}
 
 <section>
   <h2 .uncenter>Jobs (last 90 days)

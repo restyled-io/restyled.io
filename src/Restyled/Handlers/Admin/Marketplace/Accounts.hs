@@ -11,7 +11,6 @@ import Restyled.Prelude
 
 import Formatting (format)
 import Formatting.Time (dateDash, diff, hm)
-import Restyled.Contact
 import Restyled.Foundation
 import Restyled.Metrics
 import Restyled.Models
@@ -47,7 +46,6 @@ getAdminMarketplaceAccountR accountId = do
             [Desc JobCreatedAt]
         (jobs, account, ) <$> get (marketplaceAccountMarketplacePlan account)
 
-    contacts <- fetchMarketplaceAccountContacts account
     let JobMetrics {..} = buildJobMetrics jobs
 
     adminLayout $ do
