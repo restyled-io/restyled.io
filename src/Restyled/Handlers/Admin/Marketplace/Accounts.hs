@@ -47,12 +47,7 @@ getAdminMarketplaceAccountR accountId = do
             [Desc JobCreatedAt]
         (jobs, account, ) <$> get (marketplaceAccountMarketplacePlan account)
 
-    -- TODO: This is too slow on a slow cache since it tries to load orgs for
-    -- all our users. If we want to do this sort of thing, I think we'll need a
-    -- crawl Job to go and fetch org info incrementally across our users set and
-    -- store details in our DB for use. That may be net simpler anyway.
-    -- contacts <- fetchMarketplaceAccountContacts account
-    let contacts = contactsFromMarketplaceAccount account
+    contacts <- fetchMarketplaceAccountContacts account
     let JobMetrics {..} = buildJobMetrics jobs
 
     adminLayout $ do
