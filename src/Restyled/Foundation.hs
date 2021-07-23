@@ -49,6 +49,9 @@ instance HasSqlPool App where
 instance HasRedis App where
     redisConnectionL = backendL . redisConnectionL
 
+instance HasAWS App where
+    awsEnvL = backendL . awsEnvL
+
 loadApp :: Backend -> IO App
 loadApp backend@Backend {..} = App backend
     <$> makeStatic (appStaticDir backendSettings)

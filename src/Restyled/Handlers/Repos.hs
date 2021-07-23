@@ -13,6 +13,7 @@ import Restyled.Prelude
 
 import qualified Data.Text as T
 import Restyled.Foundation
+import Restyled.JobLogLine
 import Restyled.Models
 import Restyled.Settings
 import Restyled.StreamJobLogLines
@@ -60,9 +61,9 @@ getRepoJobR owner name jobId = do
 
 getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler Text
 getRepoJobLogLinesR _owner _name jobId = do
-    job <- runDB $ getEntity404 jobId
+    void $ runDB $ getEntity404 jobId
     webSockets $ streamJobLogLines jobId
 
     -- If not accessed via WebSockets, respond with plain text Job log
-    jobLogLines <- runDB $ entityVal <$$> fetchJobLog job
+    jobLogLines <- fetchJobLogLines jobId
     pure $ T.unlines $ map textJobLogLine jobLogLines

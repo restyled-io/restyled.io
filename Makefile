@@ -21,7 +21,7 @@ db.migrate:
 
 .PHONY: db.seed
 db.seed:
-	./bin/restyled.io-dev seed-db
+	AWS_PROFILE=restyled ./bin/restyled.io-dev seed-db
 
 .PHONY: db.setup
 db.setup: db.create db.migrate
@@ -82,7 +82,7 @@ test:
 
 .PHONY: watch
 watch:
-	stack build \
+	AWS_PROFILE=restyled stack build \
 	  --fast --pedantic --test --file-watch \
 	  --exec bin/restyled-restart \
 	  --ghc-options -DDEVELOPMENT

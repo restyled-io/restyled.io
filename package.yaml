@@ -46,6 +46,8 @@ library:
     - aeson-casing
     - aeson-pretty
     - ansi-terminal
+    - amazonka
+    - amazonka-cloudwatch-logs
     - blaze-html
     - blaze-markup
     - bytestring

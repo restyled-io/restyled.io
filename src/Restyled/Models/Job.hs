@@ -10,15 +10,11 @@ module Restyled.Models.Job
 
     -- * Queries
     , fetchJobIsInProgress
-    , fetchJobLogLines
 
     -- * @'JobOutput'@
     , JobOutput(..)
     , attachJobOutput
-    , fetchJobLog
     , fetchJobOutput
-    , captureJobLogLine
-    , fetchLastJobLogLineCreatedAt
 
     -- * Completing Jobs
     , completeJobSkipped
@@ -31,7 +27,9 @@ import Restyled.Prelude
 import qualified Data.Text.Lazy as TL
 import Formatting (format)
 import Formatting.Time (diff)
+import Restyled.JobLogLine
 import Restyled.Models.DB
+import Restyled.Settings
 
 jobOutcome :: Job -> Text
 jobOutcome Job {..} = fromMaybe "N/A" $ do
@@ -55,7 +53,7 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         , jobCompletedAt = Nothing
         , jobExitCode = Nothing
         , jobLog = Nothing
-        , jobStdout = Nothing
+        , jobStdout = Just "__cw"
         , jobStderr = Nothing
         }
 
@@ -63,38 +61,43 @@ fetchJobIsInProgress :: MonadIO m => JobId -> SqlPersistT m Bool
 fetchJobIsInProgress jobId =
     isJust <$> selectFirst [JobId ==. jobId, JobCompletedAt ==. Nothing] []
 
-fetchJobLog :: MonadIO m => Entity Job -> SqlPersistT m [Entity JobLogLine]
-fetchJobLog (Entity jobId Job {..}) =
-    maybe (fetchJobLogLines jobId 0) (pure . unJSONB) jobLog
-
-fetchJobLogLines
-    :: MonadIO m
-    => JobId
-    -> Int -- ^ Offset
-    -> SqlPersistT m [Entity JobLogLine]
-fetchJobLogLines jobId offset = selectList
-    [JobLogLineJob ==. jobId]
-    [Asc JobLogLineCreatedAt, OffsetBy offset]
-
 data JobOutput
     = JobOutputInProgress (Entity Job)
     | JobOutputCompleted [JobLogLine]
     | JobOutputCompressed Job
 
+expiredJobOutput :: MonadIO m => JobId -> m JobOutput
+expiredJobOutput jobId = JobOutputCompleted . pure <$> jobLogLine
+    jobId
+    JobLogStreamSystem
+    "Job log expired"
+
 attachJobOutput
-    :: MonadIO m => Entity Job -> SqlPersistT m (Entity Job, JobOutput)
+    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    => Entity Job
+    -> SqlPersistT m (Entity Job, JobOutput)
 attachJobOutput job = (job, ) <$> fetchJobOutput job
 
-fetchJobOutput :: MonadIO m => Entity Job -> SqlPersistT m JobOutput
+fetchJobOutput
+    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    => Entity Job
+    -> SqlPersistT m JobOutput
 fetchJobOutput jobE@(Entity jobId job@Job {..}) =
     case (jobCompletedAt, jobLog, jobStdout, jobStderr) of
-        -- Job is done and Log records (still) exist
+        -- Job is done and CW Logged
+        (Just _, _, Just "__cw", _) -> do
+            logLines <- lift $ fetchJobLogLines jobId
+            if null logLines
+                then expiredJobOutput jobId
+                else pure $ JobOutputCompleted logLines
+
+        -- Deprecated: Job is done and legacy Log records exist
         (Just _, Nothing, Nothing, Nothing) ->
             JobOutputCompleted . map entityVal <$> selectList
                 [JobLogLineJob ==. jobId]
                 [Asc JobLogLineCreatedAt]
 
-        -- Job is done and Log has been written into the Job itself
+        -- Deprecated: Job is done and legacy Log has been written
         (Just _, Just (JSONB logLines), _, _) ->
             pure $ JobOutputCompleted $ map entityVal logLines
 
@@ -104,47 +107,33 @@ fetchJobOutput jobE@(Entity jobId job@Job {..}) =
         -- Job is in progress
         (Nothing, _, _, _) -> pure $ JobOutputInProgress jobE
 
-captureJobLogLine :: MonadIO m => JobId -> Text -> Text -> SqlPersistT m ()
-captureJobLogLine jobId stream content = do
-    now <- liftIO getCurrentTime
-    insert_ JobLogLine
-        { jobLogLineJob = jobId
-        , jobLogLineCreatedAt = now
-        , jobLogLineStream = stream
-        , jobLogLineContent = content
-        }
-
-fetchLastJobLogLineCreatedAt
-    :: MonadIO m => JobId -> SqlPersistT m (Maybe UTCTime)
-fetchLastJobLogLineCreatedAt jobId =
-    jobLogLineCreatedAt . entityVal <$$> selectFirst
-        [JobLogLineJob ==. jobId]
-        [Desc JobLogLineCreatedAt]
-
 completeJobSkipped
-    :: MonadIO m => String -> Entity Job -> SqlPersistT m (Entity Job)
+    :: (MonadIO m, MonadReader env m, HasSettings env, HasAWS env)
+    => String
+    -> Entity Job
+    -> SqlPersistT m (Entity Job)
 completeJobSkipped reason job = do
-    captureJobLogLine (entityKey job) "system" $ pack reason
+    lift $ captureJobLogLine (entityKey job) JobLogStreamSystem $ pack reason
     completeJob ExitSuccess job
 
 completeJobErrored
-    :: MonadIO m => String -> Entity Job -> SqlPersistT m (Entity Job)
+    :: (MonadIO m, MonadReader env m, HasSettings env, HasAWS env)
+    => String
+    -> Entity Job
+    -> SqlPersistT m (Entity Job)
 completeJobErrored reason job = do
-    captureJobLogLine (entityKey job) "system" $ pack reason
+    lift $ captureJobLogLine (entityKey job) JobLogStreamSystem $ pack reason
     completeJob (ExitFailure 99) job
 
 completeJob
     :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m (Entity Job)
-completeJob ec job@(Entity jobId _) = do
+completeJob ec job = do
     now <- liftIO getCurrentTime
-    logLines <- fetchJobLogLines jobId 0
-    updatedJob <- replaceEntity $ overEntity job $ \j -> j
+    replaceEntity $ overEntity job $ \j -> j
         { jobUpdatedAt = now
         , jobCompletedAt = Just now
         , jobExitCode = Just $ exitCode ec
-        , jobLog = Just $ JSONB logLines
         }
-    updatedJob <$ deleteWhere [JobLogLineJob ==. jobId]
 
 exitCode :: ExitCode -> Int
 exitCode = \case

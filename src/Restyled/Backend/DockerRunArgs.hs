@@ -13,6 +13,12 @@ import Restyled.Settings
 dockerRunArgs :: AppSettings -> AccessToken -> Repo -> Entity Job -> [String]
 dockerRunArgs settings token repo job =
     [ "--net", "user-bridge"
+    , "--log-driver=awslogs"
+    , "--log-opt awslogs-region=us-east-1"
+    , "--log-opt awslogs-group=" <> unpack (appRestylerLogGroup settings)
+    , "--log-opt awslogs-stream="
+        <> unpack (appRestylerLogStreamPrefix settings)
+        <> unpack (toPathPiece $ entityKey job)
     , "--label", "restyler"
     , "--label", "job-id=" <> unpack (toPathPiece $ entityKey job)
     , "--env", "DEBUG=" <> if repoIsDebug settings repo then "1" else ""

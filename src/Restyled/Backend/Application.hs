@@ -15,6 +15,7 @@ runWebhooks
        , HasSqlPool env
        , HasRedis env
        , HasProcessContext env
+       , HasAWS env
        )
     => RIO env a
 runWebhooks = forever $ do

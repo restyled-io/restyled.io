@@ -37,7 +37,12 @@ data JobNotProcessed
 data JobProcessed = ExecRestylerSuccess (Entity Job) ExitCode
 
 processWebhook
-    :: (HasSettings env, HasLogFunc env, HasProcessContext env, HasSqlPool env)
+    :: ( HasSettings env
+       , HasLogFunc env
+       , HasProcessContext env
+       , HasSqlPool env
+       , HasAWS env
+       )
     => ExecRestyler (RIO env)
     -> ByteString
     -> RIO env ()
@@ -122,7 +127,9 @@ throttleWarn act = do
     delaySeconds = 60
 
 fromNotProcessed
-    :: (HasLogFunc env, HasSqlPool env) => JobNotProcessed -> RIO env ()
+    :: (HasLogFunc env, HasSqlPool env, HasSettings env, HasAWS env)
+    => JobNotProcessed
+    -> RIO env ()
 fromNotProcessed = \case
     WebhookIgnored reason ->
         logDebug $ fromString $ "Webhook ignored: " <> reasonToLogMessage reason

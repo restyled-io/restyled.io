@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d9614f4fba299a10ef4cd27e3bdfbbc781171ed3201eabc902288c7b968c6329
+-- hash: ccfec3cdeaf4ffc6399c40153dfe111c251c412d5981700a0f5cbc9deb3ee6de
 
 name:           restyled
 version:        0.1.1.0
@@ -73,6 +73,7 @@ library
       Restyled.Handlers.System.Metrics
       Restyled.Handlers.Thanks
       Restyled.Handlers.Webhooks
+      Restyled.JobLogLine
       Restyled.Marketplace
       Restyled.Metrics
       Restyled.Models
@@ -100,6 +101,7 @@ library
       Restyled.Widgets.Job
       Restyled.Widgets.JobLogLine
       Restyled.Yesod
+      RIO.AWS
       RIO.DB
       RIO.Logger
       RIO.Process.Follow
@@ -144,6 +146,8 @@ library
       aeson
     , aeson-casing
     , aeson-pretty
+    , amazonka
+    , amazonka-cloudwatch-logs
     , ansi-terminal
     , base
     , blaze-html

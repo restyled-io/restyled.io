@@ -9,7 +9,6 @@ import Restyled.Prelude
 
 import Database.Persist.Sql (updateWhereCount)
 import Restyled.Backend.Container
-import Restyled.Backend.DockerRunJob (followJobContainer)
 import Restyled.Backend.RestyleMachine (withRestyleMachineEnv)
 import Restyled.Models
 
@@ -104,24 +103,14 @@ reconcileMachine =
     unreconciled err = pure ([err], 0)
 
 reconcileStoppedContainers
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasSqlPool env
-       , HasProcessContext env
-       )
+    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
     => [StoppedContainer]
     -> m ([String], Int)
 reconcileStoppedContainers =
     pure . second sum . partitionEithers <=< traverse reconcileStoppedContainer
 
 reconcileStoppedContainer
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasSqlPool env
-       , HasProcessContext env
-       )
+    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
     => StoppedContainer
     -> m (Either String Int)
 reconcileStoppedContainer stoppedContainer@StoppedContainer {..} = do
@@ -130,27 +119,18 @@ reconcileStoppedContainer stoppedContainer@StoppedContainer {..} = do
 
     case mJob of
         Nothing -> pure $ Left noSuchJob
-        Just job -> Right 1 <$ reconcileJob job stoppedContainer
+        Just _ -> Right 1 <$ reconcileJob stoppedContainer
   where
     noSuchJob =
         "No incomplete Job found with Id " <> unpack (toPathPiece scJobId)
 
 reconcileJob
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasSqlPool env
-       , HasProcessContext env
-       )
-    => Entity Job
-    -> StoppedContainer
+    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
+    => StoppedContainer
     -> m ()
-reconcileJob job StoppedContainer {..} = do
-    mTimestamp <- runDB $ fetchLastJobLogLineCreatedAt scJobId
-    void $ followJobContainer mTimestamp job scContainerId
-    runDB $ update
-        scJobId
-        [ JobUpdatedAt =. scFinishedAt
-        , JobCompletedAt =. Just scFinishedAt
-        , JobExitCode =. Just scExitCode
-        ]
+reconcileJob StoppedContainer {..} = runDB $ update
+    scJobId
+    [ JobUpdatedAt =. scFinishedAt
+    , JobCompletedAt =. Just scFinishedAt
+    , JobExitCode =. Just scExitCode
+    ]
