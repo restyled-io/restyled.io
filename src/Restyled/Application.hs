@@ -4,6 +4,9 @@
 
 module Restyled.Application
     ( runWaiApp
+
+    -- * For use in test
+    , waiMiddleware
     ) where
 
 import Restyled.Prelude hiding (timeout)
@@ -15,7 +18,6 @@ import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Network.Wai.Middleware.Routed
 import Network.Wai.Middleware.Timeout
-import qualified RIO.NonEmpty as NE
 import Restyled.Foundation
 import Restyled.Handlers.Admin
 import Restyled.Handlers.Admin.Machines
@@ -38,7 +40,8 @@ import Restyled.Handlers.System.Metrics
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
 import Restyled.Settings
-import Restyled.Yesod
+import Restyled.Yesod hiding (LogLevel(..))
+import qualified RIO.NonEmpty as NE
 
 mkYesodDispatch "App" resourcesApp
 
@@ -56,7 +59,8 @@ waiMiddleware app =
         . routedMiddleware (not . isWebsocketsLogs) (timeout timeoutSeconds)
   where
     requestLogger
-        | appDetailedRequestLogger (app ^. settingsL) = logStdoutDev
+        | app ^. settingsL . to appLogLevel > LevelInfo = id
+        | app ^. settingsL . to appDetailedRequestLogger = logStdoutDev
         | otherwise = logStdout
 
     timeoutSeconds = app ^. settingsL . to appRequestTimeout
