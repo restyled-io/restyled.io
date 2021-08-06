@@ -23,8 +23,9 @@ import qualified Data.Text as T
 import Database.Persist.Sql (connEscapeName, rawExecute, rawSql, unSingle)
 import Database.Redis (del, keys)
 import LoadEnv (loadEnvFrom)
-import qualified RIO.DB as RIO
+import Restyled.Application (waiMiddleware)
 import Restyled.Backend.Foundation (loadBackend)
+import qualified RIO.DB as RIO
 import Text.Shakespeare.Text (st)
 
 -- | A monomorphic alias just to avoid annotations in specs
@@ -39,7 +40,7 @@ withApp = before $ do
     runRIO foundation $ do
         RIO.runDB wipeDB
         runRedis wipeRedis
-    return (foundation, id)
+    return (foundation, waiMiddleware foundation)
 
 wipeDB :: MonadIO m => SqlPersistT m ()
 wipeDB = do
