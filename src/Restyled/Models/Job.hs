@@ -78,7 +78,7 @@ fetchJobLogLines jobId offset = selectList
 
 data JobOutput
     = JobOutputInProgress (Entity Job)
-    | JobOutputCompleted [Entity JobLogLine]
+    | JobOutputCompleted [JobLogLine]
     | JobOutputCompressed Job
 
 attachJobOutput
@@ -90,13 +90,13 @@ fetchJobOutput jobE@(Entity jobId job@Job {..}) =
     case (jobCompletedAt, jobLog, jobStdout, jobStderr) of
         -- Job is done and Log records (still) exist
         (Just _, Nothing, Nothing, Nothing) ->
-            JobOutputCompleted <$> selectList
+            JobOutputCompleted . map entityVal <$> selectList
                 [JobLogLineJob ==. jobId]
                 [Asc JobLogLineCreatedAt]
 
         -- Job is done and Log has been written into the Job itself
         (Just _, Just (JSONB logLines), _, _) ->
-            pure $ JobOutputCompleted logLines
+            pure $ JobOutputCompleted $ map entityVal logLines
 
         -- Deprecated: old style compressed log
         (Just _, _, _, _) -> pure $ JobOutputCompressed job

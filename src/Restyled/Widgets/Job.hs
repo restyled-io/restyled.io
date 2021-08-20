@@ -90,11 +90,11 @@ jobOutput output = $(widgetFile "widgets/job-output")
             "logs-job-id-" <> toPathPiece jobId
         _ -> "unused"
 
-textJobLogLine :: Entity JobLogLine -> Text
-textJobLogLine = scrubGitHubToken . jobLogLineContent . entityVal
+textJobLogLine :: JobLogLine -> Text
+textJobLogLine = scrubGitHubToken . jobLogLineContent
 
-colorizedJobLogLine :: Entity JobLogLine -> Widget
-colorizedJobLogLine (Entity _ JobLogLine {..}) =
+colorizedJobLogLine :: JobLogLine -> Widget
+colorizedJobLogLine JobLogLine {..} =
     colorizedLogLine jobLogLineStream $ scrubGitHubToken jobLogLineContent
 
 colorizedLogLine :: Text -> Text -> Widget
