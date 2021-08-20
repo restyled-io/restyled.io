@@ -25,7 +25,7 @@ streamJobLogLines jobId = ignoringConnectionException $ go 0
             <$> fetchJobIsInProgress jobId
             <*> fetchJobLogLines jobId offset
 
-        htmls <- traverse (lift . renderJobLogLine) logLines
+        htmls <- traverse (lift . renderJobLogLine . entityVal) logLines
         void $ sendTextDataAck $ mconcat htmls
 
         -- Always recurse if in progress or we're still streaming lines

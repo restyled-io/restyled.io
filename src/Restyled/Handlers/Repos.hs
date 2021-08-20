@@ -64,5 +64,5 @@ getRepoJobLogLinesR _owner _name jobId = do
     webSockets $ streamJobLogLines jobId
 
     -- If not accessed via WebSockets, respond with plain text Job log
-    jobLogLines <- runDB $ fetchJobLog job
+    jobLogLines <- runDB $ entityVal <$$> fetchJobLog job
     pure $ T.unlines $ map textJobLogLine jobLogLines
