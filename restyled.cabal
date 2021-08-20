@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 250eb28ea296200d2e239ba63c6b4dc219255952442629099c1028e75b0a7a15
+-- hash: d9614f4fba299a10ef4cd27e3bdfbbc781171ed3201eabc902288c7b968c6329
 
 name:           restyled
 version:        0.1.1.0
@@ -101,7 +101,6 @@ library
       Restyled.Widgets.JobLogLine
       Restyled.Yesod
       RIO.DB
-      RIO.Handler
       RIO.Logger
       RIO.Process.Follow
       RIO.Redis
@@ -109,6 +108,7 @@ library
       SVCS.Names
       SVCS.Payload
       Yesod.Auth.OAuth2.GitHubStudents
+      Yesod.Lens
   other-modules:
       Paths_restyled
   hs-source-dirs:

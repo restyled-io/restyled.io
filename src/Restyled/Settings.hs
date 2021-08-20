@@ -22,7 +22,6 @@ import qualified Data.Default as Default (def)
 import Database.Redis (ConnectInfo(..), defaultConnectInfo)
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
-import RIO.Handler
 import Restyled.Env
 import Restyled.RestylerImage
 import Restyled.Yesod hiding (LogLevel(..))
