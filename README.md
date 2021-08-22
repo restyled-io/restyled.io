@@ -84,7 +84,8 @@ description of another project's rationale for this licensing model, one with
 which I agree, see [here][level].
 
 [cc]: https://commonsclause.com/
-[level]: https://web.archive.org/web/20181120030157/https://leveljournal.com/source-available-licensing
+[level]:
+  https://web.archive.org/web/20181120030157/https://leveljournal.com/source-available-licensing
 
 ---
 
