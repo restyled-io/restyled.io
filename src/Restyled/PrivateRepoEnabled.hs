@@ -2,8 +2,7 @@ module Restyled.PrivateRepoEnabled
     ( PrivateRepoEnabled(..)
     , enableMarketplaceRepo
     , disableMarketplaceRepo
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

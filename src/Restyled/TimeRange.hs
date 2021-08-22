@@ -4,8 +4,7 @@ module Restyled.TimeRange
     , timeRangeFromAgo
     , withinTimeRange
     , timeRangeFilters
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

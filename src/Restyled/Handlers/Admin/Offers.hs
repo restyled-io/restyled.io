@@ -7,8 +7,7 @@ module Restyled.Handlers.Admin.Offers
     , deleteAdminOfferR
     , getAdminOfferClaimsR
     , postAdminOfferClaimsR
-    )
-where
+    ) where
 
 import Restyled.Prelude.Esqueleto hiding (Value)
 
@@ -104,7 +103,8 @@ data ClaimCode = ClaimCode
 claimCode :: Text -> Maybe GitHubUserName -> ClaimCode
 claimCode code mAt = ClaimCode { code, claimed = isJust mAt }
 
-fetchOffersWithCodes :: MonadIO m => SqlPersistT m [(Entity Offer, [ClaimCode])]
+fetchOffersWithCodes
+    :: MonadIO m => SqlPersistT m [(Entity Offer, [ClaimCode])]
 fetchOffersWithCodes =
     selectMap convert $ from $ \(offers `InnerJoin` codes) -> do
         on $ codes ^. OfferClaimOffer ==. offers ^. persistIdField

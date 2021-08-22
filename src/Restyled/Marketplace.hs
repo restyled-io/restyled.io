@@ -10,8 +10,7 @@ module Restyled.Marketplace
     , MarketplacePlanLimitation(..)
     , whenMarketplacePlanForbids
     , isPrivateRepoPlan
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

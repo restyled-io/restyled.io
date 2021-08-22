@@ -1,7 +1,6 @@
 module GitHub.Endpoints.Installations.AccessTokens
     ( accessTokenForR
-    )
-where
+    ) where
 
 import Prelude
 

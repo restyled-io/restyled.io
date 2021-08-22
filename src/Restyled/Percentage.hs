@@ -1,8 +1,7 @@
 module Restyled.Percentage
     ( Percentage
     , percentage
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

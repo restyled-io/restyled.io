@@ -3,8 +3,7 @@ module Restyled.Test.Authentication
     , authenticateAsWith
     , authenticateAsAdmin
     , getTestAppAdmins
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

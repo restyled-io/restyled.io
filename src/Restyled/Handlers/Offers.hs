@@ -4,8 +4,7 @@
 module Restyled.Handlers.Offers
     ( getOfferR
     , postOfferClaimR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

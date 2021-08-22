@@ -1,8 +1,7 @@
 module RIO.Process.Follow
     ( followProcess
     , followProcessStdin
-    )
-where
+    ) where
 
 import RIO
 

@@ -1,7 +1,6 @@
 module Restyled.OffersSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

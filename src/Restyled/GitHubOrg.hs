@@ -4,8 +4,7 @@ module Restyled.GitHubOrg
     , requestUserOrgs
     , requestUserNameOrgs
     , githubOrgsCacheKey
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -64,7 +63,9 @@ requestUserNameOrgs
     -> m [GitHubOrg]
 requestUserNameOrgs username = caching (githubOrgsCacheKey username) $ do
     auth <- asks $ OAuth . appGitHubRateLimitToken . view settingsL
-    result <- liftIO $ githubRequest auth $ publicOrganizationsForR username FetchAll
+    result <- liftIO $ githubRequest auth $ publicOrganizationsForR
+        username
+        FetchAll
 
     case result of
         Left err -> [] <$ logWarnN (tshow err)

@@ -1,8 +1,7 @@
 module GitHub.Request.Preview
     ( PreviewRequest
     , MachineManPreviewJson
-    )
-where
+    ) where
 
 import Prelude
 

@@ -5,8 +5,7 @@ module Restyled.Models.User
 
     -- * Data access
     , fetchMarketplaceAccountForLoginT
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

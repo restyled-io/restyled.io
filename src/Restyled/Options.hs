@@ -3,8 +3,7 @@ module Restyled.Options
     , RestyledCommand(..)
     , BackendCommand(..)
     , parseRestyledOptions
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

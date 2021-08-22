@@ -6,8 +6,7 @@ module RIO.Logger
 
     -- * Interfacing with @"Control.Monad.Logger"@ types
     , logFuncLog
-    )
-where
+    ) where
 
 import RIO
 

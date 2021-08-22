@@ -1,7 +1,6 @@
 module Restyled.TimeSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

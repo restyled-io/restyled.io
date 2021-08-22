@@ -1,7 +1,6 @@
 module GitHub.Data.AccessTokens
     ( AccessToken(..)
-    )
-where
+    ) where
 
 import Prelude
 

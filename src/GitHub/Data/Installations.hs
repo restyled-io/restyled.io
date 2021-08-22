@@ -1,7 +1,6 @@
 module GitHub.Data.Installations
     ( Installation(..)
-    )
-where
+    ) where
 
 import Prelude
 

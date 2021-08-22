@@ -1,7 +1,6 @@
 module Restyled.Backend.RestyleMachineSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

@@ -1,7 +1,6 @@
 module Restyled.Models
     ( module X
-    )
-where
+    ) where
 
 import Restyled.Models.DB as X
 import Restyled.Models.Job as X

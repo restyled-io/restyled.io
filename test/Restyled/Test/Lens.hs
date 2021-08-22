@@ -5,8 +5,7 @@ module Restyled.Test.Lens
     , (^.)
     , (^..)
     , (^?)
-    )
-where
+    ) where
 
 import Restyled.Prelude hiding (fieldLens)
 

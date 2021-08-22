@@ -24,8 +24,7 @@ module Restyled.Models.Job
     , completeJobSkipped
     , completeJobErrored
     , completeJob
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -134,7 +133,8 @@ completeJobErrored reason job = do
     captureJobLogLine (entityKey job) "system" $ pack reason
     completeJob (ExitFailure 99) job
 
-completeJob :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m (Entity Job)
+completeJob
+    :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m (Entity Job)
 completeJob ec job@(Entity jobId _) = do
     now <- liftIO getCurrentTime
     logLines <- fetchJobLogLines jobId 0

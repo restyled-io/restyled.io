@@ -7,8 +7,7 @@ module Restyled.Cache
     -- * For use in concrete Reader instances
     , getCacheRedis
     , setCacheRedis
-    )
-where
+    ) where
 
 import Restyled.Prelude hiding (get, set)
 

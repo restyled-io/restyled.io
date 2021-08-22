@@ -2,8 +2,7 @@ module Restyled.RestylerImage
     ( RestylerImage
     , restylerImage
     , unRestylerImage
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

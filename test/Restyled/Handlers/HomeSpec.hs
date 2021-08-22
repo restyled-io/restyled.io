@@ -1,7 +1,6 @@
 module Restyled.Handlers.HomeSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

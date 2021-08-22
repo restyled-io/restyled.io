@@ -4,8 +4,7 @@ module Restyled.Backend.Container
     , RunningContainer(..)
     , getRunningContainer
     , signalContainer
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

@@ -1,8 +1,7 @@
 module Restyled.Handlers.Marketplace
     ( postRepoMarketplaceClaimR
     , deleteRepoMarketplaceClaimR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

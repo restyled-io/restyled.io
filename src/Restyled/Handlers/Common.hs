@@ -5,8 +5,7 @@ module Restyled.Handlers.Common
     ( getRevisionR
     , getFaviconR
     , getRobotsR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

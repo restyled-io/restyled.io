@@ -5,8 +5,7 @@ module GitHub.Endpoints.Repos.Collaborators.Permissions
     , collaboratorPermissions
     -- , collaboratorPermissions'
     , collaboratorPermissionsR
-    )
-where
+    ) where
 
 import Prelude
 

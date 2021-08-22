@@ -1,7 +1,6 @@
 module Restyled.Handlers.AdminSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

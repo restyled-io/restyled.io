@@ -1,7 +1,6 @@
 module Restyled.Handlers.Webhooks
     ( postWebhooksR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

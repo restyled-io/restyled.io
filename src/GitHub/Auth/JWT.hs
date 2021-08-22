@@ -3,8 +3,7 @@ module GitHub.Auth.JWT
     ( AuthJWT(..)
     , authJWT
     , authJWTMax
-    )
-where
+    ) where
 
 import Prelude
 

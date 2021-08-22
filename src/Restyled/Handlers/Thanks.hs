@@ -3,8 +3,7 @@
 module Restyled.Handlers.Thanks
     ( getThanksGitHubR
     , getThanksGitHubSetupR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

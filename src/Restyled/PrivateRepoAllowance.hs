@@ -1,8 +1,7 @@
 module Restyled.PrivateRepoAllowance
     ( PrivateRepoAllowance(..)
     , fromNumeric
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

@@ -13,8 +13,7 @@ module SVCS.GitHub
 
     -- * Re-exports
     , module X
-    )
-where
+    ) where
 
 import GitHub.Auth as X hiding (Auth)
 import GitHub.Auth.JWT as X

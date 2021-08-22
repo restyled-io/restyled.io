@@ -7,8 +7,7 @@ module Restyled.Handlers.Repos
     , getRepoJobsR
     , getRepoJobR
     , getRepoJobLogLinesR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

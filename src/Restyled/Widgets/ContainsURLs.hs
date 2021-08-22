@@ -8,8 +8,7 @@ module Restyled.Widgets.ContainsURLs
     , containsURLs
     , ContentPart(..)
     , contentPartsP
-    )
-where
+    ) where
 
 import Restyled.Prelude hiding (some, try)
 

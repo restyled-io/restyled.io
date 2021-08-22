@@ -5,8 +5,7 @@ module Restyled.ApiToken
     , apiTokenRaw
     , createApiToken
     , getUserIdByApiToken
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

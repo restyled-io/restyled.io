@@ -18,8 +18,7 @@ module Restyled.WebSockets
 
     -- * Re-export
     , module Yesod.WebSockets
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

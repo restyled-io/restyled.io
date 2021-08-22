@@ -22,8 +22,7 @@ module Restyled.Env
     , logLevel
     , connectInfo
     , githubId
-    )
-where
+    ) where
 
 import Restyled.Prelude hiding (Reader)
 

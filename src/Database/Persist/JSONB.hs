@@ -1,7 +1,6 @@
 module Database.Persist.JSONB
-  ( JSONB(..)
-  )
-where
+    ( JSONB(..)
+    ) where
 
 import Prelude
 

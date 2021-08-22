@@ -2,8 +2,7 @@
 
 module Restyled.AuthenticationSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

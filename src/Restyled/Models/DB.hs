@@ -6,8 +6,7 @@
 -- | Entities defined via @config/models@
 module Restyled.Models.DB
     ( module Restyled.Models.DB
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

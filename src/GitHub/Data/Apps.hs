@@ -2,8 +2,7 @@ module GitHub.Data.Apps
     ( App
     , AppKey
     , unAppKey
-    )
-where
+    ) where
 
 import Prelude
 

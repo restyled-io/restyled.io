@@ -1,7 +1,6 @@
 module Restyled.Handlers.CommonSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

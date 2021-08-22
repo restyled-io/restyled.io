@@ -2,8 +2,7 @@
 
 module Restyled.Handlers.ProfileSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

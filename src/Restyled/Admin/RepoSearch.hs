@@ -2,8 +2,7 @@ module Restyled.Admin.RepoSearch
     ( SearchResults(..)
     , noResults
     , searchRepos
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -11,8 +10,7 @@ import qualified Data.Text as T
 import Restyled.Foundation
 import Restyled.Models
 
-data SearchResults
-    = SearchResults
+data SearchResults = SearchResults
     { srRepos :: [Entity Repo]
     , srTotal :: Int
     }

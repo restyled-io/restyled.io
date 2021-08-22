@@ -4,8 +4,7 @@ module Restyled.Authorization
 
     -- * Exported for re-use in tests
     , authRepoCacheKey
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

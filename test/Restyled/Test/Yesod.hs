@@ -5,8 +5,7 @@ module Restyled.Test.Yesod
     , getTestRoot
     , patchJSON
     , module X
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

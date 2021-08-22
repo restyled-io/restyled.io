@@ -1,7 +1,6 @@
 module Restyled.Backend.ReconcileSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

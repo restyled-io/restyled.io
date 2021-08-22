@@ -1,7 +1,6 @@
 module Restyled.Handlers.WebhooksSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

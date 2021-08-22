@@ -2,8 +2,7 @@
 
 module RIO.Process.FollowSpec
     ( spec
-    )
-where
+    ) where
 
 import RIO
 

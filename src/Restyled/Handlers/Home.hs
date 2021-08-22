@@ -2,8 +2,7 @@
 
 module Restyled.Handlers.Home
     ( getHomeR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

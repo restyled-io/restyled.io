@@ -1,7 +1,6 @@
 module Restyled.Widgets.JobSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

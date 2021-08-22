@@ -30,8 +30,7 @@ module SVCS.Names
     , mkRepoName
     , mkUserId
     , mkUserName
-    )
-where
+    ) where
 
 import Prelude
 

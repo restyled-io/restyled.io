@@ -1,7 +1,6 @@
 module Restyled.Handlers.Admin.Machines.State
     ( getAdminMachinesStateR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

@@ -2,8 +2,7 @@
 module Restyled.Backend.ExecRestyler
     ( ExecRestyler(..)
     , tryExecRestyler
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

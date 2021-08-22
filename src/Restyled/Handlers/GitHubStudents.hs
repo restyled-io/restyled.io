@@ -3,8 +3,7 @@
 module Restyled.Handlers.GitHubStudents
     ( getGitHubStudentsR
     , getGitHubStudentsThanksR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

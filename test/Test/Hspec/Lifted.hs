@@ -1,7 +1,6 @@
 module Test.Hspec.Lifted
     ( module X
-    )
-where
+    ) where
 
 import Test.Hspec as X hiding
     ( expectationFailure

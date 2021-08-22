@@ -1,7 +1,6 @@
 module Restyled.Widgets.JobLogLine
     ( renderJobLogLine
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

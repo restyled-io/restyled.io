@@ -1,7 +1,6 @@
 module Restyled.Handlers.ReposSpec
     ( spec
-    )
-where
+    ) where
 
 import Restyled.Test
 

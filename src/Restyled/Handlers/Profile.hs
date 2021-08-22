@@ -2,8 +2,7 @@
 
 module Restyled.Handlers.Profile
     ( getProfileR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
@@ -89,7 +88,8 @@ data MarketplaceAction
     = EnablePrivateRepo
     | DisablePrivateRepo
 
-getMarketplaceAction :: GitHubIdentity -> Entity Repo -> Maybe MarketplaceAction
+getMarketplaceAction
+    :: GitHubIdentity -> Entity Repo -> Maybe MarketplaceAction
 getMarketplaceAction GitHubIdentity {..} (Entity repoId Repo {..}) = do
     MarketplaceData {..} <- ghiMarketplaceData
     guard $ repoIsPrivate && isLimitedPlan mdPlan

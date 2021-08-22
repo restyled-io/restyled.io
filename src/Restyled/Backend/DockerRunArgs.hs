@@ -1,7 +1,6 @@
 module Restyled.Backend.DockerRunArgs
     ( dockerRunArgs
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

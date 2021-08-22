@@ -2,8 +2,7 @@ module Restyled.Test.Expectations
     ( shouldRedirectTo
     , expectationFailure
     , module X
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

@@ -4,8 +4,7 @@ module Restyled.Handlers.Admin.Token
     ( getAdminTokensR
     , postAdminTokensR
     , deleteAdminTokenR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

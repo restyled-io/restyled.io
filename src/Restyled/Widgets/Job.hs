@@ -13,8 +13,7 @@ module Restyled.Widgets.Job
     , textJobLogLine
     , colorizedJobLogLine
     , scrubGitHubToken
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

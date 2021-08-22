@@ -7,8 +7,7 @@ module Restyled.Time
     , Seconds(Seconds)
     , addTime
     , subtractTime
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

@@ -1,8 +1,7 @@
 module Yesod.Auth.OAuth2.GitHubStudents
     ( oauth2GitHubStudents
     , pluginName
-    )
-where
+    ) where
 
 import Prelude
 

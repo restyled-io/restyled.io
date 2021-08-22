@@ -1,8 +1,7 @@
 module SVCS.Payload
     ( Payload(..)
     , PullRequestEventType(..)
-    )
-where
+    ) where
 
 import Prelude
 

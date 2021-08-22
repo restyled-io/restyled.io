@@ -1,7 +1,6 @@
 module Restyled.StreamJobLogLines
     ( streamJobLogLines
-    )
-where
+    ) where
 
 import Restyled.Prelude
 

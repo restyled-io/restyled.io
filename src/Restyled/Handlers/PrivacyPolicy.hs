@@ -1,7 +1,6 @@
 module Restyled.Handlers.PrivacyPolicy
     ( getPrivacyPolicyR
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
