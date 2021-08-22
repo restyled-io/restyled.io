@@ -8,6 +8,7 @@ module Restyled.Backend.Container
 
 import Restyled.Prelude
 
+import Control.Lens (_1)
 import qualified Data.ByteString.Lazy.Char8 as LBS8
 import Restyled.Models
 
@@ -157,4 +158,8 @@ signalContainer
     -> RunningContainer
     -> m ExitCode
 signalContainer signal RunningContainer {..} =
-    proc "docker" ["kill", "--signal", signal, rcContainerId] runProcess
+    view _1
+        <$> proc
+                "docker"
+                ["kill", "--signal", signal, rcContainerId]
+                readProcess
