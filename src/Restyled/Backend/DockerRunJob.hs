@@ -12,6 +12,7 @@ import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBS8
 import Restyled.Backend.DockerRunArgs
 import Restyled.Backend.MissingDaemonError
+import Restyled.JobLogLine
 import Restyled.Models
 import Restyled.Settings
 
@@ -36,6 +37,7 @@ dockerRunJob
        , HasSqlPool env
        , HasSettings env
        , HasProcessContext env
+       , HasAWS env
        )
     => Entity Repo
     -> Entity Job
@@ -43,7 +45,7 @@ dockerRunJob
 dockerRunJob (Entity _ repo) job = do
     settings <- view settingsL
     token <- repoInstallationToken settings repo
-    handleAny loggedExitFailure
+    handleAny (logUnexpectedException job)
         $ handleJust toMissingDaemonError onMissingDaemonError
         $ dockerRunRm
         $ dockerRunArgs settings token repo job
@@ -65,12 +67,24 @@ dockerRunRm args = do
         <$> proc "docker" ["wait", container] readProcessStdout_
     exitCode <$ proc "docker" ["rm", container] readProcess
 
-loggedExitFailure
-    :: (MonadIO m, MonadReader env m, HasLogFunc env, Show ex)
-    => ex
+logUnexpectedException
+    :: ( MonadIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasSettings env
+       , HasAWS env
+       , Exception ex
+       )
+    => Entity Job
+    -> ex
     -> m ExitCode
-loggedExitFailure ex = ExitFailure 99 <$ logError msg
-    where msg = "RestyleMachine.dockerRunJob: " <> displayShow ex
+logUnexpectedException (Entity jobId _) ex = do
+    logError $ "dockerRunJob: " <> fromString (displayException ex)
+    captureJobLogLine
+        jobId
+        JobLogStreamSystem
+        "An unexpected exception occurred when running this Job"
+    pure $ ExitFailure 99
 
 readExitCode :: String -> ExitCode
 readExitCode s = case readMaybe s of
