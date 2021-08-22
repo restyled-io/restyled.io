@@ -113,24 +113,19 @@ reconcileStoppedContainer
     :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
     => StoppedContainer
     -> m (Either String Int)
-reconcileStoppedContainer stoppedContainer@StoppedContainer {..} = do
-    mJob <- runDB
-        $ selectFirst [JobId ==. scJobId, JobCompletedAt ==. Nothing] []
+reconcileStoppedContainer StoppedContainer {..} = runDB $ do
+    mJob <- selectFirst [JobId ==. scJobId, JobCompletedAt ==. Nothing] []
 
     case mJob of
         Nothing -> pure $ Left noSuchJob
-        Just _ -> Right 1 <$ reconcileJob stoppedContainer
+        Just _ -> do
+            update
+                scJobId
+                [ JobUpdatedAt =. scFinishedAt
+                , JobCompletedAt =. Just scFinishedAt
+                , JobExitCode =. Just scExitCode
+                ]
+            pure $ Right 1
   where
     noSuchJob =
         "No incomplete Job found with Id " <> unpack (toPathPiece scJobId)
-
-reconcileJob
-    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
-    => StoppedContainer
-    -> m ()
-reconcileJob StoppedContainer {..} = runDB $ update
-    scJobId
-    [ JobUpdatedAt =. scFinishedAt
-    , JobCompletedAt =. Just scFinishedAt
-    , JobExitCode =. Just scExitCode
-    ]
