@@ -93,4 +93,3 @@ getJsonBody = do
                         <> "\n  Body:   "
                         <> show body
                 Right v -> pure v
-
