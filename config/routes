@@ -9,6 +9,8 @@
 
 /jobs JobsP:
   / JobsR POST
+  /#JobId JobP:
+    / JobR PATCH
 
 /privacy-policy PrivacyPolicyR GET
 /thanks/github ThanksGitHubR GET

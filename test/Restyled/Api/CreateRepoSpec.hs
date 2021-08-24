@@ -4,7 +4,6 @@ module Restyled.Api.CreateRepoSpec
 
 import Restyled.Test
 
-import Control.Monad.Validate
 import Restyled.Api.CreateRepo
 import Restyled.Api.Repo (ApiRepo(ApiRepo))
 import qualified Restyled.Api.Repo as ApiRepo
@@ -87,9 +86,3 @@ spec = withApp $ do
                     `shouldBe` Just MarketplacePlanAllows
                 ApiRepo.marketplacePlanAllows repo2 `shouldBe` Just
                     (MarketplacePlanForbids MarketplacePlanMaxRepos)
-
-assertValidateT :: (MonadIO m, Show e) => ValidateT e m a -> m a
-assertValidateT = either (expectationFailure . message) pure <=< runValidateT
-  where
-    message :: Show e => e -> String
-    message = ("Expected validation to succeed, received: " <>) . show

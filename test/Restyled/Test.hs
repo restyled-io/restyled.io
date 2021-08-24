@@ -16,6 +16,7 @@ import Restyled.Test.Authentication as X
 import Restyled.Test.Expectations as X
 import Restyled.Test.Factories as X
 import Restyled.Test.Lens as X
+import Restyled.Test.Validate as X
 import Restyled.Test.Yesod as X
 import Test.QuickCheck as X
 
