@@ -107,6 +107,11 @@ instance Yesod App where
         settings <- getsYesod $ view settingsL
         runDB $ authorizeAdmin settings =<< maybeAuthId
 
+    -- Writing RepoR is Admin-only
+    isAuthorized (RepoP _ _ RepoR) True = do
+        settings <- getsYesod $ view settingsL
+        runDB $ authorizeAdmin settings =<< maybeAuthId
+
     isAuthorized (RepoP owner repo _) _ = do
         settings <- getsYesod $ view settingsL
         runDB $ authorizeRepo settings owner repo =<< maybeAuthId

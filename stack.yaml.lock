@@ -19,6 +19,20 @@ packages:
   original:
     hackage: github-0.26@sha256:a9d4046325c3eb28cdc7bef2c3f5bb213328caeae0b7dce6f51de655f0bffaa1,7162
 - completed:
+    hackage: hspec-expectations-json-1.0.0.4@sha256:81405eeaa3aa659733a96a73872ec547093e2b39aed4a168e852d812285c8be6,3421
+    pantry-tree:
+      size: 616
+      sha256: 88040d6db30b66224eb193e134159c8975a98194ff706b14a2b4fde4802f5f61
+  original:
+    hackage: hspec-expectations-json-1.0.0.4@sha256:81405eeaa3aa659733a96a73872ec547093e2b39aed4a168e852d812285c8be6,3421
+- completed:
+    hackage: monad-validate-1.2.0.0@sha256:9850f408431098b28806dd464b6825a88a0b56c84f380d7fe0454c1df9d6f881,3505
+    pantry-tree:
+      size: 713
+      sha256: 8e049bd12ce2bd470909578f2ee8eb80b89d5ff88860afa30e29dd4eafecfa3e
+  original:
+    hackage: monad-validate-1.2.0.0@sha256:9850f408431098b28806dd464b6825a88a0b56c84f380d7fe0454c1df9d6f881,3505
+- completed:
     hackage: yesod-auth-oauth2-0.6.1.5@sha256:bc65e697ae622b80024ca22a7b9270bf64a8c96be8f6ac1d09ed3a1d1cbbde6e,2950
     pantry-tree:
       size: 1844

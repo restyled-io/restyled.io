@@ -41,14 +41,16 @@ fetchUserHasMarketplacePlan planId login = selectExists
 data MarketplacePlanAllows
     = MarketplacePlanAllows
     | MarketplacePlanForbids MarketplacePlanLimitation
-    deriving stock (Eq, Show)
+    deriving stock (Eq, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
 
 data MarketplacePlanLimitation
     = MarketplacePlanNotFound
     | MarketplacePlanPublicOnly
     | MarketplacePlanMaxRepos
     | MarketplacePlanAccountExpired UTCTime
-    deriving stock (Eq, Show)
+    deriving stock (Eq, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
 
 marketplacePlanAllows
     :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows

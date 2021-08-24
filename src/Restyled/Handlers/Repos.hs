@@ -2,6 +2,7 @@
 
 module Restyled.Handlers.Repos
     ( getRepoR
+    , putRepoR
     , getRepoPullR
     , getRepoPullJobsR
     , getRepoJobsR
@@ -11,7 +12,9 @@ module Restyled.Handlers.Repos
 
 import Restyled.Prelude
 
+import Control.Monad.Validate
 import qualified Data.Text as T
+import Restyled.Api.CreateRepo
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Settings
@@ -22,6 +25,19 @@ import Yesod.WebSockets
 
 getRepoR :: OwnerName -> RepoName -> Handler Html
 getRepoR = getRepoJobsR
+
+-- | Find or create a repository
+--
+-- - Request: 'ApiRepo'
+-- - Response: 400 with 'ApiCreateRepoErrors' or 200 with 'ApiRepo'
+--
+putRepoR :: OwnerName -> RepoName -> Handler Value
+putRepoR owner name = do
+    body <- requireJsonBody
+    result <- runDB $ runValidateT $ do
+        assertOwnerName owner body *> assertRepoName name body
+        findOrCreateRepo body
+    either (sendStatusJSON status400) (sendStatusJSON status200) result
 
 getRepoPullR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html
 getRepoPullR = getRepoPullJobsR

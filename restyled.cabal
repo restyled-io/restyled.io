@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d9614f4fba299a10ef4cd27e3bdfbbc781171ed3201eabc902288c7b968c6329
+-- hash: 93fc4cceb26c3d3fe2ebe4f1697dde6c5fd24f5dcc2bb31d705ef5adf1912560
 
 name:           restyled
 version:        0.1.1.0
@@ -26,6 +26,8 @@ library
       GitHub.Request.Preview
       Restyled.Admin.CreateMachine
       Restyled.Admin.RepoSearch
+      Restyled.Api.CreateRepo
+      Restyled.Api.Repo
       Restyled.ApiError
       Restyled.ApiToken
       Restyled.Application
@@ -176,6 +178,7 @@ library
     , lens-aeson
     , megaparsec
     , monad-logger
+    , monad-validate
     , mtl
     , optparse-applicative
     , path-pieces
@@ -258,6 +261,7 @@ test-suite test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Restyled.Api.CreateRepoSpec
       Restyled.AuthenticationSpec
       Restyled.Backend.ReconcileSpec
       Restyled.Backend.RestyleMachineSpec
@@ -315,6 +319,7 @@ test-suite test
   ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
   build-depends:
       QuickCheck
+    , aeson-qq
     , base
     , bytestring
     , filepath
@@ -322,18 +327,22 @@ test-suite test
     , hedis
     , hspec
     , hspec-core
+    , hspec-expectations-json
     , hspec-expectations-lifted
     , http-types
     , lens
+    , lens-aeson
     , load-env
     , megaparsec
     , monad-logger
+    , monad-validate
     , persistent
     , restyled
     , rio
     , shakespeare
     , text
     , time
+    , wai-extra
     , yesod-auth
     , yesod-core
     , yesod-test

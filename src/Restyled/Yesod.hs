@@ -3,8 +3,11 @@
 
 module Restyled.Yesod
     (
+    -- * Safer defaults
+      requireJsonBody
+
     -- * DB
-      getEntity404
+    , getEntity404
 
     -- * Fields
     , jsonField
@@ -23,7 +26,7 @@ import Yesod.Auth.OAuth2 as X
 import Yesod.Auth.OAuth2.GitHub as X
 import Yesod.Auth.OAuth2.GitHubStudents as X
 import Yesod.Auth.OAuth2.GitLab as X
-import Yesod.Core as X
+import Yesod.Core as X hiding (requireJsonBody)
 import Yesod.Form as X
 import Yesod.Lens as X
 import Yesod.Paginator as X
@@ -40,6 +43,9 @@ instance HasLogFunc env => HasLogFunc (HandlerData child env) where
 
 instance HasProcessContext env => HasProcessContext (HandlerData child env) where
     processContextL = handlerEnvL . siteL . processContextL
+
+requireJsonBody :: (MonadHandler m, FromJSON a) => m a
+requireJsonBody = requireCheckJsonBody
 
 getEntity404
     :: (MonadHandler m, SqlEntity a) => Key a -> SqlPersistT m (Entity a)
