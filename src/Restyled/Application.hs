@@ -31,6 +31,7 @@ import Restyled.Handlers.Admin.Token
 import Restyled.Handlers.Common
 import Restyled.Handlers.GitHubStudents
 import Restyled.Handlers.Home
+import Restyled.Handlers.Jobs
 import Restyled.Handlers.Marketplace
 import Restyled.Handlers.Offers
 import Restyled.Handlers.PrivacyPolicy

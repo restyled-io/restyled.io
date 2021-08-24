@@ -1,6 +1,8 @@
 module Restyled.Test.Expectations
     ( shouldMatchJson
     , shouldRedirectTo
+    , expectJust
+    , expectRight
     , expectationFailure
     , module X
     ) where
@@ -37,5 +39,20 @@ shouldRedirectTo doRequest path = do
         Left _err -> False
         Right url -> path `T.isSuffixOf` url
 
-expectationFailure :: MonadIO m => String -> m a
+expectJust :: (HasCallStack, MonadIO m) => String -> Maybe a -> m a
+expectJust item = \case
+    Nothing -> expectationFailure $ "Expected Just " <> item <> ", got Nothing"
+    Just a -> pure a
+
+expectRight :: (HasCallStack, MonadIO m, Show e) => String -> Either e a -> m a
+expectRight item = \case
+    Left e ->
+        expectationFailure
+            $ "Expected Right "
+            <> item
+            <> ", got Left: "
+            <> show e
+    Right a -> pure a
+
+expectationFailure :: (HasCallStack, MonadIO m) => String -> m a
 expectationFailure msg = HSpec.expectationFailure msg >> error "never here"
