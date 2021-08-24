@@ -23,7 +23,7 @@
 /profile ProfileR GET
 
 /gh/#OwnerName/repos/#RepoName RepoP:
-  / RepoR GET
+  / RepoR GET PUT
   /pulls/#PullRequestNum RepoPullP:
     / RepoPullR GET
     /jobs RepoPullJobsP:

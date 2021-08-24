@@ -4,12 +4,15 @@ module Restyled.Test.Yesod
     ( YesodSpec
     , getTestRoot
     , patchJSON
+    , putJSON
+    , getJsonBody
     , module X
     ) where
 
 import Restyled.Prelude
 
 import Control.Monad.Logger (MonadLogger(..), toLogStr)
+import Network.Wai.Test (SResponse(..))
 import Restyled.Cache as X
 import Restyled.Test.Expectations
 import Test.Hspec.Core.Spec (SpecM)
@@ -60,3 +63,34 @@ patchJSON route body = request $ do
     addRequestHeader ("Accept", "application/json")
     addRequestHeader ("Content-type", "application/json")
     setRequestBody $ encode body
+
+putJSON
+    :: (RedirectUrl site url, Yesod site, ToJSON body)
+    => url
+    -> body
+    -> YesodExample site ()
+putJSON route body = request $ do
+    setUrl route
+    setMethod "PUT"
+    addRequestHeader ("Accept", "application/json")
+    addRequestHeader ("Content-type", "application/json")
+    setRequestBody $ encode body
+
+getJsonBody :: YesodExample site Value
+getJsonBody = do
+    mResp <- getResponse
+
+    case mResp of
+        Nothing -> expectationFailure "No response"
+        Just resp -> do
+            let body = simpleBody resp
+            case eitherDecode body of
+                Left err ->
+                    expectationFailure
+                        $ "Body did not parse as JSON"
+                        <> "\n  Errors: "
+                        <> err
+                        <> "\n  Body:   "
+                        <> show body
+                Right v -> pure v
+

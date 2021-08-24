@@ -1,5 +1,6 @@
 module Restyled.Test.Expectations
-    ( shouldRedirectTo
+    ( shouldMatchJson
+    , shouldRedirectTo
     , expectationFailure
     , module X
     ) where
@@ -8,9 +9,13 @@ import Restyled.Prelude
 
 import qualified Data.Text as T
 import Restyled.Foundation
+import qualified Test.Hspec.Expectations.Json as HSpec
 import Test.Hspec.Lifted as X hiding (expectationFailure)
 import qualified Test.Hspec.Lifted as HSpec
 import Yesod.Test
+
+shouldMatchJson :: (HasCallStack, MonadIO m) => Value -> Value -> m ()
+shouldMatchJson a b = liftIO $ HSpec.shouldMatchJson a b
 
 shouldRedirectTo
     :: YesodExample App a -- ^ Perform the request

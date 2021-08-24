@@ -76,6 +76,7 @@ library:
     - lens-aeson
     - megaparsec
     - monad-logger
+    - monad-validate
     - mtl
     - optparse-applicative
     - path-pieces
@@ -131,6 +132,7 @@ tests:
     main: Spec.hs
     source-dirs: test
     dependencies:
+      - aeson-qq
       - restyled
       - QuickCheck
       - bytestring
@@ -140,16 +142,20 @@ tests:
       - hspec
       - hspec-core
       - hspec-expectations-lifted
+      - hspec-expectations-json
       - http-types
       - lens
+      - lens-aeson
       - load-env
       - megaparsec
       - monad-logger
+      - monad-validate
       - persistent
       - rio
       - shakespeare
       - text
       - time
+      - wai-extra
       - yesod-auth
       - yesod-core
       - yesod-test
