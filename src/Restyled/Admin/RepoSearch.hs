@@ -7,11 +7,12 @@ module Restyled.Admin.RepoSearch
 import Restyled.Prelude
 
 import qualified Data.Text as T
+import Restyled.Api.Repo (ApiRepo, apiRepo)
 import Restyled.Foundation
 import Restyled.Models
 
 data SearchResults = SearchResults
-    { srRepos :: [Entity Repo]
+    { srRepos :: [ApiRepo]
     , srTotal :: Int
     }
     deriving stock Generic
@@ -35,7 +36,10 @@ searchRepos limit q = runDB $ do
         then count $ searchFilters q
         else pure $ length repos
 
-    pure SearchResults { srRepos = repos, srTotal = total }
+    pure SearchResults
+        { srRepos = map (`apiRepo` Nothing) repos
+        , srTotal = total
+        }
 
 searchFilters :: Text -> [Filter Repo]
 searchFilters q = case T.breakOn "/" q of

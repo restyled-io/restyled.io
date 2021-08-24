@@ -9,10 +9,10 @@
         <i .fas .fa-search>
 <section>
   <ul #results>
-    $forall Entity _ repo <- srRepos results
+    $forall repo <- srRepos results
       <li>
-        <a href=@{repoP (repoOwner repo) (repoName repo) jobsR}>
-          #{repoOwner repo} / #{repoName repo}
+        <a href=@{repoP (ApiRepo.owner repo) (ApiRepo.name repo) jobsR}>
+          #{ApiRepo.owner repo} / #{ApiRepo.name repo}
 
   <p>
     <i>
