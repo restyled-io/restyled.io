@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 74b47b2cb9d6b31e21a2e7b6ab8c02e1997a2c0a1753543186c2c25369c1b8a5
+-- hash: 2dc2b50402d20ccacaf902161ccb2a1df15abb428b943ed42c5319e67ed25546
 
 name:           restyled
 version:        0.1.1.0
@@ -26,7 +26,9 @@ library
       GitHub.Request.Preview
       Restyled.Admin.CreateMachine
       Restyled.Admin.RepoSearch
+      Restyled.Api.CreateJob
       Restyled.Api.CreateRepo
+      Restyled.Api.Job
       Restyled.Api.Repo
       Restyled.ApiError
       Restyled.ApiToken
@@ -67,6 +69,7 @@ library
       Restyled.Handlers.Common
       Restyled.Handlers.GitHubStudents
       Restyled.Handlers.Home
+      Restyled.Handlers.Jobs
       Restyled.Handlers.Marketplace
       Restyled.Handlers.Offers
       Restyled.Handlers.PrivacyPolicy
@@ -261,6 +264,7 @@ test-suite test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Restyled.Api.CreateJobSpec
       Restyled.Api.CreateRepoSpec
       Restyled.AuthenticationSpec
       Restyled.Backend.ReconcileSpec

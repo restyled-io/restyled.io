@@ -6,6 +6,10 @@
 
 / HomeR GET
 /webhooks WebhooksR POST
+
+/jobs JobsP:
+  / JobsR POST
+
 /privacy-policy PrivacyPolicyR GET
 /thanks/github ThanksGitHubR GET
 /thanks/github-setup ThanksGitHubSetupR GET
