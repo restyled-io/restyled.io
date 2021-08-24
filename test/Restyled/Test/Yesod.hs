@@ -3,7 +3,6 @@
 module Restyled.Test.Yesod
     ( YesodSpec
     , getTestRoot
-    , patchJSON
     , putJSON
     , getJsonBody
     , module X
@@ -51,18 +50,6 @@ getTestRoot = do
         ApprootMaster f -> pure $ f site
         ApprootRequest _ ->
             expectationFailure "getTestRoot can't be used with ApprootRequest"
-
-patchJSON
-    :: (RedirectUrl site url, Yesod site, ToJSON body)
-    => url
-    -> body
-    -> YesodExample site ()
-patchJSON route body = request $ do
-    setUrl route
-    setMethod "PATCH"
-    addRequestHeader ("Accept", "application/json")
-    addRequestHeader ("Content-type", "application/json")
-    setRequestBody $ encode body
 
 putJSON
     :: (RedirectUrl site url, Yesod site, ToJSON body)
