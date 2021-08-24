@@ -17,7 +17,7 @@ User
   UniqueUser credsPlugin credsIdent
   deriving Eq Show
 
-Repo json
+Repo
   svcs RepoSVCS default='github'
   owner OwnerName
   name RepoName
@@ -30,7 +30,7 @@ Repo json
   UniqueRepo svcs owner name
   deriving Eq Show
 
-Job json
+Job
   svcs RepoSVCS default='github'
   owner OwnerName
   repo RepoName
