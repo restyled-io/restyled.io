@@ -6,7 +6,6 @@ module Restyled.Api.CreateJobSpec
 
 import Restyled.Test
 
-import Control.Monad.Validate
 import Data.Aeson.QQ
 import qualified Database.Persist as P
 import Restyled.Api.CreateJob (ApiCreateJob(ApiCreateJob), createJob)
