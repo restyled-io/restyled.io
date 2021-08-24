@@ -9,8 +9,6 @@ import Restyled.Test
 import Control.Lens ((^?!))
 import Data.Aeson.Lens
 import Data.Aeson.QQ
-import Restyled.Api.Repo (ApiRepo(ApiRepo))
-import qualified Restyled.Api.Repo as ApiRepo
 
 spec :: Spec
 spec = withApp $ do
@@ -30,13 +28,15 @@ spec = withApp $ do
         it "validates owner matches" $ do
             void authenticateAsAdmin
 
-            putJSON (repoP "baz" "bar" RepoR) $ ApiRepo
-                { ApiRepo.owner = "foo"
-                , ApiRepo.name = "bar"
-                , ApiRepo.isPrivate = False
-                , ApiRepo.installationId = 1
-                , ApiRepo.marketplacePlanAllows = Nothing
-                }
+            putJSON
+                (repoP "baz" "bar" RepoR)
+                [aesonQQ|
+                    { "owner": "foo"
+                    , "name": "bar"
+                    , "isPrivate": false
+                    , "installationId": 1
+                    }
+                |]
 
             statusIs 400
             resp <- getJsonBody
@@ -52,13 +52,15 @@ spec = withApp $ do
         it "validates name matches" $ do
             void authenticateAsAdmin
 
-            putJSON (repoP "foo" "quiix" RepoR) $ ApiRepo
-                { ApiRepo.owner = "foo"
-                , ApiRepo.name = "bar"
-                , ApiRepo.isPrivate = False
-                , ApiRepo.installationId = 1
-                , ApiRepo.marketplacePlanAllows = Nothing
-                }
+            putJSON
+                (repoP "foo" "quiix" RepoR)
+                [aesonQQ|
+                    { "owner": "foo"
+                    , "name": "bar"
+                    , "isPrivate": false
+                    , "installationId": 1
+                    }
+                |]
 
             statusIs 400
             resp <- getJsonBody
@@ -74,13 +76,15 @@ spec = withApp $ do
         it "accumulates validations" $ do
             void authenticateAsAdmin
 
-            putJSON (repoP "bat" "quiix" RepoR) $ ApiRepo
-                { ApiRepo.owner = "foo"
-                , ApiRepo.name = "bar"
-                , ApiRepo.isPrivate = False
-                , ApiRepo.installationId = 1
-                , ApiRepo.marketplacePlanAllows = Nothing
-                }
+            putJSON
+                (repoP "bat" "quiix" RepoR)
+                [aesonQQ|
+                    { "owner": "foo"
+                    , "name": "bar"
+                    , "isPrivate": false
+                    , "installationId": 1
+                    }
+                |]
 
             statusIs 400
             resp <- getJsonBody
@@ -98,30 +102,27 @@ spec = withApp $ do
 
         -- N.B. This is just a smoke-test, more tests against findOrCreateRepo
         it "inserts a new repository and parrots back" $ do
-            let owner :: OwnerName
-                owner = "foo"
-                name :: RepoName
-                name = "bar"
-                body = ApiRepo
-                    { ApiRepo.owner = owner
-                    , ApiRepo.name = name
-                    , ApiRepo.isPrivate = False
-                    , ApiRepo.installationId = 1
-                    , ApiRepo.marketplacePlanAllows = Nothing
-                    }
-
             void authenticateAsAdmin
-            putJSON (repoP owner name RepoR) body
+
+            putJSON
+                (repoP "foo" "bar" RepoR)
+                [aesonQQ|
+                    { "owner": "foo"
+                    , "name": "bar"
+                    , "isPrivate": false
+                    , "installationId": 1
+                    }
+                |]
 
             statusIs 200
             resp <- getJsonBody
-            resp ^?! key "owner" . _JSON `shouldBe` ApiRepo.owner body
-            resp ^?! key "name" . _JSON `shouldBe` ApiRepo.name body
-            resp ^?! key "isPrivate" . _JSON `shouldBe` ApiRepo.isPrivate body
+            resp ^?! key "owner" . _JSON @_ @OwnerName `shouldBe` "foo"
+            resp ^?! key "name" . _JSON @_ @RepoName `shouldBe` "bar"
+            resp ^?! key "isPrivate" . _Bool `shouldBe` False
             resp
                 ^?! key "installationId"
-                . _JSON
-                `shouldBe` ApiRepo.installationId body
+                . _JSON @_ @InstallationId
+                `shouldBe` 1
             resp
                 ^? key "marketplacePlanAllows"
                 . key "tag"
@@ -129,12 +130,12 @@ spec = withApp $ do
                 `shouldBe` Just "MarketplacePlanAllows"
             Just (Entity _ Repo {..}) <- runDB $ getBy $ UniqueRepo
                 GitHubSVCS
-                owner
-                name
-            repoOwner `shouldBe` ApiRepo.owner body
-            repoName `shouldBe` ApiRepo.name body
-            repoIsPrivate `shouldBe` ApiRepo.isPrivate body
-            repoInstallationId `shouldBe` ApiRepo.installationId body
+                "foo"
+                "bar"
+            repoOwner `shouldBe` "foo"
+            repoName `shouldBe` "bar"
+            repoIsPrivate `shouldBe` False
+            repoInstallationId `shouldBe` 1
 
 itRequiresRepositoryAccess :: RepoP -> YesodSpec App ()
 itRequiresRepositoryAccess path = do
