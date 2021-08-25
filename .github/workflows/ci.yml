@@ -108,16 +108,6 @@ jobs:
           heroku_app_name: restyled-io
           dockerfile_name: Dockerfile.web
 
-      - uses: restyled-io/gitops-deploy-action@main
-        with:
-          token: ${{ secrets.GITOPS_ACCESS_TOKEN }}
-          parameter-name: RestyledImage
-          parameter-value: ${{ needs.image.outputs.image }}
-          committer-name: Restyled Commits
-          committer-email: commits@restyled.io
-          repository: restyled-io/ops
-          stacks: cg-app/stacks/*/*/prod/services/*.yaml
-
       - uses: desiderati/github-action-pushover@v1
         if: ${{ always() }}
         with:
