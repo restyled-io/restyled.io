@@ -68,9 +68,11 @@ createJob ApiCreateJob {..} = do
         , jobCompletedAt = completedAt
         , jobExitCode = exitCode
 
+        -- Mark this as created with AWS Logs
+        , jobStdout = Just "__cw"
+
         -- Legacy fields
         , jobLog = Nothing
-        , jobStdout = Nothing
         , jobStderr = Nothing
         }
     pure $ apiJob job settings
