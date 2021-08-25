@@ -48,6 +48,7 @@ library:
     - ansi-terminal
     - amazonka
     - amazonka-cloudwatch-logs
+    - amazonka-core
     - blaze-html
     - blaze-markup
     - bytestring

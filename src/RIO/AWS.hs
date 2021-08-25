@@ -1,7 +1,7 @@
 module RIO.AWS
     ( HasAWS(..)
     , runAWS
-    , runConduitAWS
+    , pageAWS
     , discoverAWS
     ) where
 
@@ -29,12 +29,12 @@ runAWS req = do
     env <- view awsEnvL
     liftIO $ runResourceT $ AWS.runAWST env $ AWS.send req
 
-runConduitAWS
+pageAWS
     :: (MonadIO m, MonadReader env m, HasAWS env, AWS.AWSPager a)
     => a
     -> ConduitT (AWS.Rs a) Void (AWS.AWST (ResourceT IO)) r
     -> m r
-runConduitAWS req sink = do
+pageAWS req sink = do
     env <- view awsEnvL
     liftIO
         $ runResourceT

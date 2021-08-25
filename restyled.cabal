@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8a5a0ac2d0fac3c167801064e422ea4d661c63c31f534e9a885b3c22ed968de6
+-- hash: 8347578e45f0784319ddb42e49ff99bb94aabadf3a74c985ada0dffc9d3e08f2
 
 name:           restyled
 version:        0.1.1.0
@@ -139,6 +139,7 @@ library
     , aeson-pretty
     , amazonka
     , amazonka-cloudwatch-logs
+    , amazonka-core
     , ansi-terminal
     , base
     , blaze-html

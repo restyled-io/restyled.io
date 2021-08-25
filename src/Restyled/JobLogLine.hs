@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module Restyled.JobLogLine
     ( JobLogLine(..)
     , fetchJobLogLines
@@ -5,10 +7,12 @@ module Restyled.JobLogLine
 
 import Restyled.Prelude
 
+import Conduit
 import Control.Lens ((?~))
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime, utcTimeToPOSIXSeconds)
 import Network.AWS.CloudWatchLogs.GetLogEvents
 import Network.AWS.CloudWatchLogs.Types
+import Network.AWS.Pager (AWSPager(..))
 import Restyled.Models.DB (JobId, JobLogLine(..))
 import Restyled.Settings
 
@@ -23,41 +27,59 @@ jobLogStreamToText = \case
     JobLogStreamStdout -> "stdout"
     JobLogStreamStderr -> "stderr"
 
+instance AWSPager GetLogEvents where
+    page req resp = do
+        prevToken <- req ^. gleNextToken
+        nextToken <- resp ^. glersNextForwardToken
+        guard $ nextToken /= prevToken
+        pure $ req & (gleNextToken ?~ nextToken)
+
 fetchJobLogLines
-    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasSettings env
+       , HasAWS env
+       )
     => JobId
     -> Maybe UTCTime
     -> m [JobLogLine]
-fetchJobLogLines jobId mSince = handleAny (\_ -> pure []) $ do
+fetchJobLogLines jobId mSince = handleAny (errorJobLogLines jobId) $ do
     AppSettings {..} <- view settingsL
 
     let groupName = appRestylerLogGroup
         streamName = appRestylerLogStreamPrefix <> toPathPiece jobId
+        req =
+            getLogEvents groupName streamName
+                & (gleStartTime .~ startMilliseconds)
+                & (gleStartFromHead ?~ True)
+    pageAWS req $ concatMapC (fromGetLogEvents jobId) .| sinkList
+    where startMilliseconds = (+ 1) . utcTimeToPOSIXMilliseconds <$> mSince
 
-    go [] groupName streamName Nothing
-  where
-    -- We consider "since" to be exclusive, but AWS does not. This means that if
-    -- you naively use timestamp of the last event as input to find events since
-    -- it, you will continually get that event again. We add a ms to avoid this.
-    startMilliseconds = (+ 1) . utcTimeToPOSIXMilliseconds <$> mSince
+errorJobLogLines
+    :: (MonadIO m, MonadReader env m, HasLogFunc env, Show ex)
+    => JobId
+    -> ex
+    -> m [JobLogLine]
+errorJobLogLines jobId ex = do
+    logError
+        $ "Error fetching Job log for Job "
+        <> display (toPathPiece jobId)
+        <> ": "
+        <> displayShow ex
+    now <- liftIO getCurrentTime
+    pure
+        [ JobLogLine
+              { jobLogLineCreatedAt = now
+              , jobLogLineStream = jobLogStreamToText JobLogStreamSystem
+              , jobLogLineContent = "Unable to fetch Job log at this time"
+              , jobLogLineJob = jobId
+              }
+        ]
 
-    go acc groupName streamName mNextToken = do
-        resp <-
-            runAWS
-            $ getLogEvents groupName streamName
-            & (gleStartTime .~ startMilliseconds)
-            & (gleStartFromHead ?~ True)
-            & (gleNextToken .~ mNextToken)
-
-        let events = resp ^. glersEvents
-
-        if null events
-            then pure acc
-            else go
-                (acc <> mapMaybe (fromOutputLogEvent jobId) events)
-                groupName
-                streamName
-                (resp ^. glersNextForwardToken)
+fromGetLogEvents :: JobId -> GetLogEventsResponse -> [JobLogLine]
+fromGetLogEvents jobId resp =
+    mapMaybe (fromOutputLogEvent jobId) $ resp ^. glersEvents
 
 fromOutputLogEvent :: JobId -> OutputLogEvent -> Maybe JobLogLine
 fromOutputLogEvent jobId event = do

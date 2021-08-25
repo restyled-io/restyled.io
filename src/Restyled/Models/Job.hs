@@ -42,13 +42,23 @@ data JobOutput
     | JobOutputCompressed Job
 
 attachJobOutput
-    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasSettings env
+       , HasAWS env
+       )
     => Entity Job
     -> SqlPersistT m (Entity Job, JobOutput)
 attachJobOutput job = (job, ) <$> fetchJobOutput job
 
 fetchJobOutput
-    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasSettings env
+       , HasAWS env
+       )
     => Entity Job
     -> SqlPersistT m JobOutput
 fetchJobOutput jobE@(Entity jobId job@Job {..}) =
