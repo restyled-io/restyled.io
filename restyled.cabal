@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3fc9cabf154a549603c93207c4e4f0af76430c5a4a9ac0ef98644b496405b351
+-- hash: 2043e22783aa0bbdfe237a750fb2e062d12dd68446619f6ee8d7eff0c55639d0
 
 name:           restyled
 version:        0.1.1.0
@@ -24,7 +24,6 @@ library
       GitHub.Endpoints.MarketplaceListing.Plans.Accounts
       GitHub.Endpoints.Repos.Collaborators.Permissions
       GitHub.Request.Preview
-      Restyled.Admin.CreateMachine
       Restyled.Admin.RepoSearch
       Restyled.Api.CreateJob
       Restyled.Api.Job
@@ -36,20 +35,8 @@ library
       Restyled.Application
       Restyled.Authentication
       Restyled.Authorization
-      Restyled.Backend.AcceptedJob
-      Restyled.Backend.AcceptedWebhook
-      Restyled.Backend.Application
-      Restyled.Backend.ConcurrentJobs
-      Restyled.Backend.Container
-      Restyled.Backend.DockerRunArgs
-      Restyled.Backend.DockerRunJob
-      Restyled.Backend.ExecRestyler
       Restyled.Backend.Foundation
       Restyled.Backend.MarketplaceSync
-      Restyled.Backend.MissingDaemonError
-      Restyled.Backend.Reconcile
-      Restyled.Backend.RestyleMachine
-      Restyled.Backend.Webhook
       Restyled.Cache
       Restyled.Development.Seeds
       Restyled.Env
@@ -59,8 +46,6 @@ library
       Restyled.GitHubOrg
       Restyled.GitHubStudents
       Restyled.Handlers.Admin
-      Restyled.Handlers.Admin.Machines
-      Restyled.Handlers.Admin.Machines.State
       Restyled.Handlers.Admin.Marketplace
       Restyled.Handlers.Admin.Marketplace.Accounts
       Restyled.Handlers.Admin.Marketplace.Plans
@@ -269,8 +254,6 @@ test-suite test
       Restyled.Api.UpdateJobSpec
       Restyled.Api.UpsertRepoSpec
       Restyled.AuthenticationSpec
-      Restyled.Backend.ReconcileSpec
-      Restyled.Backend.RestyleMachineSpec
       Restyled.Handlers.AdminSpec
       Restyled.Handlers.CommonSpec
       Restyled.Handlers.HomeSpec

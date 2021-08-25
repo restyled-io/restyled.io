@@ -8,7 +8,6 @@ module Restyled.Marketplace
     , MarketplacePlanAllows(..)
     , marketplacePlanAllows
     , MarketplacePlanLimitation(..)
-    , whenMarketplacePlanForbids
     , isPrivateRepoPlan
     ) where
 
@@ -72,14 +71,6 @@ marketplacePlanAllowsPrivate repo = do
             MarketplacePlanForbids MarketplacePlanMaxRepos
         Just (PrivateRepoAccountExpired expiredAt) ->
             MarketplacePlanForbids $ MarketplacePlanAccountExpired expiredAt
-
-whenMarketplacePlanForbids
-    :: Applicative f
-    => MarketplacePlanAllows
-    -> (MarketplacePlanLimitation -> f ())
-    -> f ()
-whenMarketplacePlanForbids MarketplacePlanAllows _ = pure ()
-whenMarketplacePlanForbids (MarketplacePlanForbids limitation) f = f limitation
 
 isPrivateRepoPlan :: MarketplacePlan -> Bool
 isPrivateRepoPlan MarketplacePlan {..} =

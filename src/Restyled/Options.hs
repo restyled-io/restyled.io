@@ -21,8 +21,7 @@ data RestyledCommand
     | Export ExportOptions
 
 data BackendCommand
-    = Webhooks
-    | SyncMarketplace
+    = SyncMarketplace
     | SeedDB
 
 parseRestyledOptions :: IO RestyledOptions
@@ -40,7 +39,6 @@ restyledOptions = RestyledOptions
         ))
     <*> subparser
         (  command "web" (info (pure Web) mempty)
-        <> command "webhooks" (info (pure $ Backend Webhooks) mempty)
         <> command "sync-marketplace" (info (pure $ Backend SyncMarketplace) mempty)
         <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
         <> command "export" (info (Export <$> exportOptions) mempty)
