@@ -13,6 +13,7 @@ import Control.Monad.Validate
 import qualified Data.List.NonEmpty as NE
 import Restyled.Api.Job
 import Restyled.Models.DB
+import Restyled.Settings
 
 data ApiUpdateJob
     = Complete ApiCompleteJob
@@ -44,16 +45,20 @@ updatedJobNotFound :: JobId -> ApiUpdateJobErrors
 updatedJobNotFound = ApiUpdateJobErrors . pure . UpdatedJobNotFound
 
 updateJob
-    :: MonadIO m
+    :: (MonadIO m, MonadReader env m, HasSettings env)
     => JobId
     -> NonEmpty ApiUpdateJob
     -> ValidateT ApiUpdateJobErrors (SqlPersistT m) ApiJob
 updateJob jobId changes = do
+    settings <- lift $ lift $ view settingsL
     mUpdated <- lift $ do
         now <- liftIO getCurrentTime
         update jobId $ updates now
         getEntity jobId
-    maybe (refute $ updatedJobNotFound jobId) (pure . apiJob) mUpdated
+    maybe
+        (refute $ updatedJobNotFound jobId)
+        (\job -> pure $ apiJob job settings)
+        mUpdated
   where
     updates now = concatMap (toUpdates now) $ NE.toList changes
 

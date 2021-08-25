@@ -14,9 +14,9 @@ import Restyled.Prelude
 
 import Control.Monad.Validate
 import qualified Data.Text as T
-import Restyled.Api.CreateRepo
+import Restyled.Api.UpsertRepo
 import Restyled.Foundation
-import Restyled.Models
+import Restyled.Models hiding (upsertRepo)
 import Restyled.Settings
 import Restyled.StreamJobLogLines
 import Restyled.Widgets.Job
@@ -28,15 +28,15 @@ getRepoR = getRepoJobsR
 
 -- | Find or create a repository
 --
--- - Request: 'ApiRepo'
--- - Response: 400 with 'ApiCreateRepoErrors' or 200 with 'ApiRepo'
+-- - Request: 'ApiUpsertRepo'
+-- - Response: 400 with 'ApiUpsertRepoErrors' or 200 with 'ApiRepo'
 --
 putRepoR :: OwnerName -> RepoName -> Handler Value
 putRepoR owner name = do
     body <- requireJsonBody
     result <- runDB $ runValidateT $ do
         assertOwnerName owner body *> assertRepoName name body
-        findOrCreateRepo body
+        upsertRepo body
     either (sendStatusJSON status400) (sendStatusJSON status200) result
 
 getRepoPullR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html

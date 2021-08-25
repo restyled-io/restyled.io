@@ -12,6 +12,7 @@ import Restyled.Prelude
 import Control.Monad.Validate
 import Restyled.Api.Job (ApiJob, apiJob)
 import Restyled.Models.DB
+import Restyled.Settings
 
 data ApiCreateJob = ApiCreateJob
     { owner :: OwnerName
@@ -48,15 +49,16 @@ repoNotFound owner name =
     ApiCreateJobErrors $ pure $ RepoNotFound RepoNotFoundContents { .. }
 
 createJob
-    :: MonadIO m
+    :: (MonadIO m, MonadReader env m, HasSettings env)
     => ApiCreateJob
     -> ValidateT ApiCreateJobErrors (SqlPersistT m) ApiJob
 createJob ApiCreateJob {..} = do
+    settings <- lift $ lift $ view settingsL
     mRepo <- lift $ getBy $ UniqueRepo svcs owner repo
     void $ refuteNothing (repoNotFound owner repo) mRepo
 
     now <- liftIO getCurrentTime
-    lift $ apiJob <$> insertEntity Job
+    job <- lift $ insertEntity Job
         { jobSvcs = svcs
         , jobOwner = owner
         , jobRepo = repo
@@ -71,6 +73,7 @@ createJob ApiCreateJob {..} = do
         , jobStdout = Nothing
         , jobStderr = Nothing
         }
+    pure $ apiJob job settings
     where svcs = GitHubSVCS
 
 refuteNothing :: MonadValidate e m => e -> Maybe a -> m a

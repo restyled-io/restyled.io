@@ -87,6 +87,8 @@ emptySettings = AppSettings
     , appRestyleMachineLocal = True
     , appRestyleMachineJobsMax = 3
     , appRequestTimeout = 30
+    , appRestylerLogGroup = ""
+    , appRestylerLogStreamPrefix = ""
     }
 
 userWithEmail :: Text -> User

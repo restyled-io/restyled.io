@@ -6,6 +6,9 @@ module RIO.Logger
 
     -- * Interfacing with @"Control.Monad.Logger"@ types
     , logFuncLog
+
+    -- * Low-level helpers
+    , logLevelToText
     ) where
 
 import RIO
@@ -49,12 +52,7 @@ simpleLogFunc h logLevel useColor = mkLogFunc $ \_cs _source level msg ->
         | otherwise = const ""
 
 levelBuilder :: LogLevel -> Builder
-levelBuilder = byteString . \case
-    LevelDebug -> "DEBUG"
-    LevelInfo -> "INFO"
-    LevelWarn -> "WARN"
-    LevelError -> "ERROR"
-    LevelOther x -> encodeUtf8 x
+levelBuilder = byteString . encodeUtf8 . logLevelToText
 
 levelStyle :: LogLevel -> SGR
 levelStyle = \case
@@ -74,3 +72,11 @@ logFuncLog
     -> IO ()
 logFuncLog lf loc source level msg =
     runRIO lf $ Logger.monadLoggerLog loc source level msg
+
+logLevelToText :: LogLevel -> Text
+logLevelToText = \case
+    LevelDebug -> "DEBUG"
+    LevelInfo -> "INFO"
+    LevelWarn -> "WARN"
+    LevelError -> "ERROR"
+    LevelOther x -> x

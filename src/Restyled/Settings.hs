@@ -73,6 +73,8 @@ data AppSettings = AppSettings
     , appRestyleMachineLocal :: Bool
     , appRestyleMachineJobsMax :: Natural
     , appRequestTimeout :: Int
+    , appRestylerLogGroup :: Text
+    , appRestylerLogStreamPrefix :: Text
     }
 
 class HasSettings env where
@@ -133,6 +135,8 @@ loadSettings =
         <*> switch "RESTYLE_MACHINE_LOCAL" mempty
         <*> var auto "RESTYLE_MACHINE_JOBS_MAX" (def 3)
         <*> var auto "REQUEST_TIMEOUT" (def 20)
+        <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
+        <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
