@@ -29,9 +29,9 @@ jobLogStreamToText = \case
 
 instance AWSPager GetLogEvents where
     page req resp = do
-        prevToken <- req ^. gleNextToken
         nextToken <- resp ^. glersNextForwardToken
-        guard $ nextToken /= prevToken
+        let prevToken = req ^. gleNextToken
+        guard $ prevToken /= Just nextToken
         pure $ req & (gleNextToken ?~ nextToken)
 
 fetchJobLogLines
