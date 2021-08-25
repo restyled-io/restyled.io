@@ -4,33 +4,74 @@ module Restyled.StreamJobLogLines
 
 import Restyled.Prelude
 
+import Conduit
+import qualified Data.List.NonEmpty as NE
+import qualified Data.Text.Lazy as TL
 import Restyled.Foundation
-import Restyled.Models
+import qualified Restyled.JobLogLine as CW
+import Restyled.Models hiding (fetchJobLog)
 import Restyled.WebSockets
 import Restyled.Widgets.JobLogLine
 
 streamJobLogLines :: JobId -> WebSocketsT Handler ()
-streamJobLogLines jobId = ignoringConnectionException $ go 0
+streamJobLogLines jobId = do
+    cwLogs <-
+        lift $ runDB $ maybe False ((== Just "__cw") . jobStdout) <$> get jobId
+
+    let
+        source = if cwLogs
+            then stream
+                (\mSince ->
+                    lift
+                        $ (,)
+                        <$> runDB (fetchJobIsInProgress jobId)
+                        <*> CW.fetchJobLogLines jobId mSince
+                )
+                (\mSince logLines -> getLastCreatedAt logLines <|> mSince)
+                Nothing
+            else stream
+                (\offset ->
+                    lift
+                        $ runDB
+                        $ (,)
+                        <$> fetchJobIsInProgress jobId
+                        <*> (entityVal <$$> fetchJobLogLines jobId offset)
+                )
+                (\offset -> (offset +) . length)
+                0
+
+    runConduit $ source .| mapMC (lift . formatJobLogLines) .| sinkWebSockets
+
+getLastCreatedAt :: [JobLogLine] -> Maybe UTCTime
+getLastCreatedAt = fmap (jobLogLineCreatedAt . NE.last) . NE.nonEmpty
+
+formatJobLogLines :: [JobLogLine] -> Handler Text
+formatJobLogLines logLines = do
+    htmls <- traverse renderJobLogLine logLines
+    pure $ TL.toStrict $ mconcat htmls
+
+sinkWebSockets :: MonadIO m => ConduitT Text o (WebSocketsT m) ()
+sinkWebSockets = await >>= \case
+    Nothing -> lift $ sendClose @_ @Text ""
+    Just x -> lift (sendTextDataAck x) >> sinkWebSockets
+
+stream
+    :: MonadIO m
+    => (offset -> m (Bool, [item]))
+    -> (offset -> [item] -> offset)
+    -> offset
+    -> ConduitT i [item] m ()
+stream fetchLog getNextOffset = go 0
   where
-    go offset = do
-        -- Pre-emptively make sure someone is listening. If we don't do this,
-        -- the case of empty log-lines will recurse indefinitely even if the
-        -- client has closed their tab
-        void $ sendTextDataAck @_ @Text ""
+    go backoff offset = do
+        threadDelay $ backoff * 1000000
 
-        (isInProgress, logLines) <-
-            lift
-            $ runDB
-            $ (,)
-            <$> fetchJobIsInProgress jobId
-            <*> fetchJobLogLines jobId offset
+        (continue, items) <- lift $ fetchLog offset
 
-        htmls <- traverse (lift . renderJobLogLine . entityVal) logLines
-        void $ sendTextDataAck $ mconcat htmls
+        yield items
 
-        -- Always recurse if in progress or we're still streaming lines
-        if isInProgress || not (null logLines)
-            then go $ offset + length logLines
-            else do
-                logDebugN "Closing websocket: Job not in progress"
-                sendClose @_ @Text "Job finished"
+        let noItems = null items
+            nextOffset = getNextOffset offset items
+            nextBackoff = if noItems then min 5 (backoff + 1) else 0
+
+        when (continue || not noItems) $ go nextBackoff nextOffset

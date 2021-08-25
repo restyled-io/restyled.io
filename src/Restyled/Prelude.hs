@@ -50,6 +50,7 @@ import Data.Text as X (pack, unpack)
 import Database.Persist as X
 import Database.Persist.JSONB as X
 import Database.Persist.Sql as X (SqlBackend)
+import RIO.AWS as X
 import RIO.DB as X
 import RIO.List as X (headMaybe, partition)
 import RIO.Logger as X

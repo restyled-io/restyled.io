@@ -8,6 +8,7 @@ module Restyled.Backend.Foundation
 
 import Restyled.Prelude
 
+import qualified Network.AWS as AWS (Env)
 import Restyled.Settings
 
 -- | Like @'App'@ but with no webapp-related bits
@@ -17,6 +18,7 @@ data Backend = Backend
     , backendProcessContext :: ProcessContext
     , backendConnPool :: ConnectionPool
     , backendRedisConn :: Connection
+    , backendAWSEnv :: AWS.Env
     }
 
 instance HasLogFunc Backend where
@@ -36,6 +38,9 @@ instance HasRedis Backend where
     redisConnectionL =
         lens backendRedisConn $ \x y -> x { backendRedisConn = y }
 
+instance HasAWS Backend where
+    awsEnvL = lens backendAWSEnv $ \x y -> x { backendAWSEnv = y }
+
 loadBackend :: AppSettings -> IO Backend
 loadBackend = loadBackendHandle stdout
 
@@ -50,3 +55,4 @@ loadBackendHandle h settings@AppSettings {..} = do
         <$> mkDefaultProcessContext
         <*> runRIO logFunc createPool
         <*> checkedConnect appRedisConf
+        <*> discoverAWS (appLogLevel == LevelDebug)
