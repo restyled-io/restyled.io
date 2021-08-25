@@ -6,28 +6,34 @@ module Restyled.Api.Job
 import Restyled.Prelude
 
 import Restyled.Models.DB
+import Restyled.Settings (AppSettings(..))
 
 data ApiJob = ApiJob
     { id :: JobId
     , owner :: OwnerName
     , repo :: RepoName
     , pullRequest :: PullRequestNum
-    , createdAt :: UTCTime
-    , updatedAt :: UTCTime
-    , completedAt :: Maybe UTCTime
-    , exitCode :: Maybe Int
+    , url :: Text
+    , awsLogGroup :: Text
+    , awsLogStream :: Text
     }
     deriving stock (Generic, Eq, Show)
     deriving anyclass ToJSON
 
-apiJob :: Entity Job -> ApiJob
-apiJob (Entity jobId Job {..}) = ApiJob
+apiJob :: Entity Job -> AppSettings -> ApiJob
+apiJob (Entity jobId Job {..}) AppSettings {..} = ApiJob
     { id = jobId
     , owner = jobOwner
     , repo = jobRepo
     , pullRequest = jobPullRequest
-    , createdAt = jobCreatedAt
-    , updatedAt = jobUpdatedAt
-    , completedAt = jobCompletedAt
-    , exitCode = jobExitCode
+    , url =
+        appRoot
+        <> "/gh/"
+        <> toPathPiece jobOwner
+        <> "/repos/"
+        <> toPathPiece jobRepo
+        <> "/jobs/"
+        <> toPathPiece jobId
+    , awsLogGroup = appRestylerLogGroup
+    , awsLogStream = appRestylerLogStreamPrefix <> toPathPiece jobId
     }

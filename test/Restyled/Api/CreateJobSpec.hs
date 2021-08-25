@@ -103,15 +103,12 @@ spec = do
                 ApiJob.owner resp `shouldBe` repoOwner repo
                 ApiJob.repo resp `shouldBe` repoName repo
                 ApiJob.pullRequest resp `shouldBe` pullRequest
-                ApiJob.completedAt resp `shouldBe` Just now
-                ApiJob.exitCode resp `shouldBe` Just exitCode
 
                 job <- runDB $ expectJust "Job" =<< P.get (ApiJob.id resp)
                 jobOwner job `shouldBe` repoOwner repo
                 jobRepo job `shouldBe` repoName repo
                 jobPullRequest job `shouldBe` pullRequest
-                -- TODO: fails due to postgres rounding
-                -- jobCompletedAt job `shouldBe` Just now
+                jobCompletedAt job `shouldSatisfy` isJust
                 jobExitCode job `shouldBe` Just exitCode
 
             it "creates an incomplete Job" $ do
@@ -140,9 +137,6 @@ spec = do
                     }
 
                 resp <- expectRight "ApiJob" result
-                ApiJob.completedAt resp `shouldSatisfy` isNothing
-                ApiJob.exitCode resp `shouldSatisfy` isNothing
-
                 job <- runDB $ expectJust "Job" =<< P.get (ApiJob.id resp)
                 jobCompletedAt job `shouldSatisfy` isNothing
                 jobExitCode job `shouldSatisfy` isNothing

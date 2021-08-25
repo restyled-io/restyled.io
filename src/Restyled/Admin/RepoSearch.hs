@@ -10,6 +10,7 @@ import qualified Data.Text as T
 import Restyled.Api.Repo (ApiRepo, apiRepo)
 import Restyled.Foundation
 import Restyled.Models
+import Restyled.Settings
 
 data SearchResults = SearchResults
     { srRepos :: [ApiRepo]
@@ -30,16 +31,19 @@ noResults = SearchResults [] 0
 -- This is just @owner|name ILIKE %{query}%@
 --
 searchRepos :: Int -> Text -> Handler SearchResults
-searchRepos limit q = runDB $ do
-    repos <- selectList (searchFilters q) [LimitTo limit]
-    total <- if length repos == limit
-        then count $ searchFilters q
-        else pure $ length repos
+searchRepos limit q = do
+    settings <- view settingsL
 
-    pure SearchResults
-        { srRepos = map (`apiRepo` Nothing) repos
-        , srTotal = total
-        }
+    runDB $ do
+        repos <- selectList (searchFilters q) [LimitTo limit]
+        total <- if length repos == limit
+            then count $ searchFilters q
+            else pure $ length repos
+
+        pure SearchResults
+            { srRepos = map (\repo -> apiRepo repo settings Nothing) repos
+            , srTotal = total
+            }
 
 searchFilters :: Text -> [Filter Repo]
 searchFilters q = case T.breakOn "/" q of

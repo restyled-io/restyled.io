@@ -111,7 +111,8 @@ spec = withApp $ do
 
             statusIs 200
             resp <- getJsonBody
-            resp ^?! key "exitCode" . _Number `shouldBe` 99
+            resp ^?! key "id" . _JSON `shouldBe` jobId
 
             Just Job {..} <- runDB $ P.get jobId
+            jobCompletedAt `shouldSatisfy` isJust
             jobExitCode `shouldBe` Just 99
