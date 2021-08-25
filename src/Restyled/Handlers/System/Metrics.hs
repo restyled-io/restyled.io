@@ -4,9 +4,9 @@ module Restyled.Handlers.System.Metrics
 
 import Restyled.Prelude
 
-import qualified Restyled.Backend.Webhook as Webhook
 import Restyled.Foundation
 import Restyled.Metrics
+import Restyled.Settings
 import Restyled.SqlError
 import Restyled.Time
 import Restyled.TimeRange
@@ -37,7 +37,8 @@ instance ToJSON Unit where
 
 getSystemMetricsR :: Handler Value
 getSystemMetricsR = do
-    depth <- runRedis Webhook.queueDepth
+    queue <- appRestylerQueue <$> view settingsL
+    depth <- runRedis $ hush <$> llen queue
     mMins <- runInputGet $ iopt intField "since-minutes"
     range <- timeRangeFromAgo $ Minutes $ min (6 * 60) $ fromMaybe 5 mMins
     JobMetrics {..} <-

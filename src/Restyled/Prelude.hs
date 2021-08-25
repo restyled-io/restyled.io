@@ -7,22 +7,13 @@ module Restyled.Prelude
       UsCents
     , fromCents
 
-    -- * Errors
-    , fromLeftM
-    , untryIO
-
     -- * Persist
     , SqlEntity
-    , overEntity
     , selectExists
-    , replaceEntity
     , selectFirstT
     , getEntityT
     , getByT
     , getT
-
-    -- * ExceptT
-    , eitherT
 
     -- * IO
     , setLineBuffering
@@ -98,24 +89,7 @@ instance ToMarkup UsCents where
 fromCents :: Natural -> UsCents
 fromCents = UsCents
 
-fromLeftM :: Monad m => (a -> m b) -> m (Either a b) -> m b
-fromLeftM f me = either f pure =<< me
-
--- | Take an @'IO' ('Either' e a)@ and eliminate via @'throwIO'@
---
--- This effectively reverses @'try'@.
---
-untryIO :: (MonadIO m, Exception e) => IO (Either e a) -> m a
-untryIO = fromLeftM throwIO . liftIO
-
 type SqlEntity a = (PersistEntity a, PersistEntityBackend a ~ SqlBackend)
-
-overEntity :: Entity a -> (a -> a) -> Entity a
-overEntity e f = e { entityVal = f $ entityVal e }
-
-replaceEntity
-    :: (MonadIO m, SqlEntity a) => Entity a -> SqlPersistT m (Entity a)
-replaceEntity e@(Entity k v) = e <$ replace k v
 
 selectExists :: (MonadIO m, SqlEntity a) => [Filter a] -> SqlPersistT m Bool
 selectExists x = isJust <$> selectFirst x []
@@ -137,10 +111,6 @@ getByT = MaybeT . getBy
 
 getT :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) a
 getT = MaybeT . get
-
-eitherT
-    :: Functor f => (e -> e') -> (a -> a') -> ExceptT e f a -> ExceptT e' f a'
-eitherT l r f = withExceptT l $ r <$> f
 
 -- | Set output handles to line buffering
 --

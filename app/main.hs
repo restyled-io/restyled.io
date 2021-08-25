@@ -1,21 +1,18 @@
 module Main
     ( main
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
 import LoadEnv (loadEnvFrom)
 import Restyled.Application (runWaiApp)
-import Restyled.Backend.Application
 import Restyled.Backend.Foundation (loadBackend, loadBackendHandle)
 import Restyled.Backend.MarketplaceSync (runSynchronize)
-import Restyled.Backend.Reconcile (safelyReconcile)
 import Restyled.Development.Seeds (seedDB)
 import Restyled.Export (runExport)
 import Restyled.Foundation (loadApp)
 import Restyled.Options
-import Restyled.Settings (AppSettings(..), loadSettings)
+import Restyled.Settings (loadSettings)
 
 main :: IO ()
 main = do
@@ -31,10 +28,6 @@ main = do
         Backend cmd -> do
             backend <- loadBackend settings
             runRIO backend $ case cmd of
-                Webhooks -> do
-                    unless (appRestyleMachineLocal settings)
-                        $ safelyReconcile 10 Nothing
-                    runWebhooks
                 SyncMarketplace -> runSynchronize
                 SeedDB -> runDB seedDB
         Export options -> do

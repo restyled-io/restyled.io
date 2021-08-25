@@ -70,11 +70,10 @@ data AppSettings = AppSettings
     , appMutableStatic :: Bool
     , appStaticDir :: FilePath
     , appStubMarketplaceListing :: Bool
-    , appRestyleMachineLocal :: Bool
-    , appRestyleMachineJobsMax :: Natural
     , appRequestTimeout :: Int
     , appRestylerLogGroup :: Text
     , appRestylerLogStreamPrefix :: Text
+    , appRestylerQueue :: ByteString
     }
 
 class HasSettings env where
@@ -132,11 +131,10 @@ loadSettings =
         <*> switch "MUTABLE_STATIC" mempty
         <*> var nonempty "STATIC_DIR" (def "static")
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
-        <*> switch "RESTYLE_MACHINE_LOCAL" mempty
-        <*> var auto "RESTYLE_MACHINE_JOBS_MAX" (def 3)
         <*> var auto "REQUEST_TIMEOUT" (def 20)
         <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
         <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
+        <*> var nonempty "RESTYLER_QUEUE" (def "restyled:hooks:webhooks")
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
