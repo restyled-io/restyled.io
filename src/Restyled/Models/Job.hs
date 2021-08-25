@@ -15,7 +15,9 @@ module Restyled.Models.Job
 
 import Restyled.Prelude
 
+import qualified Restyled.JobLogLine as CW
 import Restyled.Models.DB
+import Restyled.Settings
 
 fetchJobIsInProgress :: MonadIO m => JobId -> SqlPersistT m Bool
 fetchJobIsInProgress jobId =
@@ -40,12 +42,20 @@ data JobOutput
     | JobOutputCompressed Job
 
 attachJobOutput
-    :: MonadIO m => Entity Job -> SqlPersistT m (Entity Job, JobOutput)
+    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    => Entity Job
+    -> SqlPersistT m (Entity Job, JobOutput)
 attachJobOutput job = (job, ) <$> fetchJobOutput job
 
-fetchJobOutput :: MonadIO m => Entity Job -> SqlPersistT m JobOutput
+fetchJobOutput
+    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    => Entity Job
+    -> SqlPersistT m JobOutput
 fetchJobOutput jobE@(Entity jobId job@Job {..}) =
     case (jobCompletedAt, jobLog, jobStdout, jobStderr) of
+        (Just _, _, Just "__cw", _) ->
+            lift $ JobOutputCompleted <$> CW.fetchJobLogLines jobId Nothing
+
         -- Job is done and Log records (still) exist
         (Just _, Nothing, Nothing, Nothing) ->
             JobOutputCompleted . map entityVal <$> selectList
