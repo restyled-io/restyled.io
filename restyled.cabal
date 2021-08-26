@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8347578e45f0784319ddb42e49ff99bb94aabadf3a74c985ada0dffc9d3e08f2
+-- hash: d0ba2c224253a759c838cd7397b29a48cc6704a91083d04b91a5d8482135de7f
 
 name:           restyled
 version:        0.1.1.0
@@ -95,11 +95,9 @@ library
       RIO.AWS
       RIO.DB
       RIO.Logger
-      RIO.Process.Follow
       RIO.Redis
       SVCS.GitHub
       SVCS.Names
-      SVCS.Payload
       Yesod.Auth.OAuth2.GitHubStudents
       Yesod.Lens
   other-modules:
@@ -280,7 +278,6 @@ test-suite test
       Restyled.TimeSpec
       Restyled.Widgets.ContainsURLsSpec
       Restyled.Widgets.JobSpec
-      RIO.Process.FollowSpec
       Test.Hspec.Lifted
       Paths_restyled
   hs-source-dirs:
