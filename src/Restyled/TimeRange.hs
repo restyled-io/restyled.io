@@ -5,9 +5,8 @@ module Restyled.TimeRange
     , withinTimeRange
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude.Esqueleto
 
-import qualified Database.Esqueleto as E
 import Restyled.Time
 
 data TimeRange = TimeRange
@@ -33,9 +32,8 @@ timeRangeFromAgo t = do
 timeRangeToVia :: UTCTime -> (UTCTime -> UTCTime) -> TimeRange
 timeRangeToVia tmTo f = let tmFrom = f tmTo in TimeRange { .. }
 
-withinTimeRange
-    :: E.SqlExpr (E.Value UTCTime) -> TimeRange -> E.SqlExpr (E.Value Bool)
+withinTimeRange :: SqlExpr (Value UTCTime) -> TimeRange -> SqlExpr (Value Bool)
 withinTimeRange field TimeRange {..} =
-    field E.>=. E.val tmFrom E.&&. field E.<=. E.val tmTo
+    field >=. val tmFrom &&. field <=. val tmTo
 
 infix 4 `withinTimeRange`
