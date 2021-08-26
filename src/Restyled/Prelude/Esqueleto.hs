@@ -3,7 +3,6 @@ module Restyled.Prelude.Esqueleto
     , selectMap
     , selectFoldMap
     , aggregate
-    , refineNotNull
     , unValue2
     , unValue3
     , unValue5
@@ -38,8 +37,7 @@ import Restyled.Prelude as X hiding
 
 import Database.Esqueleto as X
 
-import Database.Esqueleto.Internal.Internal
-    (SqlSelect, veryUnsafeCoerceSqlExprValue)
+import Database.Esqueleto.Internal.Internal (SqlSelect)
 import Database.Esqueleto.PostgreSQL
 
 selectMap
@@ -58,14 +56,6 @@ aggregate
     => SqlExpr (Value a)
     -> SqlExpr (Value [a])
 aggregate = maybeArray . arrayAgg
-
-refineNotNull
-    :: PersistField a
-    => SqlExpr (Value (Maybe a))
-    -> SqlQuery (SqlExpr (Value a))
-refineNotNull m = do
-    where_ $ not_ $ isNothing m
-    pure $ veryUnsafeCoerceSqlExprValue m
 
 unValue2 :: (Value a, Value b) -> (a, b)
 unValue2 (Value a, Value b) = (a, b)

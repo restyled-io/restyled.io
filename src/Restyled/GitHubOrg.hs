@@ -1,6 +1,5 @@
 module Restyled.GitHubOrg
     ( GitHubOrg(..)
-    , githubOrgLogin
     , requestUserOrgs
     , requestUserNameOrgs
     , githubOrgsCacheKey
@@ -17,10 +16,6 @@ import Restyled.Yesod
 -- | Wrapper for JSON instances for caching
 newtype GitHubOrg = GitHubOrg SimpleOrganization
     deriving newtype (Eq, Ord)
-
-githubOrgLogin :: GitHubOrg -> GitHubUserName
-githubOrgLogin (GitHubOrg SimpleOrganization {..}) =
-    nameToName simpleOrganizationLogin
 
 githubOrgsCacheKey :: GitHubUserName -> [Text]
 githubOrgsCacheKey username = ["profile", "orgs", toPathPart username]

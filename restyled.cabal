@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d0ba2c224253a759c838cd7397b29a48cc6704a91083d04b91a5d8482135de7f
+-- hash: f2e8dd04e6f4ed40e419e12c14956e51f8f8c4709dbbb4ebf5e1d43d582a2287
 
 name:           restyled
 version:        0.1.1.0
@@ -40,8 +40,6 @@ library
       Restyled.Cache
       Restyled.Development.Seeds
       Restyled.Env
-      Restyled.Export
-      Restyled.Export.Customers
       Restyled.Foundation
       Restyled.GitHubOrg
       Restyled.GitHubStudents

@@ -6,10 +6,9 @@ import Restyled.Prelude
 
 import LoadEnv (loadEnvFrom)
 import Restyled.Application (runWaiApp)
-import Restyled.Backend.Foundation (loadBackend, loadBackendHandle)
+import Restyled.Backend.Foundation (loadBackend)
 import Restyled.Backend.MarketplaceSync (runSynchronize)
 import Restyled.Development.Seeds (seedDB)
-import Restyled.Export (runExport)
 import Restyled.Foundation (loadApp)
 import Restyled.Options
 import Restyled.Settings (loadSettings)
@@ -30,7 +29,3 @@ main = do
             runRIO backend $ case cmd of
                 SyncMarketplace -> runSynchronize
                 SeedDB -> runDB seedDB
-        Export options -> do
-            -- Log to stderr, since we produce actually useful output
-            backend <- loadBackendHandle stderr settings
-            runRIO backend $ runExport options

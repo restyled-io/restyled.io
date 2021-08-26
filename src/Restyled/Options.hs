@@ -8,7 +8,6 @@ module Restyled.Options
 import Restyled.Prelude
 
 import Options.Applicative
-import Restyled.Export
 
 data RestyledOptions = RestyledOptions
     { oEnvFile :: Maybe FilePath
@@ -18,7 +17,6 @@ data RestyledOptions = RestyledOptions
 data RestyledCommand
     = Web
     | Backend BackendCommand
-    | Export ExportOptions
 
 data BackendCommand
     = SyncMarketplace
@@ -41,5 +39,4 @@ restyledOptions = RestyledOptions
         (  command "web" (info (pure Web) mempty)
         <> command "sync-marketplace" (info (pure $ Backend SyncMarketplace) mempty)
         <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
-        <> command "export" (info (Export <$> exportOptions) mempty)
         )
