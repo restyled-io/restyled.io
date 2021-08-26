@@ -1,6 +1,5 @@
 module RIO.AWS
     ( HasAWS(..)
-    , runAWS
     , pageAWS
     , discoverAWS
     ) where
@@ -20,14 +19,6 @@ instance HasAWS AWS.Env where
 
 instance HasAWS env => HasAWS (HandlerData child env) where
     awsEnvL = handlerEnvL . siteL . awsEnvL
-
-runAWS
-    :: (MonadIO m, MonadReader env m, HasAWS env, AWS.AWSRequest a)
-    => a
-    -> m (AWS.Rs a)
-runAWS req = do
-    env <- view awsEnvL
-    liftIO $ runResourceT $ AWS.runAWST env $ AWS.send req
 
 pageAWS
     :: (MonadIO m, MonadReader env m, HasAWS env, AWS.AWSPager a)
