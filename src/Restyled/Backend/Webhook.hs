@@ -1,5 +1,6 @@
 module Restyled.Backend.Webhook
     ( enqueueWebhook
+    , enqueueWebhookTo
     , awaitWebhook
     , processWebhook
     , queueDepth
@@ -17,7 +18,10 @@ import Restyled.Models
 import Restyled.Settings
 
 enqueueWebhook :: ByteString -> Redis ()
-enqueueWebhook = void . lpush queueName . pure
+enqueueWebhook = enqueueWebhookTo queueName
+
+enqueueWebhookTo :: ByteString -> ByteString -> Redis ()
+enqueueWebhookTo name = void . lpush name . pure
 
 awaitWebhook
     :: (HasLogFunc env, HasRedis env, MonadReader env m, MonadIO m)
