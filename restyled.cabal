@@ -79,6 +79,7 @@ library
       Restyled.Handlers.System.Metrics
       Restyled.Handlers.Thanks
       Restyled.Handlers.Webhooks
+      Restyled.JobLogLine
       Restyled.Marketplace
       Restyled.Metrics
       Restyled.Models
@@ -107,6 +108,7 @@ library
       Restyled.Widgets.Job
       Restyled.Widgets.JobLogLine
       Restyled.Yesod
+      RIO.AWS
       RIO.DB
       RIO.Logger
       RIO.Process.Follow
@@ -151,6 +153,9 @@ library
       aeson
     , aeson-casing
     , aeson-pretty
+    , amazonka
+    , amazonka-cloudwatch-logs
+    , amazonka-core
     , ansi-terminal
     , base
     , blaze-html

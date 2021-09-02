@@ -12,6 +12,7 @@ import Restyled.Prelude
 import Control.Monad.Validate
 import Restyled.Api.Job (ApiJob, apiJob)
 import Restyled.Models.DB
+import Restyled.Models.Job (markJobAsCloudWatch)
 import Restyled.Settings
 
 data ApiCreateJob = ApiCreateJob
@@ -58,7 +59,7 @@ createJob ApiCreateJob {..} = do
     void $ refuteNothing (repoNotFound owner repo) mRepo
 
     now <- liftIO getCurrentTime
-    job <- lift $ insertEntity Job
+    job <- lift $ insertEntity $ markJobAsCloudWatch $ Job
         { jobSvcs = svcs
         , jobOwner = owner
         , jobRepo = repo
