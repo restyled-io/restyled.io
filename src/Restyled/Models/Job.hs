@@ -8,14 +8,9 @@ module Restyled.Models.Job
     -- * Creating Jobs
     , insertJob
 
-    -- * Queries
-    , fetchJobIsInProgress
-    , fetchJobLogLines
-
     -- * @'JobOutput'@
     , JobOutput(..)
     , attachJobOutput
-    , fetchJobLog
     , fetchJobOutput
     , captureJobLogLine
     , fetchLastJobLogLineCreatedAt
@@ -32,6 +27,7 @@ import qualified Data.Text.Lazy as TL
 import Formatting (format)
 import Formatting.Time (diff)
 import Restyled.Models.DB
+import Restyled.Models.JobLogLine
 
 jobOutcome :: Job -> Text
 jobOutcome Job {..} = fromMaybe "N/A" $ do
@@ -59,40 +55,22 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         , jobStderr = Nothing
         }
 
-fetchJobIsInProgress :: MonadIO m => JobId -> SqlPersistT m Bool
-fetchJobIsInProgress jobId =
-    isJust <$> selectFirst [JobId ==. jobId, JobCompletedAt ==. Nothing] []
-
-fetchJobLog :: MonadIO m => Entity Job -> SqlPersistT m [Entity JobLogLine]
-fetchJobLog (Entity jobId Job {..}) =
-    maybe (fetchJobLogLines jobId 0) (pure . unJSONB) jobLog
-
-fetchJobLogLines
-    :: MonadIO m
-    => JobId
-    -> Int -- ^ Offset
-    -> SqlPersistT m [Entity JobLogLine]
-fetchJobLogLines jobId offset = selectList
-    [JobLogLineJob ==. jobId]
-    [Asc JobLogLineCreatedAt, OffsetBy offset]
-
 data JobOutput
-    = JobOutputInProgress (Entity Job)
+    = JobOutputInProgress (Entity Job) [JobLogLine]
     | JobOutputCompleted [JobLogLine]
     | JobOutputCompressed Job
 
 attachJobOutput
     :: MonadIO m => Entity Job -> SqlPersistT m (Entity Job, JobOutput)
-attachJobOutput job = (job, ) <$> fetchJobOutput job
+attachJobOutput job = (job, ) <$> fetchJobOutput job Nothing
 
-fetchJobOutput :: MonadIO m => Entity Job -> SqlPersistT m JobOutput
-fetchJobOutput jobE@(Entity jobId job@Job {..}) =
+fetchJobOutput
+    :: MonadIO m => Entity Job -> Maybe UTCTime -> SqlPersistT m JobOutput
+fetchJobOutput jobE@(Entity jobId job@Job {..}) mSince =
     case (jobCompletedAt, jobLog, jobStdout, jobStderr) of
         -- Job is done and Log records (still) exist
         (Just _, Nothing, Nothing, Nothing) ->
-            JobOutputCompleted . map entityVal <$> selectList
-                [JobLogLineJob ==. jobId]
-                [Asc JobLogLineCreatedAt]
+            JobOutputCompleted . map entityVal <$> fetchJobLogLines jobId mSince
 
         -- Job is done and Log has been written into the Job itself
         (Just _, Just (JSONB logLines), _, _) ->
@@ -102,7 +80,10 @@ fetchJobOutput jobE@(Entity jobId job@Job {..}) =
         (Just _, _, _, _) -> pure $ JobOutputCompressed job
 
         -- Job is in progress
-        (Nothing, _, _, _) -> pure $ JobOutputInProgress jobE
+        (Nothing, _, _, _) ->
+            JobOutputInProgress jobE
+                . map entityVal
+                <$> fetchJobLogLines jobId mSince
 
 captureJobLogLine :: MonadIO m => JobId -> Text -> Text -> SqlPersistT m ()
 captureJobLogLine jobId stream content = do
@@ -137,7 +118,7 @@ completeJob
     :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m (Entity Job)
 completeJob ec job@(Entity jobId _) = do
     now <- liftIO getCurrentTime
-    logLines <- fetchJobLogLines jobId 0
+    logLines <- fetchJobLogLines jobId Nothing
     updatedJob <- replaceEntity $ overEntity job $ \j -> j
         { jobUpdatedAt = now
         , jobCompletedAt = Just now

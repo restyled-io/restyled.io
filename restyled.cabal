@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3fc9cabf154a549603c93207c4e4f0af76430c5a4a9ac0ef98644b496405b351
+-- hash: ba26595ef44d0ce9aa35b4fb879dc7fd27d0ff1491564efee5c04a6cb4261f7f
 
 name:           restyled
 version:        0.1.1.0
@@ -84,6 +84,7 @@ library
       Restyled.Models
       Restyled.Models.DB
       Restyled.Models.Job
+      Restyled.Models.JobLogLine
       Restyled.Models.Repo
       Restyled.Models.User
       Restyled.Offers

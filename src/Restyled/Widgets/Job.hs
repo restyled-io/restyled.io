@@ -86,7 +86,7 @@ jobOutput :: JobOutput -> Widget
 jobOutput output = $(widgetFile "widgets/job-output")
   where
     streamElementId = case output of
-        JobOutputInProgress (Entity jobId _) ->
+        JobOutputInProgress (Entity jobId _) _ ->
             "logs-job-id-" <> toPathPiece jobId
         _ -> "unused"
 
