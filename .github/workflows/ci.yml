@@ -108,15 +108,19 @@ jobs:
           heroku_app_name: restyled-io
           dockerfile_name: Dockerfile.web
 
-      - uses: restyled-io/gitops-deploy-action@main
-        with:
-          token: ${{ secrets.GITOPS_ACCESS_TOKEN }}
-          parameter-name: RestyledImage
-          parameter-value: ${{ needs.image.outputs.image }}
-          committer-name: Restyled Commits
-          committer-email: commits@restyled.io
-          repository: restyled-io/ops
-          stacks: cg-app/stacks/*/*/prod/services/*.yaml
+      # Pause deploying Backend services. All efforts are now going into
+      # restyling on Agents directly and removing all Backend from this
+      # repository.
+      #
+      # - uses: restyled-io/gitops-deploy-action@main
+      #   with:
+      #     token: ${{ secrets.GITOPS_ACCESS_TOKEN }}
+      #     parameter-name: RestyledImage
+      #     parameter-value: ${{ needs.image.outputs.image }}
+      #     committer-name: Restyled Commits
+      #     committer-email: commits@restyled.io
+      #     repository: restyled-io/ops
+      #     stacks: cg-app/stacks/*/*/prod/services/*.yaml
 
       - uses: desiderati/github-action-pushover@v1
         if: ${{ always() }}
