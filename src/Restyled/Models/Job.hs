@@ -19,6 +19,7 @@ module Restyled.Models.Job
     , completeJobSkipped
     , completeJobErrored
     , completeJob
+    , markJobAsCloudWatch
     ) where
 
 import Restyled.Prelude
@@ -26,8 +27,10 @@ import Restyled.Prelude
 import qualified Data.Text.Lazy as TL
 import Formatting (format)
 import Formatting.Time (diff)
+import qualified Restyled.JobLogLine as CW
 import Restyled.Models.DB
 import Restyled.Models.JobLogLine
+import Restyled.Settings
 
 jobOutcome :: Job -> Text
 jobOutcome Job {..} = fromMaybe "N/A" $ do
@@ -61,13 +64,33 @@ data JobOutput
     | JobOutputCompressed Job
 
 attachJobOutput
-    :: MonadIO m => Entity Job -> SqlPersistT m (Entity Job, JobOutput)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasSettings env
+       , HasAWS env
+       )
+    => Entity Job
+    -> SqlPersistT m (Entity Job, JobOutput)
 attachJobOutput job = (job, ) <$> fetchJobOutput job Nothing
 
 fetchJobOutput
-    :: MonadIO m => Entity Job -> Maybe UTCTime -> SqlPersistT m JobOutput
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasSettings env
+       , HasAWS env
+       )
+    => Entity Job
+    -> Maybe UTCTime
+    -> SqlPersistT m JobOutput
 fetchJobOutput jobE@(Entity jobId job@Job {..}) mSince =
     case (jobCompletedAt, jobLog, jobStdout, jobStderr) of
+        (Just _, _, _, _) | jobIsCloudWatch job ->
+            lift $ JobOutputCompleted <$> CW.fetchJobLogLines jobId mSince
+        (Nothing, _, _, _) | jobIsCloudWatch job ->
+            lift $ JobOutputInProgress jobE <$> CW.fetchJobLogLines jobId mSince
+
         -- Job is done and Log records (still) exist
         (Just _, Nothing, Nothing, Nothing) ->
             JobOutputCompleted . map entityVal <$> fetchJobLogLines jobId mSince
@@ -131,3 +154,12 @@ exitCode :: ExitCode -> Int
 exitCode = \case
     ExitSuccess -> 0
     ExitFailure i -> i
+
+markJobAsCloudWatch :: Job -> Job
+markJobAsCloudWatch job = job { jobStdout = Just cwSigil }
+
+jobIsCloudWatch :: Job -> Bool
+jobIsCloudWatch = (== Just cwSigil) . jobStdout
+
+cwSigil :: Text
+cwSigil = "__cw"
