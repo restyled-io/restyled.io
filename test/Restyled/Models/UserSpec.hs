@@ -89,6 +89,7 @@ emptySettings = AppSettings
     , appRequestTimeout = 30
     , appRestylerLogGroup = ""
     , appRestylerLogStreamPrefix = ""
+    , appAwsTrace = False
     }
 
 userWithEmail :: Text -> User

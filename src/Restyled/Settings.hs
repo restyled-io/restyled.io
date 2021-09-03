@@ -75,6 +75,7 @@ data AppSettings = AppSettings
     , appRequestTimeout :: Int
     , appRestylerLogGroup :: Text
     , appRestylerLogStreamPrefix :: Text
+    , appAwsTrace :: Bool
     }
 
 class HasSettings env where
@@ -137,6 +138,7 @@ loadSettings =
         <*> var auto "REQUEST_TIMEOUT" (def 20)
         <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
         <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
+        <*> switch "AWS_TRACE" mempty
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"

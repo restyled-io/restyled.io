@@ -55,4 +55,4 @@ loadBackendHandle h settings@AppSettings {..} = do
         <$> mkDefaultProcessContext
         <*> runRIO logFunc createPool
         <*> checkedConnect appRedisConf
-        <*> discoverAWS False -- (appLogLevel == LevelDebug)
+        <*> discoverAWS appAwsTrace
