@@ -4,4 +4,5 @@
 # helps the long-line in Makefile's watch target.
 #
 ###
-exec stack exec restyled.io -- --env-file .env.development "$@"
+AWS_PROFILE=restyled exec stack exec -- \
+  restyled.io --env-file .env.development "$@"

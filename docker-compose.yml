@@ -13,3 +13,24 @@ services:
     image: redis:6.0.13
     ports:
       - 6379:6379
+
+  agent:
+    image: restyled/agent:main
+    entrypoint: sh
+    command: |
+      -c "/bin/agent \
+      --github-app-id \"$$GITHUB_APP_ID\" \
+      --github-app-key \"$$GITHUB_APP_KEY\" \
+      --restyled-host \"$$RESTYLED_HOST\" \
+      --restyled-token \"$$RESTYLED_TOKEN\" \
+      --restyler-pool-size 1 \
+      --redis-url redis://redis \
+      --termination-delay 600000 \
+      --webhook-timeout 5 \
+      --debug"
+    env_file: ./.env.development
+    environment:
+      AWS_ACCESS_KEY_ID: x
+      AWS_SECRET_ACCESS_KEY: x
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
