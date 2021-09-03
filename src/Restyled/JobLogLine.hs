@@ -29,9 +29,13 @@ jobLogStreamToText = \case
 
 instance AWSPager GetLogEvents where
     page req resp = do
+        -- Events were present in last response
+        guard $ not $ null $ resp ^. glersEvents
+
+        -- Forward token present, and differs from what we just used
         nextToken <- resp ^. glersNextForwardToken
-        let prevToken = req ^. gleNextToken
-        guard $ prevToken /= Just nextToken
+        guard $ req ^. gleNextToken /= Just nextToken
+
         pure $ req & (gleNextToken ?~ nextToken)
 
 fetchJobLogLines
