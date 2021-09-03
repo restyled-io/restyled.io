@@ -12,16 +12,19 @@ module Restyled.Handlers.Repos
 
 import Restyled.Prelude
 
+import Conduit
 import Control.Monad.Validate
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import Restyled.Api.UpsertRepo
 import Restyled.Foundation
+import Restyled.JobOutput
 import Restyled.Models hiding (upsertRepo)
 import Restyled.Settings
-import Restyled.StreamJobLogLines
+import Restyled.WebSockets
 import Restyled.Widgets.Job
+import Restyled.Widgets.JobLogLine
 import Restyled.Yesod
-import Yesod.WebSockets
 
 getRepoR :: OwnerName -> RepoName -> Handler Html
 getRepoR = getRepoJobsR
@@ -44,7 +47,7 @@ getRepoPullR = getRepoPullJobsR
 
 getRepoPullJobsR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html
 getRepoPullJobsR owner name num = do
-    pages <- runDB $ traverse attachJobOutput =<< selectPaginated
+    pages <- runDB $ selectPaginated
         5
         [JobOwner ==. owner, JobRepo ==. name, JobPullRequest ==. num]
         [Desc JobCreatedAt]
@@ -55,7 +58,7 @@ getRepoPullJobsR owner name num = do
 
 getRepoJobsR :: OwnerName -> RepoName -> Handler Html
 getRepoJobsR owner name = do
-    pages <- runDB $ traverse attachJobOutput =<< selectPaginated
+    pages <- runDB $ selectPaginated
         5
         [JobOwner ==. owner, JobRepo ==. name]
         [Desc JobCreatedAt]
@@ -66,9 +69,7 @@ getRepoJobsR owner name = do
 
 getRepoJobR :: OwnerName -> RepoName -> JobId -> Handler Html
 getRepoJobR owner name jobId = do
-    jobWithOutput <- runDB $ do
-        job <- fromMaybeM notFound $ getEntity jobId
-        attachJobOutput job
+    job <- runDB $ getEntity404 jobId
 
     defaultLayout $ do
         setTitle $ toHtml $ repoPath owner name <> " #" <> toPathPiece jobId
@@ -77,15 +78,22 @@ getRepoJobR owner name jobId = do
 getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler Text
 getRepoJobLogLinesR _owner _name jobId = do
     job <- runDB $ getEntity404 jobId
-    webSockets $ streamJobLogLines job
+
+    webSockets $ ignoringConnectionException $ do
+        conn <- ask
+
+        let conduit :: ConduitT [JobLogLine] [JobLogLine] Handler ()
+            conduit = mapMC $ \jobLogLines -> do
+                t <- formatJobLogLines jobLogLines
+                jobLogLines <$ runReaderT (sendTextDataAck t) conn
+
+        lift $ followJobOutput job conduit
 
     -- If not accessed via WebSockets, respond with plain text Job log
-    jobLogLines <- do
-        output <- runDB $ fetchJobOutput job Nothing
-
-        case output of
-            JobOutputInProgress _ logLines -> pure logLines
-            JobOutputCompleted logLines -> pure logLines
-            JobOutputCompressed{} -> pure [] -- Legacy
-
+    jobLogLines <- fetchJobOutput job
     pure $ T.unlines $ map textJobLogLine jobLogLines
+
+formatJobLogLines :: [JobLogLine] -> Handler Text
+formatJobLogLines jobLogLines = do
+    htmls <- traverse renderJobLogLine jobLogLines
+    pure $ TL.toStrict $ mconcat htmls

@@ -42,8 +42,8 @@ jobCompletion job = case (jobCompletedAt job, jobExitCode job) of
     (Just completedAt, Just n) -> Failure completedAt n
     _ -> InProgress
 
-jobCard :: (Entity Job, JobOutput) -> Widget
-jobCard (jobE@(Entity jobId job), output) = do
+jobCard :: Entity Job -> Widget
+jobCard jobE@(Entity jobId job) = do
     now <- liftIO getCurrentTime
     issueUrl <- jobIssueURL jobE <$> getUrlRender
     $(widgetFile "widgets/job-card")
@@ -82,13 +82,9 @@ I'm having a problem with a Restyled Job
 ```
 |]
 
-jobOutput :: JobOutput -> Widget
-jobOutput output = $(widgetFile "widgets/job-output")
-  where
-    streamElementId = case output of
-        JobOutputInProgress (Entity jobId _) _ ->
-            "logs-job-id-" <> toPathPiece jobId
-        _ -> "unused"
+jobOutput :: Entity Job -> Widget
+jobOutput (Entity jobId job) = $(widgetFile "widgets/job-output")
+    where streamElementId = "logs-job-id-" <> toPathPiece jobId
 
 textJobLogLine :: JobLogLine -> Text
 textJobLogLine = scrubGitHubToken . jobLogLineContent

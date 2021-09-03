@@ -1,14 +1,16 @@
 module RIO.AWS
     ( HasAWS(..)
-    , runAWS
-    , pageAWS
     , discoverAWS
+    , implementAWS
+    , MonadAWS(..)
+    , send
+    , paginate
     ) where
 
 import RIO
 
-import Conduit
 import qualified Control.Monad.Trans.AWS as AWS
+import Network.AWS (AWS, MonadAWS(..), paginate, runAWS, runResourceT, send)
 import Yesod.Core.Types (HandlerData)
 import Yesod.Lens
 
@@ -21,28 +23,6 @@ instance HasAWS AWS.Env where
 instance HasAWS env => HasAWS (HandlerData child env) where
     awsEnvL = handlerEnvL . siteL . awsEnvL
 
-runAWS
-    :: (MonadIO m, MonadReader env m, HasAWS env, AWS.AWSRequest a)
-    => a
-    -> m (AWS.Rs a)
-runAWS req = do
-    env <- view awsEnvL
-    liftIO $ runResourceT $ AWS.runAWST env $ AWS.send req
-
-pageAWS
-    :: (MonadIO m, MonadReader env m, HasAWS env, AWS.AWSPager a)
-    => a
-    -> ConduitT (AWS.Rs a) Void (AWS.AWST (ResourceT IO)) r
-    -> m r
-pageAWS req sink = do
-    env <- view awsEnvL
-    liftIO
-        $ runResourceT
-        $ AWS.runAWST env
-        $ runConduit
-        $ AWS.paginate req
-        .| sink
-
 discoverAWS
     :: MonadIO m
     => Bool -- ^ Debug?
@@ -51,3 +31,9 @@ discoverAWS debug = do
     let level = if debug then AWS.Debug else AWS.Info
     lgr <- AWS.newLogger level stdout
     liftIO $ AWS.newEnv AWS.Discover <&> AWS.envLogger .~ lgr
+
+implementAWS
+    :: (MonadUnliftIO m, MonadReader env m, HasAWS env) => AWS a -> m a
+implementAWS req = do
+    env <- view awsEnvL
+    runResourceT $ runAWS env req

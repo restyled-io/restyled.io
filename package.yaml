@@ -61,6 +61,7 @@ library:
     - envparse
     - errors
     - esqueleto
+    - exceptions
     - extra
     - fast-logger
     - file-embed
@@ -100,6 +101,7 @@ library:
     - text
     - time
     - transformers
+    - unliftio
     - unordered-containers
     - uri-encode
     - uuid

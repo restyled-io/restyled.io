@@ -4,4 +4,6 @@ $newline never
     <span .level-#{level} .prefix>
       #{level}
   <span .level-#{level} .content>
+    $if T.isPrefixOf "We had trouble" message
+      <span .error>
     ^{renderWithURLs message}
