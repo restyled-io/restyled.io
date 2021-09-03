@@ -12,7 +12,7 @@ import Restyled.PrivateRepoAllowance
 import Restyled.Settings
 
 seedDB
-    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    :: (MonadUnliftIO m, MonadAWS m, MonadReader env m, HasSettings env)
     => SqlPersistT m ()
 seedDB = do
     now <- liftIO getCurrentTime
@@ -90,7 +90,7 @@ restyledRepoPrivate :: RepoName -> Repo
 restyledRepoPrivate name = (restyledRepo name) { repoIsPrivate = True }
 
 seedJob
-    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    :: (MonadUnliftIO m, MonadAWS m, MonadReader env m, HasSettings env)
     => Repo
     -> PullRequestNum
     -> UTCTime

@@ -80,6 +80,7 @@ library
       Restyled.Handlers.Thanks
       Restyled.Handlers.Webhooks
       Restyled.JobLogLine
+      Restyled.JobOutput
       Restyled.Marketplace
       Restyled.Metrics
       Restyled.Models
@@ -100,7 +101,6 @@ library
       Restyled.ServerUnavailable
       Restyled.Settings
       Restyled.SqlError
-      Restyled.StreamJobLogLines
       Restyled.Time
       Restyled.TimeRange
       Restyled.WebSockets
@@ -170,6 +170,7 @@ library
     , envparse
     , errors
     , esqueleto
+    , exceptions
     , extra
     , fast-logger
     , file-embed
@@ -209,6 +210,7 @@ library
     , text
     , time
     , transformers
+    , unliftio
     , unordered-containers
     , uri-encode
     , uuid

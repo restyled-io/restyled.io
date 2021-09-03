@@ -1,8 +1,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module Restyled.JobLogLine
-    ( JobLogLine(..)
-    , fetchJobLogLines
+    ( streamJobLogLines
     , captureJobLogLines
     , deleteJobLogLines
     ) where
@@ -24,17 +23,6 @@ import Network.AWS.Pager (AWSPager(..))
 import Restyled.Models.DB (JobId, JobLogLine(..))
 import Restyled.Settings
 
-data JobLogStream
-    = JobLogStreamSystem
-    | JobLogStreamStdout
-    | JobLogStreamStderr
-
-jobLogStreamToText :: JobLogStream -> Text
-jobLogStreamToText = \case
-    JobLogStreamSystem -> "system"
-    JobLogStreamStdout -> "stdout"
-    JobLogStreamStderr -> "stderr"
-
 instance AWSPager GetLogEvents where
     page req resp = do
         -- Events were present in last response
@@ -46,18 +34,15 @@ instance AWSPager GetLogEvents where
 
         pure $ req & (gleNextToken ?~ nextToken)
 
-fetchJobLogLines
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasSettings env
-       , HasAWS env
-       )
+-- | Paginate the Job log from CloudWatch in a streaming fashion
+streamJobLogLines
+    :: (MonadAWS m, MonadReader env m, HasSettings env)
     => JobId
-    -> Maybe UTCTime
-    -> m [JobLogLine]
-fetchJobLogLines jobId mSince = handleAny (errorJobLogLines jobId) $ do
-    AppSettings {..} <- view settingsL
+    -> Maybe UTCTime -- ^ Stream logs since a given time
+    -> Maybe Natural -- ^ Page size, /not/ overall limit
+    -> ConduitT () [JobLogLine] m ()
+streamJobLogLines jobId mSince mPageSize = do
+    AppSettings {..} <- lift $ view settingsL
 
     let groupName = appRestylerLogGroup
         streamName = appRestylerLogStreamPrefix <> toPathPiece jobId
@@ -65,34 +50,13 @@ fetchJobLogLines jobId mSince = handleAny (errorJobLogLines jobId) $ do
             getLogEvents groupName streamName
                 & (gleStartTime .~ startMilliseconds)
                 & (gleStartFromHead ?~ True)
-    pageAWS req $ concatMapC (fromGetLogEvents jobId) .| sinkList
+                & (gleLimit .~ mPageSize)
+
+    paginate req .| mapC (fromGetLogEvents jobId)
     where startMilliseconds = (+ 1) . utcTimeToPOSIXMilliseconds <$> mSince
 
-errorJobLogLines
-    :: (MonadIO m, MonadReader env m, HasLogFunc env, Show ex)
-    => JobId
-    -> ex
-    -> m [JobLogLine]
-errorJobLogLines jobId ex = do
-    logError
-        $ "Error fetching Job log for Job "
-        <> display (toPathPiece jobId)
-        <> ": "
-        <> displayShow ex
-    now <- liftIO getCurrentTime
-    pure
-        [ JobLogLine
-              { jobLogLineCreatedAt = now
-              , jobLogLineStream = jobLogStreamToText JobLogStreamSystem
-              , jobLogLineContent = "Unable to fetch Job log at this time"
-              , jobLogLineJob = jobId
-              }
-        ]
-
 captureJobLogLines
-    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
-    => [JobLogLine]
-    -> m ()
+    :: (MonadAWS m, MonadReader env m, HasSettings env) => [JobLogLine] -> m ()
 captureJobLogLines allJobLogLines = do
     AppSettings {..} <- view settingsL
 
@@ -106,21 +70,19 @@ captureJobLogLines allJobLogLines = do
         mSequenceToken <- findOrCreateLogStream groupName streamName
 
         void
-            $ runAWS
+            $ send
             $ putLogEvents groupName streamName events
             & (pleSequenceToken .~ mSequenceToken)
 
 deleteJobLogLines
-    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
-    => JobId
-    -> m ()
+    :: (MonadAWS m, MonadReader env m, HasSettings env) => JobId -> m ()
 deleteJobLogLines jobId = do
     AppSettings {..} <- view settingsL
 
     let groupName = appRestylerLogGroup
         streamName = appRestylerLogStreamPrefix <> toPathPiece jobId
 
-    void $ runAWS $ deleteLogStream groupName streamName
+    void $ send $ deleteLogStream groupName streamName
 
 toInputLogEvent :: JobLogLine -> InputLogEvent
 toInputLogEvent JobLogLine {..} = inputLogEvent
@@ -137,19 +99,19 @@ fromOutputLogEvent jobId event = do
     timestamp <- event ^. oleTimestamp
     pure JobLogLine
         { jobLogLineCreatedAt = posixMillisecondsToUTCTime timestamp
-        , jobLogLineStream = jobLogStreamToText JobLogStreamSystem
+        , jobLogLineStream = "system"
         , jobLogLineContent = message
         , jobLogLineJob = jobId
         }
 
 findOrCreateLogStream
-    :: (MonadIO m, MonadReader env m, HasAWS env)
+    :: (MonadIO m, MonadAWS m)
     => Text -- ^ Group name
     -> Text -- ^ Stream name
     -> m (Maybe Text) -- ^ Sequence token if existed
 findOrCreateLogStream group name = do
     resp <-
-        runAWS
+        send
         $ describeLogStreams group
         & (dlssLogStreamNamePrefix ?~ name)
         & (dlssLimit ?~ 1)
@@ -160,7 +122,7 @@ findOrCreateLogStream group name = do
             (resp ^. dlsrsLogStreams)
 
     case mStream of
-        Nothing -> Nothing <$ runAWS (createLogStream group name)
+        Nothing -> Nothing <$ send (createLogStream group name)
         Just stream -> pure $ stream ^. lsUploadSequenceToken
 
 utcTimeToPOSIXMilliseconds :: Integral n => UTCTime -> n

@@ -6,6 +6,7 @@ if (typeof Output === "undefined") {
     this.streamUrl = elem
       .getAttribute("data-stream-url")
       .replace(/http(s?):/, "ws$1:");
+    this.logsSeen = false;
   }
 
   Output.prototype.append = function(html) {
@@ -34,56 +35,20 @@ if (typeof Output === "undefined") {
     socket.onmessage = function(data) {
       self.append(data.data);
       socket.send("acknowledged");
+
+      if (data.data !== "") {
+        self.logsSeen = true;
+      }
     };
 
     socket.onclose = function(event) {
-      console.log("websocket closed", event);
+      console.log("websocket closed", event, self.logsSeen);
 
-      if (event.reason === "Job finished") {
-        window.location.reload();
+      if (!self.logsSeen) {
+        self.append("The log for this Job was empty or has expired");
       }
     };
   };
-}
-
-if (typeof ErrorFocuser === "undefined") {
-  function ErrorFocuser(elem) {
-    this.elem = elem;
-  }
-
-  ErrorFocuser.prototype.focus = function () {
-    this.scrollTo(this.findContent());
-  }
-
-  ErrorFocuser.prototype.findContent = function() {
-    var contents = this.elem.getElementsByClassName("content");
-    var content
-
-    for (var i = 0; i < contents.length; i++) {
-      content = contents[i];
-
-      if (content && content.textContent.startsWith("We had trouble ")) {
-        return content;
-      }
-    }
-  }
-
-  // Brittle assumptions:
-  //
-  // - We have 100px of stream stuff to scroll-x past
-  // - The pre to scroll is exactly parent-of-parent of content
-  //
-  ErrorFocuser.prototype.scrollTo = function (content) {
-    if (!content) {
-      return
-    }
-
-    var navHeight = 48;
-    var contentTop = content.offsetTop - navHeight;
-    var pre = content.parentElement.parentElement; // Brittle!
-    pre.scrollTo({ top: 0, left: 100, behavior: "smooth" });
-    window.scrollTo({ top: contentTop, left: 0, behavior: "smooth" });
-  }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -93,9 +58,5 @@ document.addEventListener("DOMContentLoaded", function() {
 
   if (stream) {
     new Output(stream, singleCard).connect();
-  }
-
-  if (singleCard) {
-    new ErrorFocuser(cards[0]).focus();
   }
 });
