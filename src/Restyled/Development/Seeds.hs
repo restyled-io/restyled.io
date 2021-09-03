@@ -5,11 +5,15 @@ module Restyled.Development.Seeds
 import Restyled.Prelude
 
 import qualified Prelude as Unsafe
+import Restyled.JobLogLine
 import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.Settings
 
-seedDB :: MonadIO m => SqlPersistT m ()
+seedDB
+    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
+    => SqlPersistT m ()
 seedDB = do
     now <- liftIO getCurrentTime
 
@@ -86,7 +90,7 @@ restyledRepoPrivate :: RepoName -> Repo
 restyledRepoPrivate name = (restyledRepo name) { repoIsPrivate = True }
 
 seedJob
-    :: MonadIO m
+    :: (MonadUnliftIO m, MonadReader env m, HasSettings env, HasAWS env)
     => Repo
     -> PullRequestNum
     -> UTCTime
@@ -95,7 +99,7 @@ seedJob
     -> SqlPersistT m ()
 seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
     -- Start the Job
-    jobId <- insert Job
+    jobId <- insert $ markJobAsCloudWatch $ Job
         { jobSvcs = repoSvcs
         , jobOwner = repoOwner
         , jobRepo = repoName
@@ -110,13 +114,20 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
         }
 
     -- Capture it "running"
-    jobLogLines <- for timestamped $ \(t, (stream, content)) -> insertRecord
-        JobLogLine
-            { jobLogLineJob = jobId
-            , jobLogLineCreatedAt = t
-            , jobLogLineStream = stream
-            , jobLogLineContent = content
-            }
+    let
+        jobLogLines = map
+            (\(t, (stream, content)) -> JobLogLine
+                { jobLogLineJob = jobId
+                , jobLogLineCreatedAt = t
+                , jobLogLineStream = stream
+                , jobLogLineContent = content
+                }
+            )
+            timestamped
+
+    lift $ do
+        deleteJobLogLines jobId
+        captureJobLogLines jobLogLines
 
     -- Complete it if appropriate
     for_ mExitCode $ \ec -> do
@@ -152,15 +163,15 @@ restylingOutput :: [(Text, Text)]
 restylingOutput =
     [ ("stderr", "Switched to a new branch 'issue#87'")
     , ("stdout", "Branch 'issue#87' set up to track remote branch 'issue#87' from 'origin'.")
-    , ("stdout", "Restyling restyled-io/restyler#88")
-    , ("stdout", "Restyled PR does not exist")
+    , ("stdout", "[Info] Restyling restyled-io/restyler#88")
+    , ("stdout", "[Info] Restyled PR does not exist")
     , ("stderr", "Switched to a new branch 'issue#87-restyled'")
-    , ("stdout", "Restyling \"app/Http/Controllers/Store.php\" via \"php-cs-fixer\"")
-    , ("stderr", "Loaded config default from \"/code/.php_cs\".")
+    , ("stdout", "[Info] Restyling \"app/Http/Controllers/Store.php\" via \"php-cs-fixer\"")
+    , ("stderr", "[Debug] Loaded config default from \"/code/.php_cs\".")
     , ("stderr", "Paths from configuration file have been overridden by paths provided as command arguments.")
-    , ("stdout", "")
+    , ("stdout", " ")
     , ("stdout", "Fixed all files in 0.010 seconds, 10.000 MB memory used")
-    , ("stdout", "Restyling \"app/Models/Example.php\" via \"php-cs-fixer\"")
+    , ("stdout", "[Info] Restyling \"app/Models/Example.php\" via \"php-cs-fixer\"")
     ]
 
 -- brittany-next-binding --columns=250
@@ -169,11 +180,11 @@ noDifferencesOutput :: [(Text, Text)]
 noDifferencesOutput =
     [ ("stdout", "Branch 'lucky/ela-skills-debugger' set up to track remote branch 'lucky/ela-skills-debugger' from 'origin'.")
     , ("stderr", "Switched to a new branch 'lucky/ela-skills-debugger'")
-    , ("stdout", "Restyling freckle/megarepo#8616")
-    , ("stdout", "Restyled PR does not exist")
+    , ("stdout", "[Info] Restyling freckle/megarepo#8616")
+    , ("stdout", "[Info] Restyled PR does not exist")
     , ("stderr", "Switched to a new branch 'lucky/ela-skills-debugger-restyled'")
-    , ("stdout", "Setting status of no differences for 686fe0a")
-    , ("stdout", "No style differences found")
+    , ("stdout", "[Info] Setting status of no differences for 686fe0a")
+    , ("stdout", "[Info] No style differences found")
     ]
 
 -- brittany-next-binding --columns=250
@@ -184,22 +195,22 @@ invalidArgumentOutput =
     , ("stderr", " * [new branch]      release/1 -> release/1")
     , ("stderr", "Switched to a new branch 'trim-fixes'")
     , ("stdout", "Branch 'trim-fixes' set up to track remote branch 'trim-fixes' from 'origin'.")
-    , ("stdout", "Restyling restyled.io/demo#1")
-    , ("stdout", "Restyled PR does not exist")
+    , ("stdout", "[Info] Restyling restyled.io/demo#1")
+    , ("stdout", "[Info] Restyled PR does not exist")
     , ("stderr", "Switched to a new branch 'elevator-trim-fixes-restyled'")
-    , ("stderr", "Process unsuccessful (ExitFailure 127)")
+    , ("stderr", "[Error] Process unsuccessful (ExitFailure 127)")
     , ("stderr", "Command: docker")
     , ("stderr", "Arguments: [--rm, --net=none, ...]")
-    , ("stderr", "")
-    , ("stderr", "")
+    , ("stderr", " ")
+    , ("stderr", " ")
     , ("stderr", "  docker: command not found")
     , ("stderr", "    1:some/stack")
     , ("stderr", "    75:trace/there")
-    , ("stderr", "")
+    , ("stderr", " ")
     , ("stderr", "Please see https://google.com")
-    , ("stderr", "")
+    , ("stderr", " ")
     , ("stderr", "Please see")
-    , ("stderr", "")
+    , ("stderr", " ")
     , ("stderr", "  - https://google.com")
     , ("stderr", "  - https://google.com")
     , ("stderr", "  - https://google.com")
@@ -209,11 +220,15 @@ invalidArgumentOutput =
 
 configErrorOutput1 :: [(Text, Text)]
 configErrorOutput1 =
-    [ ("stderr", "Switched to a new branch 'fix'")
+    [ ("stdout", "[Info] Restyler starting")
+    , ("stdout", "[Info] Restyling restyled-io/restyler#153")
+    , ("stdout", "[Info] No existing Restyled PR")
+    , ("stdout", "[Info] Cloning repository")
+    , ("stderr", "Switched to a new branch 'fix'")
     , ("stdout", "Branch 'fix' set up to track remote branch 'fix' from 'origin'.")
     , ("stderr", "Switched to a new branch 'fix-restyled'")
-    , ("stderr", "We had trouble with your configuration:")
-    , ("stderr", "")
+    , ("stderr", "[Error] We had trouble with your configuration:")
+    , ("stderr", " ")
     , ("stderr", "  Yaml parse exception:")
     , ("stderr", "  Aeson exception:")
     , ("stderr", "  Error in $.restylers[2]: - Unexpected key \"prettier\", must be one of")
@@ -321,7 +336,7 @@ configErrorOutput1 =
     , ("stderr", "  # surprises.")
     , ("stderr", "  #")
     , ("stderr", "  restylers_version: \"20190715\"")
-    , ("stderr", "")
+    , ("stderr", " ")
     , ("stderr", "Please see https://github.com/restyled-io/restyled.io/wiki/Common-Errors:-.restyled.yaml")
-    , ("stderr", "")
+    , ("stderr", " ")
     ]
