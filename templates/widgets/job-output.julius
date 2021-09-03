@@ -6,6 +6,7 @@ if (typeof Output === "undefined") {
     this.streamUrl = elem
       .getAttribute("data-stream-url")
       .replace(/http(s?):/, "ws$1:");
+    this.logsSeen = false;
   }
 
   Output.prototype.append = function(html) {
@@ -34,13 +35,17 @@ if (typeof Output === "undefined") {
     socket.onmessage = function(data) {
       self.append(data.data);
       socket.send("acknowledged");
+
+      if (data.data !== "") {
+        self.logsSeen = true;
+      }
     };
 
     socket.onclose = function(event) {
-      console.log("websocket closed", event);
+      console.log("websocket closed", event, self.logsSeen);
 
-      if (event.reason === "Job finished") {
-        window.location.reload();
+      if (!self.logsSeen) {
+        self.append("The log for this Job was empty or has expired");
       }
     };
   };

@@ -1,27 +1,7 @@
-$case output
-  $of JobOutputInProgress (Entity jobId job) _
-    <pre
-      .logs-stream
-      ##{streamElementId}
-      data-stream-url=@{repoP (jobOwner job) (jobRepo job) $ jobLogR jobId}
-      data-stream-loaded=false
-      >
-      Fetching job log...
-
-  $of JobOutputCompleted logLines
-    <pre>
-      $forall logLine <- logLines
-        ^{colorizedJobLogLine logLine}
-
-  $of JobOutputCompressed job
-    $maybe x <- jobStdout job
-      $if not (T.null x)
-        <pre>
-          $forall ln <- T.lines x
-            ^{colorizedLogLine ln}
-
-    $maybe x <- jobStderr job
-      $if not (T.null x)
-        <pre>
-          $forall ln <- T.lines x
-            ^{colorizedLogLine ln}
+<pre
+  .logs-stream
+  ##{streamElementId}
+  data-stream-url=@{repoP (jobOwner job) (jobRepo job) $ jobLogR jobId}
+  data-stream-loaded=false
+  >
+  Fetching job log...

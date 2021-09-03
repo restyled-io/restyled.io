@@ -14,7 +14,6 @@ module Restyled.WebSockets
 
     -- * Wrappers
     , sendTextDataAck
-    , sendClose
 
     -- * Re-export
     , module Yesod.WebSockets
@@ -24,7 +23,7 @@ import Restyled.Prelude
 
 import qualified Network.WebSockets as WS
 import Yesod.Core (MonadHandler)
-import Yesod.WebSockets hiding (sendClose)
+import Yesod.WebSockets
 
 data Message a = Send a | Done
 
@@ -60,8 +59,7 @@ withAsyncWebSockets_
     -> m ()
 withAsyncWebSockets_ = void . withAsyncWebSockets
 
-ignoringConnectionException
-    :: MonadUnliftIO m => WebSocketsT m () -> WebSocketsT m ()
+ignoringConnectionException :: MonadUnliftIO m => m () -> m ()
 ignoringConnectionException = handle ignoreConnectionException
 
 ignoreConnectionException :: Applicative f => WS.ConnectionException -> f ()
@@ -69,12 +67,3 @@ ignoreConnectionException _ = pure ()
 
 sendTextDataAck :: (MonadIO m, WS.WebSocketsData a) => a -> WebSocketsT m Text
 sendTextDataAck a = sendTextData a >> receiveData
-
--- | <https://github.com/yesodweb/yesod/issues/1599>
-sendClose
-    :: (MonadIO m, WS.WebSocketsData a, MonadReader WS.Connection m)
-    => a
-    -> m ()
-sendClose x = do
-    conn <- ask
-    liftIO $ WS.sendClose conn x

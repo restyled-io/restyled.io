@@ -1,5 +1,3 @@
-{-# LANGUAGE TupleSections #-}
-
 module Restyled.Models.Job
     (
     -- * Formatting
@@ -9,9 +7,6 @@ module Restyled.Models.Job
     , insertJob
 
     -- * @'JobOutput'@
-    , JobOutput(..)
-    , attachJobOutput
-    , fetchJobOutput
     , captureJobLogLine
     , fetchLastJobLogLineCreatedAt
 
@@ -19,7 +14,10 @@ module Restyled.Models.Job
     , completeJobSkipped
     , completeJobErrored
     , completeJob
+
+    -- * Temporary log-transition helpers
     , markJobAsCloudWatch
+    , jobIsCloudWatch
     ) where
 
 import Restyled.Prelude
@@ -27,10 +25,8 @@ import Restyled.Prelude
 import qualified Data.Text.Lazy as TL
 import Formatting (format)
 import Formatting.Time (diff)
-import qualified Restyled.JobLogLine as CW
 import Restyled.Models.DB
 import Restyled.Models.JobLogLine
-import Restyled.Settings
 
 jobOutcome :: Job -> Text
 jobOutcome Job {..} = fromMaybe "N/A" $ do
@@ -57,56 +53,6 @@ insertJob (Entity _ Repo {..}) pullRequestNumber = do
         , jobStdout = Nothing
         , jobStderr = Nothing
         }
-
-data JobOutput
-    = JobOutputInProgress (Entity Job) [JobLogLine]
-    | JobOutputCompleted [JobLogLine]
-    | JobOutputCompressed Job
-
-attachJobOutput
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasSettings env
-       , HasAWS env
-       )
-    => Entity Job
-    -> SqlPersistT m (Entity Job, JobOutput)
-attachJobOutput job = (job, ) <$> fetchJobOutput job Nothing
-
-fetchJobOutput
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasSettings env
-       , HasAWS env
-       )
-    => Entity Job
-    -> Maybe UTCTime
-    -> SqlPersistT m JobOutput
-fetchJobOutput jobE@(Entity jobId job@Job {..}) mSince =
-    case (jobCompletedAt, jobLog, jobStdout, jobStderr) of
-        (Just _, _, _, _) | jobIsCloudWatch job ->
-            lift $ JobOutputCompleted <$> CW.fetchJobLogLines jobId mSince
-        (Nothing, _, _, _) | jobIsCloudWatch job ->
-            lift $ JobOutputInProgress jobE <$> CW.fetchJobLogLines jobId mSince
-
-        -- Job is done and Log records (still) exist
-        (Just _, Nothing, Nothing, Nothing) ->
-            JobOutputCompleted . map entityVal <$> fetchJobLogLines jobId mSince
-
-        -- Job is done and Log has been written into the Job itself
-        (Just _, Just (JSONB logLines), _, _) ->
-            pure $ JobOutputCompleted $ map entityVal logLines
-
-        -- Deprecated: old style compressed log
-        (Just _, _, _, _) -> pure $ JobOutputCompressed job
-
-        -- Job is in progress
-        (Nothing, _, _, _) ->
-            JobOutputInProgress jobE
-                . map entityVal
-                <$> fetchJobLogLines jobId mSince
 
 captureJobLogLine :: MonadIO m => JobId -> Text -> Text -> SqlPersistT m ()
 captureJobLogLine jobId stream content = do
@@ -141,7 +87,7 @@ completeJob
     :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m (Entity Job)
 completeJob ec job@(Entity jobId _) = do
     now <- liftIO getCurrentTime
-    logLines <- fetchJobLogLines jobId Nothing
+    logLines <- fetchJobLogLines jobId Nothing Nothing
     updatedJob <- replaceEntity $ overEntity job $ \j -> j
         { jobUpdatedAt = now
         , jobCompletedAt = Just now
