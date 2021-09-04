@@ -27,7 +27,8 @@ enqueueToExperimentalRestyler body = fromMaybe False $ do
     pure $ name `elem` experimentalRepositories
 
 experimentalRepositories :: [Text]
-experimentalRepositories = ["restyled-io/restyled.io", "restyled-io/agent"]
+experimentalRepositories =
+    ["restyled-io/demo", "restyled-io/restyled.io", "restyled-io/agent"]
 
 experimentalQueueName :: ByteString
 experimentalQueueName = "restyled:agent:webhooks"

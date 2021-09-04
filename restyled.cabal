@@ -283,7 +283,6 @@ test-suite test
       Restyled.Handlers.JobsSpec
       Restyled.Handlers.ProfileSpec
       Restyled.Handlers.ReposSpec
-      Restyled.Handlers.WebhooksSpec
       Restyled.MarketplaceSpec
       Restyled.MetricsSpec
       Restyled.Models.UserSpec
