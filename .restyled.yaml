@@ -13,13 +13,22 @@ restylers:
       include:
         - "**/*.hs"
         - "!src/Restyled/Settings.hs" # CPP
-  - hlint
-  - stylish-haskell
+        - "!src/Restyled/Handlers/Revision.hs" # CPP
+  - stylish-haskell:
+      include:
+        - "**/*.hs"
+        - "!src/Restyled/Settings.hs" # CPP
+        - "!src/Restyled/Handlers/Revision.hs" # CPP
+  - hlint:
+      include:
+        - "**/*.hs"
+        - "!src/Restyled/Settings.hs" # CPP
+        - "!src/Restyled/Handlers/Revision.hs" # CPP
   - prettier:
       # Explicitly set parser so it works on .julius
       arguments:
         - --parser
-        - babylon # named babel after v1.16.0
+        - babel
       include:
         - "**/*.js"
         - "**/*.julius"
