@@ -34,4 +34,8 @@ restylers:
         - "**/*.julius"
   - shellharden:
       enabled: false
+  - whitespace:
+      include:
+        - "**/*"
+        - "!**/*.hamlet"
   - "*"
