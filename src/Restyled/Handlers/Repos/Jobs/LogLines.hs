@@ -5,8 +5,10 @@ module Restyled.Handlers.Repos.Jobs.LogLines
 import Restyled.Prelude
 
 import Conduit
+import qualified Data.List.NonEmpty as NE
+import Data.Semigroup (Last(..))
 import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
+import qualified Network.WebSockets as WebSockets
 import Restyled.Foundation
 import Restyled.JobOutput
 import Restyled.Models
@@ -22,18 +24,19 @@ getRepoJobLogLinesR _owner _name jobId = do
     webSockets $ ignoringConnectionException $ do
         conn <- ask
 
-        let conduit :: ConduitT [JobLogLine] [JobLogLine] Handler ()
-            conduit = mapMC $ \jobLogLines -> do
-                t <- formatJobLogLines jobLogLines
-                jobLogLines <$ runReaderT (sendTextDataAck t) conn
-
-        lift $ followJobOutput job conduit
+        lift
+            $ followJobOutput job
+            $ mapMC (sendLogLines conn)
+            .| foldMapC getLastCreatedAt
 
     -- If not accessed via WebSockets, respond with plain text Job log
     jobLogLines <- fetchJobOutput job
     pure $ T.unlines $ map textJobLogLine jobLogLines
 
-formatJobLogLines :: [JobLogLine] -> Handler Text
-formatJobLogLines jobLogLines = do
+sendLogLines :: WebSockets.Connection -> [JobLogLine] -> Handler [JobLogLine]
+sendLogLines conn jobLogLines = do
     htmls <- traverse renderJobLogLine jobLogLines
-    pure $ TL.toStrict $ mconcat htmls
+    jobLogLines <$ runReaderT (sendTextDataAck $ mconcat htmls) conn
+
+getLastCreatedAt :: [JobLogLine] -> Maybe (Last UTCTime)
+getLastCreatedAt = fmap (Last . jobLogLineCreatedAt . NE.last) . NE.nonEmpty

@@ -87,7 +87,7 @@ completeJob
     :: MonadIO m => ExitCode -> Entity Job -> SqlPersistT m (Entity Job)
 completeJob ec job@(Entity jobId _) = do
     now <- liftIO getCurrentTime
-    logLines <- fetchJobLogLines jobId Nothing Nothing
+    logLines <- fetchJobLogLines jobId Nothing
     updatedJob <- replaceEntity $ overEntity job $ \j -> j
         { jobUpdatedAt = now
         , jobCompletedAt = Just now
