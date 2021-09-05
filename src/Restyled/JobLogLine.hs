@@ -38,10 +38,9 @@ instance AWSPager GetLogEvents where
 streamJobLogLines
     :: (MonadAWS m, MonadReader env m, HasSettings env)
     => JobId
-    -> Maybe UTCTime -- ^ Stream logs since a given time
-    -> Maybe Natural -- ^ Page size, /not/ overall limit
+    -> Maybe UTCTime
     -> ConduitT () [JobLogLine] m ()
-streamJobLogLines jobId mSince mPageSize = do
+streamJobLogLines jobId mSince = do
     AppSettings {..} <- lift $ view settingsL
 
     let groupName = appRestylerLogGroup
@@ -50,7 +49,6 @@ streamJobLogLines jobId mSince mPageSize = do
             getLogEvents groupName streamName
                 & (gleStartTime .~ startMilliseconds)
                 & (gleStartFromHead ?~ True)
-                & (gleLimit .~ mPageSize)
 
     paginate req .| mapC (fromGetLogEvents jobId)
     where startMilliseconds = (+ 1) . utcTimeToPOSIXMilliseconds <$> mSince
