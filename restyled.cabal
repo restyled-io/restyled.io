@@ -74,6 +74,10 @@ library
       Restyled.Handlers.PrivacyPolicy
       Restyled.Handlers.Profile
       Restyled.Handlers.Repos
+      Restyled.Handlers.Repos.Jobs
+      Restyled.Handlers.Repos.Jobs.LogLines
+      Restyled.Handlers.Repos.Pulls
+      Restyled.Handlers.Repos.Pulls.Jobs
       Restyled.Handlers.Revision
       Restyled.Handlers.Robots
       Restyled.Handlers.System.Metrics
