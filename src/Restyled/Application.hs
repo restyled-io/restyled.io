@@ -18,7 +18,6 @@ import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Network.Wai.Middleware.Routed
 import Network.Wai.Middleware.Timeout
-import qualified RIO.NonEmpty as NE
 import Restyled.Foundation
 import Restyled.Handlers.Admin
 import Restyled.Handlers.Admin.Machines
@@ -29,7 +28,7 @@ import Restyled.Handlers.Admin.Marketplace.Plans
 import Restyled.Handlers.Admin.Offers
 import Restyled.Handlers.Admin.Repos
 import Restyled.Handlers.Admin.Token
-import Restyled.Handlers.Common
+import Restyled.Handlers.Favicon
 import Restyled.Handlers.GitHubStudents
 import Restyled.Handlers.Home
 import Restyled.Handlers.Jobs
@@ -38,11 +37,14 @@ import Restyled.Handlers.Offers
 import Restyled.Handlers.PrivacyPolicy
 import Restyled.Handlers.Profile
 import Restyled.Handlers.Repos
+import Restyled.Handlers.Revision
+import Restyled.Handlers.Robots
 import Restyled.Handlers.System.Metrics
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
 import Restyled.Settings
 import Restyled.Yesod hiding (LogLevel(..))
+import qualified RIO.NonEmpty as NE
 
 mkYesodDispatch "App" resourcesApp
 

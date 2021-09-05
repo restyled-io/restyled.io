@@ -3,8 +3,6 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: ba26595ef44d0ce9aa35b4fb879dc7fd27d0ff1491564efee5c04a6cb4261f7f
 
 name:           restyled
 version:        0.1.1.0
@@ -67,7 +65,7 @@ library
       Restyled.Handlers.Admin.Offers
       Restyled.Handlers.Admin.Repos
       Restyled.Handlers.Admin.Token
-      Restyled.Handlers.Common
+      Restyled.Handlers.Favicon
       Restyled.Handlers.GitHubStudents
       Restyled.Handlers.Home
       Restyled.Handlers.Jobs
@@ -76,6 +74,8 @@ library
       Restyled.Handlers.PrivacyPolicy
       Restyled.Handlers.Profile
       Restyled.Handlers.Repos
+      Restyled.Handlers.Revision
+      Restyled.Handlers.Robots
       Restyled.Handlers.System.Metrics
       Restyled.Handlers.Thanks
       Restyled.Handlers.Webhooks
