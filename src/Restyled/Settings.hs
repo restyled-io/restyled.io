@@ -123,7 +123,7 @@ loadSettings =
             <*> optional (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_SECRET" mempty)
             )
         <*> (restylerImage
-            <$> var str "RESTYLER_IMAGE" (def "restyled/restyler")
+            <$> var str "RESTYLER_IMAGE" (def "restyled/restyler:main")
             <*> optional (var nonempty "RESTYLER_TAG" mempty)
             )
         <*> var (splitOn ',') "ADMIN_EMAILS" (def [])
