@@ -6,7 +6,6 @@ module Restyled.JobOutput
 import Restyled.Prelude
 
 import Conduit
-import qualified Data.List.NonEmpty as NE
 import Data.Semigroup (Last(..))
 import qualified Restyled.JobLogLine as CW
 import Restyled.Models.DB
@@ -25,7 +24,7 @@ fetchJobOutput
     => Entity Job
     -> m [JobLogLine]
 fetchJobOutput job =
-    runConduit $ streamJobLogLines job Nothing Nothing .| concatC .| sinkList
+    runConduit $ streamJobLogLines job Nothing .| concatC .| sinkList
 
 -- | Stream a Job's log until it is finished
 --
@@ -40,21 +39,16 @@ followJobOutput
        , HasSettings env
        )
     => Entity Job
-    -> ConduitT [JobLogLine] [JobLogLine] m ()
-    -- ^ A Conduit to feed the batches of log-lines through
+    -> ConduitT [JobLogLine] Void m (Maybe (Last UTCTime))
+    -- ^ A sink to feed the batches of log-lines into
     --
-    -- For example, to fire off to a WebSocket. We need to get them back again
-    -- so we can track when we reach the of the log.
+    -- It must return the last created-at, so we can loop from there.
     --
     -> m ()
-followJobOutput job@(Entity jobId _) conduit = runConduit
-    $ loop Nothing Nothing
+followJobOutput job@(Entity jobId _) sink = runConduit $ loop Nothing
   where
-    loop mSince mPageSize = do
-        mLastCreatedAt <-
-            streamJobLogLines job (getLast <$> mSince) mPageSize
-            .| conduit
-            .| sinkLastBy jobLogLineCreatedAt
+    loop mSince = do
+        mLastCreatedAt <- streamJobLogLines job (getLast <$> mSince) .| sink
 
         inProgress <-
             lift
@@ -65,8 +59,7 @@ followJobOutput job@(Entity jobId _) conduit = runConduit
         let continue = inProgress || isJust mLastCreatedAt
             mNextSince = mSince <> mLastCreatedAt
 
-        -- Stream 1-line pages from now one
-        when continue $ loop mNextSince $ Just 1
+        when continue $ loop mNextSince
 
 -- | Paper over CloudWatch vs DB, for now
 streamJobLogLines
@@ -78,11 +71,7 @@ streamJobLogLines
        )
     => Entity Job
     -> Maybe UTCTime
-    -> Maybe Natural
     -> ConduitT () [JobLogLine] m ()
-streamJobLogLines (Entity jobId job) mSince mPageSize
-    | jobIsCloudWatch job = CW.streamJobLogLines jobId mSince mPageSize
-    | otherwise = JL.streamJobLogLines jobId mSince mPageSize
-
-sinkLastBy :: Monad m => (a -> b) -> ConduitT [a] Void m (Maybe (Last b))
-sinkLastBy f = foldMapC $ fmap (Last . f . NE.last) . NE.nonEmpty
+streamJobLogLines (Entity jobId job) mSince
+    | jobIsCloudWatch job = CW.streamJobLogLines jobId mSince
+    | otherwise = JL.streamJobLogLines jobId mSince
