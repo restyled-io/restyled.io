@@ -1,5 +1,7 @@
 $newline never
-<div .log-line .stream-#{stream}>
-  <span .prefix>#{stream}
+<div .log-line>
+  $if level /= "unknown"
+    <span .level-#{level} .prefix>
+      #{level}
   <span .level-#{level} .content>
     ^{renderWithURLs message}
