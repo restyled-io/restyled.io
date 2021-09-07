@@ -24,17 +24,6 @@ import Network.AWS.Pager (AWSPager(..))
 import Restyled.Models.DB (JobId, JobLogLine(..))
 import Restyled.Settings
 
-data JobLogStream
-    = JobLogStreamSystem
-    | JobLogStreamStdout
-    | JobLogStreamStderr
-
-jobLogStreamToText :: JobLogStream -> Text
-jobLogStreamToText = \case
-    JobLogStreamSystem -> "system"
-    JobLogStreamStdout -> "stdout"
-    JobLogStreamStderr -> "stderr"
-
 instance AWSPager GetLogEvents where
     page req resp = do
         -- Events were present in last response
@@ -83,7 +72,7 @@ errorJobLogLines jobId ex = do
     pure
         [ JobLogLine
               { jobLogLineCreatedAt = now
-              , jobLogLineStream = jobLogStreamToText JobLogStreamSystem
+              , jobLogLineStream = "system"
               , jobLogLineContent = "Unable to fetch Job log at this time"
               , jobLogLineJob = jobId
               }
@@ -137,7 +126,7 @@ fromOutputLogEvent jobId event = do
     timestamp <- event ^. oleTimestamp
     pure JobLogLine
         { jobLogLineCreatedAt = posixMillisecondsToUTCTime timestamp
-        , jobLogLineStream = jobLogStreamToText JobLogStreamSystem
+        , jobLogLineStream = "system"
         , jobLogLineContent = message
         , jobLogLineJob = jobId
         }
