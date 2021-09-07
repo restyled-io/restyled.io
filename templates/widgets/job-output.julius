@@ -9,7 +9,7 @@ if (typeof Output === "undefined") {
     this.logsSeen = false;
   }
 
-  Output.prototype.append = function(html) {
+  Output.prototype.append = function (html) {
     var loaded = this.elem.getAttribute("data-stream-loaded");
 
     if (loaded === "false" && html !== "") {
@@ -24,15 +24,15 @@ if (typeof Output === "undefined") {
     }
   };
 
-  Output.prototype.connect = function() {
+  Output.prototype.connect = function () {
     var self = this,
       socket = new WebSocket(this.streamUrl);
 
-    socket.onerror = function(data) {
+    socket.onerror = function (data) {
       console.log("websockets error", data);
     };
 
-    socket.onmessage = function(data) {
+    socket.onmessage = function (data) {
       self.append(data.data);
       socket.send("acknowledged");
 
@@ -41,7 +41,7 @@ if (typeof Output === "undefined") {
       }
     };
 
-    socket.onclose = function(event) {
+    socket.onclose = function (event) {
       console.log("websocket closed", event, self.logsSeen);
 
       if (!self.logsSeen) {
@@ -51,8 +51,8 @@ if (typeof Output === "undefined") {
   };
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  var cards = document.getElementsByClassName("card")
+document.addEventListener("DOMContentLoaded", function () {
+  var cards = document.getElementsByClassName("card");
   var singleCard = cards.length === 1;
   var stream = document.getElementById("#{rawJS streamElementId}");
 
