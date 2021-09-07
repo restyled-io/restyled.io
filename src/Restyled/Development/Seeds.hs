@@ -95,7 +95,7 @@ seedJob
     -> PullRequestNum
     -> UTCTime
     -> Maybe Int
-    -> [(Text, Text)]
+    -> [Text]
     -> SqlPersistT m ()
 seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
     -- Start the Job
@@ -116,10 +116,10 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
     -- Capture it "running"
     let
         jobLogLines = map
-            (\(t, (stream, content)) -> JobLogLine
+            (\(t, content) -> JobLogLine
                 { jobLogLineJob = jobId
                 , jobLogLineCreatedAt = t
-                , jobLogLineStream = stream
+                , jobLogLineStream = "system"
                 , jobLogLineContent = content
                 }
             )
@@ -150,8 +150,8 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
   where
     timestamped =
         zip (secondsFrom createdAt)
-            $ ("system", "docker run --rm ...")
-            : ("system", "Running on ...")
+            $ "docker run --rm ..."
+            : "Running on ..."
             : untimestamped
 
 secondsFrom :: UTCTime -> [UTCTime]
@@ -159,184 +159,184 @@ secondsFrom t0 = let t1 = addUTCTime 1 t0 in t1 : secondsFrom t1
 
 -- brittany-next-binding --columns=250
 
-restylingOutput :: [(Text, Text)]
+restylingOutput :: [Text]
 restylingOutput =
-    [ ("stderr", "Switched to a new branch 'issue#87'")
-    , ("stdout", "Branch 'issue#87' set up to track remote branch 'issue#87' from 'origin'.")
-    , ("stdout", "[Info] Restyling restyled-io/restyler#88")
-    , ("stdout", "[Info] Restyled PR does not exist")
-    , ("stderr", "Switched to a new branch 'issue#87-restyled'")
-    , ("stdout", "[Info] Restyling \"app/Http/Controllers/Store.php\" via \"php-cs-fixer\"")
-    , ("stderr", "[Debug] Loaded config default from \"/code/.php_cs\".")
-    , ("stderr", "Paths from configuration file have been overridden by paths provided as command arguments.")
-    , ("stdout", " ")
-    , ("stdout", "Fixed all files in 0.010 seconds, 10.000 MB memory used")
-    , ("stdout", "[Info] Restyling \"app/Models/Example.php\" via \"php-cs-fixer\"")
+    [ "Switched to a new branch 'issue#87'"
+    , "Branch 'issue#87' set up to track remote branch 'issue#87' from 'origin'."
+    , "[Info] Restyling restyled-io/restyler#88"
+    , "[Info] Restyled PR does not exist"
+    , "Switched to a new branch 'issue#87-restyled'"
+    , "[Info] Restyling \"app/Http/Controllers/Store.php\" via \"php-cs-fixer\""
+    , "[Debug] Loaded config default from \"/code/.php_cs\"."
+    , "Paths from configuration file have been overridden by paths provided as command arguments."
+    , " "
+    , "Fixed all files in 0.010 seconds, 10.000 MB memory used"
+    , "[Info] Restyling \"app/Models/Example.php\" via \"php-cs-fixer\""
     ]
 
 -- brittany-next-binding --columns=250
 
-noDifferencesOutput :: [(Text, Text)]
+noDifferencesOutput :: [Text]
 noDifferencesOutput =
-    [ ("stdout", "Branch 'lucky/ela-skills-debugger' set up to track remote branch 'lucky/ela-skills-debugger' from 'origin'.")
-    , ("stderr", "Switched to a new branch 'lucky/ela-skills-debugger'")
-    , ("stdout", "[Info] Restyling freckle/megarepo#8616")
-    , ("stdout", "[Info] Restyled PR does not exist")
-    , ("stderr", "Switched to a new branch 'lucky/ela-skills-debugger-restyled'")
-    , ("stdout", "[Info] Setting status of no differences for 686fe0a")
-    , ("stdout", "[Info] No style differences found")
+    [ "Branch 'lucky/ela-skills-debugger' set up to track remote branch 'lucky/ela-skills-debugger' from 'origin'."
+    , "Switched to a new branch 'lucky/ela-skills-debugger'"
+    , "[Info] Restyling freckle/megarepo#8616"
+    , "[Info] Restyled PR does not exist"
+    , "Switched to a new branch 'lucky/ela-skills-debugger-restyled'"
+    , "[Info] Setting status of no differences for 686fe0a"
+    , "[Info] No style differences found"
     ]
 
 -- brittany-next-binding --columns=250
 
-invalidArgumentOutput :: [(Text, Text)]
+invalidArgumentOutput :: [Text]
 invalidArgumentOutput =
-    [ ("stderr", "From https://github.com/restyled.io/demo")
-    , ("stderr", " * [new branch]      release/1 -> release/1")
-    , ("stderr", "Switched to a new branch 'trim-fixes'")
-    , ("stdout", "Branch 'trim-fixes' set up to track remote branch 'trim-fixes' from 'origin'.")
-    , ("stdout", "[Info] Restyling restyled.io/demo#1")
-    , ("stdout", "[Info] Restyled PR does not exist")
-    , ("stderr", "Switched to a new branch 'elevator-trim-fixes-restyled'")
-    , ("stderr", "[Error] Process unsuccessful (ExitFailure 127)")
-    , ("stderr", "Command: docker")
-    , ("stderr", "Arguments: [--rm, --net=none, ...]")
-    , ("stderr", " ")
-    , ("stderr", " ")
-    , ("stderr", "  docker: command not found")
-    , ("stderr", "    1:some/stack")
-    , ("stderr", "    75:trace/there")
-    , ("stderr", " ")
-    , ("stderr", "Please see https://google.com")
-    , ("stderr", " ")
-    , ("stderr", "Please see")
-    , ("stderr", " ")
-    , ("stderr", "  - https://google.com")
-    , ("stderr", "  - https://google.com")
-    , ("stderr", "  - https://google.com")
+    [ "From https://github.com/restyled.io/demo"
+    , " * [new branch]      release/1 -> release/1"
+    , "Switched to a new branch 'trim-fixes'"
+    , "Branch 'trim-fixes' set up to track remote branch 'trim-fixes' from 'origin'."
+    , "[Info] Restyling restyled.io/demo#1"
+    , "[Info] Restyled PR does not exist"
+    , "Switched to a new branch 'elevator-trim-fixes-restyled'"
+    , "[Error] Process unsuccessful (ExitFailure 127)"
+    , "Command: docker"
+    , "Arguments: [--rm, --net=none, ...]"
+    , " "
+    , " "
+    , "  docker: command not found"
+    , "    1:some/stack"
+    , "    75:trace/there"
+    , " "
+    , "Please see https://google.com"
+    , " "
+    , "Please see"
+    , " "
+    , "  - https://google.com"
+    , "  - https://google.com"
+    , "  - https://google.com"
     ]
 
 -- brittany-next-binding --columns=250
 
-configErrorOutput1 :: [(Text, Text)]
+configErrorOutput1 :: [Text]
 configErrorOutput1 =
-    [ ("stdout", "[Info] Restyler starting")
-    , ("stdout", "[Info] Restyling restyled-io/restyler#153")
-    , ("stdout", "[Info] No existing Restyled PR")
-    , ("stdout", "[Info] Cloning repository")
-    , ("stderr", "Switched to a new branch 'fix'")
-    , ("stdout", "Branch 'fix' set up to track remote branch 'fix' from 'origin'.")
-    , ("stderr", "Switched to a new branch 'fix-restyled'")
-    , ("stderr", "[Error] We had trouble with your configuration:")
-    , ("stderr", " ")
-    , ("stderr", "  Yaml parse exception:")
-    , ("stderr", "  Aeson exception:")
-    , ("stderr", "  Error in $.restylers[2]: - Unexpected key \"prettier\", must be one of")
-    , ("stderr", "  [\"name\",\"image\",\"command\",\"arguments\",\"include\",\"interpreters\",\"supports_arg_sep\",\"supports_multiple_paths\",\"documentation\"].")
-    , ("stderr", "  ")
-    , ("stderr", "  ")
-    , ("stderr", "  Did you intend to specify a full Restyler object, or do you have incorrect")
-    , ("stderr", "  indentation for a named override?")
-    , ("stderr", "  ")
-    , ("stderr", "  Original input:")
-    , ("stderr", "  # Restyler Configuration")
-    , ("stderr", "  #")
-    , ("stderr", "  # Overall notes:")
-    , ("stderr", "  #")
-    , ("stderr", "  # - All keys are optional and default as shown")
-    , ("stderr", "  # - The entire config can also be just a list of values, which will be")
-    , ("stderr", "  #   interpreted as specifying the restylers key")
-    , ("stderr", "  #")
-    , ("stderr", "  ####")
-    , ("stderr", "  ")
-    , ("stderr", "  # Do anything at all?")
-    , ("stderr", "  enabled: true")
-    , ("stderr", "  ")
-    , ("stderr", "  # Push the style fixes directly to the original PR")
-    , ("stderr", "  #")
-    , ("stderr", "  # This setting implies pull_requests: false for origin PRs, and has no effect on")
-    , ("stderr", "  # forked PRs (since we can't push to those).")
-    , ("stderr", "  #")
-    , ("stderr", "  auto: false")
-    , ("stderr", "  ")
-    , ("stderr", "  # Download remote files before restyling")
-    , ("stderr", "  #")
-    , ("stderr", "  # Example:")
-    , ("stderr", "  #")
-    , ("stderr", "  #   remote_files:")
-    , ("stderr", "  #     - url: https://raw.github.com/.../hlint.yaml")
-    , ("stderr", "  #       path: .hlint.yaml")
-    , ("stderr", "  #")
-    , ("stderr", "  # Files must be publicly accessible.")
-    , ("stderr", "  #")
-    , ("stderr", "  remote_files: []")
-    , ("stderr", "  ")
-    , ("stderr", "  # Open Restyle PRs?")
-    , ("stderr", "  pull_requests: true")
-    , ("stderr", "  ")
-    , ("stderr", "  # Leave comments on the original PR linking to the Restyle PR?")
-    , ("stderr", "  comments: true")
-    , ("stderr", "  ")
-    , ("stderr", "  # Set commit statuses on the original PR?")
-    , ("stderr", "  statuses:")
-    , ("stderr", "    # Red status in the case of differences found")
-    , ("stderr", "    differences: true")
-    , ("stderr", "    # Green status in the case of no differences found")
-    , ("stderr", "    no_differences: true")
-    , ("stderr", "    # Red status if we encounter errors restyling")
-    , ("stderr", "    error: true")
-    , ("stderr", "  ")
-    , ("stderr", "  # Request review on the Restyle PR?")
-    , ("stderr", "  #")
-    , ("stderr", "  # Possible values:")
-    , ("stderr", "  #")
-    , ("stderr", "  #   author: From the author of the original PR")
-    , ("stderr", "  #   owner: From the owner of the repository")
-    , ("stderr", "  #")
-    , ("stderr", "  # One value will apply to origin and forked PRs, but you can also specify")
-    , ("stderr", "  # separate values.")
-    , ("stderr", "  #")
-    , ("stderr", "  request_review: none")
-    , ("stderr", "  ")
-    , ("stderr", "  # Add labels to any created Restyle PRs")
-    , ("stderr", "  #")
-    , ("stderr", "  # These can be used to tell other automation to avoid our PRs.")
-    , ("stderr", "  #")
-    , ("stderr", "  labels: []")
-    , ("stderr", "  ")
-    , ("stderr", "  # Which restylers to run")
-    , ("stderr", "  #")
-    , ("stderr", "  # See restyled-io/restylers repository for their defaults.")
-    , ("stderr", "  #")
-    , ("stderr", "  restylers:")
-    , ("stderr", "    - black:")
-    , ("stderr", "        arguments:")
-    , ("stderr", "          - \"--line-length 100\"")
-    , ("stderr", "    - shfmt:")
-    , ("stderr", "        arguments:")
-    , ("stderr", "          - \"-i\"")
-    , ("stderr", "          - \"2\"")
-    , ("stderr", "          - \"-ci\"")
-    , ("stderr", "          - \"-bn\"")
-    , ("stderr", "          - \"-sr\"")
-    , ("stderr", "    - prettier:")
-    , ("stderr", "      include:")
-    , ("stderr", "        - \"**/*.js\"")
-    , ("stderr", "        - \"**/*.jsx\"")
-    , ("stderr", "        - \"**/*.yml\"")
-    , ("stderr", "        - \"**/*.yaml\"")
-    , ("stderr", "        - \"!chats/**/*\"")
-    , ("stderr", "        - \"!flow/**/*\"")
-    , ("stderr", "   ")
-    , ("stderr", "  # Version of the set of Restylers to run")
-    , ("stderr", "  #")
-    , ("stderr", "  # This should correspond to a ref on the restyled-io/restylers repository,")
-    , ("stderr", "  # usually it's a tag that is a date of when that set was released. You could")
-    , ("stderr", "  # re-specific the default in your own config if you prefer to avoid update")
-    , ("stderr", "  # surprises.")
-    , ("stderr", "  #")
-    , ("stderr", "  restylers_version: \"20190715\"")
-    , ("stderr", " ")
-    , ("stderr", "Please see https://github.com/restyled-io/restyled.io/wiki/Common-Errors:-.restyled.yaml")
-    , ("stderr", " ")
+    [ "[Info] Restyler starting"
+    , "[Info] Restyling restyled-io/restyler#153"
+    , "[Info] No existing Restyled PR"
+    , "[Info] Cloning repository"
+    , "Switched to a new branch 'fix'"
+    , "Branch 'fix' set up to track remote branch 'fix' from 'origin'."
+    , "Switched to a new branch 'fix-restyled'"
+    , "[Error] We had trouble with your configuration:"
+    , " "
+    , "  Yaml parse exception:"
+    , "  Aeson exception:"
+    , "  Error in $.restylers[2]: - Unexpected key \"prettier\", must be one of"
+    , "  [\"name\",\"image\",\"command\",\"arguments\",\"include\",\"interpreters\",\"supports_arg_sep\",\"supports_multiple_paths\",\"documentation\"]."
+    , "  "
+    , "  "
+    , "  Did you intend to specify a full Restyler object, or do you have incorrect"
+    , "  indentation for a named override?"
+    , "  "
+    , "  Original input:"
+    , "  # Restyler Configuration"
+    , "  #"
+    , "  # Overall notes:"
+    , "  #"
+    , "  # - All keys are optional and default as shown"
+    , "  # - The entire config can also be just a list of values, which will be"
+    , "  #   interpreted as specifying the restylers key"
+    , "  #"
+    , "  ####"
+    , "  "
+    , "  # Do anything at all?"
+    , "  enabled: true"
+    , "  "
+    , "  # Push the style fixes directly to the original PR"
+    , "  #"
+    , "  # This setting implies pull_requests: false for origin PRs, and has no effect on"
+    , "  # forked PRs (since we can't push to those)."
+    , "  #"
+    , "  auto: false"
+    , "  "
+    , "  # Download remote files before restyling"
+    , "  #"
+    , "  # Example:"
+    , "  #"
+    , "  #   remote_files:"
+    , "  #     - url: https://raw.github.com/.../hlint.yaml"
+    , "  #       path: .hlint.yaml"
+    , "  #"
+    , "  # Files must be publicly accessible."
+    , "  #"
+    , "  remote_files: []"
+    , "  "
+    , "  # Open Restyle PRs?"
+    , "  pull_requests: true"
+    , "  "
+    , "  # Leave comments on the original PR linking to the Restyle PR?"
+    , "  comments: true"
+    , "  "
+    , "  # Set commit statuses on the original PR?"
+    , "  statuses:"
+    , "    # Red status in the case of differences found"
+    , "    differences: true"
+    , "    # Green status in the case of no differences found"
+    , "    no_differences: true"
+    , "    # Red status if we encounter errors restyling"
+    , "    error: true"
+    , "  "
+    , "  # Request review on the Restyle PR?"
+    , "  #"
+    , "  # Possible values:"
+    , "  #"
+    , "  #   author: From the author of the original PR"
+    , "  #   owner: From the owner of the repository"
+    , "  #"
+    , "  # One value will apply to origin and forked PRs, but you can also specify"
+    , "  # separate values."
+    , "  #"
+    , "  request_review: none"
+    , "  "
+    , "  # Add labels to any created Restyle PRs"
+    , "  #"
+    , "  # These can be used to tell other automation to avoid our PRs."
+    , "  #"
+    , "  labels: []"
+    , "  "
+    , "  # Which restylers to run"
+    , "  #"
+    , "  # See restyled-io/restylers repository for their defaults."
+    , "  #"
+    , "  restylers:"
+    , "    - black:"
+    , "        arguments:"
+    , "          - \"--line-length 100\""
+    , "    - shfmt:"
+    , "        arguments:"
+    , "          - \"-i\""
+    , "          - \"2\""
+    , "          - \"-ci\""
+    , "          - \"-bn\""
+    , "          - \"-sr\""
+    , "    - prettier:"
+    , "      include:"
+    , "        - \"**/*.js\""
+    , "        - \"**/*.jsx\""
+    , "        - \"**/*.yml\""
+    , "        - \"**/*.yaml\""
+    , "        - \"!chats/**/*\""
+    , "        - \"!flow/**/*\""
+    , "   "
+    , "  # Version of the set of Restylers to run"
+    , "  #"
+    , "  # This should correspond to a ref on the restyled-io/restylers repository,"
+    , "  # usually it's a tag that is a date of when that set was released. You could"
+    , "  # re-specific the default in your own config if you prefer to avoid update"
+    , "  # surprises."
+    , "  #"
+    , "  restylers_version: \"20190715\""
+    , " "
+    , "Please see https://github.com/restyled-io/restyled.io/wiki/Common-Errors:-.restyled.yaml"
+    , " "
     ]
