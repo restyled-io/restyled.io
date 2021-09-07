@@ -94,11 +94,10 @@ textJobLogLine :: JobLogLine -> Text
 textJobLogLine = scrubGitHubToken . jobLogLineContent
 
 colorizedJobLogLine :: JobLogLine -> Widget
-colorizedJobLogLine JobLogLine {..} =
-    colorizedLogLine jobLogLineStream $ scrubGitHubToken jobLogLineContent
+colorizedJobLogLine = colorizedLogLine . scrubGitHubToken . jobLogLineContent
 
-colorizedLogLine :: Text -> Text -> Widget
-colorizedLogLine stream ln
+colorizedLogLine :: Text -> Widget
+colorizedLogLine ln
     | Just message <- T.stripPrefix "[Debug] " ln = logLine "debug" message
     | Just message <- T.stripPrefix "[Info] " ln = logLine "info" message
     | Just message <- T.stripPrefix "[Warn] " ln = logLine "warn" message

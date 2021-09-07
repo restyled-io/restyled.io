@@ -18,10 +18,10 @@ $case output
       $if not (T.null x)
         <pre>
           $forall ln <- T.lines x
-            ^{colorizedLogLine "stdout" ln}
+            ^{colorizedLogLine ln}
 
     $maybe x <- jobStderr job
       $if not (T.null x)
         <pre>
           $forall ln <- T.lines x
-            ^{colorizedLogLine "stderr" ln}
+            ^{colorizedLogLine ln}
