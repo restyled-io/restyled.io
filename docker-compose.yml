@@ -33,4 +33,5 @@ services:
       AWS_ACCESS_KEY_ID: x
       AWS_SECRET_ACCESS_KEY: x
     volumes:
+      - /tmp:/tmp
       - /var/run/docker.sock:/var/run/docker.sock
