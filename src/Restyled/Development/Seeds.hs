@@ -134,13 +134,6 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
         let lastLogLineAt = jobLogLineCreatedAt $ Unsafe.last jobLogLines
             completedAt = addUTCTime 1 lastLogLineAt
 
-        insert_ JobLogLine
-            { jobLogLineJob = jobId
-            , jobLogLineCreatedAt = completedAt
-            , jobLogLineStream = "system"
-            , jobLogLineContent = "Restyler exited " <> tshow ec
-            }
-
         update
             jobId
             [ JobUpdatedAt =. completedAt
