@@ -8,6 +8,7 @@ import Restyled.Test
 
 import qualified Data.Text as T
 import Restyled.Authentication
+import Restyled.Test.Graphula
 import Restyled.Yesod
 
 instance Eq (AuthenticationResult App) where
@@ -28,14 +29,16 @@ spec = withApp $ do
             let creds :: Creds App
                 creds = Creds "github" "1" []
 
-            it "accepts a known user" $ do
-                (userId, result) <-
-                    runDB
-                    $ (,)
-                    <$> insert (someUser creds "pat@example.com")
-                    <*> authenticateUser creds
+            it "accepts a known user" $ graph $ do
+                user <-
+                    node @User ()
+                    $ edit
+                    $ (fieldLens UserCredsIdent .~ "1")
+                    . (fieldLens UserCredsPlugin .~ "github")
 
-                result `shouldBe` Authenticated userId
+                result <- lift $ runDB $ authenticateUser creds
+
+                result `shouldBe` Authenticated (entityKey user)
 
             it "rejects unknown users" $ do
                 result <- runDB $ authenticateUser creds
@@ -45,14 +48,16 @@ spec = withApp $ do
             let creds :: Creds App
                 creds = Creds "github" "1" [("userResponse", "{}")]
 
-            it "accepts a known user" $ do
-                (userId, result) <-
-                    runDB
-                    $ (,)
-                    <$> insert (someUser creds "pat@example.com")
-                    <*> authenticateUser creds
+            it "accepts a known user" $ graph $ do
+                user <-
+                    node @User ()
+                    $ edit
+                    $ (fieldLens UserCredsIdent .~ "1")
+                    . (fieldLens UserCredsPlugin .~ "github")
 
-                result `shouldBe` Authenticated userId
+                result <- lift $ runDB $ authenticateUser creds
+
+                result `shouldBe` Authenticated (entityKey user)
 
             it "rejects unknown users" $ do
                 result <- runDB $ authenticateUser creds
@@ -71,57 +76,36 @@ spec = withApp $ do
                 creds :: Creds App
                 creds = Creds "github" "1" [("userResponse", userResponse)]
 
-            it "creates a new user" $ do
-                (result, mUser) <-
-                    runDB
-                    $ (,)
-                    <$> authenticateUser creds
-                    <*> selectFirst [UserCredsPlugin ==. "github"] []
+            it "creates a new user" $ runDB $ do
+                result <- authenticateUser creds
 
-                Just result `shouldBe` (authenticatedAs <$> mUser)
-
-                (entityVal <$> mUser) `shouldBe` Just (emptyUser creds)
-                    { userEmail = Just "me@example.com"
-                    , userGithubUserId = Just 1
-                    , userGithubUsername = Just "pbrisbin"
-                    }
-
-            it "updates an existing user" $ do
-                (userId, result, mUser) <-
-                    runDB
-                    $ (,,)
-                    <$> insert (someUser creds "pat@example.com")
-                    <*> authenticateUser creds
-                    <*> selectFirst [UserCredsPlugin ==. "github"] []
-
+                Just (Entity userId User {..}) <- selectFirst
+                    [UserCredsPlugin ==. "github"]
+                    []
                 result `shouldBe` Authenticated userId
+                userEmail `shouldBe` Just "me@example.com"
+                userGithubUserId `shouldBe` Just 1
+                userGithubUsername `shouldBe` Just "pbrisbin"
 
-                (entityKey <$> mUser) `shouldBe` Just userId
-                (entityVal <$> mUser) `shouldBe` Just (emptyUser creds)
-                    { userEmail = Just "me@example.com"
-                    , userGithubUserId = Just 1
-                    , userGithubUsername = Just "pbrisbin"
-                    }
+            it "updates an existing user" $ graph $ do
+                user <-
+                    node @User ()
+                    $ edit
+                    $ (fieldLens UserCredsIdent .~ "1")
+                    . (fieldLens UserCredsPlugin .~ "github")
+                lift $ runDB $ do
+                    result <- authenticateUser creds
 
-authenticatedAs :: Entity User -> AuthenticationResult App
-authenticatedAs = Authenticated . entityKey
+                    result `shouldBe` Authenticated (entityKey user)
+
+                    Just (Entity userId User {..}) <- selectFirst
+                        [UserCredsPlugin ==. "github"]
+                        []
+                    userId `shouldBe` entityKey user
+                    userEmail `shouldBe` Just "me@example.com"
+                    userGithubUserId `shouldBe` Just 1
+                    userGithubUsername `shouldBe` Just "pbrisbin"
 
 isUserError :: AuthenticationResult site -> Bool
 isUserError (UserError _) = True
 isUserError _ = False
-
-someUser :: Creds site -> Text -> User
-someUser creds email = (emptyUser creds) { userEmail = Just email }
-
-emptyUser :: Creds site -> User
-emptyUser Creds {..} = User
-    { userEmail = Nothing
-    , userGithubUserId = Nothing
-    , userGithubUsername = Nothing
-    , userGitlabUserId = Nothing
-    , userGitlabUsername = Nothing
-    , userGitlabAccessToken = Nothing
-    , userGitlabRefreshToken = Nothing
-    , userCredsIdent = credsIdent
-    , userCredsPlugin = credsPlugin
-    }

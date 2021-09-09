@@ -15,7 +15,7 @@ User
   credsPlugin Text
 
   UniqueUser credsPlugin credsIdent
-  deriving Eq Show
+  deriving Eq Show Generic
 
 Repo
   svcs RepoSVCS default='github'
@@ -28,7 +28,7 @@ Repo
   restylerImage RestylerImage Maybe
 
   UniqueRepo svcs owner name
-  deriving Eq Show
+  deriving Eq Show Generic
 
 Job
   svcs RepoSVCS default='github'
@@ -47,7 +47,7 @@ Job
   stdout Text Maybe
   stderr Text Maybe
 
-  deriving Eq Show
+  deriving Eq Show Generic
 
 JobLogLine json
   job JobId
@@ -55,7 +55,7 @@ JobLogLine json
   stream Text
   content Text
 
-  deriving Eq Show
+  deriving Eq Show Generic
 
 RestyleMachine json
   name Text
@@ -79,7 +79,7 @@ MarketplacePlan json
   retired Bool
 
   UniqueMarketplacePlan githubId !force
-  deriving Eq Show
+  deriving Eq Show Generic
 
 MarketplaceAccount json
   githubId GitHubUserId Maybe
@@ -94,7 +94,7 @@ MarketplaceAccount json
   expiresAt UTCTime Maybe
 
   UniqueMarketplaceAccount githubLogin
-  deriving Eq Show
+  deriving Eq Show Generic
 
 MarketplaceEnabledRepo
   marketplacePlan MarketplacePlanId
@@ -120,7 +120,7 @@ Offer
   marketplacePlan MarketplacePlanId
 
   UniqueOffer name
-  deriving Eq Show
+  deriving Eq Show Generic
 
 OfferClaim
   offer OfferId
@@ -131,4 +131,4 @@ OfferClaim
   claimedFor GitHubUserName Maybe
 
   UniqueOfferClaim offer code
-  deriving Eq Show
+  deriving Eq Show Generic

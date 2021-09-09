@@ -153,7 +153,8 @@ library
       ViewPatterns
   ghc-options: -Weverything -Wno-all-missed-specialisations -Wno-missing-import-lists -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unsafe
   build-depends:
-      aeson
+      QuickCheck
+    , aeson
     , aeson-casing
     , aeson-pretty
     , amazonka
@@ -179,8 +180,10 @@ library
     , file-embed
     , filepath
     , formatting
+    , generic-arbitrary
     , github
     , gitrev
+    , graphula
     , hedis
     , hjsmin
     , hoauth2
@@ -200,6 +203,7 @@ library
     , persistent-postgresql
     , persistent-qq
     , postgresql-simple
+    , quickcheck-instances
     , random
     , retry
     , rio
@@ -279,7 +283,6 @@ test-suite test
       Restyled.Api.UpdateJobSpec
       Restyled.Api.UpsertRepoSpec
       Restyled.AuthenticationSpec
-      Restyled.Backend.ReconcileSpec
       Restyled.Backend.RestyleMachineSpec
       Restyled.Handlers.AdminSpec
       Restyled.Handlers.CommonSpec
@@ -295,6 +298,7 @@ test-suite test
       Restyled.Test.Authentication
       Restyled.Test.Expectations
       Restyled.Test.Factories
+      Restyled.Test.Graphula
       Restyled.Test.Lens
       Restyled.Test.Validate
       Restyled.Test.Yesod
@@ -339,6 +343,7 @@ test-suite test
     , base
     , bytestring
     , github
+    , graphula
     , hedis
     , hspec
     , hspec-core

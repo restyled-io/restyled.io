@@ -1,5 +1,3 @@
-{-# LANGUAGE TupleSections #-}
-
 module Restyled.Handlers.ProfileSpec
     ( spec
     ) where
@@ -10,6 +8,7 @@ import qualified Database.Persist as P
 import qualified GitHub.Data as GH
 import Restyled.Authorization (authRepoCacheKey)
 import Restyled.GitHubOrg
+import Restyled.Test.Graphula
 
 spec :: Spec
 spec = withApp $ do
@@ -17,112 +16,132 @@ spec = withApp $ do
         it "requires authentication" $ do
             get ProfileR `shouldRedirectTo` "/auth/login"
 
-        it "shows user repositories" $ do
-            runDB $ do
-                void $ insertEntity $ buildRepo "pbrisbin" "foo"
-                void $ insertEntity $ buildRepo "pbrisbin" "bar"
+        it "shows user repositories" $ graph $ do
             void
-                $ authenticateAsWith "me@example.com"
+                $ node @Repo ()
+                $ edit
+                $ (fieldLens RepoOwner .~ "pbrisbin")
+                . (fieldLens RepoName .~ "foo")
+            void
+                $ node @Repo ()
+                $ edit
+                $ (fieldLens RepoOwner .~ "pbrisbin")
+                . (fieldLens RepoName .~ "bar")
+            user <-
+                genUser "me@example.com"
                 $ (fieldLens UserGithubUserId ?~ 123)
                 . (fieldLens UserGithubUsername ?~ "pbrisbin")
+            lift $ do
+                void $ authenticateAs user
 
-            get ProfileR
+                get ProfileR
 
-            statusIs 200
-            htmlAnyContain ".profile-repo" "pbrisbin/foo"
-            htmlAnyContain ".profile-repo" "pbrisbin/bar"
+                statusIs 200
+                htmlAnyContain ".profile-repo" "pbrisbin/foo"
+                htmlAnyContain ".profile-repo" "pbrisbin/bar"
 
-        it "shows org repositories" $ do
-            runDB $ do
-                void $ insertEntity $ buildRepo "freckle" "foo"
-                void $ insertEntity $ buildRepo "yesodweb" "bar"
+        it "shows org repositories" $ graph $ do
             void
-                $ authenticateAsWith "me@example.com"
+                $ node @Repo ()
+                $ edit
+                $ (fieldLens RepoOwner .~ "freckle")
+                . (fieldLens RepoName .~ "foo")
+            void
+                $ node @Repo ()
+                $ edit
+                $ (fieldLens RepoOwner .~ "yesodweb")
+                . (fieldLens RepoName .~ "bar")
+            user <-
+                genUser "me@example.com"
                 $ (fieldLens UserGithubUserId ?~ 123)
                 . (fieldLens UserGithubUsername ?~ "pbrisbin")
-            cacheGitHubOrgs "pbrisbin" ["freckle", "restyled-io", "yesodweb"]
+            lift $ do
+                void $ authenticateAs user
+                cacheGitHubOrgs
+                    "pbrisbin"
+                    ["freckle", "restyled-io", "yesodweb"]
 
-            get ProfileR
+                get ProfileR
 
-            statusIs 200
-            htmlAnyContain ".profile-repo" "freckle/foo"
-            htmlAnyContain ".profile-repo" "yesodweb/bar"
+                statusIs 200
+                htmlAnyContain ".profile-repo" "freckle/foo"
+                htmlAnyContain ".profile-repo" "yesodweb/bar"
 
-        it "supports enable/disable for private repo plans (User)" $ do
-            (planId, accountId, repoId) <- runDB $ do
-                planId <- insert buildPrivateMarketplacePlan
-                (planId, , )
-                    <$> insert
-                            (buildMarketplaceAccount
-                                (Just 123)
-                                "pbrisbin"
-                                planId
-                            )
-                    <*> insert (buildPrivateRepo "pbrisbin" "private")
-            void
-                $ authenticateAsWith "me@example.com"
+        it "supports enable/disable for private repo plans (User)" $ graph $ do
+            repo <-
+                node @Repo ()
+                $ edit
+                $ (fieldLens RepoOwner .~ "pbrisbin")
+                . (fieldLens RepoName .~ "private")
+                . (fieldLens RepoIsPrivate .~ True)
+            plan <- node @MarketplacePlan () $ edit $ setPlanLimited 1
+            account <- genAccount repo plan setAccountUnexpired
+            user <-
+                genUser "me@example.com"
                 $ (fieldLens UserGithubUserId ?~ 123)
                 . (fieldLens UserGithubUsername ?~ "pbrisbin")
-            cacheCallaboratorCanRead repoId "pbrisbin" True
-            cacheGitHubOrgs "pbrisbin" []
+            lift $ do
+                void $ authenticateAs user
+                cacheCallaboratorCanRead (entityKey repo) "pbrisbin" True
+                cacheGitHubOrgs "pbrisbin" []
 
-            get ProfileR
+                get ProfileR
 
-            statusIs 200
-            htmlAnyContain ".profile-repo" "pbrisbin/private"
-            htmlAnyContain ".profile-repo" "Enable"
+                statusIs 200
+                htmlAnyContain ".profile-repo" "pbrisbin/private"
+                htmlAnyContain ".profile-repo" "Enable"
 
-            -- clickOn $ ".profile-repo-" <> toPathPiece repoId <> " .enable"
-            post $ RepoP "pbrisbin" "private" $ RepoMarketplaceP
-                RepoMarketplaceClaimR
-            void followRedirect
+                -- clickOn $ ".profile-repo-" <> toPathPiece (entityKey repo) <> " .enable"
+                post $ RepoP "pbrisbin" "private" $ RepoMarketplaceP
+                    RepoMarketplaceClaimR
+                followRedirect
 
-            htmlAnyContain ".profile-repo" "pbrisbin/private"
-            htmlAnyContain ".profile-repo" "Disable"
+                htmlAnyContain ".profile-repo" "pbrisbin/private"
+                htmlAnyContain ".profile-repo" "Disable"
 
-            enabled <- runDB $ getBy $ UniqueMarketplaceEnabledRepo
-                planId
-                accountId
-                repoId
-            void enabled `shouldBe` Just ()
+                enabled <- runDB $ getBy $ UniqueMarketplaceEnabledRepo
+                    (entityKey plan)
+                    (entityKey account)
+                    (entityKey repo)
+                void enabled `shouldBe` Just ()
 
-        it "supports enable/disable for private repo plans (Org)" $ do
-            (planId, accountId, repoId) <- runDB $ do
-                planId <- insert buildPrivateMarketplacePlan
-                (planId, , )
-                    <$> insert
-                            (buildMarketplaceAccount
-                                (Just 456)
-                                "yesodweb"
-                                planId
-                            )
-                    <*> insert (buildPrivateRepo "yesodweb" "yesod")
-            void
-                $ authenticateAsWith "me@example.com"
+        it "supports enable/disable for private repo plans (Org)" $ graph $ do
+            repo <-
+                node @Repo ()
+                $ edit
+                $ (fieldLens RepoOwner .~ "yesodweb")
+                . (fieldLens RepoName .~ "yesod")
+                . (fieldLens RepoIsPrivate .~ True)
+            plan <- node @MarketplacePlan () $ edit $ setPlanLimited 1
+            account <- genAccount repo plan setAccountUnexpired
+            user <-
+                genUser "me@example.com"
                 $ (fieldLens UserGithubUserId ?~ 123)
                 . (fieldLens UserGithubUsername ?~ "pbrisbin")
-            cacheCallaboratorCanRead repoId "pbrisbin" True
-            cacheGitHubOrgs "pbrisbin" ["yesodweb"]
+            lift $ do
+                void $ authenticateAs user
+                cacheCallaboratorCanRead (entityKey repo) "pbrisbin" True
+                cacheGitHubOrgs "pbrisbin" ["yesodweb"]
 
-            get ProfileR
+                get ProfileR
 
-            statusIs 200
-            htmlAnyContain ".profile-repo" "yesodweb/yesod"
-            htmlAnyContain ".profile-repo" "Enable"
+                statusIs 200
+                htmlAnyContain ".profile-repo" "yesodweb/yesod"
+                htmlAnyContain ".profile-repo" "Enable"
 
-            -- clickOn $ ".profile-repo-" <> toPathPiece repoId <> " .enable"
-            post $ RepoP "yesodweb" "yesod" $ RepoMarketplaceP
-                RepoMarketplaceClaimR
-            void followRedirect
+                -- clickOn $ ".profile-repo-" <> toPathPiece repoId <> " .enable"
+                post $ RepoP "yesodweb" "yesod" $ RepoMarketplaceP
+                    RepoMarketplaceClaimR
+                followRedirect
 
-            htmlAnyContain ".profile-repo" "yesodweb/yesod"
-            htmlAnyContain ".profile-repo" "Disable"
+                htmlAnyContain ".profile-repo" "yesodweb/yesod"
+                htmlAnyContain ".profile-repo" "Disable"
 
-            enabled <- runDB $ getBy $ UniqueMarketplaceEnabledRepo
-                planId
-                accountId
-                repoId
-            void enabled `shouldBe` Just ()
+                enabled <- runDB $ getBy $ UniqueMarketplaceEnabledRepo
+                    (entityKey plan)
+                    (entityKey account)
+                    (entityKey repo)
+                void enabled `shouldBe` Just ()
 
 cacheCallaboratorCanRead
     :: RepoId -> GitHubUserName -> Bool -> YesodExample App ()

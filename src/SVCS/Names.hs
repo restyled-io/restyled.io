@@ -45,6 +45,8 @@ import GitHub.Data
 import GitHub.Data.Apps
 import GitHub.Data.Installations
 import RIO (Display(..))
+import Test.QuickCheck.Arbitrary
+import Test.QuickCheck.Instances.Text ()
 import Text.Blaze (ToMarkup(..))
 import Text.Read hiding (String)
 import Web.PathPieces
@@ -71,6 +73,9 @@ type GitLabUserName = Name User
 
 data RepoSVCS = GitHubSVCS | GitLabSVCS
     deriving stock (Eq, Ord, Read, Show, Enum, Bounded)
+
+instance Arbitrary RepoSVCS where
+    arbitrary = pure GitHubSVCS
 
 readRepoSVCS :: Text -> Either Text RepoSVCS
 readRepoSVCS = \case
@@ -103,6 +108,9 @@ instance FromJSON RepoSVCS where
 instance PersistFieldSql RepoSVCS where
     sqlType _ = sqlType (Proxy :: Proxy Text)
 
+instance Arbitrary (Id a) where
+    arbitrary = mkId Proxy <$> arbitrary
+
 instance Read (Id a) where
     readPrec = mkId Proxy <$> readPrec
 
@@ -123,6 +131,7 @@ instance ToMarkup (Id a) where
 instance Display (Id a) where
     display = display . untagId
 
+deriving newtype instance Arbitrary IssueNumber
 deriving newtype instance Num IssueNumber
 deriving newtype instance Read IssueNumber
 deriving newtype instance PathPiece IssueNumber
@@ -130,6 +139,9 @@ deriving newtype instance PersistField IssueNumber
 deriving newtype instance PersistFieldSql IssueNumber
 deriving newtype instance ToMarkup IssueNumber
 deriving newtype instance Display IssueNumber
+
+instance Arbitrary (Name a) where
+    arbitrary = mkName Proxy <$> arbitrary
 
 instance Read (Name a) where
     readsPrec n = map (first $ mkName Proxy) . readsPrec n
