@@ -11,6 +11,7 @@ import qualified Database.Persist as P
 import Restyled.Api.CreateJob (ApiCreateJob(ApiCreateJob), createJob)
 import qualified Restyled.Api.CreateJob as ApiCreateJob
 import qualified Restyled.Api.Job as ApiJob
+import Restyled.Test.Graphula
 
 spec :: Spec
 spec = do
@@ -70,73 +71,42 @@ spec = do
 
                 result `shouldSatisfy` isLeft
 
-            it "creates a complete Job" $ do
-                let repo = Repo
-                        { repoSvcs = GitHubSVCS
-                        , repoOwner = "restyled-io"
-                        , repoName = "demo"
-                        , repoInstallationId = 1
-                        , repoIsPrivate = False
-                        , repoDebugEnabled = False
-                        , repoEnabled = True
-                        , repoRestylerImage = Nothing
-                        }
-
-                    pullRequest :: PullRequestNum
-                    pullRequest = 1
-
-                    exitCode :: Int
-                    exitCode = 99
-
+            it "creates a complete Job" $ graph $ do
                 now <- liftIO getCurrentTime
-                void $ runDB $ insert repo
+                Entity _ Repo {..} <- node @Repo () mempty
 
-                result <- runDB $ runValidateT $ createJob $ ApiCreateJob
-                    { ApiCreateJob.owner = repoOwner repo
-                    , ApiCreateJob.repo = repoName repo
-                    , ApiCreateJob.pullRequest = pullRequest
-                    , ApiCreateJob.completedAt = Just now
-                    , ApiCreateJob.exitCode = Just exitCode
-                    }
-
-                resp <- expectRight "ApiJob" result
-                ApiJob.owner resp `shouldBe` repoOwner repo
-                ApiJob.repo resp `shouldBe` repoName repo
-                ApiJob.pullRequest resp `shouldBe` pullRequest
-
-                job <- runDB $ expectJust "Job" =<< P.get (ApiJob.id resp)
-                jobOwner job `shouldBe` repoOwner repo
-                jobRepo job `shouldBe` repoName repo
-                jobPullRequest job `shouldBe` pullRequest
-                jobCompletedAt job `shouldSatisfy` isJust
-                jobExitCode job `shouldBe` Just exitCode
-
-            it "creates an incomplete Job" $ do
-                let repo = Repo
-                        { repoSvcs = GitHubSVCS
-                        , repoOwner = "restyled-io"
-                        , repoName = "demo"
-                        , repoInstallationId = 1
-                        , repoIsPrivate = False
-                        , repoDebugEnabled = False
-                        , repoEnabled = True
-                        , repoRestylerImage = Nothing
+                lift $ runDB $ do
+                    Right resp <- runValidateT $ createJob $ ApiCreateJob
+                        { ApiCreateJob.owner = repoOwner
+                        , ApiCreateJob.repo = repoName
+                        , ApiCreateJob.pullRequest = 1
+                        , ApiCreateJob.completedAt = Just now
+                        , ApiCreateJob.exitCode = Just 99
                         }
 
-                    pullRequest :: PullRequestNum
-                    pullRequest = 1
+                    ApiJob.owner resp `shouldBe` repoOwner
+                    ApiJob.repo resp `shouldBe` repoName
+                    ApiJob.pullRequest resp `shouldBe` 1
 
-                void $ runDB $ insert repo
+                    Just Job {..} <- P.get $ ApiJob.id resp
+                    jobOwner `shouldBe` repoOwner
+                    jobRepo `shouldBe` repoName
+                    jobPullRequest `shouldBe` 1
+                    jobCompletedAt `shouldSatisfy` isJust
+                    jobExitCode `shouldBe` Just 99
 
-                result <- runDB $ runValidateT $ createJob $ ApiCreateJob
-                    { ApiCreateJob.owner = repoOwner repo
-                    , ApiCreateJob.repo = repoName repo
-                    , ApiCreateJob.pullRequest = pullRequest
-                    , ApiCreateJob.completedAt = Nothing
-                    , ApiCreateJob.exitCode = Nothing
-                    }
+            it "creates an incomplete Job" $ graph $ do
+                Entity _ Repo {..} <- node @Repo () mempty
 
-                resp <- expectRight "ApiJob" result
-                job <- runDB $ expectJust "Job" =<< P.get (ApiJob.id resp)
-                jobCompletedAt job `shouldSatisfy` isNothing
-                jobExitCode job `shouldSatisfy` isNothing
+                lift $ runDB $ do
+                    Right resp <- runValidateT $ createJob $ ApiCreateJob
+                        { ApiCreateJob.owner = repoOwner
+                        , ApiCreateJob.repo = repoName
+                        , ApiCreateJob.pullRequest = 1
+                        , ApiCreateJob.completedAt = Nothing
+                        , ApiCreateJob.exitCode = Nothing
+                        }
+
+                    Just Job {..} <- P.get $ ApiJob.id resp
+                    jobCompletedAt `shouldSatisfy` isNothing
+                    jobExitCode `shouldSatisfy` isNothing

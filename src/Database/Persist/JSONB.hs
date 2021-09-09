@@ -8,6 +8,7 @@ import Data.Aeson
 import Database.Persist
 import Database.Persist.Sql
 import GHC.Generics
+import Test.QuickCheck.Arbitrary
 
 newtype JSONB a = JSONB { unJSONB :: a }
     deriving stock
@@ -20,7 +21,7 @@ newtype JSONB a = JSONB { unJSONB :: a }
         , Show
         , Traversable
         )
-    deriving newtype (FromJSON, ToJSON)
+    deriving newtype (Arbitrary, FromJSON, ToJSON)
 
 instance (FromJSON a, ToJSON a) => PersistField (JSONB a) where
     toPersistValue = toPersistValueJSON

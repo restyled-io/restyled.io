@@ -6,12 +6,15 @@ module Restyled.PrivateRepoAllowance
 import Restyled.Prelude
 
 import Database.Persist.Sql (PersistFieldSql(..))
+import Test.QuickCheck.Arbitrary
+import Test.QuickCheck.Arbitrary.Generic
+import Test.QuickCheck.Instances.Natural ()
 
 data PrivateRepoAllowance
     = PrivateRepoAllowanceNone
     | PrivateRepoAllowanceUnlimited
     | PrivateRepoAllowanceLimited Natural
-    deriving stock (Eq, Show)
+    deriving stock (Eq, Show, Generic)
 
 fromNumeric :: Int -> PrivateRepoAllowance
 fromNumeric n
@@ -38,3 +41,6 @@ instance PersistField PrivateRepoAllowance where
 
 instance PersistFieldSql PrivateRepoAllowance where
     sqlType _ = sqlType $ Proxy @Int
+
+instance Arbitrary PrivateRepoAllowance where
+    arbitrary = genericArbitrary

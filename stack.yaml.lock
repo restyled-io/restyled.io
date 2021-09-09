@@ -5,12 +5,18 @@
 
 packages:
 - completed:
-    hackage: amazonka-1.6.1@sha256:f58b63e83876f93aa03c54e54b3eb8ba9358af93819d41f4a5a8f8b7d8b8399c,3544
+    subdir: amazonka
+    name: amazonka
+    version: 1.6.1
+    git: https://github.com/brendanhay/amazonka
     pantry-tree:
-      size: 992
-      sha256: d792656a70ee42df262a599bc6608bda069e33092d665c3438a6eeeaf7db4fb2
+      size: 1038
+      sha256: eced9a7c0fe287f06e5dfd010c0989d9b3b2342885af67531e5197d69de7fad5
+    commit: 14bc3248c423f486ae710d523b8996ddb3dac854
   original:
-    hackage: amazonka-1.6.1@sha256:f58b63e83876f93aa03c54e54b3eb8ba9358af93819d41f4a5a8f8b7d8b8399c,3544
+    subdir: amazonka
+    git: https://github.com/brendanhay/amazonka
+    commit: 14bc3248c423f486ae710d523b8996ddb3dac854
 - completed:
     hackage: github-0.26@sha256:a9d4046325c3eb28cdc7bef2c3f5bb213328caeae0b7dce6f51de655f0bffaa1,7162
     pantry-tree:
@@ -25,13 +31,6 @@ packages:
       sha256: 8e049bd12ce2bd470909578f2ee8eb80b89d5ff88860afa30e29dd4eafecfa3e
   original:
     hackage: monad-validate-1.2.0.0@sha256:9850f408431098b28806dd464b6825a88a0b56c84f380d7fe0454c1df9d6f881,3505
-- completed:
-    hackage: unliftio-core-0.1.2.0@sha256:b0a7652ffce2284a6cebe05c99eb60573a8fb6631163f34b0b30a80b4a78cb23,1081
-    pantry-tree:
-      size: 328
-      sha256: 9d970bf5f98e68e8fc129b04d6c9d8eb1e641c7556ffd0f0a168a259335b6fd7
-  original:
-    hackage: unliftio-core-0.1.2.0@sha256:b0a7652ffce2284a6cebe05c99eb60573a8fb6631163f34b0b30a80b4a78cb23,1081
 - completed:
     hackage: base16-bytestring-0.1.1.7@sha256:0021256a9628971c08da95cb8f4d0d72192f3bb8a7b30b55c080562d17c43dd3,2231
     pantry-tree:

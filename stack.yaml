@@ -1,11 +1,14 @@
 resolver: lts-18.9
 extra-deps:
-  - amazonka-1.6.1@sha256:f58b63e83876f93aa03c54e54b3eb8ba9358af93819d41f4a5a8f8b7d8b8399c,3544
+  # 1.6.1 + fixes needed for newer unliftio, until 2.0 drops.
+  # https://github.com/brendanhay/amazonka/pull/617#issuecomment-830606997
+  - git: https://github.com/brendanhay/amazonka
+    commit: 14bc3248c423f486ae710d523b8996ddb3dac854
+    subdirs:
+      - amazonka
+
   - github-0.26@sha256:a9d4046325c3eb28cdc7bef2c3f5bb213328caeae0b7dce6f51de655f0bffaa1,7162
   - monad-validate-1.2.0.0@sha256:9850f408431098b28806dd464b6825a88a0b56c84f380d7fe0454c1df9d6f881,3505
-
-  # For amazonka
-  - unliftio-core-0.1.2.0@sha256:b0a7652ffce2284a6cebe05c99eb60573a8fb6631163f34b0b30a80b4a78cb23,1081
 
   # For github
   - base16-bytestring-0.1.1.7@sha256:0021256a9628971c08da95cb8f4d0d72192f3bb8a7b30b55c080562d17c43dd3,2231

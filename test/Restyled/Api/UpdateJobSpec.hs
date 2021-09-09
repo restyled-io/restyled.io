@@ -12,6 +12,7 @@ import Database.Persist.Sql (toSqlKey)
 import Restyled.Api.UpdateJob
     (ApiCompleteJob(ApiCompleteJob), ApiUpdateJob(Complete), updateJob)
 import qualified Restyled.Api.UpdateJob as ApiUpdateJob
+import Restyled.Test.Graphula
 
 spec :: Spec
 spec = do
@@ -49,35 +50,23 @@ spec = do
 
     withApp $ do
         describe "updateJob" $ do
-            it "sets values given" $ runDB $ do
+            it "sets values given" $ graph $ do
                 now <- liftIO getCurrentTime
-                jobId <- insert $ Job
-                    { jobSvcs = GitHubSVCS
-                    , jobOwner = "foo"
-                    , jobRepo = "bar"
-                    , jobPullRequest = 1
-                    , jobCreatedAt = now
-                    , jobUpdatedAt = now
-                    , jobCompletedAt = Nothing
-                    , jobExitCode = Nothing
+                repo <- node @Repo () mempty
+                job <- genJob repo setJobIncomplete
 
-                    -- Legacy
-                    , jobLog = Nothing
-                    , jobStdout = Nothing
-                    , jobStderr = Nothing
-                    }
+                lift $ runDB $ do
+                    void
+                        $ assertValidateT
+                        $ updateJob (entityKey job)
+                        $ pure
+                        $ Complete
+                        $ ApiCompleteJob
+                              { ApiUpdateJob.completedAt = now
+                              , ApiUpdateJob.exitCode = 99
+                              }
 
-                void
-                    $ assertValidateT
-                    $ updateJob jobId
-                    $ pure
-                    $ Complete
-                    $ ApiCompleteJob
-                          { ApiUpdateJob.completedAt = now
-                          , ApiUpdateJob.exitCode = 99
-                          }
+                    Just Job {..} <- P.get $ entityKey job
 
-                Just job <- P.get jobId
-
-                jobCompletedAt job `shouldSatisfy` isJust
-                jobExitCode job `shouldBe` Just 99
+                    jobCompletedAt `shouldSatisfy` isJust
+                    jobExitCode `shouldBe` Just 99

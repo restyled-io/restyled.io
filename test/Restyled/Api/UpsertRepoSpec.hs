@@ -8,6 +8,7 @@ import qualified Restyled.Api.Repo as ApiRepo
 import Restyled.Api.UpsertRepo (ApiUpsertRepo(ApiUpsertRepo), upsertRepo)
 import qualified Restyled.Api.UpsertRepo as ApiUpsertRepo
 import Restyled.Marketplace
+import Restyled.Test.Graphula
 
 spec :: Spec
 spec = withApp $ do
@@ -33,26 +34,24 @@ spec = withApp $ do
                 []
             repos `shouldSatisfy` (== 1) . length
 
-        it "updates installationId and isPrivate" $ runDB $ do
-            insert_ Repo
-                { repoSvcs = GitHubSVCS
-                , repoOwner = ApiUpsertRepo.owner body
-                , repoName = ApiUpsertRepo.name body
-                , repoIsPrivate = True
-                , repoInstallationId = 2
-                , repoEnabled = True
-                , repoDebugEnabled = False
-                , repoRestylerImage = Nothing
-                }
+        it "updates installationId and isPrivate" $ graph $ do
+            void
+                $ node @Repo ()
+                $ edit
+                $ (fieldLens RepoOwner .~ ApiUpsertRepo.owner body)
+                . (fieldLens RepoName .~ ApiUpsertRepo.name body)
+                . (fieldLens RepoIsPrivate .~ True)
+                . (fieldLens RepoInstallationId .~ 2)
 
-            void $ assertValidateT $ upsertRepo body
+            lift $ runDB $ do
+                void $ assertValidateT $ upsertRepo body
 
-            Just (Entity _ repo) <- getBy $ UniqueRepo
-                GitHubSVCS
-                (ApiUpsertRepo.owner body)
-                (ApiUpsertRepo.name body)
-            repoIsPrivate repo `shouldBe` False
-            repoInstallationId repo `shouldBe` 1
+                Just (Entity _ repo) <- getBy $ UniqueRepo
+                    GitHubSVCS
+                    (ApiUpsertRepo.owner body)
+                    (ApiUpsertRepo.name body)
+                repoIsPrivate repo `shouldBe` False
+                repoInstallationId repo `shouldBe` 1
 
         context "marketplacePlanAllows" $ do
             it "allows public repos" $ runDB $ do
@@ -62,26 +61,29 @@ spec = withApp $ do
                 ApiRepo.marketplacePlanAllows repo
                     `shouldBe` Just MarketplacePlanAllows
 
-            it "handles private plans" $ runDB $ do
-                planId <- insert buildPrivateMarketplacePlan -- allowance=1
-                insert_ $ buildMarketplaceAccount
-                    Nothing
-                    (nameToName $ ApiUpsertRepo.owner body)
-                    planId
+            it "handles private plans" $ graph $ do
+                plan <- node @MarketplacePlan () $ edit $ setPlanLimited 1
+                void
+                    $ node @MarketplaceAccount
+                          ( nameToName $ ApiUpsertRepo.owner body
+                          , entityKey plan
+                          )
+                    $ edit setAccountUnexpired
 
-                Right (repo1, repo2) <-
-                    runValidateT
-                    $ (,)
-                    <$> upsertRepo body
-                            { ApiUpsertRepo.name = "one"
-                            , ApiUpsertRepo.isPrivate = True
-                            }
-                    <*> upsertRepo body
-                            { ApiUpsertRepo.name = "two"
-                            , ApiUpsertRepo.isPrivate = True
-                            }
+                lift $ runDB $ do
+                    Right (repo1, repo2) <-
+                        runValidateT
+                        $ (,)
+                        <$> upsertRepo body
+                                { ApiUpsertRepo.name = "one"
+                                , ApiUpsertRepo.isPrivate = True
+                                }
+                        <*> upsertRepo body
+                                { ApiUpsertRepo.name = "two"
+                                , ApiUpsertRepo.isPrivate = True
+                                }
 
-                ApiRepo.marketplacePlanAllows repo1
-                    `shouldBe` Just MarketplacePlanAllows
-                ApiRepo.marketplacePlanAllows repo2 `shouldBe` Just
-                    (MarketplacePlanForbids MarketplacePlanMaxRepos)
+                    ApiRepo.marketplacePlanAllows repo1
+                        `shouldBe` Just MarketplacePlanAllows
+                    ApiRepo.marketplacePlanAllows repo2 `shouldBe` Just
+                        (MarketplacePlanForbids MarketplacePlanMaxRepos)

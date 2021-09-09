@@ -5,61 +5,61 @@ module Restyled.MarketplaceSpec
 import Restyled.Test
 
 import Restyled.Marketplace
-import Restyled.PrivateRepoAllowance
+import Restyled.Test.Graphula
 import Restyled.Time
-import Restyled.UsCents
 
 spec :: Spec
 spec = withApp $ do
     describe "marketplacePlanAllows" $ do
-        it "always allows public repos" $ runDB $ do
-            repo <- insertRepo "restyled-io" "restyled.io" False
-            shouldAllow repo
+        it "always allows public repos" $ graph $ do
+            repo <- node @Repo () $ ensure $ not . repoIsPrivate
+            lift $ runDB $ shouldAllow repo
 
-        it "allows private repos on the unlimited plan" $ runDB $ do
-            insertAccountOnPlan
-                "restyled-io"
-                (Just 2553)
-                Nothing
-                PrivateRepoAllowanceUnlimited
-            repo <- insertRepo "restyled-io" "restyled.io" True
-            shouldAllow repo
+        it "allows private repos on the unlimited plan" $ graph $ do
+            repo <- node @Repo () $ ensure repoIsPrivate
+            plan <- node @MarketplacePlan () $ edit setPlanUnlimited
+            void $ genAccount repo plan setAccountUnexpired
+            lift $ runDB $ shouldAllow repo
 
-        it "disallows private repos on expired plans" $ runDB $ do
+        it "disallows private repos on expired plans" $ graph $ do
             expiredAt <- subtractTime (Days 1) <$> getCurrentTime
-            insertAccountOnPlan
-                "restyled-io"
-                (Just 2553)
-                (Just expiredAt)
-                PrivateRepoAllowanceUnlimited
-            repo <- insertRepo "restyled-io" "restyled.io" True
-            shouldForbidExpired repo expiredAt
+            repo <- node @Repo () $ ensure repoIsPrivate
+            plan <- node @MarketplacePlan () $ edit setPlanUnlimited
+            void $ genAccount repo plan $ setAccountExpired expiredAt
+            lift $ runDB $ shouldForbidExpired repo expiredAt
 
-        it "disallows private repos without a plan" $ runDB $ do
-            repo <- insertRepo "restyled-io" "restyled.io" True
-            shouldForbid repo MarketplacePlanNotFound
+        it "disallows private repos without a plan" $ graph $ do
+            repo <- node @Repo () $ ensure repoIsPrivate
+            lift $ runDB $ shouldForbid repo MarketplacePlanNotFound
 
-        it "disallows private repos on a public plan" $ runDB $ do
-            insertAccountOnPlan
-                "restyled-io"
-                Nothing
-                Nothing
-                PrivateRepoAllowanceNone
-            repo <- insertRepo "restyled-io" "restyled.io" True
-            shouldForbid repo MarketplacePlanPublicOnly
+        it "disallows private repos on a public plan" $ graph $ do
+            repo <- node @Repo () $ ensure repoIsPrivate
+            plan <- node @MarketplacePlan () $ edit setPlanPublic
+            void $ genAccount repo plan setAccountUnexpired
+            lift $ runDB $ shouldForbid repo MarketplacePlanPublicOnly
 
-        it "limits repos on a limited plan" $ runDB $ do
-            insertAccountOnPlan "restyled-io" (Just 2695) Nothing
-                $ PrivateRepoAllowanceLimited 1
-            privateRepo1 <- insertRepo "restyled-io" "restyled.io" True
-            privateRepo2 <- insertRepo "restyled-io" "restyler" True
-            ossRepo <- insertRepo "restyled-io" "demo" False
+        it "limits repos on a limited plan" $ graph $ do
+            let genRepo
+                    :: GraphulaContext m '[Repo]
+                    => (Repo -> Bool)
+                    -> m (Entity Repo)
+                genRepo p =
+                    node @Repo ()
+                        $ edit (fieldLens RepoOwner .~ "example")
+                        <> ensure p
 
-            shouldAllow privateRepo1
-            shouldAllow ossRepo
-            shouldForbid privateRepo2 MarketplacePlanMaxRepos
-            shouldAllow privateRepo1
-            shouldForbid privateRepo2 MarketplacePlanMaxRepos
+            privateRepo1 <- genRepo repoIsPrivate
+            privateRepo2 <- genRepo repoIsPrivate
+            ossRepo <- genRepo $ not . repoIsPrivate
+            plan <- node @MarketplacePlan () $ edit $ setPlanLimited 1
+            void $ genAccount privateRepo1 plan setAccountUnexpired
+
+            lift $ runDB $ do
+                shouldAllow privateRepo1
+                shouldAllow ossRepo
+                shouldForbid privateRepo2 MarketplacePlanMaxRepos
+                shouldAllow privateRepo1
+                shouldForbid privateRepo2 MarketplacePlanMaxRepos
 
 shouldAllow :: (HasCallStack, MonadIO m) => Entity Repo -> SqlPersistT m ()
 shouldAllow repo = do
@@ -89,47 +89,3 @@ shouldForbidExpired repo expiredAt = do
         x -> x `shouldBe` expected
   where
     expected = MarketplacePlanForbids $ MarketplacePlanAccountExpired expiredAt
-
-insertRepo
-    :: MonadIO m
-    => OwnerName
-    -> RepoName
-    -> Bool -- ^ Is private?
-    -> SqlPersistT m (Entity Repo)
-insertRepo owner name isPrivate = insertEntity Repo
-    { repoSvcs = GitHubSVCS
-    , repoOwner = owner
-    , repoName = name
-    , repoInstallationId = 123
-    , repoIsPrivate = isPrivate
-    , repoDebugEnabled = False
-    , repoEnabled = True
-    , repoRestylerImage = Nothing
-    }
-
-insertAccountOnPlan
-    :: MonadIO m
-    => GitHubUserName
-    -> Maybe Int
-    -> Maybe UTCTime
-    -> PrivateRepoAllowance
-    -> SqlPersistT m ()
-insertAccountOnPlan username mPlanGitHubId mExpiresAt planAllowance = do
-    planId <- insert MarketplacePlan
-        { marketplacePlanGithubId = mPlanGitHubId
-        , marketplacePlanPrivateRepoAllowance = planAllowance
-        , marketplacePlanName = ""
-        , marketplacePlanDescription = ""
-        , marketplacePlanMonthlyRevenue = fromCents 0
-        , marketplacePlanRetired = False
-        }
-    insert_ MarketplaceAccount
-        { marketplaceAccountGithubId = Nothing
-        , marketplaceAccountGithubLogin = username
-        , marketplaceAccountMarketplacePlan = planId
-        , marketplaceAccountGithubType = "User"
-        , marketplaceAccountEmail = Nothing
-        , marketplaceAccountBillingEmail = Nothing
-        , marketplaceAccountTrialEndsAt = Nothing
-        , marketplaceAccountExpiresAt = mExpiresAt
-        }

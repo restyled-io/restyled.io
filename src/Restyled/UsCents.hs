@@ -8,13 +8,15 @@ module Restyled.UsCents
 import Restyled.Prelude
 
 import Database.Persist.Sql (PersistFieldSql)
+import Test.QuickCheck.Arbitrary
+import Test.QuickCheck.Instances.Natural ()
 import Text.Blaze (ToMarkup(..))
 
 newtype UsCents = UsCents
     { _usCents :: Natural
     }
     deriving stock (Eq, Show)
-    deriving newtype (Num, FromJSON, ToJSON)
+    deriving newtype (Arbitrary, Num, FromJSON, ToJSON)
     deriving (PersistField, PersistFieldSql) via OverflowNatural
 
 -- TODO: Formatters.fixed 2 + Formatters.commas

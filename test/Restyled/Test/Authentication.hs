@@ -1,6 +1,7 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Restyled.Test.Authentication
     ( authenticateAs
-    , authenticateAsWith
     , authenticateAsAdmin
     , getTestAppAdmins
     ) where
@@ -12,44 +13,26 @@ import Restyled.Foundation
 import Restyled.Models
 import Restyled.Settings
 import Restyled.Test.Expectations
+import Restyled.Test.Factories
+import Restyled.Test.Graphula
 import Restyled.Test.Yesod
 
--- | Authenticate as the given Email
---
--- Ensures the dummy Plugin, and the email is treated as Ident. A @'User'@ is
--- inserted unless one exists already.
---
-authenticateAs :: Text -> YesodExample App (Entity User)
-authenticateAs = flip authenticateAsWith id
-
-authenticateAsWith :: Text -> (User -> User) -> YesodExample App (Entity User)
-authenticateAsWith email edit = do
-    user <- runDB $ upsert
-        (edit User
-            { userEmail = Just email
-            , userGithubUserId = Nothing
-            , userGithubUsername = Nothing
-            , userGitlabUserId = Nothing
-            , userGitlabUsername = Nothing
-            , userGitlabAccessToken = Nothing
-            , userGitlabRefreshToken = Nothing
-            , userCredsIdent = email
-            , userCredsPlugin = "dummy"
-            }
-        )
-        []
-
+authenticateAs :: Entity User -> YesodExample App ()
+authenticateAs (Entity _ User { userCredsIdent, userCredsPlugin }) = do
     testRoot <- getTestRoot
 
     request $ do
         setMethod "POST"
-        addPostParam "ident" email
-        setUrl $ testRoot <> "/auth/page/dummy"
+        addPostParam "ident" userCredsIdent
+        setUrl $ testRoot <> "/auth/page/" <> userCredsPlugin
 
-    pure user
-
-authenticateAsAdmin :: YesodExample App (Entity User)
-authenticateAsAdmin = authenticateAs . NE.head =<< getTestAppAdmins
+authenticateAsAdmin
+    :: (m ~ t (YesodExample App), MonadTrans t, GraphulaContext m '[User])
+    => m (Entity User)
+authenticateAsAdmin = do
+    emails <- lift getTestAppAdmins
+    user <- genUser (NE.head emails) id
+    user <$ lift (authenticateAs user)
 
 getTestAppAdmins :: YesodExample App (NonEmpty Text)
 getTestAppAdmins = fromMaybeM

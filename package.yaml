@@ -45,6 +45,7 @@ dependencies:
 library:
   source-dirs: src
   dependencies:
+    - QuickCheck
     - aeson
     - aeson-casing
     - aeson-pretty
@@ -70,8 +71,10 @@ library:
     - file-embed
     - filepath
     - formatting
+    - generic-arbitrary
     - github
     - gitrev
+    - graphula
     - hedis
     - hjsmin
     - http-conduit
@@ -91,6 +94,7 @@ library:
     - persistent-postgresql
     - persistent-qq
     - postgresql-simple
+    - quickcheck-instances
     - random
     - retry
     - rio
@@ -144,6 +148,7 @@ tests:
       - QuickCheck
       - bytestring
       - github
+      - graphula
       - hedis
       - hspec
       - hspec-core
