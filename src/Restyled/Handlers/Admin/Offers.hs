@@ -13,11 +13,11 @@ import Restyled.Prelude.Esqueleto hiding (Value)
 
 import Data.Aeson.Lens
 import qualified Data.Text.Lazy.Encoding as TL
-import qualified Database.Esqueleto as E
 import qualified Database.Persist as P
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Offers
+import qualified Restyled.Prelude.Esqueleto as E
 import Restyled.Settings
 import Restyled.Yesod
 

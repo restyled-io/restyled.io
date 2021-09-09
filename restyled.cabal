@@ -152,7 +152,7 @@ library
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
+  ghc-options: -Weverything -Wno-all-missed-specialisations -Wno-missing-import-lists -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unsafe
   build-depends:
       aeson
     , aeson-casing
@@ -200,7 +200,6 @@ library
     , persistent
     , persistent-postgresql
     , persistent-qq
-    , persistent-template
     , postgresql-simple
     , random
     , retry
@@ -266,7 +265,7 @@ executable restyled.io
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations -threaded -rtsopts -with-rtsopts=-T
+  ghc-options: -Weverything -Wno-all-missed-specialisations -Wno-missing-import-lists -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unsafe -threaded -rtsopts -with-rtsopts=-T
   build-depends:
       base
     , load-env
@@ -334,13 +333,12 @@ test-suite test
       TypeApplications
       TypeFamilies
       ViewPatterns
-  ghc-options: -Weverything -Wno-unsafe -Wno-missing-import-lists -Wno-all-missed-specialisations
+  ghc-options: -Weverything -Wno-all-missed-specialisations -Wno-missing-import-lists -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unsafe
   build-depends:
       QuickCheck
     , aeson-qq
     , base
     , bytestring
-    , filepath
     , github
     , hedis
     , hspec

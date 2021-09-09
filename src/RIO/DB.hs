@@ -13,7 +13,7 @@ module RIO.DB
 
 import RIO
 
-import Control.Monad.Logger (MonadLogger)
+import Control.Monad.Logger (MonadLoggerIO)
 import Database.Persist.Postgresql
     (PostgresConf(..), createPostgresqlPool, createPostgresqlPoolModified)
 import Database.Persist.Sql (ConnectionPool, SqlPersistT, runSqlPool)
@@ -39,7 +39,7 @@ runDB action = do
     runSqlPool action pool
 
 createConnectionPool
-    :: (MonadUnliftIO m, MonadLogger m)
+    :: (MonadUnliftIO m, MonadLoggerIO m)
     => PostgresConf
     -> Maybe Integer
     -> m ConnectionPool

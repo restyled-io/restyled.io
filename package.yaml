@@ -31,10 +31,13 @@ default-extensions:
   # Needed here just so HLint doesn't strip it
   - ViewPatterns
 
-ghc-options: -Weverything
-  -Wno-unsafe
-  -Wno-missing-import-lists
+ghc-options: >-
+  -Weverything
   -Wno-all-missed-specialisations
+  -Wno-missing-import-lists
+  -Wno-missing-safe-haskell-mode
+  -Wno-prepositive-qualified-module
+  -Wno-unsafe
 
 dependencies:
   - base
@@ -87,7 +90,6 @@ library:
     - persistent
     - persistent-postgresql
     - persistent-qq
-    - persistent-template
     - postgresql-simple
     - random
     - retry
@@ -141,7 +143,6 @@ tests:
       - restyled
       - QuickCheck
       - bytestring
-      - filepath
       - github
       - hedis
       - hspec

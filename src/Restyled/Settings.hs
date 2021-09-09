@@ -98,6 +98,8 @@ loadSettings =
         $ AppSettings
         <$> (PostgresConf
             <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
+            <*> var auto "PGPOOLSTRIPES" (def 1)
+            <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
             <*> var auto "PGPOOLSIZE" (def 10)
             )
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)

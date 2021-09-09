@@ -8,7 +8,7 @@ module Restyled.TimeRange
 
 import Restyled.Prelude
 
-import qualified Database.Esqueleto as E
+import qualified Restyled.Prelude.Esqueleto as E
 import Restyled.Time
 
 data TimeRange = TimeRange

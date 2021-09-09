@@ -6,8 +6,8 @@ module Restyled.RestylerImage
 
 import Restyled.Prelude
 
-import Database.Esqueleto (SqlString)
 import Database.Persist.Sql (PersistFieldSql)
+import Restyled.Prelude.Esqueleto (SqlString)
 
 newtype RestylerImage = RestylerImage
     { unRestylerImage :: Text

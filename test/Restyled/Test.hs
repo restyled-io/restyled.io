@@ -21,7 +21,8 @@ import Restyled.Test.Yesod as X
 import Test.QuickCheck as X
 
 import qualified Data.Text as T
-import Database.Persist.Sql (connEscapeName, rawExecute, rawSql, unSingle)
+import Database.Persist.Sql (rawExecute, rawSql, unSingle)
+import Database.Persist.Sql.Types.Internal (connEscapeRawName)
 import Database.Redis (del, keys)
 import LoadEnv (loadEnvFrom)
 import qualified RIO.DB as RIO
@@ -46,9 +47,9 @@ withApp = before $ do
 wipeDB :: MonadIO m => SqlPersistT m ()
 wipeDB = do
     tables <- getTables
-    sqlBackend <- ask
+    escape <- asks connEscapeRawName
 
-    let escapedTables = map (connEscapeName sqlBackend . DBName) tables
+    let escapedTables = map (escapeWith escape . EntityNameDB) tables
         query = "TRUNCATE TABLE " <> T.intercalate ", " escapedTables
     rawExecute query []
 

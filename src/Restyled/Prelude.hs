@@ -81,15 +81,8 @@ import Text.Blaze (ToMarkup(..))
 newtype UsCents = UsCents
     { _usCents :: Natural
     }
-    deriving newtype
-        ( Eq
-        , FromJSON
-        , Num
-        , Show
-        , PersistField
-        , PersistFieldSql
-        , ToJSON
-        )
+    deriving newtype (Eq, FromJSON, Num, Show, ToJSON)
+    deriving (PersistField, PersistFieldSql) via OverflowNatural
 
 -- TODO: Formatters.fixed 2 + Formatters.commas
 instance ToMarkup UsCents where

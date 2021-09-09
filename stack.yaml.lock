@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: envparse-0.4.1@sha256:989902e6368532548f61de1fa245ad2b39176cddd8743b20071af519a709ce30,2842
+    hackage: amazonka-1.6.1@sha256:f58b63e83876f93aa03c54e54b3eb8ba9358af93819d41f4a5a8f8b7d8b8399c,3544
     pantry-tree:
-      size: 1180
-      sha256: 35044d67979fe2a5cff05cf8736a06a265592433cdd03e13a72908ceed892612
+      size: 992
+      sha256: d792656a70ee42df262a599bc6608bda069e33092d665c3438a6eeeaf7db4fb2
   original:
-    hackage: envparse-0.4.1@sha256:989902e6368532548f61de1fa245ad2b39176cddd8743b20071af519a709ce30,2842
+    hackage: amazonka-1.6.1@sha256:f58b63e83876f93aa03c54e54b3eb8ba9358af93819d41f4a5a8f8b7d8b8399c,3544
 - completed:
     hackage: github-0.26@sha256:a9d4046325c3eb28cdc7bef2c3f5bb213328caeae0b7dce6f51de655f0bffaa1,7162
     pantry-tree:
@@ -19,13 +19,6 @@ packages:
   original:
     hackage: github-0.26@sha256:a9d4046325c3eb28cdc7bef2c3f5bb213328caeae0b7dce6f51de655f0bffaa1,7162
 - completed:
-    hackage: hspec-expectations-json-1.0.0.4@sha256:81405eeaa3aa659733a96a73872ec547093e2b39aed4a168e852d812285c8be6,3421
-    pantry-tree:
-      size: 616
-      sha256: 88040d6db30b66224eb193e134159c8975a98194ff706b14a2b4fde4802f5f61
-  original:
-    hackage: hspec-expectations-json-1.0.0.4@sha256:81405eeaa3aa659733a96a73872ec547093e2b39aed4a168e852d812285c8be6,3421
-- completed:
     hackage: monad-validate-1.2.0.0@sha256:9850f408431098b28806dd464b6825a88a0b56c84f380d7fe0454c1df9d6f881,3505
     pantry-tree:
       size: 713
@@ -33,40 +26,75 @@ packages:
   original:
     hackage: monad-validate-1.2.0.0@sha256:9850f408431098b28806dd464b6825a88a0b56c84f380d7fe0454c1df9d6f881,3505
 - completed:
-    hackage: yesod-auth-oauth2-0.6.1.5@sha256:bc65e697ae622b80024ca22a7b9270bf64a8c96be8f6ac1d09ed3a1d1cbbde6e,2950
+    hackage: unliftio-core-0.1.2.0@sha256:b0a7652ffce2284a6cebe05c99eb60573a8fb6631163f34b0b30a80b4a78cb23,1081
     pantry-tree:
-      size: 1844
-      sha256: 314407a32db4ef4a0bed6991f2b3a4ac9d4636984c5449d9e64b30c6b7961a46
+      size: 328
+      sha256: 9d970bf5f98e68e8fc129b04d6c9d8eb1e641c7556ffd0f0a168a259335b6fd7
   original:
-    hackage: yesod-auth-oauth2-0.6.1.5@sha256:bc65e697ae622b80024ca22a7b9270bf64a8c96be8f6ac1d09ed3a1d1cbbde6e,2950
+    hackage: unliftio-core-0.1.2.0@sha256:b0a7652ffce2284a6cebe05c99eb60573a8fb6631163f34b0b30a80b4a78cb23,1081
 - completed:
-    hackage: yesod-paginator-1.1.1.0@sha256:cd561bb4e450d4facf8214d0d367f56741f0ef757c692439c54083cb79359995,2360
+    hackage: base16-bytestring-0.1.1.7@sha256:0021256a9628971c08da95cb8f4d0d72192f3bb8a7b30b55c080562d17c43dd3,2231
     pantry-tree:
-      size: 953
-      sha256: ced5654fef351ab0f9c25059b837ab193bb8d3f6b74dcccf8aef3529745916e7
+      size: 454
+      sha256: 2dc99cd67293b09204098202d0bdcdcf89d2b8c69ce6c8f4e31deadbdab2a7f9
   original:
-    hackage: yesod-paginator-1.1.1.0@sha256:cd561bb4e450d4facf8214d0d367f56741f0ef757c692439c54083cb79359995,2360
+    hackage: base16-bytestring-0.1.1.7@sha256:0021256a9628971c08da95cb8f4d0d72192f3bb8a7b30b55c080562d17c43dd3,2231
 - completed:
-    hackage: binary-instances-1.0.0.1@sha256:e234be994da675479a3661f050d4a1d53565c9ed7786d9a68b7a29ba8b54b5a7,2659
+    hackage: http-link-header-1.0.3.1@sha256:9917c26635a46eff5d36c5344a4ae42fad2b5de79c0e300363bddd5eec66facd,1937
     pantry-tree:
-      size: 1035
-      sha256: 6086ebb4c6f3d28200f295c36495227b3cd762ab1de3dafa36f6ce8674a23a90
+      size: 990
+      sha256: 155feaf856daf5b55491048c8c4726ba765a8fe79263ebdbfc82f6c385a15715
   original:
-    hackage: binary-instances-1.0.0.1@sha256:e234be994da675479a3661f050d4a1d53565c9ed7786d9a68b7a29ba8b54b5a7,2659
+    hackage: http-link-header-1.0.3.1@sha256:9917c26635a46eff5d36c5344a4ae42fad2b5de79c0e300363bddd5eec66facd,1937
 - completed:
-    hackage: HDBC-postgresql-2.3.2.7@sha256:93d8e3c3d2dc9291a10f28ae3f8d0604a55ef47298ed43003a4d16f3d9905bae,3228
+    hackage: data-tree-print-0.1.0.2@sha256:d845e99f322df70e0c06d6743bf80336f5918d5423498528beb0593a2afc1703,1620
     pantry-tree:
-      size: 1740
-      sha256: 07bfba988402849f447025b324f2993ea88ac0ec4f7dd4b86942644e2e239d45
+      size: 272
+      sha256: b8778eb1b16fddb91b2eed2b25f33a89d1e4f7a533160de4ccbf226f82456135
   original:
-    hackage: HDBC-postgresql-2.3.2.7@sha256:93d8e3c3d2dc9291a10f28ae3f8d0604a55ef47298ed43003a4d16f3d9905bae,3228
+    hackage: data-tree-print-0.1.0.2@sha256:d845e99f322df70e0c06d6743bf80336f5918d5423498528beb0593a2afc1703,1620
+- completed:
+    hackage: optparse-applicative-0.15.1.0@sha256:29ff6146aabf54d46c4c8788e8d1eadaea27c94f6d360c690c5f6c93dac4b07e,4810
+    pantry-tree:
+      size: 2904
+      sha256: 04ad3816bc580cbe0834d3d1f4729ddd386abfe31b43e5b14968885f636d1b0d
+  original:
+    hackage: optparse-applicative-0.15.1.0@sha256:29ff6146aabf54d46c4c8788e8d1eadaea27c94f6d360c690c5f6c93dac4b07e,4810
+- completed:
+    hackage: dhall-1.40.1@sha256:5d4bb256d4c331b9e75a59677e21ca8cc55ad3ba1426edff7efd13c39f67f8ff,34635
+    pantry-tree:
+      size: 314278
+      sha256: 6b60951885f4a905a34412176a892b21a239778dc9f7a45439813e2e44273c0e
+  original:
+    hackage: dhall-1.40.1@sha256:5d4bb256d4c331b9e75a59677e21ca8cc55ad3ba1426edff7efd13c39f67f8ff,34635
+- completed:
+    hackage: generic-lens-2.2.0.0@sha256:4008a39f464e377130346e46062e2ac1211f9d2e256bbb1857216e889c7196be,3867
+    pantry-tree:
+      size: 2470
+      sha256: 93d7aae1de4cbbb2e3320b357cd744618cb17356989bd417d374aa73331e7370
+  original:
+    hackage: generic-lens-2.2.0.0@sha256:4008a39f464e377130346e46062e2ac1211f9d2e256bbb1857216e889c7196be,3867
+- completed:
+    hackage: generic-lens-core-2.2.0.0@sha256:b6b69e992f15fa80001de737f41f2123059011a1163d6c8941ce2e3ab44f8c03,2913
+    pantry-tree:
+      size: 2202
+      sha256: 6918fb47f34ecf4246778b229911693b6e20fc2ce94ae8c89d69a89db4e72269
+  original:
+    hackage: generic-lens-core-2.2.0.0@sha256:b6b69e992f15fa80001de737f41f2123059011a1163d6c8941ce2e3ab44f8c03,2913
+- completed:
+    hackage: HDBC-postgresql-2.5.0.0@sha256:10ceb4f456bbd4768a3f0ab425d9b4d40cb0e17992083b881b37fe5d91b58aba,3050
+    pantry-tree:
+      size: 1611
+      sha256: 9db472e5f433c07d097b6cdc6af354d0a40c0fd3c7205510973380ced739c764
+  original:
+    hackage: HDBC-postgresql-2.5.0.0@sha256:10ceb4f456bbd4768a3f0ab425d9b4d40cb0e17992083b881b37fe5d91b58aba,3050
 - completed:
     hackage: dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
     pantry-tree:
       size: 3935
       sha256: c0ed60caea8b8aace63e40628c753ba8b007edcea17ccc270317b533d07c8e28
   original:
-    hackage: dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075
+    hackage: dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
 - completed:
     hackage: yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d,1887
     pantry-tree:
@@ -83,7 +111,7 @@ packages:
     hackage: HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da,1818
 snapshots:
 - completed:
-    size: 532414
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/16/22.yaml
-    sha256: e483fb88549fc0f454c190979bf35ac91c7aceff2c0e71e7d8edd11842d772d8
-  original: lts-16.22
+    size: 586923
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/9.yaml
+    sha256: 9f9fe35c949414146840a985fb228fd397c504d1781b834bfc9ab935f4d27df6
+  original: lts-18.9

@@ -1,4 +1,4 @@
-FROM fpco/stack-build-small:lts-14.6 AS builder
+FROM fpco/stack-build-small:lts-18.8 AS builder
 LABEL maintainer="Pat Brisbin <pbrisbin@gmail.com>"
 ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8
 RUN \

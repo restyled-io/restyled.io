@@ -15,6 +15,7 @@ import Restyled.Prelude as X hiding
     , Value
     , count
     , delete
+    , exists
     , isNothing
     , on
     , selectSource
@@ -36,7 +37,7 @@ import Restyled.Prelude as X hiding
     , (||.)
     )
 
-import Database.Esqueleto as X
+import Database.Esqueleto.Legacy as X
 
 import Database.Esqueleto.Internal.Internal
     (SqlSelect, veryUnsafeCoerceSqlExprValue)
