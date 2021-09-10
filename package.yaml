@@ -156,6 +156,7 @@ tests:
       - megaparsec
       - monad-logger
       - monad-validate
+      - mtl
       - persistent
       - rio
       - shakespeare

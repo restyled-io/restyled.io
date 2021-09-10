@@ -12,8 +12,10 @@ module Restyled.Test.Yesod
 import Restyled.Prelude
 
 import Control.Monad.Logger (MonadLogger(..), toLogStr)
+import qualified Control.Monad.State as State
 import Network.Wai.Test (SResponse(..))
 import Restyled.Cache as X
+import Restyled.Settings
 import Restyled.Test.Expectations
 import Test.Hspec.Core.Spec (SpecM)
 import Yesod.Core
@@ -21,18 +23,40 @@ import Yesod.Test as X hiding (YesodSpec)
 
 type YesodSpec site = SpecM (TestApp site)
 
+instance HasSettings site => HasSettings (YesodExampleData site) where
+    settingsL = siteL . settingsL
+
+instance HasLogFunc site => HasLogFunc (YesodExampleData site) where
+    logFuncL = siteL . logFuncL
+
+instance HasProcessContext site => HasProcessContext (YesodExampleData site) where
+    processContextL = siteL . processContextL
+
+instance HasRedis site => HasRedis (YesodExampleData site) where
+    redisConnectionL = siteL . redisConnectionL
+
+instance HasSqlPool site => HasSqlPool (YesodExampleData site) where
+    sqlPoolL = siteL . sqlPoolL
+
+siteL :: Lens' (YesodExampleData site) site
+siteL = lens yedSite $ \x y -> x { yedSite = y }
+
 instance HasLogFunc site => MonadLogger (YesodExample site) where
     monadLoggerLog loc source level msg = do
         logFunc <- view logFuncL
         liftIO $ logFuncLog logFunc loc source level $ toLogStr msg
 
-instance MonadReader site (SIO (YesodExampleData site)) where
-    ask = getTestYesod
-    local _ _ = expectationFailure "local cannot be used in a test"
-
-instance HasRedis site => MonadCache (SIO (YesodExampleData site)) where
+instance HasRedis site => MonadCache (YesodExample site) where
     getCache = getCacheRedis
     setCache = setCacheRedis
+
+instance MonadReader s (SIO s) where
+    ask = State.get
+    local f m = do
+        s <- State.get
+        State.modify f
+        result <- m
+        result <$ State.put s
 
 instance MonadFail (SIO s) where
     fail = expectationFailure
