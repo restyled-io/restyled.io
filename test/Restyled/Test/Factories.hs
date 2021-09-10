@@ -2,6 +2,7 @@ module Restyled.Test.Factories
     (
     -- * User
       genUser
+    , genAdmin
 
     -- * Job
     , genJob
@@ -19,8 +20,10 @@ module Restyled.Test.Factories
 
 import Restyled.Prelude hiding (fieldLens)
 
+import qualified Data.List.NonEmpty as NE
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.Settings
 import Restyled.Test.Graphula
 import Restyled.Test.Lens
 
@@ -36,6 +39,18 @@ genUser email f =
         . (fieldLens UserCredsIdent .~ email)
         . (fieldLens UserCredsPlugin .~ "dummy")
         . f
+
+genAdmin
+    :: ( MonadReader env m
+       , HasSettings env
+       , MonadTrans t
+       , MonadFail (t m)
+       , GraphulaContext (t m) '[User]
+       )
+    => t m (Entity User)
+genAdmin = do
+    Just emails <- lift $ NE.nonEmpty . appAdmins <$> view settingsL
+    genUser (NE.head emails) id
 
 genJob
     :: (MonadIO m, GraphulaContext m '[Job])

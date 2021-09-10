@@ -18,19 +18,21 @@ spec :: Spec
 spec = withApp $ do
     describe "PATCH /jobs/:id" $ do
         it "404s for unknown Job" $ graph $ do
-            void authenticateAsAdmin
-
+            admin <- genAdmin
             lift $ do
+                authenticateAs admin
+
                 patchJSON (JobsP $ JobP (toSqlKey 99) JobR) [aesonQQ|{}|]
 
                 statusIs 404
 
         it "expects a nonempty list of updates" $ graph $ do
-            void authenticateAsAdmin
+            admin <- genAdmin
             repo <- node @Repo () mempty
             job <- genJob repo setJobIncomplete
-
             lift $ do
+                authenticateAs admin
+
                 patchJSON (JobsP $ JobP (entityKey job) JobR) [aesonQQ|[]|]
 
                 statusIs 400
@@ -42,12 +44,13 @@ spec = withApp $ do
                     `shouldSatisfy` ("parsing NonEmpty failed" `T.isPrefixOf`)
 
         it "accepts updates and parrots back" $ graph $ do
-            void authenticateAsAdmin
+            admin <- genAdmin
             now <- liftIO getCurrentTime
             repo <- node @Repo () mempty
             job <- genJob repo setJobIncomplete
-
             lift $ do
+                authenticateAs admin
+
                 patchJSON
                     (JobsP $ JobP (entityKey job) JobR)
                     [aesonQQ|

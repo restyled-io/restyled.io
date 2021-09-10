@@ -32,7 +32,7 @@ spec = withApp $ do
                 $ (fieldLens UserGithubUserId ?~ 123)
                 . (fieldLens UserGithubUsername ?~ "pbrisbin")
             lift $ do
-                void $ authenticateAs user
+                authenticateAs user
 
                 get ProfileR
 
@@ -56,7 +56,7 @@ spec = withApp $ do
                 $ (fieldLens UserGithubUserId ?~ 123)
                 . (fieldLens UserGithubUsername ?~ "pbrisbin")
             lift $ do
-                void $ authenticateAs user
+                authenticateAs user
                 cacheGitHubOrgs
                     "pbrisbin"
                     ["freckle", "restyled-io", "yesodweb"]
@@ -81,7 +81,7 @@ spec = withApp $ do
                 $ (fieldLens UserGithubUserId ?~ 123)
                 . (fieldLens UserGithubUsername ?~ "pbrisbin")
             lift $ do
-                void $ authenticateAs user
+                authenticateAs user
                 cacheCallaboratorCanRead (entityKey repo) "pbrisbin" True
                 cacheGitHubOrgs "pbrisbin" []
 
@@ -119,7 +119,7 @@ spec = withApp $ do
                 $ (fieldLens UserGithubUserId ?~ 123)
                 . (fieldLens UserGithubUsername ?~ "pbrisbin")
             lift $ do
-                void $ authenticateAs user
+                authenticateAs user
                 cacheCallaboratorCanRead (entityKey repo) "pbrisbin" True
                 cacheGitHubOrgs "pbrisbin" ["yesodweb"]
 

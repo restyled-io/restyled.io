@@ -27,9 +27,10 @@ spec = withApp $ do
 
     describe "PUT gh/:owner/repos/:repo" $ do
         it "validates owner matches" $ graph $ do
-            void authenticateAsAdmin
-
+            admin <- genAdmin
             lift $ do
+                authenticateAs admin
+
                 putJSON
                     (repoP "baz" "bar" RepoR)
                     [aesonQQ|
@@ -52,9 +53,10 @@ spec = withApp $ do
                 |]
 
         it "validates name matches" $ graph $ do
-            void authenticateAsAdmin
-
+            admin <- genAdmin
             lift $ do
+                authenticateAs admin
+
                 putJSON
                     (repoP "foo" "quiix" RepoR)
                     [aesonQQ|
@@ -77,9 +79,11 @@ spec = withApp $ do
                 |]
 
         it "accumulates validations" $ graph $ do
-            void authenticateAsAdmin
+            admin <- genAdmin
 
             lift $ do
+                authenticateAs admin
+
                 putJSON
                     (repoP "bat" "quiix" RepoR)
                     [aesonQQ|
@@ -106,9 +110,11 @@ spec = withApp $ do
 
         -- N.B. This is just a smoke-test, more tests against findOrCreateRepo
         it "creates a new repository and parrots back" $ graph $ do
-            void authenticateAsAdmin
+            admin <- genAdmin
 
             lift $ do
+                authenticateAs admin
+
                 putJSON
                     (repoP "foo" "bar" RepoR)
                     [aesonQQ|
