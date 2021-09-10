@@ -6,6 +6,7 @@ module Restyled.Test.Yesod
     , patchJSON
     , putJSON
     , getJsonBody
+    , followRedirect
     , module X
     ) where
 
@@ -19,7 +20,8 @@ import Restyled.Settings
 import Restyled.Test.Expectations
 import Test.Hspec.Core.Spec (SpecM)
 import Yesod.Core
-import Yesod.Test as X hiding (YesodSpec)
+import Yesod.Test as X hiding (YesodSpec, followRedirect)
+import qualified Yesod.Test as Yesod
 
 type YesodSpec site = SpecM (TestApp site)
 
@@ -60,6 +62,11 @@ instance MonadReader s (SIO s) where
 
 instance MonadFail (SIO s) where
     fail = expectationFailure
+
+followRedirect :: (HasCallStack, Yesod site) => YesodExample site ()
+followRedirect = do
+    result <- Yesod.followRedirect
+    either (expectationFailure . unpack) (const $ pure ()) result
 
 -- | Get the test application's root as a @'Text'@
 --
