@@ -16,6 +16,7 @@ import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.Time
+import Restyled.UsCents
 import Restyled.Yesod
 import qualified Yesod.Auth.OAuth2.GitHubStudents as GitHubStudents
 

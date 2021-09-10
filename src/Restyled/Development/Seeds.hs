@@ -10,6 +10,7 @@ import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.Settings
+import Restyled.UsCents
 
 seedDB
     :: (MonadUnliftIO m, MonadAWS m, MonadReader env m, HasSettings env)

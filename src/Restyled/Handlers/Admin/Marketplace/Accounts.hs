@@ -17,6 +17,7 @@ import Restyled.Models
 import Restyled.Routes
 import Restyled.Settings
 import Restyled.Time
+import Restyled.UsCents
 import Restyled.Yesod
 
 newtype MarketplaceAccountsQuery = MarketplaceAccountsQuery

@@ -23,6 +23,7 @@ import Restyled.Routes
 import Restyled.Settings
 import Restyled.Time
 import Restyled.TimeRange
+import Restyled.UsCents
 import Restyled.Yesod
 import Text.Blaze (ToMarkup(..))
 

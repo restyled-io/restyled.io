@@ -11,6 +11,7 @@ import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.Settings
+import Restyled.UsCents
 
 runSynchronize
     :: (HasCallStack, HasLogFunc env, HasSettings env, HasSqlPool env)

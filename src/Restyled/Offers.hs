@@ -18,6 +18,7 @@ import Data.List ((!!))
 import Database.Persist.Sql (updateWhereCount)
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.UsCents
 import System.Random
 
 data CreateOffer = CreateOffer

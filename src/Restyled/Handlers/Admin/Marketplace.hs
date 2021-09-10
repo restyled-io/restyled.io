@@ -13,6 +13,7 @@ import Restyled.Marketplace (isPrivateRepoPlan)
 import Restyled.Models
 import Restyled.Routes
 import Restyled.Settings
+import Restyled.UsCents
 import Restyled.Yesod
 
 data MarketplacePlanWithAccounts = MarketplacePlanWithAccounts

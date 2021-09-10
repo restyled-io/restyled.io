@@ -9,6 +9,7 @@ import Restyled.Prelude
 
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.UsCents
 
 buildRepo :: OwnerName -> RepoName -> Repo
 buildRepo owner name = Repo

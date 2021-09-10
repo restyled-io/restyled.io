@@ -105,6 +105,7 @@ library
       Restyled.SqlError
       Restyled.Time
       Restyled.TimeRange
+      Restyled.UsCents
       Restyled.WebSockets
       Restyled.Widgets.ContainsURLs
       Restyled.Widgets.Job

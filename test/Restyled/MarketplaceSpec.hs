@@ -7,6 +7,7 @@ import Restyled.Test
 import Restyled.Marketplace
 import Restyled.PrivateRepoAllowance
 import Restyled.Time
+import Restyled.UsCents
 
 spec :: Spec
 spec = withApp $ do
