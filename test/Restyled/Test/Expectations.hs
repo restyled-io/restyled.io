@@ -1,7 +1,6 @@
 module Restyled.Test.Expectations
     ( shouldMatchJson
     , shouldRedirectTo
-    , expectJust
     , expectRight
     , expectationFailure
     , module X
@@ -38,11 +37,6 @@ shouldRedirectTo doRequest path = do
     predicate = \case
         Left _err -> False
         Right url -> path `T.isSuffixOf` url
-
-expectJust :: (HasCallStack, MonadIO m) => String -> Maybe a -> m a
-expectJust item = \case
-    Nothing -> expectationFailure $ "Expected Just " <> item <> ", got Nothing"
-    Just a -> pure a
 
 expectRight :: (HasCallStack, MonadIO m, Show e) => String -> Either e a -> m a
 expectRight item = \case
