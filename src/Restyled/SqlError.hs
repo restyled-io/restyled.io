@@ -15,12 +15,13 @@ newtype DisplaySqlError = DisplaySqlError SqlError
 
 instance Display DisplaySqlError where
     display (DisplaySqlError SqlError {..}) = mconcat
-        [ "SqlError"
-        , "\n  State: " <> displayBytesUtf8 sqlState
-        , "\n  ExecStatus: " <> displayShow sqlExecStatus
-        , "\n  Message: " <> displayBytesUtf8 sqlErrorMsg
-        , "\n  Detail: " <> displayBytesUtf8 sqlErrorDetail
-        , "\n  Hint: " <> displayBytesUtf8 sqlErrorHint
+        [ "SqlError "
+        , "{ state=" <> displayBytesUtf8 sqlState
+        , ", execStatus=" <> displayShow sqlExecStatus
+        , ", message=" <> displayBytesUtf8 sqlErrorMsg
+        , ", detail=" <> displayBytesUtf8 sqlErrorDetail
+        , ", hint=" <> displayBytesUtf8 sqlErrorHint
+        , "}"
         ]
 
 -- | Encapsulation of known States to handle by
