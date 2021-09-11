@@ -43,7 +43,6 @@ jobs:
       - uses: freckle/stack-cache-action@v1
       - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
       - run: db/migrate test upgrade
-      - run: .github/scripts/prune-hie
       - uses: freckle/stack-action@v1.1
       - run: db/pending-prod-migrations --check
         env:
