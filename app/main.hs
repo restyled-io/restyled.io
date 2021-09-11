@@ -1,18 +1,16 @@
 module Main
     ( main
-    )
-where
+    ) where
 
 import Restyled.Prelude
 
 import LoadEnv (loadEnvFrom)
 import Restyled.Application (runWaiApp)
 import Restyled.Backend.Application
-import Restyled.Backend.Foundation (loadBackend, loadBackendHandle)
+import Restyled.Backend.Foundation (loadBackend)
 import Restyled.Backend.MarketplaceSync (runSynchronize)
 import Restyled.Backend.Reconcile (safelyReconcile)
 import Restyled.Development.Seeds (seedDB)
-import Restyled.Export (runExport)
 import Restyled.Foundation (loadApp)
 import Restyled.Options
 import Restyled.Settings (AppSettings(..), loadSettings)
@@ -37,7 +35,3 @@ main = do
                     runWebhooks
                 SyncMarketplace -> runSynchronize
                 SeedDB -> runDB seedDB
-        Export options -> do
-            -- Log to stderr, since we produce actually useful output
-            backend <- loadBackendHandle stderr settings
-            runRIO backend $ runExport options

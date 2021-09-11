@@ -51,8 +51,6 @@ library
       Restyled.Cache
       Restyled.Development.Seeds
       Restyled.Env
-      Restyled.Export
-      Restyled.Export.Customers
       Restyled.Foundation
       Restyled.GitHubOrg
       Restyled.GitHubStudents
