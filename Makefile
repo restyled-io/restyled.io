@@ -93,14 +93,10 @@ ngrok.http: setup.ngrok
 
 .PHONY: image
 image:
-	docker run -it --rm \
-	  --volume /var/run/docker.sock:/var/run/docker.sock \
-	  --volume "$(HOME)"/.docker/config.json:/root/.docker/config.json:ro \
-	  --volume "$(PWD)":/build:ro \
-	  --workdir /build \
-	  restyled/ops:v5 docker-build-remote-cache \
-	  restyled/restyled.io:testing \
-	  --build-arg "REVISION=testing"
+	docker build \
+	  --build-arg "REVISION=testing" \
+	  --tag restyled/restyled.io:testing \
+	  .
 
 .PHONY: image.check
 image.check: image
