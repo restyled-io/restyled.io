@@ -37,4 +37,4 @@ instance PersistField PrivateRepoAllowance where
     fromPersistValue v = fromNumeric <$> fromPersistValue v
 
 instance PersistFieldSql PrivateRepoAllowance where
-    sqlType _ = sqlType @Int undefined
+    sqlType _ = sqlType $ Proxy @Int
