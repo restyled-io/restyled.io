@@ -1,8 +1,6 @@
 module Restyled.SqlError
     ( SqlError(..)
     , DisplaySqlError(..)
-    , displaySqlError
-    , handleSqlError
     , SqlState
     , sqlStateQueryCanceled
     , handleSqlErrorState
@@ -13,11 +11,6 @@ import Restyled.Prelude
 import Database.PostgreSQL.Simple (SqlError(..))
 
 -- | Wrapper in order to provide a 'Display' instance
---
--- @
--- 'handleSqlError' ('logError' . 'DisplaySqlError') $ runDB $ insert_ ...
--- @
---
 newtype DisplaySqlError = DisplaySqlError SqlError
 
 instance Display DisplaySqlError where
@@ -29,19 +22,6 @@ instance Display DisplaySqlError where
         , "\n  Detail: " <> displayBytesUtf8 sqlErrorDetail
         , "\n  Hint: " <> displayBytesUtf8 sqlErrorHint
         ]
-
--- | Conversion to 'Text', for 'MonadLogger' use
---
--- @
--- 'handleSqlError' ('logErrorN' . 'displaySqlError') $ runDB $ insert_ ...
--- @
---
-displaySqlError :: SqlError -> Text
-displaySqlError = utf8BuilderToText . display . DisplaySqlError
-
--- | Type-restricted 'handle'
-handleSqlError :: MonadUnliftIO m => (SqlError -> m a) -> m a -> m a
-handleSqlError = handle
 
 -- | Encapsulation of known States to handle by
 --
