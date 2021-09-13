@@ -50,7 +50,6 @@
   /machines AdminMachinesP:
     / AdminMachinesR GET POST
     /new AdminMachinesNewR GET
-    /state AdminMachinesStateR GET
     !/#RestyleMachineId AdminMachineR GET PATCH DELETE
     !/#RestyleMachineId/info AdminMachineInfoR GET
     !/#RestyleMachineId/prune AdminMachinePruneR GET

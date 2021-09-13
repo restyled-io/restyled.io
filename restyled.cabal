@@ -56,7 +56,6 @@ library
       Restyled.GitHubStudents
       Restyled.Handlers.Admin
       Restyled.Handlers.Admin.Machines
-      Restyled.Handlers.Admin.Machines.State
       Restyled.Handlers.Admin.Marketplace
       Restyled.Handlers.Admin.Marketplace.Accounts
       Restyled.Handlers.Admin.Marketplace.Plans
