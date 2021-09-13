@@ -11,6 +11,7 @@ module Restyled.Backend.Foundation
 import Restyled.Prelude
 
 import qualified Network.AWS as AWS (Env)
+import Restyled.Queues
 import Restyled.Settings
 
 -- | Like @'App'@ but with no webapp-related bits
@@ -28,6 +29,9 @@ instance HasLogFunc Backend where
 
 instance HasSettings Backend where
     settingsL = lens backendSettings $ \x y -> x { backendSettings = y }
+
+instance HasQueues Backend where
+    queuesL = settingsL . queuesL
 
 instance HasProcessContext Backend where
     processContextL =

@@ -23,6 +23,7 @@ import Database.Redis (ConnectInfo(..), defaultConnectInfo)
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
 import Restyled.Env
+import Restyled.Queues
 import Restyled.RestylerImage
 import Restyled.Yesod hiding (LogLevel(..))
 import Yesod.Auth.Dummy
@@ -76,6 +77,7 @@ data AppSettings = AppSettings
     , appRestylerLogGroup :: Text
     , appRestylerLogStreamPrefix :: Text
     , appAwsTrace :: Bool
+    , appRestylerQueues :: Queues
     }
 
 class HasSettings env where
@@ -86,6 +88,9 @@ instance HasSettings AppSettings where
 
 instance HasSettings env => HasSettings (HandlerData child env) where
     settingsL = handlerEnvL . siteL . settingsL
+
+instance HasQueues AppSettings where
+    queuesL = lens appRestylerQueues $ \x y -> x { appRestylerQueues = y }
 
 addAuthBackDoor
     :: YesodAuth app => AppSettings -> [AuthPlugin app] -> [AuthPlugin app]
@@ -141,6 +146,7 @@ loadSettings =
         <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
         <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
         <*> switch "AWS_TRACE" mempty
+        <*> var (eitherReader readQueues) "RESTYLER_QUEUES" (def defaultQueues)
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"

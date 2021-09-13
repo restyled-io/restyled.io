@@ -16,6 +16,7 @@ import Restyled.Authentication
 import Restyled.Authorization
 import Restyled.Backend.Foundation
 import Restyled.Models
+import Restyled.Queues
 import Restyled.ServerUnavailable
 import Restyled.Settings
 import Restyled.SqlError
@@ -53,6 +54,9 @@ instance HasRedis App where
 
 instance HasAWS App where
     awsEnvL = backendL . awsEnvL
+
+instance HasQueues App where
+    queuesL = backendL . queuesL
 
 loadApp :: Backend -> IO App
 loadApp backend@Backend {..} = App backend

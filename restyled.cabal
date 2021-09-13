@@ -83,6 +83,7 @@ library
       Restyled.JobLogLine
       Restyled.JobOutput
       Restyled.Marketplace
+      Restyled.Metric
       Restyled.Metrics
       Restyled.Models
       Restyled.Models.DB
@@ -97,6 +98,7 @@ library
       Restyled.Prelude.Esqueleto
       Restyled.PrivateRepoAllowance
       Restyled.PrivateRepoEnabled
+      Restyled.Queues
       Restyled.RestylerImage
       Restyled.Routes
       Restyled.ServerUnavailable
@@ -289,10 +291,12 @@ test-suite test
       Restyled.Handlers.JobsSpec
       Restyled.Handlers.ProfileSpec
       Restyled.Handlers.ReposSpec
+      Restyled.Handlers.WebhooksSpec
       Restyled.MarketplaceSpec
       Restyled.MetricsSpec
       Restyled.Models.UserSpec
       Restyled.OffersSpec
+      Restyled.QueuesSpec
       Restyled.Test
       Restyled.Test.Authentication
       Restyled.Test.Expectations
@@ -341,6 +345,7 @@ test-suite test
     , aeson-qq
     , base
     , bytestring
+    , filepath
     , github
     , graphula
     , hedis

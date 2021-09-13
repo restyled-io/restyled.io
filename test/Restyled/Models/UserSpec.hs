@@ -5,6 +5,7 @@ module Restyled.Models.UserSpec
 import Restyled.Test
 
 import qualified Prelude as Unsafe
+import Restyled.Queues
 import Restyled.RestylerImage
 
 data AdminSettings = AdminSettings
@@ -90,6 +91,7 @@ emptySettings = AppSettings
     , appRestylerLogGroup = ""
     , appRestylerLogStreamPrefix = ""
     , appAwsTrace = False
+    , appRestylerQueues = defaultQueues
     }
 
 userWithEmail :: Text -> User
