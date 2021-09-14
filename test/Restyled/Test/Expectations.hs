@@ -40,11 +40,13 @@ shouldRedirectTo doRequest path = do
         Right url -> path `T.isSuffixOf` url
 
 -- | Here /near/ simply means @+/-1@
-shouldBeNear :: (HasCallStack, MonadIO m, Ord a, Num a) => a -> a -> m ()
+shouldBeNear
+    :: (HasCallStack, MonadIO m, Show a, Ord a, Num a) => a -> a -> m ()
 x `shouldBeNear` n
-    | x < n - 1 = expectationFailure ""
-    | x > n + 1 = expectationFailure ""
+    | x < n - 1 = expectationFailure failure
+    | x > n + 1 = expectationFailure failure
     | otherwise = pure ()
+    where failure = "Expected " <> show x <> " to be " <> show n <> " +/-1"
 
 expectRight :: (HasCallStack, MonadIO m, Show e) => String -> Either e a -> m a
 expectRight item = \case
