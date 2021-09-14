@@ -118,4 +118,3 @@ queueDepthMetric name depth = Metric
     , mDimensions =
         [Dimension { dName = "QueueName", dValue = decodeUtf8 name }]
     }
-
