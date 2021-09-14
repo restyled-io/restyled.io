@@ -28,5 +28,5 @@ spec = withApp $ do
 
             let (a, b) = partition ((== "restyled:testa") . fst) results
             length a + length b `shouldBe` 10
-            length a `shouldBeNear` 3
-            length b `shouldBeNear` 7
+            length a `shouldBeWithin` (1, 5) -- 3 +/-2
+            length b `shouldBeWithin` (5, 9) -- 7 +/-2
