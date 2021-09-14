@@ -23,10 +23,10 @@ spec = withApp $ do
                 $ readQueues "restyled:testa/1, restyled:testb/2"
 
             results <- fmap (catMaybes . rights) $ runRedis $ do
-                replicateM_ 10 $ enqueue qs "{}"
-                replicateM 10 $ brpop ["restyled:testa", "restyled:testb"] 3
+                replicateM_ 60 $ enqueue qs "{}"
+                replicateM 60 $ brpop ["restyled:testa", "restyled:testb"] 3
 
             let (a, b) = partition ((== "restyled:testa") . fst) results
-            length a + length b `shouldBe` 10
-            length a `shouldBeWithin` (1, 5) -- 3 +/-2
-            length b `shouldBeWithin` (5, 9) -- 7 +/-2
+            length a + length b `shouldBe` 60
+            length a `shouldBeWithin` (10, 30) -- 20 +/-10
+            length b `shouldBeWithin` (30, 50) -- 40 +/-10
