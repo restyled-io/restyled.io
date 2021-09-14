@@ -1,9 +1,6 @@
 module Restyled.Backend.Webhook
-    ( enqueueWebhook
-    , enqueueWebhookTo
-    , awaitWebhook
+    ( awaitWebhook
     , processWebhook
-    , queueDepth
     ) where
 
 import Restyled.Prelude
@@ -16,12 +13,6 @@ import Restyled.Backend.Reconcile
 import Restyled.Backend.RestyleMachine
 import Restyled.Models
 import Restyled.Settings
-
-enqueueWebhook :: ByteString -> Redis ()
-enqueueWebhook = enqueueWebhookTo queueName
-
-enqueueWebhookTo :: ByteString -> ByteString -> Redis ()
-enqueueWebhookTo name = void . lpush name . pure
 
 awaitWebhook
     :: (HasLogFunc env, HasRedis env, MonadReader env m, MonadIO m)
@@ -151,9 +142,6 @@ fromProcessed (ExecRestylerSuccess job ec) = do
         <> " completed ("
         <> display (jobOutcome $ entityVal updatedJob)
         <> ")"
-
-queueDepth :: Redis (Maybe Integer)
-queueDepth = hush <$> llen queueName
 
 queueName :: ByteString
 queueName = "restyled:hooks:webhooks"

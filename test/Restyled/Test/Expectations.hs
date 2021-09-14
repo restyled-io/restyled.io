@@ -1,6 +1,7 @@
 module Restyled.Test.Expectations
     ( shouldMatchJson
     , shouldRedirectTo
+    , shouldBeWithin
     , expectRight
     , expectationFailure
     , module X
@@ -37,6 +38,23 @@ shouldRedirectTo doRequest path = do
     predicate = \case
         Left _err -> False
         Right url -> path `T.isSuffixOf` url
+
+shouldBeWithin
+    :: (HasCallStack, MonadIO m, Show a, Ord a) => a -> (a, a) -> m ()
+x `shouldBeWithin` (low, high)
+    | low > high = expectationFailure "shouldBeWithin must be (low, high)"
+    | x < low = expectationFailure failure
+    | x > high = expectationFailure failure
+    | otherwise = pure ()
+  where
+    failure =
+        "Expected "
+            <> show x
+            <> " to be within "
+            <> show low
+            <> " and "
+            <> show high
+            <> " (inclusive)"
 
 expectRight :: (HasCallStack, MonadIO m, Show e) => String -> Either e a -> m a
 expectRight item = \case

@@ -147,6 +147,7 @@ tests:
       - restyled
       - QuickCheck
       - bytestring
+      - filepath
       - github
       - graphula
       - hedis
