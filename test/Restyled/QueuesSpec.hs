@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
-
 module Restyled.QueuesSpec
     ( spec
     ) where
@@ -12,7 +10,7 @@ spec :: Spec
 spec = withApp $ do
     describe "enqueue" $ do
         it "works with a single queue" $ do
-            let Right qs = readQueues "restyled:test"
+            qs <- expectRight "Queues" $ readQueues "restyled:test"
 
             result <- runRedis $ do
                 enqueue qs "{}"
@@ -21,7 +19,8 @@ spec = withApp $ do
             result `shouldBe` Right (Just ("restyled:test", "{}"))
 
         it "works with multiple frequencies" $ do
-            let Right qs = readQueues "restyled:testa/1, restyled:testb/2"
+            qs <- expectRight "Queues"
+                $ readQueues "restyled:testa/1, restyled:testb/2"
 
             results <- fmap (catMaybes . rights) $ runRedis $ do
                 replicateM_ 10 $ enqueue qs "{}"
