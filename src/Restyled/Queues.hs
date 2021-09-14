@@ -43,11 +43,11 @@ instance HasQueues env => HasQueues (HandlerData child env) where
 --
 -- Format:
 --
--- > {queue}(/{priority})(, ...)
+-- > {queue}(/{frequency})(, ...)
 --
 -- - Multiple values can be comma-separated
 -- - @queue@ cannot contain @/@ or @,@
--- - @priority@ can be any number, and determines frequency within the set
+-- - @frequency@ can be any number, and determines frequency to use that queue
 --
 -- Examples:
 --
