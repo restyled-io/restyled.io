@@ -38,20 +38,6 @@
           >
           <input type=submit value="Docker Info" />
 
-        <!-- <form -->
-        <!--   .form-websockets -->
-        <!--   action=@{AdminP $ AdminMachinesP $ AdminMachinePruneR machineId} -->
-        <!--   > -->
-        <!--   <input type=submit value="Prune" /> -->
-
-        <form
-          method=post
-          action=@{AdminP $ AdminMachinesP $ AdminMachineR machineId}
-          >
-          <input type=hidden name=_method value=PATCH />
-          <input type=hidden name=reconciling value=true />
-          <input type=submit value="Reconcile" />
-
         <form
           method=post
           action=@{AdminP $ AdminMachinesP $ AdminMachineR machineId}

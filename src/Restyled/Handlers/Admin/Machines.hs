@@ -69,34 +69,23 @@ postAdminMachinesR = selectRep $ do
 getAdminMachineR :: RestyleMachineId -> Handler Value
 getAdminMachineR machineId = runDB $ toJSON <$> getEntity404 machineId
 
-data AdminMachinePatch = AdminMachinePatch
+newtype AdminMachinePatch = AdminMachinePatch
     { enabled :: Maybe Bool
-    , reconciling :: Maybe Bool
     }
     deriving stock Generic
     deriving anyclass FromJSON
 
 patchAdminMachine
     :: RestyleMachineId -> AdminMachinePatch -> Handler (Entity RestyleMachine)
-patchAdminMachine machineId AdminMachinePatch { enabled, reconciling } = do
-    machine <- runDB $ do
-        -- Don't update reconciling here, let the reconcile routine handle that
-        -- itself, in a race-free way.
-        let updates = catMaybes [(RestyleMachineEnabled =.) <$> enabled]
-        unless (null updates) $ update machineId updates
-        getEntity404 machineId
-    machine <$ when
-        (reconciling == Just True)
-        (safelyReconcile 10 $ Just [machine])
+patchAdminMachine machineId AdminMachinePatch { enabled } = runDB $ do
+    let updates = catMaybes [(RestyleMachineEnabled =.) <$> enabled]
+    unless (null updates) $ update machineId updates
+    getEntity404 machineId
 
 patchAdminMachineR :: RestyleMachineId -> Handler TypedContent
 patchAdminMachineR machineId = selectRep $ do
     provideRep @_ @Html $ do
-        body <-
-            runInputPost
-            $ AdminMachinePatch
-            <$> iopt boolField "enabled"
-            <*> iopt boolField "reconciling"
+        body <- runInputPost $ AdminMachinePatch <$> iopt boolField "enabled"
         void $ patchAdminMachine machineId body
         setMessage "Machine updated"
         redirect $ AdminP $ AdminMachinesP AdminMachinesR
