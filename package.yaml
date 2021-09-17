@@ -136,6 +136,16 @@ executables:
       - load-env
       - restyled
 
+  sync-marketplace:
+    main: Main.hs
+    source-dirs: sync-marketplace
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-T
+    dependencies:
+      - restyled
+
 tests:
   test:
     main: Spec.hs
