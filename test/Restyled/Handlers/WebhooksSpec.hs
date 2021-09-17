@@ -6,13 +6,14 @@ import Restyled.Test
 
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.Lazy.Char8 as L8
-import Restyled.Backend.Webhook
 import System.FilePath ((</>))
 
 spec :: Spec
 spec = withApp $ do
     describe "POST /webhooks" $ do
         it "stores the body and responds 201" $ do
+            let q :: ByteString
+                q = "restyled:hooks:webhooks"
             body <- readFixture "webhooks/github/pull-request-opened.json"
 
             request $ do
@@ -21,7 +22,8 @@ spec = withApp $ do
                 setRequestBody body
 
             statusIs 201
-            awaitWebhook 5 `shouldReturn` Just (LB.toStrict body)
+            runRedis (brpop [q] 3)
+                `shouldReturn` Right (Just (q, LB.toStrict body))
 
 readFixture :: MonadIO m => FilePath -> m LB.ByteString
 readFixture = liftIO . L8.readFile . ("fixtures" </>)

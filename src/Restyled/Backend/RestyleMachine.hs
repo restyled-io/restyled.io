@@ -1,7 +1,5 @@
 module Restyled.Backend.RestyleMachine
     ( withRestyleMachineEnv
-    , getCurrentRestyleMachine
-    , disableRestyleMachine
     , deleteRestyleMachine
 
     -- * Exported for testing
@@ -37,22 +35,6 @@ withRestyleMachineEnv machine f = do
         , ("DOCKER_TLS_VERIFY", "1")
         ]
         f
-
-getCurrentRestyleMachine
-    :: (MonadIO m, MonadReader env m, HasProcessContext env)
-    => SqlPersistT m (Maybe (Entity RestyleMachine))
-getCurrentRestyleMachine = runMaybeT $ do
-    host <- MaybeT $ lift $ lookupEnvFromContext "DOCKER_HOST"
-    selectFirstT [RestyleMachineHost ==. host] []
-
-disableRestyleMachine :: MonadIO m => RestyleMachineId -> SqlPersistT m Bool
-disableRestyleMachine machineId = do
-    othersExist <- selectExists
-        [RestyleMachineId !=. machineId, RestyleMachineEnabled ==. True]
-
-    if othersExist
-        then True <$ update machineId [RestyleMachineEnabled =. False]
-        else pure False
 
 deleteRestyleMachine :: MonadIO m => Entity RestyleMachine -> SqlPersistT m ()
 deleteRestyleMachine (Entity machineId machine) = do

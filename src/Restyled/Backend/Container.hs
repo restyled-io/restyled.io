@@ -1,14 +1,10 @@
 module Restyled.Backend.Container
     ( StoppedContainer(..)
     , getStoppedContainers
-    , RunningContainer(..)
-    , getRunningContainer
-    , signalContainer
     ) where
 
 import Restyled.Prelude
 
-import Control.Lens (_1)
 import qualified Data.ByteString.Lazy.Char8 as LBS8
 import Restyled.Models
 
@@ -40,32 +36,6 @@ instance FromJSON StoppedContainer where
             <*> state
             .: "ExitCode"
 
-data RunningContainer = RunningContainer
-    { rcJobId :: JobId
-    , rcContainerId :: String
-    , rcStartedAt :: UTCTime
-    }
-
-instance Display RunningContainer where
-    display RunningContainer {..} =
-        "RunningContainer "
-            <> display (pack rcContainerId)
-            <> ", job "
-            <> display (toPathPiece rcJobId)
-            <> ", started "
-            <> displayShow rcStartedAt
-
-instance FromJSON RunningContainer where
-    parseJSON = withObject "Container" $ \o -> do
-        state <- o .: "State"
-        jobId <-
-            either fail pure
-            . fromPathPieceEither
-            =<< (.: "job-id")
-            =<< (.: "Labels")
-            =<< (o .: "Config")
-        RunningContainer jobId <$> o .: "Id" <*> state .: "StartedAt"
-
 fromPathPieceEither :: PathPiece a => Text -> Either String a
 fromPathPieceEither x =
     note ("Unable to parse with PathPiece: " <> unpack x) $ fromPathPiece x
@@ -84,25 +54,6 @@ getStoppedContainers = do
     if null containerIds
         then pure $ Right []
         else inspectContainers containerIds
-
-getRunningContainer
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasProcessContext env
-       )
-    => JobId
-    -> m (Either String (Maybe RunningContainer))
-getRunningContainer jobId = do
-    containerIds <- getContainerIdsBy
-        [ "label=restyler"
-        , "label=job-id=" <> unpack (toPathPiece jobId)
-        , "status=running"
-        ]
-
-    if null containerIds
-        then pure $ Right Nothing
-        else second listToMaybe <$> inspectContainers containerIds
 
 getContainerIdsBy
     :: ( MonadUnliftIO m
@@ -147,19 +98,3 @@ inspectContainers containerIds = do
             <> ", with stderr "
             <> displayShow err
             )
-
-signalContainer
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasProcessContext env
-       )
-    => String
-    -> RunningContainer
-    -> m ExitCode
-signalContainer signal RunningContainer {..} =
-    view _1
-        <$> proc
-                "docker"
-                ["kill", "--signal", signal, rcContainerId]
-                readProcess

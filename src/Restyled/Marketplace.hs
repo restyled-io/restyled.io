@@ -8,7 +8,6 @@ module Restyled.Marketplace
     , MarketplacePlanAllows(..)
     , marketplacePlanAllows
     , MarketplacePlanLimitation(..)
-    , whenMarketplacePlanForbids
     , isPrivateRepoPlan
     ) where
 
@@ -33,7 +32,7 @@ findOrCreateMarketplacePlan plan@MarketplacePlan {..} = do
 
 fetchUserHasMarketplacePlan
     :: MonadIO m => MarketplacePlanId -> GitHubUserName -> SqlPersistT m Bool
-fetchUserHasMarketplacePlan planId login = selectExists
+fetchUserHasMarketplacePlan planId login = exists
     [ MarketplaceAccountMarketplacePlan ==. planId
     , MarketplaceAccountGithubLogin ==. login
     ]
@@ -72,14 +71,6 @@ marketplacePlanAllowsPrivate repo = do
             MarketplacePlanForbids MarketplacePlanMaxRepos
         Just (PrivateRepoAccountExpired expiredAt) ->
             MarketplacePlanForbids $ MarketplacePlanAccountExpired expiredAt
-
-whenMarketplacePlanForbids
-    :: Applicative f
-    => MarketplacePlanAllows
-    -> (MarketplacePlanLimitation -> f ())
-    -> f ()
-whenMarketplacePlanForbids MarketplacePlanAllows _ = pure ()
-whenMarketplacePlanForbids (MarketplacePlanForbids limitation) f = f limitation
 
 isPrivateRepoPlan :: MarketplacePlan -> Bool
 isPrivateRepoPlan MarketplacePlan {..} =

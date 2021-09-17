@@ -34,20 +34,12 @@ library
       Restyled.Application
       Restyled.Authentication
       Restyled.Authorization
-      Restyled.Backend.AcceptedJob
-      Restyled.Backend.AcceptedWebhook
-      Restyled.Backend.Application
-      Restyled.Backend.ConcurrentJobs
       Restyled.Backend.Container
-      Restyled.Backend.DockerRunArgs
       Restyled.Backend.DockerRunJob
-      Restyled.Backend.ExecRestyler
       Restyled.Backend.Foundation
       Restyled.Backend.MarketplaceSync
-      Restyled.Backend.MissingDaemonError
       Restyled.Backend.Reconcile
       Restyled.Backend.RestyleMachine
-      Restyled.Backend.Webhook
       Restyled.Cache
       Restyled.Development.Seeds
       Restyled.Env
