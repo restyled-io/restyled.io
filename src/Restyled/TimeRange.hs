@@ -3,7 +3,6 @@ module Restyled.TimeRange
     , timeRangeBefore
     , timeRangeFromAgo
     , withinTimeRange
-    , timeRangeFilters
     ) where
 
 import Restyled.Prelude
@@ -40,6 +39,3 @@ withinTimeRange field TimeRange {..} =
     field E.>=. E.val tmFrom E.&&. field E.<=. E.val tmTo
 
 infix 4 `withinTimeRange`
-
-timeRangeFilters :: EntityField e UTCTime -> TimeRange -> [Filter e]
-timeRangeFilters field TimeRange {..} = [field >=. tmFrom, field <=. tmTo]
