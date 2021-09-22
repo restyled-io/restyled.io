@@ -57,19 +57,6 @@ JobLogLine json
 
   deriving Eq Show Generic
 
-RestyleMachine json
-  name Text
-  enabled Bool
-  host Text
-  caCert Text
-  cert Text
-  key Text
-  jobCount Int
-  reconciling Bool
-
-  UniqueRestyleMachine name
-  deriving Eq Show
-
 MarketplacePlan json
   githubId Int Maybe
   name Text
