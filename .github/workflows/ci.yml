@@ -43,7 +43,9 @@ jobs:
       - uses: freckle/stack-cache-action@v1
       - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
       - run: db/migrate test upgrade
-      - uses: freckle/stack-action@v1.1
+      - uses: freckle/stack-action@v2.3
+        with:
+          weeder-arguments: --require-hs-files
       - run: db/pending-prod-migrations --check
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
