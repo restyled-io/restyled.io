@@ -1,16 +1,8 @@
 module Restyled.WebSockets
     (
-    -- * Async
-      withAsyncWebSockets
-    , withAsyncWebSockets_
-
     -- * Helpers
     -- | TODO: I think a since-fixed bug was causing the need for this
-    --
-    -- Try to write new code without it and see if it breaks. If not, remove it
-    -- where it is used currently.
-    --
-    , ignoringConnectionException
+      ignoringConnectionException
 
     -- * Wrappers
     , sendTextDataAck
@@ -22,42 +14,7 @@ module Restyled.WebSockets
 import Restyled.Prelude
 
 import qualified Network.WebSockets as WS
-import Yesod.Core (MonadHandler)
 import Yesod.WebSockets
-
-data Message a = Send a | Done
-
-withAsyncWebSockets
-    :: (MonadHandler m, MonadUnliftIO m, WS.WebSocketsData a)
-    => ((a -> m ()) -> m b)
-    -> m b
-withAsyncWebSockets f = do
-    c <- newChan
-    a <- async $ do
-        x <- f $ writeChan c . Send
-        x <$ writeChan c Done
-
-    webSockets $ loop c
-    wait a
-  where
-    loop
-        :: (MonadIO m, WS.WebSocketsData a)
-        => Chan (Message a)
-        -> ReaderT WS.Connection m ()
-    loop c = do
-        msg <- readChan c
-
-        case msg of
-            Send x -> do
-                void $ sendTextDataAck x
-                loop c
-            Done -> sendClose @_ @Text ""
-
-withAsyncWebSockets_
-    :: (MonadHandler m, MonadUnliftIO m, WS.WebSocketsData a)
-    => ((a -> m ()) -> m b)
-    -> m ()
-withAsyncWebSockets_ = void . withAsyncWebSockets
 
 ignoringConnectionException :: MonadUnliftIO m => m () -> m ()
 ignoringConnectionException = handle ignoreConnectionException
