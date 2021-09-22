@@ -23,22 +23,6 @@ seedDB = do
     Entity _ restyler <- upsertRepo $ restyledRepo "restyler"
     Entity _ _ops <- upsertRepo $ restyledRepoPrivate "ops"
 
-    -- We don't seed an enabled example because for it to be functional would
-    -- mean having secrets in the seeds, and we'd rather not have a
-    -- non-functional machine in the seeded database.
-    void $ upsert
-        RestyleMachine
-            { restyleMachineName = "disabled-example"
-            , restyleMachineEnabled = False
-            , restyleMachineHost = "tcp://123.123.123:123"
-            , restyleMachineCaCert = "-- CA --\n"
-            , restyleMachineCert = "-- CERT --\n"
-            , restyleMachineKey = "-- Key --\n"
-            , restyleMachineJobCount = 0
-            , restyleMachineReconciling = False
-            }
-        []
-
     seedJob demo 1 now (Just 127) invalidArgumentOutput
     seedJob restyled 1 now (Just 0) noDifferencesOutput
     seedJob restyler 1 now Nothing restylingOutput
