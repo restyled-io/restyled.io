@@ -1,4 +1,3 @@
-{-# LANGUAGE QuasiQuotes #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Restyled.Yesod
@@ -8,9 +7,6 @@ module Restyled.Yesod
 
     -- * DB
     , getEntity404
-
-    -- * Fields
-    , jsonField
 
     -- * TypedContent
     , sendResponseCSV
@@ -50,22 +46,6 @@ requireJsonBody = requireCheckJsonBody
 getEntity404
     :: (MonadHandler m, SqlEntity a) => Key a -> SqlPersistT m (Entity a)
 getEntity404 k = Entity k <$> get404 k
-
-jsonField
-    :: (Monad m, RenderMessage (HandlerSite m) FormMessage, FromJSON a)
-    => (a -> Text)
-    -> Field m a
-jsonField enc = Field
-    { fieldParse = parseHelper parseVal
-    , fieldView = \theId name attrs val isReq -> toWidget [hamlet|
-$newline never
-<textarea :isReq:required="" id="#{theId}" name="#{name}" *{attrs}>#{either id enc val}
-|]
-    , fieldEnctype = UrlEncoded
-    }
-  where
-    parseVal :: FromJSON a => Text -> Either FormMessage a
-    parseVal = first (MsgInvalidEntry . pack) . eitherDecodeStrict . encodeUtf8
 
 sendResponseCSV
     :: forall m t a r
