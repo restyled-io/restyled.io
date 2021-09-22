@@ -47,12 +47,6 @@
 /admin AdminP:
   /repos AdminReposP:
     /search AdminReposSearchR GET
-  /machines AdminMachinesP:
-    / AdminMachinesR GET POST
-    /new AdminMachinesNewR GET
-    !/#RestyleMachineId AdminMachineR GET PATCH DELETE
-    !/#RestyleMachineId/info AdminMachineInfoR GET
-    !/#RestyleMachineId/prune AdminMachinePruneR GET
   /marketplace AdminMarketplaceP:
     / AdminMarketplaceR GET
     /plans AdminMarketplacePlansP:

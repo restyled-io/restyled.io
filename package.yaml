@@ -48,7 +48,6 @@ library:
     - QuickCheck
     - aeson
     - aeson-casing
-    - aeson-pretty
     - ansi-terminal
     - amazonka
     - amazonka-cloudwatch-logs
@@ -69,7 +68,6 @@ library:
     - extra
     - fast-logger
     - file-embed
-    - filepath
     - formatting
     - generic-arbitrary
     - github

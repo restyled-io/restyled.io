@@ -12,8 +12,10 @@ spec :: Spec
 spec = withApp $ do
     describe "AdminP" $ do
         -- Just a random example page
-        let getAdmin :: YesodExample App ()
-            getAdmin = get $ AdminP $ AdminMachinesP AdminMachinesR
+        let adminRoute = AdminP $ AdminOffersP AdminOffersR
+
+            getAdmin :: YesodExample App ()
+            getAdmin = get adminRoute
 
         it "404s for un-authenticated users" $ do
             getAdmin
@@ -44,7 +46,7 @@ spec = withApp $ do
                 adminToken <- runDB $ createApiToken (entityKey admin) "testing"
 
                 request $ do
-                    setUrl $ AdminP $ AdminMachinesP AdminMachinesR
+                    setUrl adminRoute
                     addRequestHeader
                         ( hAuthorization
                         , "token " <> encodeUtf8 (apiTokenRaw adminToken)
@@ -58,7 +60,7 @@ spec = withApp $ do
                 userToken <- runDB $ createApiToken (entityKey user) "testing"
 
                 request $ do
-                    setUrl $ AdminP $ AdminMachinesP AdminMachinesR
+                    setUrl adminRoute
                     addRequestHeader
                         ( hAuthorization
                         , "token " <> encodeUtf8 (apiTokenRaw userToken)
@@ -72,7 +74,7 @@ spec = withApp $ do
                 adminToken <- runDB $ createApiToken (entityKey admin) "testing"
 
                 request $ do
-                    setUrl $ AdminP $ AdminMachinesP AdminMachinesR
+                    setUrl adminRoute
                     addGetParam "token" $ apiTokenRaw adminToken
 
                 statusIs 200
@@ -83,7 +85,7 @@ spec = withApp $ do
                 userToken <- runDB $ createApiToken (entityKey user) "testing"
 
                 request $ do
-                    setUrl $ AdminP $ AdminMachinesP AdminMachinesR
+                    setUrl adminRoute
                     addGetParam "token" $ apiTokenRaw userToken
 
                 statusIs 404
