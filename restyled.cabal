@@ -22,7 +22,6 @@ library
       GitHub.Endpoints.MarketplaceListing.Plans.Accounts
       GitHub.Endpoints.Repos.Collaborators.Permissions
       GitHub.Request.Preview
-      Restyled.Admin.CreateMachine
       Restyled.Admin.RepoSearch
       Restyled.Api.CreateJob
       Restyled.Api.Job
@@ -34,12 +33,8 @@ library
       Restyled.Application
       Restyled.Authentication
       Restyled.Authorization
-      Restyled.Backend.Container
-      Restyled.Backend.DockerRunJob
       Restyled.Backend.Foundation
       Restyled.Backend.MarketplaceSync
-      Restyled.Backend.Reconcile
-      Restyled.Backend.RestyleMachine
       Restyled.Cache
       Restyled.Development.Seeds
       Restyled.Env
@@ -47,7 +42,6 @@ library
       Restyled.GitHubOrg
       Restyled.GitHubStudents
       Restyled.Handlers.Admin
-      Restyled.Handlers.Admin.Machines
       Restyled.Handlers.Admin.Marketplace
       Restyled.Handlers.Admin.Marketplace.Accounts
       Restyled.Handlers.Admin.Marketplace.Plans
@@ -107,7 +101,6 @@ library
       RIO.AWS
       RIO.DB
       RIO.Logger
-      RIO.Process.Follow
       RIO.Redis
       SVCS.GitHub
       SVCS.Names
@@ -149,7 +142,6 @@ library
       QuickCheck
     , aeson
     , aeson-casing
-    , aeson-pretty
     , amazonka
     , amazonka-cloudwatch-logs
     , amazonka-core
@@ -171,7 +163,6 @@ library
     , extra
     , fast-logger
     , file-embed
-    , filepath
     , formatting
     , generic-arbitrary
     , github
@@ -276,7 +267,6 @@ test-suite test
       Restyled.Api.UpdateJobSpec
       Restyled.Api.UpsertRepoSpec
       Restyled.AuthenticationSpec
-      Restyled.Backend.RestyleMachineSpec
       Restyled.Handlers.AdminSpec
       Restyled.Handlers.CommonSpec
       Restyled.Handlers.HomeSpec
@@ -300,7 +290,6 @@ test-suite test
       Restyled.TimeSpec
       Restyled.Widgets.ContainsURLsSpec
       Restyled.Widgets.JobSpec
-      RIO.Process.FollowSpec
       Test.Hspec.Lifted
       Paths_restyled
   hs-source-dirs:

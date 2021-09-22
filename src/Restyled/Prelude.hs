@@ -49,7 +49,6 @@ import RIO.DB as X
 import RIO.List as X (headMaybe, partition)
 import RIO.Logger as X
 import RIO.Process as X
-import RIO.Process.Follow as X
 import RIO.Redis as X
 import RIO.Time as X
 import SVCS.GitHub as X
