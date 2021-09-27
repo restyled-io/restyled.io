@@ -19,11 +19,17 @@ WORKDIR /src
 COPY stack.yaml package.yaml /src/
 RUN stack install --dependencies-only
 
-# App
-COPY app /src/app
+# Main app
 COPY src /src/src
+
+# Executables
+COPY app /src/app
+COPY sync-marketplace /src/sync-marketplace
+
+# Web support
 COPY templates /src/templates
 COPY config /src/config
+
 ARG REVISION=unknown
 RUN echo $REVISION > /src/config/revision
 RUN stack install --ghc-options -DDOCKERIZED
