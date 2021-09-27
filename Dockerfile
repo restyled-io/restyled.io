@@ -60,6 +60,7 @@ WORKDIR /app
 # Build stage files
 COPY --from=builder /src/config /app/config
 COPY --from=builder /root/.local/bin/restyled.io /app/restyled.io
+COPY --from=builder /root/.local/bin/sync-marketplace /app/sync-marketplace
 COPY --from=builder /usr/local/bin/docker /usr/local/bin/docker
 
 # Static
