@@ -10,6 +10,7 @@ import Control.Retry (exponentialBackoff, limitRetries, retrying)
 import qualified Data.Vector as V
 import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
+import Restyled.Env
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.UsCents
@@ -30,7 +31,23 @@ instance HasSettings AppSettings where
     settingsL = id
 
 loadSettings :: IO AppSettings
-loadSettings = undefined
+loadSettings =
+    parse
+        $ AppSettings
+        <$> (PostgresConf
+            <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
+            <*> var auto "PGPOOLSTRIPES" (def 1)
+            <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
+            <*> var auto "PGPOOLSIZE" (def 10)
+            )
+        <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
+        <*> var logLevel "LOG_LEVEL" (def LevelInfo)
+        <*> var githubId "GITHUB_APP_ID" mempty
+        <*> var nonempty "GITHUB_APP_KEY" mempty
+        <*> switch "STUB_MARKETPLACE_LISTING" mempty
+
+defaultDatabaseURL :: ByteString
+defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 data App = App
     { appLogFunc :: LogFunc
