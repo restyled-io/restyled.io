@@ -6,4 +6,3 @@
 ###
 pkill restyled.io
 bin/restyled.io-dev web &
-#bin/restyled.io-dev webhooks &

@@ -1,7 +1,5 @@
 module Restyled.Options
     ( RestyledOptions(..)
-    , RestyledCommand(..)
-    , BackendCommand(..)
     , parseRestyledOptions
     ) where
 
@@ -9,16 +7,9 @@ import Restyled.Prelude
 
 import Options.Applicative
 
-data RestyledOptions = RestyledOptions
+newtype RestyledOptions = RestyledOptions
     { oEnvFile :: Maybe FilePath
-    , oCommand :: RestyledCommand
     }
-
-data RestyledCommand
-    = Web
-    | Backend BackendCommand
-
-data BackendCommand = SeedDB
 
 parseRestyledOptions :: IO RestyledOptions
 parseRestyledOptions = execParser $ info (restyledOptions <**> helper) fullDesc
@@ -33,7 +24,3 @@ restyledOptions = RestyledOptions
         <> metavar "PATH"
         <> help "Load PATH as a .env file"
         ))
-    <*> subparser
-        (  command "web" (info (pure Web) mempty)
-        <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
-        )

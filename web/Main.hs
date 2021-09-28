@@ -7,7 +7,6 @@ import Restyled.Prelude
 import LoadEnv (loadEnvFrom)
 import Restyled.Application (runWaiApp)
 import Restyled.Backend.Foundation (loadBackend)
-import Restyled.Development.Seeds (seedDB)
 import Restyled.Foundation (loadApp)
 import Restyled.Options
 import Restyled.Settings (loadSettings)
@@ -19,11 +18,6 @@ main = do
     traverse_ loadEnvFrom oEnvFile
     settings <- loadSettings
 
-    case oCommand of
-        Web -> do
-            backend <- loadBackend settings
-            runWaiApp =<< loadApp backend
-        Backend cmd -> do
-            backend <- loadBackend settings
-            runRIO backend $ case cmd of
-                SeedDB -> runDB seedDB
+    -- TODO: Collapse loadBackend/Backend into loadApp/App
+    backend <- loadBackend settings
+    runWaiApp =<< loadApp backend
