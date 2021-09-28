@@ -5,8 +5,8 @@ module Main
 import Restyled.Prelude
 
 import LoadEnv (loadEnvFrom)
+import Restyled.Development.Seeds
 import Restyled.Options
-import Restyled.SyncMarketplace
 
 main :: IO ()
 main = do
@@ -14,4 +14,4 @@ main = do
     RestyledOptions {..} <- parseRestyledOptions
     traverse_ loadEnvFrom oEnvFile
     app <- loadApp
-    runRIO app syncMarketplace
+    runRIO app $ runDB seedDB
