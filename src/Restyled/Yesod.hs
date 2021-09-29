@@ -23,8 +23,8 @@ import Yesod.Auth.OAuth2.GitHub as X
 import Yesod.Auth.OAuth2.GitHubStudents as X
 import Yesod.Auth.OAuth2.GitLab as X
 import Yesod.Core as X hiding (requireJsonBody)
-import Yesod.Form as X
 import Yesod.Core.Types.Lens as X
+import Yesod.Form as X
 import Yesod.Paginator as X
 import Yesod.Persist as X (get404, getBy404)
 
