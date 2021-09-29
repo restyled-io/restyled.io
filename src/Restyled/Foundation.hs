@@ -8,7 +8,6 @@ module Restyled.Foundation
 
 import Restyled.Prelude
 
-import Control.Monad.Catch (MonadCatch(..))
 import Data.Text (splitOn)
 import Restyled.ApiError
 import Restyled.ApiToken
@@ -23,7 +22,6 @@ import Restyled.SqlError
 import Restyled.Yesod
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
-import qualified UnliftIO.Exception as UnliftIO
 import Yesod.Default.Util (addStaticContentExternal)
 import Yesod.Persist (YesodPersist)
 import qualified Yesod.Persist as YP
@@ -250,9 +248,3 @@ instance YesodAuth App where
 
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage
-
-instance MonadCatch Handler where
-    catch = UnliftIO.catch
-
-instance MonadAWS Handler where
-    liftAWS = implementAWS

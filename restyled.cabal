@@ -34,7 +34,6 @@ library
       Restyled.Authentication
       Restyled.Authorization
       Restyled.Backend.Foundation
-      Restyled.Backend.MarketplaceSync
       Restyled.Cache
       Restyled.Development.Seeds
       Restyled.Env
@@ -222,11 +221,50 @@ library
   default-language: Haskell2010
 
 executable restyled.io
-  main-is: main.hs
+  main-is: Main.hs
   other-modules:
       Paths_restyled
   hs-source-dirs:
-      app
+      web
+  default-extensions:
+      BangPatterns
+      DataKinds
+      DeriveAnyClass
+      DeriveFoldable
+      DeriveFunctor
+      DeriveGeneric
+      DeriveLift
+      DeriveTraversable
+      DerivingStrategies
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      LambdaCase
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      NoMonomorphismRestriction
+      OverloadedStrings
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      TypeApplications
+      TypeFamilies
+      ViewPatterns
+  ghc-options: -Weverything -Wno-all-missed-specialisations -Wno-missing-import-lists -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unsafe -threaded -rtsopts -with-rtsopts=-T
+  build-depends:
+      base
+    , load-env
+    , restyled
+  default-language: Haskell2010
+
+executable seed-db
+  main-is: Main.hs
+  other-modules:
+      Paths_restyled
+  hs-source-dirs:
+      seed-db
   default-extensions:
       BangPatterns
       DataKinds
@@ -295,6 +333,7 @@ executable sync-marketplace
   ghc-options: -Weverything -Wno-all-missed-specialisations -Wno-missing-import-lists -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unsafe -threaded -rtsopts -with-rtsopts=-T
   build-depends:
       base
+    , load-env
     , restyled
   default-language: Haskell2010
 

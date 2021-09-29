@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module Restyled.Backend.Foundation
     ( Backend(..)
     , loadBackend
@@ -46,9 +44,6 @@ instance HasRedis Backend where
 
 instance HasAWS Backend where
     awsEnvL = lens backendAWSEnv $ \x y -> x { backendAWSEnv = y }
-
-instance HasAWS env => MonadAWS (RIO env) where
-    liftAWS = implementAWS
 
 loadBackend :: AppSettings -> IO Backend
 loadBackend = loadBackendHandle stdout
