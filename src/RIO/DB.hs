@@ -19,7 +19,7 @@ import Database.Persist.Postgresql
 import Database.Persist.Sql (ConnectionPool, SqlPersistT, runSqlPool)
 import Database.PostgreSQL.Simple (Connection, execute)
 import Yesod.Core.Types (HandlerData)
-import Yesod.Lens
+import Yesod.Core.Types.Lens
 
 class HasSqlPool env where
     sqlPoolL :: Lens' env ConnectionPool
@@ -28,7 +28,7 @@ instance HasSqlPool ConnectionPool where
     sqlPoolL = id
 
 instance HasSqlPool env => HasSqlPool (HandlerData child env) where
-    sqlPoolL = handlerEnvL . siteL . sqlPoolL
+    sqlPoolL = envL . siteL . sqlPoolL
 
 runDB
     :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)

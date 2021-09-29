@@ -105,7 +105,7 @@ library
       SVCS.Names
       SVCS.Payload
       Yesod.Auth.OAuth2.GitHubStudents
-      Yesod.Lens
+      Yesod.Core.Types.Lens
   other-modules:
       Paths_restyled
   hs-source-dirs:

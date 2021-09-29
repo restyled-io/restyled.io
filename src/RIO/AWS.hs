@@ -17,7 +17,7 @@ import Network.AWS (AWS, MonadAWS(..), paginate, runAWS, runResourceT, send)
 import RIO.Orphans ()
 import qualified UnliftIO.Exception as UnliftIO
 import Yesod.Core.Types (HandlerData, HandlerFor)
-import Yesod.Lens
+import Yesod.Core.Types.Lens
 
 class HasAWS env where
     awsEnvL :: Lens' env AWS.Env
@@ -26,7 +26,7 @@ instance HasAWS AWS.Env where
     awsEnvL = id
 
 instance HasAWS env => HasAWS (HandlerData child env) where
-    awsEnvL = handlerEnvL . siteL . awsEnvL
+    awsEnvL = envL . siteL . awsEnvL
 
 discoverAWS
     :: MonadIO m
