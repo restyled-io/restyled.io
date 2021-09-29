@@ -29,7 +29,6 @@ import LoadEnv (loadEnvFrom)
 import qualified RIO.DB as RIO
 import qualified RIO.Redis as RIO
 import Restyled.Application (waiMiddleware)
-import Restyled.Backend.Foundation (loadBackend)
 import Text.Shakespeare.Text (st)
 
 -- | A monomorphic alias just to avoid annotations in specs
@@ -44,7 +43,7 @@ runRedis = RIO.runRedis
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
     loadEnvFrom ".env.test"
-    foundation <- loadApp =<< loadBackend =<< loadSettings
+    foundation <- loadApp
     runRIO foundation $ do
         RIO.runDB wipeDB
         RIO.runRedis wipeRedis

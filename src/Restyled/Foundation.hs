@@ -9,11 +9,11 @@ module Restyled.Foundation
 import Restyled.Prelude
 
 import Data.Text (splitOn)
+import qualified Network.AWS as AWS (Env)
 import Restyled.ApiError
 import Restyled.ApiToken
 import Restyled.Authentication
 import Restyled.Authorization
-import Restyled.Backend.Foundation
 import Restyled.Models
 import Restyled.Queues
 import Restyled.ServerUnavailable
@@ -28,41 +28,55 @@ import qualified Yesod.Persist as YP
 import Yesod.Static
 
 data App = App
-    { appBackend :: Backend
+    { appLogFunc :: LogFunc
+    , appSettings :: AppSettings
+    , appProcessContext :: ProcessContext
+    , appConnPool :: ConnectionPool
+    , appRedisConn :: Connection
+    , appAWSEnv :: AWS.Env
     , appStatic :: Static
     }
 
-backendL :: Lens' App Backend
-backendL = lens appBackend $ \x y -> x { appBackend = y }
-
 instance HasLogFunc App where
-    logFuncL = backendL . logFuncL
+    logFuncL = lens appLogFunc $ \x y -> x { appLogFunc = y }
 
 instance HasProcessContext App where
-    processContextL = backendL . processContextL
+    processContextL =
+        lens appProcessContext $ \x y -> x { appProcessContext = y }
 
 instance HasSettings App where
-    settingsL = backendL . settingsL
-
-instance HasSqlPool App where
-    sqlPoolL = backendL . sqlPoolL
-
-instance HasRedis App where
-    redisConnectionL = backendL . redisConnectionL
-
-instance HasAWS App where
-    awsEnvL = backendL . awsEnvL
+    settingsL = lens appSettings $ \x y -> x { appSettings = y }
 
 instance HasQueues App where
-    queuesL = backendL . queuesL
+    queuesL = settingsL . queuesL
 
-loadApp :: Backend -> IO App
-loadApp backend@Backend {..} = App backend
-    <$> makeStatic (appStaticDir backendSettings)
-  where
-    makeStatic
-        | appMutableStatic backendSettings = staticDevel
-        | otherwise = static
+instance HasSqlPool App where
+    sqlPoolL = lens appConnPool $ \x y -> x { appConnPool = y }
+
+instance HasRedis App where
+    redisConnectionL = lens appRedisConn $ \x y -> x { appRedisConn = y }
+
+instance HasAWS App where
+    awsEnvL = lens appAWSEnv $ \x y -> x { appAWSEnv = y }
+
+loadApp :: IO App
+loadApp = do
+    settings@AppSettings {..} <- loadSettings
+
+    logFunc <- terminalLogFunc stdout appLogLevel
+
+    runRIO logFunc $ logInfoN "Starting up..."
+    let createPool = createConnectionPool appDatabaseConf appStatementTimeout
+        makeStatic
+            | appMutableStatic = staticDevel
+            | otherwise = static
+
+    App logFunc settings
+        <$> mkDefaultProcessContext
+        <*> runRIO logFunc createPool
+        <*> checkedConnect appRedisConf
+        <*> discoverAWS appAwsTrace
+        <*> makeStatic appStaticDir
 
 mkYesodData "App" $(parseRoutesFile "config/routes")
 

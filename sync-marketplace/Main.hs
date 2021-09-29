@@ -4,14 +4,11 @@ module Main
 
 import Restyled.Prelude
 
-import LoadEnv (loadEnvFrom)
-import Restyled.Options
+import Restyled.CLI
 import Restyled.SyncMarketplace
 
 main :: IO ()
 main = do
-    setLineBuffering
-    RestyledOptions {..} <- parseRestyledOptions
-    traverse_ loadEnvFrom oEnvFile
+    setupCLI
     app <- loadApp
     runRIO app syncMarketplace
