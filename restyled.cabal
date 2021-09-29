@@ -34,6 +34,7 @@ library
       Restyled.Authentication
       Restyled.Authorization
       Restyled.Backend.Foundation
+      Restyled.Backend.MarketplaceSync
       Restyled.Cache
       Restyled.Development.Seeds
       Restyled.Env

@@ -18,7 +18,9 @@ data RestyledCommand
     = Web
     | Backend BackendCommand
 
-data BackendCommand = SeedDB
+data BackendCommand
+    = SyncMarketplace
+    | SeedDB
 
 parseRestyledOptions :: IO RestyledOptions
 parseRestyledOptions = execParser $ info (restyledOptions <**> helper) fullDesc
@@ -35,5 +37,6 @@ restyledOptions = RestyledOptions
         ))
     <*> subparser
         (  command "web" (info (pure Web) mempty)
+        <> command "sync-marketplace" (info (pure $ Backend SyncMarketplace) mempty)
         <> command "seed-db" (info (pure $ Backend SeedDB) mempty)
         )
