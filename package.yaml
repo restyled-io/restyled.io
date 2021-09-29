@@ -126,8 +126,8 @@ library:
 
 executables:
   restyled.io:
-    main: Main.hs
-    source-dirs: web
+    main: main.hs
+    source-dirs: app
     ghc-options:
       - -threaded
       - -rtsopts
@@ -144,18 +144,6 @@ executables:
       - -rtsopts
       - -with-rtsopts=-T
     dependencies:
-      - load-env
-      - restyled
-
-  seed-db:
-    main: Main.hs
-    source-dirs: seed-db
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-T
-    dependencies:
-      - load-env
       - restyled
 
 tests:
