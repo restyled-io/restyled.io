@@ -1,88 +1,16 @@
 module Restyled.Development.Seeds
-    ( App
-    , loadApp
-    , seedDB
+    ( seedDB
     ) where
 
 import Restyled.Prelude
 
-import Control.Monad.Catch (MonadCatch)
-import qualified Data.List.NonEmpty as NE
-import Data.Monoid (First)
-import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
-import qualified Network.AWS as AWS (Env)
-import Network.AWS.CloudWatchLogs.CreateLogStream
-import Network.AWS.CloudWatchLogs.DeleteLogStream
-import Network.AWS.CloudWatchLogs.PutLogEvents
-import Network.AWS.CloudWatchLogs.Types
-import Network.AWS.Lens (catching_)
-import Restyled.Env
+import qualified Prelude as Unsafe
+import Restyled.JobLogLine
 import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.Settings
 import Restyled.UsCents
-
-data AppSettings = AppSettings
-    { appDatabaseConf :: PostgresConf
-    , appStatementTimeout :: Maybe Integer
-    , appLogLevel :: LogLevel
-    , appRestylerLogGroup :: Text
-    , appRestylerLogStreamPrefix :: Text
-    , appAwsTrace :: Bool
-    }
-
-class HasSettings env where
-    settingsL :: Lens' env AppSettings
-
-instance HasSettings AppSettings where
-    settingsL = id
-
-loadSettings :: IO AppSettings
-loadSettings =
-    parse
-        $ AppSettings
-        <$> (PostgresConf
-            <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
-            <*> var auto "PGPOOLSTRIPES" (def 1)
-            <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
-            <*> var auto "PGPOOLSIZE" (def 10)
-            )
-        <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
-        <*> var logLevel "LOG_LEVEL" (def LevelInfo)
-        <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
-        <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
-        <*> switch "AWS_TRACE" mempty
-
-defaultDatabaseURL :: ByteString
-defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
-
-data App = App
-    { appLogFunc :: LogFunc
-    , appSettings :: AppSettings
-    , appSqlPool :: ConnectionPool
-    , appAWSEnv :: AWS.Env
-    }
-
-instance HasLogFunc App where
-    logFuncL = lens appLogFunc $ \x y -> x { appLogFunc = y }
-
-instance HasSettings App where
-    settingsL = lens appSettings $ \x y -> x { appSettings = y }
-
-instance HasSqlPool App where
-    sqlPoolL = lens appSqlPool $ \x y -> x { appSqlPool = y }
-
-instance HasAWS App where
-    awsEnvL = lens appAWSEnv $ \x y -> x { appAWSEnv = y }
-
-loadApp :: IO App
-loadApp = do
-    appSettings@AppSettings {..} <- loadSettings
-    appLogFunc <- terminalLogFunc stdout appLogLevel
-    appSqlPool <- runRIO appLogFunc
-        $ createConnectionPool appDatabaseConf appStatementTimeout
-    appAWSEnv <- discoverAWS appAwsTrace
-    pure App { .. }
 
 seedDB
     :: (MonadUnliftIO m, MonadAWS m, MonadReader env m, HasSettings env)
@@ -172,21 +100,23 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
 
     -- Capture it "running"
     let
-        jobLogLines =
+        jobLogLines = map
             (\(t, content) -> JobLogLine
-                    { jobLogLineJob = jobId
-                    , jobLogLineCreatedAt = t
-                    , jobLogLineStream = "system"
-                    , jobLogLineContent = content
-                    }
-                )
-                <$> timestamped
+                { jobLogLineJob = jobId
+                , jobLogLineCreatedAt = t
+                , jobLogLineStream = "system"
+                , jobLogLineContent = content
+                }
+            )
+            timestamped
 
-    lift $ seedJobLogLines jobId jobLogLines
+    lift $ do
+        deleteJobLogLines jobId
+        captureJobLogLines jobLogLines
 
     -- Complete it if appropriate
     for_ mExitCode $ \ec -> do
-        let lastLogLineAt = jobLogLineCreatedAt $ NE.last jobLogLines
+        let lastLogLineAt = jobLogLineCreatedAt $ Unsafe.last jobLogLines
             completedAt = addUTCTime 1 lastLogLineAt
 
         update
@@ -197,10 +127,13 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
             ]
   where
     timestamped =
-        NE.zip (secondsFrom createdAt) $ "Restyling..." :| untimestamped
+        zip (secondsFrom createdAt)
+            $ "docker run --rm ..."
+            : "Running on ..."
+            : untimestamped
 
-secondsFrom :: UTCTime -> NonEmpty UTCTime
-secondsFrom = NE.iterate $ addUTCTime 1
+secondsFrom :: UTCTime -> [UTCTime]
+secondsFrom t0 = let t1 = addUTCTime 1 t0 in t1 : secondsFrom t1
 
 -- brittany-next-binding --columns=250
 
@@ -385,33 +318,3 @@ configErrorOutput1 =
     , "Please see https://github.com/restyled-io/restyled.io/wiki/Common-Errors:-.restyled.yaml"
     , " "
     ]
-
-seedJobLogLines
-    :: (MonadAWS m, MonadReader env m, HasSettings env)
-    => JobId
-    -> NonEmpty JobLogLine
-    -> m ()
-seedJobLogLines jobId jobLogLines = do
-    AppSettings {..} <- view settingsL
-
-    let group = appRestylerLogGroup
-        stream = appRestylerLogStreamPrefix <> toPathPiece jobId
-        events = toInputLogEvent <$> jobLogLines
-
-    ignoring _ResourceNotFoundException $ void $ send $ deleteLogStream
-        group
-        stream
-
-    void $ send $ createLogStream group stream
-    void $ send $ putLogEvents group stream events
-
-toInputLogEvent :: JobLogLine -> InputLogEvent
-toInputLogEvent JobLogLine {..} = inputLogEvent
-    (utcTimeToPOSIXMilliseconds jobLogLineCreatedAt)
-    jobLogLineContent
-
-utcTimeToPOSIXMilliseconds :: Integral n => UTCTime -> n
-utcTimeToPOSIXMilliseconds = round . (* 1000) . utcTimeToPOSIXSeconds
-
-ignoring :: MonadCatch m => Getting (First a) SomeException a -> m () -> m ()
-ignoring l f = catching_ l f $ pure ()

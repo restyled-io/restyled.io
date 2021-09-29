@@ -23,9 +23,8 @@ RUN stack install --dependencies-only
 COPY src /src/src
 
 # Executables
-COPY web /src/web
+COPY app /src/app
 COPY sync-marketplace /src/sync-marketplace
-COPY seed-db /src/seed-db
 
 # Web support
 COPY templates /src/templates
@@ -62,7 +61,6 @@ WORKDIR /app
 COPY --from=builder /src/config /app/config
 COPY --from=builder /root/.local/bin/restyled.io /app/restyled.io
 COPY --from=builder /root/.local/bin/sync-marketplace /app/sync-marketplace
-COPY --from=builder /root/.local/bin/seed-db /app/seed-db
 COPY --from=builder /usr/local/bin/docker /usr/local/bin/docker
 
 # Static
