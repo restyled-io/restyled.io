@@ -9,9 +9,6 @@ module Restyled.Prelude
     , getByT
     , getT
 
-    -- * IO
-    , setLineBuffering
-
     -- * Formatting
     , pluralize
     , pluralizeWith
@@ -79,15 +76,6 @@ getByT = MaybeT . getBy
 
 getT :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) a
 getT = MaybeT . get
-
--- | Set output handles to line buffering
---
--- Required to ensure container logs are visible immediately.
---
-setLineBuffering :: MonadIO m => m ()
-setLineBuffering = do
-    hSetBuffering stdout LineBuffering
-    hSetBuffering stderr LineBuffering
 
 pluralize
     :: TL.Text -- ^ Singular
