@@ -87,7 +87,7 @@ instance HasSettings AppSettings where
     settingsL = id
 
 instance HasSettings env => HasSettings (HandlerData child env) where
-    settingsL = handlerEnvL . siteL . settingsL
+    settingsL = envL . siteL . settingsL
 
 instance HasQueues AppSettings where
     queuesL = lens appRestylerQueues $ \x y -> x { appRestylerQueues = y }

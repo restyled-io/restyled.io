@@ -24,7 +24,7 @@ import Yesod.Auth.OAuth2.GitHubStudents as X
 import Yesod.Auth.OAuth2.GitLab as X
 import Yesod.Core as X hiding (requireJsonBody)
 import Yesod.Form as X
-import Yesod.Lens as X
+import Yesod.Core.Types.Lens as X
 import Yesod.Paginator as X
 import Yesod.Persist as X (get404, getBy404)
 
@@ -35,10 +35,10 @@ import Restyled.Prelude
 import Yesod.Core.Types (HandlerData)
 
 instance HasLogFunc env => HasLogFunc (HandlerData child env) where
-    logFuncL = handlerEnvL . siteL . logFuncL
+    logFuncL = envL . siteL . logFuncL
 
 instance HasProcessContext env => HasProcessContext (HandlerData child env) where
-    processContextL = handlerEnvL . siteL . processContextL
+    processContextL = envL . siteL . processContextL
 
 requireJsonBody :: (MonadHandler m, FromJSON a) => m a
 requireJsonBody = requireCheckJsonBody

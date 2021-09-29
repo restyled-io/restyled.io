@@ -19,7 +19,7 @@ import Restyled.Metric
 import Test.QuickCheck
 import Text.Read (readEither)
 import Yesod.Core.Types (HandlerData)
-import Yesod.Lens
+import Yesod.Core.Types.Lens
 
 newtype Queues = Queues
     { unQueues :: NonEmpty Queue
@@ -37,7 +37,7 @@ instance HasQueues Queues where
     queuesL = id
 
 instance HasQueues env => HasQueues (HandlerData child env) where
-    queuesL = handlerEnvL . siteL . queuesL
+    queuesL = envL . siteL . queuesL
 
 -- | Read a 'Queues' value, e.g. from @ENV@
 --

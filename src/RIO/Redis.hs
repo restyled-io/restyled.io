@@ -24,7 +24,7 @@ import Data.ByteString.Lazy (toStrict)
 import Database.Redis (Connection, Redis, brpop, checkedConnect, llen, lpush)
 import qualified Database.Redis as Redis
 import Yesod.Core.Types (HandlerData)
-import Yesod.Lens
+import Yesod.Core.Types.Lens
 
 class HasRedis env where
     redisConnectionL :: Lens' env Connection
@@ -33,7 +33,7 @@ instance HasRedis Connection where
     redisConnectionL = id
 
 instance HasRedis env => HasRedis (HandlerData child env) where
-    redisConnectionL = handlerEnvL . siteL . redisConnectionL
+    redisConnectionL = envL . siteL . redisConnectionL
 
 runRedis :: (HasRedis env, MonadReader env m, MonadIO m) => Redis a -> m a
 runRedis action = do
