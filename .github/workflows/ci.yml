@@ -102,7 +102,7 @@ jobs:
       - run: |
           cat >Dockerfile.web <<'EOM'
           FROM ${{ needs.image.outputs.image }}
-          CMD ["/app/restyled.io", "web"]
+          CMD ["/app/restyled.io"]
           EOM
 
       - uses: gonuit/heroku-docker-deploy@v1.3.3
