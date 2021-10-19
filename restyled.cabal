@@ -72,8 +72,6 @@ library
       Restyled.Metrics
       Restyled.Models
       Restyled.Models.DB
-      Restyled.Models.Job
-      Restyled.Models.JobLogLine
       Restyled.Models.Repo
       Restyled.Models.User
       Restyled.Offers

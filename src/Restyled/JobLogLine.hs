@@ -1,7 +1,8 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module Restyled.JobLogLine
-    ( streamJobLogLines
+    ( JobLogLine(..)
+    , streamJobLogLines
     ) where
 
 import Restyled.Prelude
@@ -12,7 +13,7 @@ import Data.Time.Clock.POSIX (posixSecondsToUTCTime, utcTimeToPOSIXSeconds)
 import Network.AWS.CloudWatchLogs.GetLogEvents
 import Network.AWS.CloudWatchLogs.Types
 import Network.AWS.Pager (AWSPager(..))
-import Restyled.Models.DB (JobId, JobLogLine(..))
+import Restyled.Models.DB (JobId)
 import Restyled.Settings
 
 instance AWSPager GetLogEvents where
@@ -25,6 +26,11 @@ instance AWSPager GetLogEvents where
         guard $ req ^. gleNextToken /= Just nextToken
 
         pure $ req & (gleNextToken ?~ nextToken)
+
+data JobLogLine = JobLogLine
+    { jobLogLineCreatedAt :: UTCTime
+    , jobLogLineContent :: Text
+    }
 
 -- | Paginate the Job log from CloudWatch in a streaming fashion
 streamJobLogLines
@@ -42,22 +48,19 @@ streamJobLogLines jobId mSince = do
                 & (gleStartTime .~ startMilliseconds)
                 & (gleStartFromHead ?~ True)
 
-    paginate req .| mapC (fromGetLogEvents jobId)
+    paginate req .| mapC fromGetLogEvents
     where startMilliseconds = (+ 1) . utcTimeToPOSIXMilliseconds <$> mSince
 
-fromGetLogEvents :: JobId -> GetLogEventsResponse -> [JobLogLine]
-fromGetLogEvents jobId resp =
-    mapMaybe (fromOutputLogEvent jobId) $ resp ^. glersEvents
+fromGetLogEvents :: GetLogEventsResponse -> [JobLogLine]
+fromGetLogEvents resp = mapMaybe fromOutputLogEvent $ resp ^. glersEvents
 
-fromOutputLogEvent :: JobId -> OutputLogEvent -> Maybe JobLogLine
-fromOutputLogEvent jobId event = do
+fromOutputLogEvent :: OutputLogEvent -> Maybe JobLogLine
+fromOutputLogEvent event = do
     message <- event ^. oleMessage
     timestamp <- event ^. oleTimestamp
     pure JobLogLine
         { jobLogLineCreatedAt = posixMillisecondsToUTCTime timestamp
-        , jobLogLineStream = "system"
         , jobLogLineContent = message
-        , jobLogLineJob = jobId
         }
 
 utcTimeToPOSIXMilliseconds :: Integral n => UTCTime -> n

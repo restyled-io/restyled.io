@@ -17,6 +17,7 @@ import Network.AWS.CloudWatchLogs.PutLogEvents
 import Network.AWS.CloudWatchLogs.Types
 import Network.AWS.Lens (catching_)
 import Restyled.Env
+import Restyled.JobLogLine
 import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
@@ -156,7 +157,7 @@ seedJob
     -> SqlPersistT m ()
 seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
     -- Start the Job
-    jobId <- insert $ markJobAsCloudWatch $ Job
+    jobId <- insert $ Job
         { jobSvcs = repoSvcs
         , jobOwner = repoOwner
         , jobRepo = repoName
@@ -165,22 +166,10 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
         , jobUpdatedAt = createdAt
         , jobCompletedAt = Nothing
         , jobExitCode = Nothing
-        , jobLog = Nothing
-        , jobStdout = Nothing
-        , jobStderr = Nothing
         }
 
     -- Capture it "running"
-    let
-        jobLogLines =
-            (\(t, content) -> JobLogLine
-                    { jobLogLineJob = jobId
-                    , jobLogLineCreatedAt = t
-                    , jobLogLineStream = "system"
-                    , jobLogLineContent = content
-                    }
-                )
-                <$> timestamped
+    let jobLogLines = uncurry JobLogLine <$> timestamped
 
     lift $ seedJobLogLines jobId jobLogLines
 

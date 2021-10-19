@@ -22,6 +22,7 @@ import Formatting (format)
 import Formatting.Time (diff)
 import qualified Network.URI.Encode as URI
 import Restyled.Foundation
+import Restyled.JobLogLine
 import Restyled.Models
 import Restyled.Routes
 import Restyled.Settings
