@@ -63,11 +63,7 @@ genJob (Entity _ Repo {..}) f = do
 
 setJobIncomplete :: Job -> Job
 setJobIncomplete =
-    (fieldLens JobCompletedAt .~ Nothing)
-        . (fieldLens JobExitCode .~ Nothing)
-        . (fieldLens JobLog .~ Nothing)
-        . (fieldLens JobStdout .~ Nothing)
-        . (fieldLens JobStderr .~ Nothing)
+    (fieldLens JobCompletedAt .~ Nothing) . (fieldLens JobExitCode .~ Nothing)
 
 setJobComplete :: UTCTime -> Int -> Job -> Job
 setJobComplete at exitCode =

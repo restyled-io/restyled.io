@@ -41,19 +41,6 @@ Job
   completedAt UTCTime Maybe
 
   exitCode Int Maybe
-  log (JSONB [Entity JobLogLine]) Maybe
-
-  -- Deprecated
-  stdout Text Maybe
-  stderr Text Maybe
-
-  deriving Eq Show Generic
-
-JobLogLine json
-  job JobId
-  createdAt UTCTime
-  stream Text
-  content Text
 
   deriving Eq Show Generic
 

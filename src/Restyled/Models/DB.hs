@@ -76,21 +76,6 @@ instance Arbitrary Job where
 instance HasDependencies Job where
     type Dependencies Job = (OwnerName, RepoName, PullRequestNum)
 
--- brittany-disable-next-binding
-
--- This is needed for the jobLog field of Arbitrary Job, but we are deprecating
--- that so let's not worry about it.
-instance Arbitrary (Entity JobLogLine) where
-    arbitrary = Entity (toSqlKey 1)
-        <$> (JobLogLine
-            <$> arbitrary
-            <*> arbitrary
-            <*> pure ""
-            <*> pure "")
-
-instance HasDependencies JobLogLine where
-    type Dependencies JobLogLine = Only JobId
-
 instance Arbitrary MarketplacePlanId where
     arbitrary = toSqlKey . getPositive <$> arbitrary
 
