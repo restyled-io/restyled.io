@@ -5,13 +5,14 @@ module Restyled.Handlers.Repos.Jobs.LogLines
 import Restyled.Prelude
 
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as LT
 import Restyled.Foundation
 import Restyled.JobOutput
 import Restyled.Models
 import Restyled.WebSockets
-import Restyled.Widgets.Job
-import Restyled.Widgets.JobLogLine
+import qualified Restyled.Widgets.Job as Widgets
 import Restyled.Yesod
+import Text.Blaze.Html.Renderer.Text (renderHtml)
 
 getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler Text
 getRepoJobLogLinesR _owner _name jobId = do
@@ -26,4 +27,9 @@ getRepoJobLogLinesR _owner _name jobId = do
 
     -- If not accessed via WebSockets, respond with plain text Job log
     jobLogLines <- fetchJobOutput jobId
-    pure $ T.unlines $ map textJobLogLine jobLogLines
+    pure $ T.unlines $ map jobLogLineContent jobLogLines
+
+renderJobLogLine :: JobLogLine -> Handler LT.Text
+renderJobLogLine ln = do
+    pc <- widgetToPageContent $ Widgets.jobLogLine ln
+    renderHtml <$> withUrlRenderer (pageBody pc)

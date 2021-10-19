@@ -1,9 +1,5 @@
 $newline never
 <div .log-line>
-  $if level /= "unknown"
-    <span .level-#{level} .prefix>
-      #{level}
-  <span .level-#{level} .content>
-    $if T.isPrefixOf "We had trouble" message
-      <span .error>
-    ^{renderWithURLs message}
+  <span .#{levelStyleClass levelStyle} .prefix>
+  <span .#{levelStyleClass levelStyle} .content>
+    ^{renderWithURLs content}
