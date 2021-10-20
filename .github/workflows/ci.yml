@@ -43,8 +43,9 @@ jobs:
       - uses: freckle/stack-cache-action@v1
       - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
       - run: db/migrate test upgrade
-      - uses: freckle/stack-action@v2.3
+      - uses: freckle/stack-action@main
         with:
+          weeder-version: 2.2.0
           weeder-arguments: --require-hs-files
       - run: db/pending-prod-migrations --check
         env:
