@@ -1,10 +1,10 @@
-module Restyled.Widgets.JobSpec
+module Restyled.ScrubSpec
     ( spec
     ) where
 
 import Restyled.Test
 
-import Restyled.Widgets.Job (scrubGitHubToken)
+import Restyled.Scrub
 
 spec :: Spec
 spec = do

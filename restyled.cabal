@@ -65,13 +65,14 @@ library
       Restyled.Handlers.System.Metrics
       Restyled.Handlers.Thanks
       Restyled.Handlers.Webhooks
-      Restyled.JobLogLine
+      Restyled.Job.Completion
       Restyled.JobOutput
       Restyled.Marketplace
       Restyled.Metric
       Restyled.Metrics
       Restyled.Models
       Restyled.Models.DB
+      Restyled.Models.JobLogLine
       Restyled.Models.Repo
       Restyled.Models.User
       Restyled.Offers
@@ -83,6 +84,7 @@ library
       Restyled.Queues
       Restyled.RestylerImage
       Restyled.Routes
+      Restyled.Scrub
       Restyled.ServerUnavailable
       Restyled.Settings
       Restyled.SqlError
@@ -93,7 +95,6 @@ library
       Restyled.WebSockets
       Restyled.Widgets.ContainsURLs
       Restyled.Widgets.Job
-      Restyled.Widgets.JobLogLine
       Restyled.Yesod
       RIO.AWS
       RIO.DB
@@ -352,6 +353,7 @@ test-suite test
       Restyled.Models.UserSpec
       Restyled.OffersSpec
       Restyled.QueuesSpec
+      Restyled.ScrubSpec
       Restyled.Test
       Restyled.Test.Authentication
       Restyled.Test.Expectations
@@ -362,7 +364,6 @@ test-suite test
       Restyled.Test.Yesod
       Restyled.TimeSpec
       Restyled.Widgets.ContainsURLsSpec
-      Restyled.Widgets.JobSpec
       Test.Hspec.Lifted
       Paths_restyled
   hs-source-dirs:

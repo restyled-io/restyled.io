@@ -177,10 +177,15 @@ details {
   content: "] ";
 }
 
-.log-line .level-debug.prefix {
-  color: gray;
+.log-line .level-unknown.prefix {
+  display: none;
 }
-.log-line .level-debug.content {
+
+.log-line .level-unknown.content {
+  color: #d3d3d3;
+}
+
+.log-line .level-debug.prefix, .log-line .level-debug.content {
   color: gray;
 }
 
@@ -188,17 +193,19 @@ details {
   color: #2a77ac; /* N.B. matches strapless .info */
 }
 
+/* .content unchanged */
+
 .log-line .level-warn.prefix {
   color: #efefaf;
 }
+
+/* .content unchanged */
 
 .log-line .level-error.prefix {
   color: #cc9393;
 }
 
-.log-line .level-unknown.content {
-  color: #d3d3d3;
-}
+/* .content unchanged */
 
 .logs-stream {
   display: none;

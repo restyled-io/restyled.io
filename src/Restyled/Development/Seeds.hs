@@ -17,7 +17,6 @@ import Network.AWS.CloudWatchLogs.PutLogEvents
 import Network.AWS.CloudWatchLogs.Types
 import Network.AWS.Lens (catching_)
 import Restyled.Env
-import Restyled.JobLogLine
 import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
@@ -169,7 +168,7 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
         }
 
     -- Capture it "running"
-    let jobLogLines = uncurry JobLogLine <$> timestamped
+    let jobLogLines = uncurry jobLogLine <$> timestamped
 
     lift $ seedJobLogLines jobId jobLogLines
 
@@ -395,9 +394,9 @@ seedJobLogLines jobId jobLogLines = do
     void $ send $ putLogEvents group stream events
 
 toInputLogEvent :: JobLogLine -> InputLogEvent
-toInputLogEvent JobLogLine {..} = inputLogEvent
-    (utcTimeToPOSIXMilliseconds jobLogLineCreatedAt)
-    jobLogLineContent
+toInputLogEvent ln = inputLogEvent
+    (utcTimeToPOSIXMilliseconds $ jobLogLineCreatedAt ln)
+    (jobLogLineContent ln)
 
 utcTimeToPOSIXMilliseconds :: Integral n => UTCTime -> n
 utcTimeToPOSIXMilliseconds = round . (* 1000) . utcTimeToPOSIXSeconds

@@ -2,8 +2,12 @@
 
 module Restyled.Prelude
     (
+    -- * Bifuctor
+      firstM
+    , secondM
+
     -- * Persist
-      SqlEntity
+    , SqlEntity
     , selectFirstT
     , getEntityT
     , getByT
@@ -56,6 +60,12 @@ import Web.PathPieces as X
 import qualified Data.Text.Lazy as TL
 import Formatting (Format, format, (%))
 import qualified Formatting.Formatters as Formatters
+
+firstM :: (Bitraversable t, Applicative f) => (a -> f c) -> t a b -> f (t c b)
+firstM f = bimapM f pure
+
+secondM :: (Bitraversable t, Applicative f) => (b -> f c) -> t a b -> f (t a c)
+secondM = bimapM pure
 
 type SqlEntity a = (PersistEntity a, PersistEntityBackend a ~ SqlBackend)
 
