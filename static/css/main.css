@@ -185,31 +185,24 @@ details {
   color: #d3d3d3;
 }
 
-.log-line .level-debug.prefix {
-  color: gray;
-  content: "debug";
-}
-.log-line .level-debug.content {
+.log-line .level-debug.prefix, .log-line .level-debug.content {
   color: gray;
 }
 
 .log-line .level-info.prefix {
   color: #2a77ac; /* N.B. matches strapless .info */
-  content: "info";
 }
 
 /* .content unchanged */
 
 .log-line .level-warn.prefix {
   color: #efefaf;
-  content: "warn";
 }
 
 /* .content unchanged */
 
 .log-line .level-error.prefix {
   color: #cc9393;
-  content: "error";
 }
 
 /* .content unchanged */

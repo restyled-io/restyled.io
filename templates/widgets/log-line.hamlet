@@ -1,5 +1,6 @@
 $newline never
 <div .log-line>
   <span .#{levelStyleClass levelStyle} .prefix>
+    ^{levelStyleContent levelStyle}
   <span .#{levelStyleClass levelStyle} .content>
     ^{renderWithURLs content}

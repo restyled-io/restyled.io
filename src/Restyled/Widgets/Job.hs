@@ -80,7 +80,20 @@ data LevelStyle
     | LevelStyleError
 
 levelStyleClass :: LevelStyle -> Text
-levelStyleClass = undefined
+levelStyleClass = \case
+    LevelStyleUnknown -> "level-unknown"
+    LevelStyleDebug -> "level-debug"
+    LevelStyleInfo -> "level-info"
+    LevelStyleWarn -> "level-warn"
+    LevelStyleError -> "level-error"
+
+levelStyleContent :: LevelStyle -> Text
+levelStyleContent = \case
+    LevelStyleUnknown -> "unknown"
+    LevelStyleDebug -> "debug"
+    LevelStyleInfo -> "info"
+    LevelStyleWarn -> "warn"
+    LevelStyleError -> "error"
 
 getLevelStyle :: Text -> (Text, LevelStyle)
 getLevelStyle content = maybe (content, LevelStyleUnknown) getFirst
@@ -91,5 +104,5 @@ stylePrefixes =
     [ ("[Debug] ", LevelStyleDebug)
     , ("[Info] ", LevelStyleInfo)
     , ("[Warn] ", LevelStyleWarn)
-    , ("[Error ] ", LevelStyleError)
+    , ("[Error] ", LevelStyleError)
     ]
