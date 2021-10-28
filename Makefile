@@ -2,7 +2,16 @@
 update: setup setup.lint setup.tools db.migrate build lint test
 
 # Initialize from a fresh clone
-bootstrap: setup setup.lint setup.tools db.setup build lint test db.seed
+bootstrap: \
+  setup \
+  setup.lint \
+  setup.tools \
+  setup.ngrok \
+  db.setup \
+  build \
+  lint \
+  test \
+  db.seed
 
 .PHONY: db.drop
 db.drop:
@@ -60,10 +69,7 @@ setup.tools:
 
 .PHONY: setup.ngrok
 setup.ngrok:
-	if ! command -v ngrok; then \
-	  aurget -S ngrok; \
-	  ngrok authtoken $$(pass ngrok/authtoken); \
-	fi
+	ngrok authtoken $$(pass ngrok/authtoken)
 
 .PHONY: build
 build:
@@ -88,7 +94,7 @@ watch:
 	  --ghc-options -DDEVELOPMENT
 
 .PHONY: ngrok.http
-ngrok.http: setup.ngrok
+ngrok.http:
 	ngrok http -subdomain restyled 3000
 
 .PHONY: image
