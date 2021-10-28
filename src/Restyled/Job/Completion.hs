@@ -17,4 +17,3 @@ jobCompletion job = case (jobCompletedAt job, jobExitCode job) of
     (Just completedAt, Just 0) -> JobSuccess completedAt
     (Just completedAt, Just n) -> JobFailure completedAt n
     _ -> JobInProgress
-
