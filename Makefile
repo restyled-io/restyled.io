@@ -57,7 +57,7 @@ setup:
 setup.lint:
 	stack install --copy-compiler-tool \
 	  hlint \
-	  weeder
+	  weeder-2.2.0
 
 .PHONY: setup.tools
 setup.tools:
@@ -77,10 +77,8 @@ build:
 
 .PHONY: lint
 lint:
-	find app src test -name '*.hs' \
-	  -not -name 'Foundation.hs' \
-	  -exec stack exec hlint {} +
-	stack exec weeder
+	stack exec -- hlint . --ignore-glob src/Restyled/Widgets/Job.hs
+	stack exec -- weeder --require-hs-files
 
 .PHONY: test
 test:
