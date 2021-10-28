@@ -11,7 +11,12 @@ bootstrap: \
   build \
   lint \
   test \
+  .env.development \
   db.seed
+
+.env.development: .env.example
+	{ ./bin/make-ssm-m4; cat $^; } | m4 >$@
+
 
 .PHONY: db.drop
 db.drop:

@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Fetches all SSM parameters at the /restyled/dev prefix and outputs M4 define
+# lines of the form,
+#
+#     define(`SSM_{unprefixed, underscored key}', `{value}')dnl
+#
+# Feed this into m4, followed by text with (e.g.) "SSM_github_app_key" in it,
+# and it will be replaced by that parameter's value.
+#
+##
+aws --profile restyled ssm get-parameters-by-path --path /restyled/dev |
+  jq --raw-output '
+    .Parameters[] | (
+      "define(`SSM_"
+        + (.Name | gsub("/restyled/dev/"; "") | gsub("[/-]"; "_"))
+        + "'\'', `"
+        + .Value
+        + "'\'')dnl"
+    )
+    '
