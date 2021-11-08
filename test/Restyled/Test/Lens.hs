@@ -12,19 +12,16 @@ import Restyled.Prelude hiding (fieldLens)
 import Control.Lens ((?~))
 import qualified Database.Persist as P
 
+-- | Use an 'EntityField' as a lens
+--
+-- The library-provided @fieldLens@ is over @'Entity' record@, and we need it
+-- over just @record@ for Graphula. This is unsafe when used with a key
+-- 'EntityField', such as 'JobId', which is why the library-provided one works
+-- the way that it does.
+--
 fieldLens
     :: PersistEntity record => EntityField record field -> Lens' record field
-fieldLens field =
-    unsafeEntityLens . P.fieldLens field . unsafeEntityLens . entityValLens
+fieldLens field = unsafeEntityLens . P.fieldLens field
 
 unsafeEntityLens :: Lens' record (Entity record)
-unsafeEntityLens = lens (Entity (error err)) (\_ entity -> entityVal entity)
-  where
-    err :: String
-    err = "Cannot access EntityKey of Entity constructed unsafely without one"
-
--- entityKeyLens :: Lens' (Entity record) (Key record)
--- entityKeyLens = lens entityKey (\(Entity _ v) k -> Entity k v)
-
-entityValLens :: Lens' (Entity record) record
-entityValLens = lens entityVal (\(Entity k _) v -> Entity k v)
+unsafeEntityLens = lens (Entity undefined) $ \_ y -> entityVal y
