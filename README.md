@@ -58,8 +58,7 @@ To process real `restyled-io/demo` Pull Requests:
    (cd ../restyler && docker build --tag restyled/restyler .)
    ```
 
-   To use a deployed image, set `RESTYLER_IMAGE` and `RESTYLER_TAG` in
-   `.env.development`.
+   To use a deployed image, set `RESTYLER_IMAGE` in `.env.development`.
 
    _At this time, individual Restylers will always be pulled from deployed
    sources._

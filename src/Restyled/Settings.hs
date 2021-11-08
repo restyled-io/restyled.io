@@ -131,7 +131,6 @@ loadSettings =
             )
         <*> (restylerImage
             <$> var str "RESTYLER_IMAGE" (def "restyled/restyler:main")
-            <*> optional (var nonempty "RESTYLER_TAG" mempty)
             )
         <*> var (splitOn ',') "ADMIN_EMAILS" (def [])
         <*> switch "AUTH_DUMMY_LOGIN" mempty

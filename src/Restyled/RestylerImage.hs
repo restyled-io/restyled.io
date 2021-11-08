@@ -11,20 +11,19 @@ import Restyled.Prelude.Esqueleto (SqlString)
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Instances.Text ()
 
-newtype RestylerImage = RestylerImage
-    { unRestylerImage :: Text
-    }
+newtype RestylerImage = RestylerImage Text
     deriving stock (Eq, Show)
     deriving newtype
-        ( PersistField
+        ( Arbitrary
+        , PersistField
         , PersistFieldSql
         , SqlString
         , FromJSON
         , ToJSON
         )
 
-instance Arbitrary RestylerImage where
-    arbitrary = restylerImage <$> arbitrary <*> arbitrary
+restylerImage :: Text -> RestylerImage
+restylerImage = RestylerImage
 
-restylerImage :: Text -> Maybe Text -> RestylerImage
-restylerImage image mTag = RestylerImage $ image <> maybe "" (":" <>) mTag
+unRestylerImage :: RestylerImage -> Text
+unRestylerImage (RestylerImage x) = x
