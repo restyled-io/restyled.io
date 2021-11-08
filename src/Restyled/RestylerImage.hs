@@ -1,7 +1,6 @@
 module Restyled.RestylerImage
     ( RestylerImage
     , restylerImage
-    , unRestylerImage
     ) where
 
 import Restyled.Prelude
@@ -24,6 +23,3 @@ newtype RestylerImage = RestylerImage Text
 
 restylerImage :: Text -> RestylerImage
 restylerImage = RestylerImage
-
-unRestylerImage :: RestylerImage -> Text
-unRestylerImage (RestylerImage x) = x
