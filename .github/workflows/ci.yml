@@ -45,6 +45,7 @@ jobs:
       - run: db/migrate test upgrade
       - uses: freckle/stack-action@main
         with:
+          hlint-arguments: . --ignore-glob 'src/Restyled/Widgets/Job.hs'
           weeder-version: 2.2.0
           weeder-arguments: --require-hs-files
       - run: db/pending-prod-migrations --check
