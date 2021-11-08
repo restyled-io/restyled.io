@@ -1,4 +1,4 @@
-resolver: lts-18.9
+resolver: lts-18.14
 extra-deps:
   # 1.6.1 + fixes needed for newer unliftio, until 2.0 drops.
   # https://github.com/brendanhay/amazonka/pull/617#issuecomment-830606997
@@ -7,21 +7,14 @@ extra-deps:
     subdirs:
       - amazonka
 
-  - github-0.26@sha256:a9d4046325c3eb28cdc7bef2c3f5bb213328caeae0b7dce6f51de655f0bffaa1,7162
+  - github-0.27@sha256:074e69ad24b94b1199331b156e5373e9d4fa4a4452e02217f3539fe94a21a838,6995
   - monad-validate-1.2.0.0@sha256:9850f408431098b28806dd464b6825a88a0b56c84f380d7fe0454c1df9d6f881,3505
-
-  # For github
-  - base16-bytestring-0.1.1.7@sha256:0021256a9628971c08da95cb8f4d0d72192f3bb8a7b30b55c080562d17c43dd3,2231
-  - http-link-header-1.0.3.1@sha256:9917c26635a46eff5d36c5344a4ae42fad2b5de79c0e300363bddd5eec66facd,1937
 
   # For brittany
   - data-tree-print-0.1.0.2@sha256:d845e99f322df70e0c06d6743bf80336f5918d5423498528beb0593a2afc1703,1620
 
-  # For stylish-haskell
-  - optparse-applicative-0.15.1.0@sha256:29ff6146aabf54d46c4c8788e8d1eadaea27c94f6d360c690c5f6c93dac4b07e,4810
-
   # For weeder
-  - dhall-1.40.1@sha256:5d4bb256d4c331b9e75a59677e21ca8cc55ad3ba1426edff7efd13c39f67f8ff,34635
+  - dhall-1.40.1@sha256:f286fa8474927b5717a611444008ec274a0f0ebea0911088cec87b2e84c0dc6f,35396
   - generic-lens-2.2.0.0@sha256:4008a39f464e377130346e46062e2ac1211f9d2e256bbb1857216e889c7196be,3867
 
   # For generic-lens
