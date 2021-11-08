@@ -70,7 +70,8 @@ setup.tools:
 	  dhall \
 	  brittany \
 	  fast-tags \
-	  stylish-haskell
+	  stylish-haskell \
+	  apply-refact
 
 .PHONY: setup.ngrok
 setup.ngrok:
