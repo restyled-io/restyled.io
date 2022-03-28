@@ -9,6 +9,7 @@ import qualified Data.Text.Lazy as LT
 import Restyled.Foundation
 import Restyled.JobOutput
 import Restyled.Models
+import Restyled.Time
 import Restyled.WebSockets
 import qualified Restyled.Widgets.Job as Widgets
 import Restyled.Yesod
@@ -16,9 +17,10 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 
 getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler Text
 getRepoJobLogLinesR _owner _name jobId = do
-    void $ runDB $ get404 jobId
+    job <- runDB $ get404 jobId
+    expired <- (jobUpdatedAt job <=) <$> getLogRetentionStart
 
-    webSockets $ ignoringConnectionException $ do
+    webSockets $ ignoringConnectionException $ unless expired $ do
         conn <- ask
 
         lift $ followJobOutput jobId $ \jobLogLines -> do
@@ -26,8 +28,11 @@ getRepoJobLogLinesR _owner _name jobId = do
             runReaderT (void $ sendTextDataAck htmls) conn
 
     -- If not accessed via WebSockets, respond with plain text Job log
-    jobLogLines <- fetchJobOutput jobId
+    jobLogLines <- if expired then pure [] else fetchJobOutput jobId
     pure $ T.unlines $ map jobLogLineContent jobLogLines
+
+getLogRetentionStart :: MonadIO m => m UTCTime
+getLogRetentionStart = subtractTime (Days $ 30 + 5) <$> getCurrentTime
 
 renderJobLogLine :: JobLogLine -> Handler LT.Text
 renderJobLogLine ln = do
