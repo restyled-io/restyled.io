@@ -3,6 +3,7 @@
 
 module Restyled.Widgets.Job
     ( jobCard
+    , jobListItem
     , jobOutput
     , jobLogLine
     ) where
@@ -29,6 +30,11 @@ jobCard jobE@(Entity jobId job) = do
     now <- liftIO getCurrentTime
     issueUrl <- jobIssueURL jobE <$> getUrlRender
     $(widgetFile "widgets/job-card")
+
+jobListItem :: Entity Job -> Widget
+jobListItem (Entity jobId job) = do
+    now <- liftIO getCurrentTime
+    $(widgetFile "widgets/job-list-item")
 
 jobIssueURL :: Entity Job -> (Route App -> Text) -> Text
 jobIssueURL (Entity jobId Job {..}) urlRender =

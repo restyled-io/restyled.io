@@ -3,7 +3,7 @@
     <p>Hmm, no Jobs yet...
   $else
     $forall job <- pageItems $ pagesCurrent pages
-      ^{jobCard job}
+      ^{jobListItem job}
 
     <aside>
       ^{simple 3 pages}

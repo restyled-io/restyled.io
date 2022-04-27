@@ -15,7 +15,7 @@ import Restyled.Yesod
 getRepoPullJobsR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html
 getRepoPullJobsR owner name num = do
     pages <- runDB $ selectPaginated
-        5
+        15
         [JobOwner ==. owner, JobRepo ==. name, JobPullRequest ==. num]
         [Desc JobCreatedAt]
 
