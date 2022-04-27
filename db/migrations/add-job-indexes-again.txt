@@ -1,0 +1,8 @@
+# vim: ft=yaml
+Description: Add indexes on job
+Created: 2022-04-27 19:22:13.026251439 UTC
+Depends: create-job
+Apply: |
+  CREATE INDEX job_repo_owner_pull_request_idx ON job (repo, owner, pull_request)
+Revert: |
+  DROP INDEX IF EXISTS job_repo_owner_pull_request_idx
