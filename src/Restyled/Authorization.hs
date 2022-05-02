@@ -23,20 +23,15 @@ authorizeAdmin settings (Just userId) = do
 authorizeRepo
     :: (HasCallStack, MonadCache m, MonadHandler m)
     => AppSettings
-    -> OwnerName
-    -> RepoName
-    -> Maybe UserId
-    -> SqlPersistT m AuthResult
-authorizeRepo settings owner name mUserId = do
-    -- We only support checking collaborator access for GitHub right now. This
-    -- will naturally return 404 for other cases for now.
-    Entity _ repo <- getBy404 $ UniqueRepo GitHubSVCS owner name
-
-    if repoIsPrivate repo
-        then do
-            mUser <- join <$> traverse get mUserId
-            maybe notFound (authorizePrivateRepo settings repo) mUser
-        else pure Authorized
+    -> Repo
+    -> Maybe User
+    -> m AuthResult
+authorizeRepo settings repo mUser
+    | repoIsPrivate repo = maybe
+        notFound
+        (authorizePrivateRepo settings repo)
+        mUser
+    | otherwise = pure Authorized
 
 -- | Authorize if the @'User'@ is a Collaborator according to GitHub
 authorizePrivateRepo
@@ -44,7 +39,7 @@ authorizePrivateRepo
     => AppSettings
     -> Repo
     -> User
-    -> SqlPersistT m AuthResult
+    -> m AuthResult
 authorizePrivateRepo settings@AppSettings {..} repo@Repo {..} user@User {..} =
     do
         result <- runExceptT $ do

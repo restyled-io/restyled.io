@@ -144,9 +144,14 @@ instance Yesod App where
         settings <- getsYesod $ view settingsL
         runDB $ authorizeAdmin settings =<< maybeAuthId
 
-    isAuthorized (RepoP owner repo _) _ = do
+    isAuthorized (RepoP owner name _) _ = do
         settings <- getsYesod $ view settingsL
-        runDB $ authorizeRepo settings owner repo =<< maybeAuthId
+        -- We only support checking collaborator access for GitHub right now. This
+        -- will naturally return 404 for other cases for now.
+        (Entity _ repo, mUser) <- runDB $ (,)
+            <$> getBy404 (UniqueRepo GitHubSVCS owner name)
+            <*> fmap join (traverse get =<< maybeAuthId)
+        authorizeRepo settings repo mUser
 
     isAuthorized (SystemP _) _ = do
         settings <- getsYesod $ view settingsL
