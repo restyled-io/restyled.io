@@ -16,6 +16,7 @@ import Control.Monad.Logger (MonadLogger(..), toLogStr)
 import qualified Control.Monad.State as State
 import Network.Wai.Test (SResponse(..))
 import Restyled.Cache as X
+import Restyled.Cache.Memory
 import Restyled.Settings
 import Restyled.Test.Expectations
 import Test.Hspec.Core.Spec (SpecM)
@@ -37,6 +38,9 @@ instance HasProcessContext site => HasProcessContext (YesodExampleData site) whe
 instance HasRedis site => HasRedis (YesodExampleData site) where
     redisConnectionL = siteL . redisConnectionL
 
+instance HasCacheMemory site => HasCacheMemory (YesodExampleData site) where
+    cacheMemoryL = siteL . cacheMemoryL
+
 instance HasSqlPool site => HasSqlPool (YesodExampleData site) where
     sqlPoolL = siteL . sqlPoolL
 
@@ -48,9 +52,9 @@ instance HasLogFunc site => MonadLogger (YesodExample site) where
         logFunc <- view logFuncL
         liftIO $ logFuncLog logFunc loc source level $ toLogStr msg
 
-instance HasRedis site => MonadCache (YesodExample site) where
-    getCache = getCacheRedis
-    setCache = setCacheRedis
+instance HasCacheMemory site => MonadCache (YesodExample site) where
+    getCache = getCacheMemory
+    setCache = setCacheMemory
 
 instance MonadReader s (SIO s) where
     ask = State.get
