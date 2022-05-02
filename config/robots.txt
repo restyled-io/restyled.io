@@ -1,1 +1,10 @@
 User-agent: *
+Disallow: /admin
+Disallow: /auth
+Disallow: /gh
+Disallow: /jobs
+Disallow: /offers
+Disallow: /profile
+Disallow: /profile
+Disallow: /system
+Disallow: /webhooks
