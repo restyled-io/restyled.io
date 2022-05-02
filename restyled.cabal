@@ -34,7 +34,6 @@ library
       Restyled.Authentication
       Restyled.Authorization
       Restyled.Cache
-      Restyled.Cache.Memory
       Restyled.CLI
       Restyled.Development.Seeds
       Restyled.Env

@@ -14,7 +14,6 @@ import Restyled.ApiError
 import Restyled.ApiToken
 import Restyled.Authentication
 import Restyled.Authorization
-import Restyled.Cache.Memory
 import Restyled.Models
 import Restyled.Queues
 import Restyled.ServerUnavailable
@@ -34,7 +33,6 @@ data App = App
     , appProcessContext :: ProcessContext
     , appConnPool :: ConnectionPool
     , appRedisConn :: Connection
-    , appCacheMemory :: CacheMemory
     , appAWSEnv :: AWS.Env
     , appStatic :: Static
     }
@@ -58,9 +56,6 @@ instance HasSqlPool App where
 instance HasRedis App where
     redisConnectionL = lens appRedisConn $ \x y -> x { appRedisConn = y }
 
-instance HasCacheMemory App where
-    cacheMemoryL = lens appCacheMemory $ \x y -> x { appCacheMemory = y }
-
 instance HasAWS App where
     awsEnvL = lens appAWSEnv $ \x y -> x { appAWSEnv = y }
 
@@ -80,7 +75,6 @@ loadApp = do
         <$> mkDefaultProcessContext
         <*> runRIO logFunc createPool
         <*> checkedConnect appRedisConf
-        <*> newCacheMemory
         <*> discoverAWS appAwsTrace
         <*> makeStatic appStaticDir
 
