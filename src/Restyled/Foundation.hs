@@ -122,34 +122,29 @@ instance Yesod App where
 
     isAuthorized AdminR _ = do
         settings <- getsYesod $ view settingsL
-        runDB $ authorizeAdmin settings =<< maybeAuthId
+        authorizeAdmin settings =<< maybeAuthId
 
     isAuthorized (AdminP _) _ = do
         settings <- getsYesod $ view settingsL
-        runDB $ authorizeAdmin settings =<< maybeAuthId
+        authorizeAdmin settings =<< maybeAuthId
 
     -- Jobs API is Admin-only
     isAuthorized (JobsP _) _ = do
         settings <- getsYesod $ view settingsL
-        runDB $ authorizeAdmin settings =<< maybeAuthId
+        authorizeAdmin settings =<< maybeAuthId
 
     -- Writing RepoR is Admin-only
     isAuthorized (RepoP _ _ RepoR) True = do
         settings <- getsYesod $ view settingsL
-        runDB $ authorizeAdmin settings =<< maybeAuthId
+        authorizeAdmin settings =<< maybeAuthId
 
-    isAuthorized (RepoP owner name _) _ = do
+    isAuthorized (RepoP owner repo _) _ = do
         settings <- getsYesod $ view settingsL
-        -- We only support checking collaborator access for GitHub right now. This
-        -- will naturally return 404 for other cases for now.
-        (Entity _ repo, mUser) <- runDB $ (,)
-            <$> getBy404 (UniqueRepo GitHubSVCS owner name)
-            <*> fmap join (traverse get =<< maybeAuthId)
-        authorizeRepo settings repo mUser
+        authorizeRepo settings owner repo =<< maybeAuthId
 
     isAuthorized (SystemP _) _ = do
         settings <- getsYesod $ view settingsL
-        runDB $ authorizeAdmin settings =<< maybeAuthId
+        authorizeAdmin settings =<< maybeAuthId
 
     addStaticContent ext mime content = do
         staticDir <- getsYesod $ appStaticDir . view settingsL

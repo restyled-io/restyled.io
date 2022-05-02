@@ -14,24 +14,41 @@ import Restyled.Settings
 import Restyled.Yesod
 
 authorizeAdmin
-    :: MonadHandler m => AppSettings -> Maybe UserId -> SqlPersistT m AuthResult
+    :: (MonadUnliftIO m, MonadHandler m, MonadReader env m, HasSqlPool env)
+    => AppSettings
+    -> Maybe UserId
+    -> m AuthResult
 authorizeAdmin _ Nothing = notFound
 authorizeAdmin settings (Just userId) = do
-    user <- fromMaybeM notFound $ get userId
+    user <- fromMaybeM notFound $ runDB $ get userId
     authorizeWhen $ userIsAdmin settings user
 
 authorizeRepo
-    :: (HasCallStack, MonadCache m, MonadHandler m)
+    :: ( HasCallStack
+       , MonadUnliftIO m
+       , MonadCache m
+       , MonadHandler m
+       , MonadReader env m
+       , HasSqlPool env
+       )
     => AppSettings
-    -> Repo
-    -> Maybe User
+    -> OwnerName
+    -> RepoName
+    -> Maybe UserId
     -> m AuthResult
-authorizeRepo settings repo mUser
-    | repoIsPrivate repo = maybe
-        notFound
-        (authorizePrivateRepo settings repo)
-        mUser
-    | otherwise = pure Authorized
+authorizeRepo settings owner name mUserId = do
+    -- We only support checking collaborator access for GitHub right now. This
+    -- will naturally return 404 for other cases for now.
+    (Entity _ repo, mUser) <-
+        runDB
+        $ (,)
+        <$> getBy404 (UniqueRepo GitHubSVCS owner name)
+        <*> (join <$> traverse get mUserId)
+
+    if repoIsPrivate repo
+        then do
+            maybe notFound (authorizePrivateRepo settings repo) mUser
+        else pure Authorized
 
 -- | Authorize if the @'User'@ is a Collaborator according to GitHub
 authorizePrivateRepo
