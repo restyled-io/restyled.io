@@ -33,4 +33,4 @@ putRepoR owner name = do
     either (sendStatusJSON status400) (sendStatusJSON status200) result
 
 debug :: MonadLogger m => Text -> m ()
-debug msg = logDebugN $ "[putRepoR]: " <> msg
+debug msg = logInfoN $ "[putRepoR]: " <> msg
