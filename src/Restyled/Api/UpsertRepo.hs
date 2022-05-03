@@ -70,7 +70,7 @@ data ApiUpsertRepo = ApiUpsertRepo
     , isPrivate :: Bool
     , installationId :: InstallationId
     }
-    deriving stock Generic
+    deriving stock (Show, Generic)
     deriving anyclass FromJSON
 
 upsertRepo

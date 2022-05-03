@@ -20,12 +20,13 @@ data ApiRepo = ApiRepo
     , restylerImage :: RestylerImage
     , restylerLogLevel :: ApiLogLevel
     }
-    deriving stock Generic
+    deriving stock (Show, Generic)
     deriving anyclass ToJSON
 
 newtype ApiLogLevel = ApiLogLevel
     { unApiLogLevel :: LogLevel
     }
+    deriving newtype Show
 
 instance ToJSON ApiLogLevel where
     toJSON = toJSON . logLevelToText . unApiLogLevel
