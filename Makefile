@@ -111,6 +111,7 @@ image:
 .PHONY: image.check
 image.check: image
 	docker run -it --rm --net=host \
+	  --volume "$(HOME)"/.aws:/root/.aws:ro \
 	  --volume "$(PWD)"/.env.development:/app/.env:ro \
 	  restyled/restyled.io:testing /app/restyled.io \
-	  -e .env web
+	  -e .env
