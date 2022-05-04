@@ -9,11 +9,16 @@ RUN \
     gcc \
     libpq-dev \
     locales \
-    netbase && \
+    netbase \
+    libpcre3-dev && \
   locale-gen en_US.UTF-8 && \
   rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /src
 WORKDIR /src
+
+# Setup annoying tracing-newrelic
+COPY bin/setup-tracing-newrelic /usr/local/bin/setup-tracing-newrelic
+RUN cd /src && setup-tracing-newrelic
 
 # Dependencies
 COPY stack.yaml package.yaml /src/

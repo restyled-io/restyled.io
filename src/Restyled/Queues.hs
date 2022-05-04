@@ -16,6 +16,7 @@ import Restyled.Prelude
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
 import Restyled.Metric
+import Restyled.Tracing
 import Test.QuickCheck
 import Text.Read (readEither)
 import Yesod.Core.Types (HandlerData)
@@ -90,13 +91,25 @@ selectQueue (Queues qs)
     toPair q = (fromIntegral $ queueFrequency q, pure q)
 
 getQueuesMetrics
-    :: (MonadIO m, MonadReader env m, HasLogFunc env, HasRedis env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasRedis env
+       , HasTracingApp env
+       , HasTransactionId env
+       )
     => Queues
     -> m [Metric Integer]
 getQueuesMetrics = traverse getQueueMetric . NE.toList . unQueues
 
 getQueueMetric
-    :: (MonadIO m, MonadReader env m, HasLogFunc env, HasRedis env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasRedis env
+       , HasTracingApp env
+       , HasTransactionId env
+       )
     => Queue
     -> m (Metric Integer)
 getQueueMetric q = do

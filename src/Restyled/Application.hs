@@ -46,6 +46,7 @@ import Restyled.Handlers.System.Metrics
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
 import Restyled.Settings
+import Restyled.Tracing.Middleware
 import Restyled.Yesod hiding (LogLevel(..))
 
 mkYesodDispatch "App" resourcesApp
@@ -57,11 +58,14 @@ runWaiApp app = do
 
 waiMiddleware :: App -> Middleware
 waiMiddleware app =
-    forceSSL
-        . methodOverridePost
-        . requestLogger
-        . defaultMiddlewaresNoLogging
-        . routedMiddleware (not . isWebsocketsLogs) (timeout timeoutSeconds)
+    transactionMiddleware app
+        . traceMiddlewareSegment app "Force SSL" forceSSL
+        . traceMiddlewareSegment app "Method override" methodOverridePost
+        . traceMiddlewareSegment app "Logger" requestLogger
+        . traceMiddlewareSegment app "Default" defaultMiddlewaresNoLogging
+        . routedMiddleware
+              (not . isWebsocketsLogs)
+              (traceMiddlewareSegment app "Timeout" $ timeout timeoutSeconds)
   where
     requestLogger
         | app ^. settingsL . to appLogLevel > LevelInfo = id

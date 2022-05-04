@@ -41,6 +41,7 @@ jobs:
           curl --location --output .hlint.yaml \
             https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
       - uses: freckle/stack-cache-action@v1
+      - run: bin/setup-tracing-newrelic
       - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
       - run: db/migrate test upgrade
       - uses: freckle/stack-action@main

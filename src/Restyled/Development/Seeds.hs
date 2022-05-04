@@ -20,6 +20,7 @@ import Restyled.Env
 import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.Tracing
 import Restyled.UsCents
 
 data AppSettings = AppSettings
@@ -68,6 +69,12 @@ instance HasLogFunc App where
 
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x { appSettings = y }
+
+instance HasTracingApp App where
+    tracingAppL = lens (const TracingDisabled) const
+
+instance HasTransactionId App where
+    transactionIdL = lens (const Nothing) const
 
 instance HasSqlPool App where
     sqlPoolL = lens appSqlPool $ \x y -> x { appSqlPool = y }

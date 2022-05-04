@@ -18,6 +18,7 @@ import Network.Wai.Test (SResponse(..))
 import Restyled.Cache as X
 import Restyled.Settings
 import Restyled.Test.Expectations
+import Restyled.Tracing
 import Test.Hspec.Core.Spec (SpecM)
 import Yesod.Core
 import Yesod.Test as X hiding (YesodSpec, followRedirect)
@@ -37,6 +38,12 @@ instance HasProcessContext site => HasProcessContext (YesodExampleData site) whe
 instance HasRedis site => HasRedis (YesodExampleData site) where
     redisConnectionL = siteL . redisConnectionL
 
+instance HasTracingApp site => HasTracingApp (YesodExampleData site) where
+    tracingAppL = siteL . tracingAppL
+
+instance HasTransactionId (YesodExampleData site) where
+    transactionIdL = lens (const Nothing) const
+
 instance HasSqlPool site => HasSqlPool (YesodExampleData site) where
     sqlPoolL = siteL . sqlPoolL
 
@@ -48,7 +55,7 @@ instance HasLogFunc site => MonadLogger (YesodExample site) where
         logFunc <- view logFuncL
         liftIO $ logFuncLog logFunc loc source level $ toLogStr msg
 
-instance HasRedis site => MonadCache (YesodExample site) where
+instance (HasRedis site, HasTracingApp site) => MonadCache (YesodExample site) where
     getCache = getCacheRedis
     setCache = setCacheRedis
 

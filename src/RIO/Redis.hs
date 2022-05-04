@@ -1,6 +1,7 @@
 module RIO.Redis
     ( HasRedis(..)
     , runRedis
+    , runRedisUntraced
 
     -- * Re-export
     , Redis
@@ -23,6 +24,7 @@ import Data.Aeson (ToJSON, encode)
 import Data.ByteString.Lazy (toStrict)
 import Database.Redis (Connection, Redis, brpop, checkedConnect, llen, lpush)
 import qualified Database.Redis as Redis
+import Restyled.Tracing
 import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
 
@@ -35,8 +37,23 @@ instance HasRedis Connection where
 instance HasRedis env => HasRedis (HandlerData child env) where
     redisConnectionL = envL . siteL . redisConnectionL
 
-runRedis :: (HasRedis env, MonadReader env m, MonadIO m) => Redis a -> m a
+runRedis
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasRedis env
+       , HasTracingApp env
+       , HasTransactionId env
+       )
+    => Redis a
+    -> m a
 runRedis action = do
+    conn <- view redisConnectionL
+    traceAppSegment "runRedis" $ do
+        liftIO $ Redis.runRedis conn action
+
+runRedisUntraced
+    :: (MonadIO m, MonadReader env m, HasRedis env) => Redis a -> m a
+runRedisUntraced action = do
     conn <- view redisConnectionL
     liftIO $ Redis.runRedis conn action
 
