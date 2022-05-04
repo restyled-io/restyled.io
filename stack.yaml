@@ -2,7 +2,7 @@ resolver: lts-18.14
 extra-deps:
   # 1.6.1 + fixes needed for newer unliftio, until 2.0 drops.
   # https://github.com/brendanhay/amazonka/pull/617#issuecomment-830606997
-  - git: https://github.com/brendanhay/amazonka
+  - github: brendanhay/amazonka
     commit: 14bc3248c423f486ae710d523b8996ddb3dac854
     subdirs:
       - amazonka

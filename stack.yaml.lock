@@ -5,18 +5,18 @@
 
 packages:
 - completed:
+    size: 11138705
     subdir: amazonka
+    url: https://github.com/brendanhay/amazonka/archive/14bc3248c423f486ae710d523b8996ddb3dac854.tar.gz
     name: amazonka
     version: 1.6.1
-    git: https://github.com/brendanhay/amazonka
+    sha256: 624a0209b35d130a4d033bb3812447a5f2b5ab3d0d92a08d0db1d66e996caf55
     pantry-tree:
       size: 1038
       sha256: eced9a7c0fe287f06e5dfd010c0989d9b3b2342885af67531e5197d69de7fad5
-    commit: 14bc3248c423f486ae710d523b8996ddb3dac854
   original:
     subdir: amazonka
-    git: https://github.com/brendanhay/amazonka
-    commit: 14bc3248c423f486ae710d523b8996ddb3dac854
+    url: https://github.com/brendanhay/amazonka/archive/14bc3248c423f486ae710d523b8996ddb3dac854.tar.gz
 - completed:
     hackage: github-0.27@sha256:074e69ad24b94b1199331b156e5373e9d4fa4a4452e02217f3539fe94a21a838,6995
     pantry-tree:
