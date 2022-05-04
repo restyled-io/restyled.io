@@ -56,6 +56,7 @@ library:
     - blaze-markup
     - bytestring
     - cassava
+    - case-insensitive
     - composition-extra
     - conduit
     - conduit-extra
@@ -95,6 +96,7 @@ library:
     - postgresql-simple
     - quickcheck-instances
     - random
+    - resource-pool
     - retry
     - rio
     - rio-orphans
@@ -105,6 +107,7 @@ library:
     - template-haskell
     - text
     - time
+    - tracing-newrelic
     - transformers
     - unliftio
     - unordered-containers

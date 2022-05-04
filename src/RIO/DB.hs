@@ -1,6 +1,7 @@
 module RIO.DB
     ( HasSqlPool(..)
     , runDB
+    , runDBUntraced
 
     -- * Construction
     , PostgresConf(..)
@@ -14,10 +15,13 @@ module RIO.DB
 import RIO
 
 import Control.Monad.Logger (MonadLoggerIO)
+import Data.Pool (withResource)
 import Database.Persist.Postgresql
     (PostgresConf(..), createPostgresqlPool, createPostgresqlPoolModified)
-import Database.Persist.Sql (ConnectionPool, SqlPersistT, runSqlPool)
+import Database.Persist.Sql
+    (ConnectionPool, SqlBackend, SqlPersistT, runSqlConn, runSqlPool)
 import Database.PostgreSQL.Simple (Connection, execute)
+import Restyled.Tracing
 import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
 
@@ -31,12 +35,30 @@ instance HasSqlPool env => HasSqlPool (HandlerData child env) where
     sqlPoolL = envL . siteL . sqlPoolL
 
 runDB
-    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasSqlPool env
+       , HasTracingApp env
+       , HasTransactionId env
+       )
     => SqlPersistT m a
     -> m a
 runDB action = do
     pool <- view sqlPoolL
+    traceAppSegment "runDB" $ withRunInIO $ \runInIO ->
+        withResource pool $ \backend ->
+            runInIO $ runSqlConn action $ modifyBackend backend
+
+runDBUntraced
+    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
+    => SqlPersistT m a
+    -> m a
+runDBUntraced action = do
+    pool <- view sqlPoolL
     runSqlPool action pool
+
+modifyBackend :: SqlBackend -> SqlBackend
+modifyBackend = id -- TODO: this is where we hook to log actual SQL segments
 
 createConnectionPool
     :: (MonadUnliftIO m, MonadLoggerIO m)

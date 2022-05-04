@@ -19,6 +19,7 @@ import Restyled.Queues
 import Restyled.ServerUnavailable
 import Restyled.Settings
 import Restyled.SqlError
+import Restyled.Tracing
 import Restyled.Yesod
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
@@ -34,6 +35,7 @@ data App = App
     , appConnPool :: ConnectionPool
     , appRedisConn :: Connection
     , appAWSEnv :: AWS.Env
+    , appTracingApp :: TracingApp
     , appStatic :: Static
     }
 
@@ -59,6 +61,9 @@ instance HasRedis App where
 instance HasAWS App where
     awsEnvL = lens appAWSEnv $ \x y -> x { appAWSEnv = y }
 
+instance HasTracingApp App where
+    tracingAppL = lens appTracingApp $ \x y -> x { appTracingApp = y }
+
 loadApp :: IO App
 loadApp = do
     settings@AppSettings {..} <- loadSettings
@@ -76,6 +81,7 @@ loadApp = do
         <*> runRIO logFunc createPool
         <*> checkedConnect appRedisConf
         <*> discoverAWS appAwsTrace
+        <*> newTracingApp appTracingConfig
         <*> makeStatic appStaticDir
 
 mkYesodData "App" $(parseRoutesFile "config/routes")
@@ -117,32 +123,32 @@ instance Yesod App where
     isAuthorized ThanksGitHubSetupR _ = pure Authorized
     isAuthorized (GitHubStudentsP _) _ = pure Authorized
 
-    isAuthorized ProfileR _ =
+    isAuthorized ProfileR _ = traceAppSegment "Authorize" $ do
         maybe AuthenticationRequired (const Authorized) <$> maybeAuthId
 
-    isAuthorized AdminR _ = do
+    isAuthorized AdminR _ = traceAppSegment "Authorize" $ do
         settings <- getsYesod $ view settingsL
         authorizeAdmin settings =<< maybeAuthId
 
-    isAuthorized (AdminP _) _ = do
+    isAuthorized (AdminP _) _ = traceAppSegment "Authorize" $ do
         settings <- getsYesod $ view settingsL
         authorizeAdmin settings =<< maybeAuthId
 
     -- Jobs API is Admin-only
-    isAuthorized (JobsP _) _ = do
+    isAuthorized (JobsP _) _ = traceAppSegment "Authorize" $ do
         settings <- getsYesod $ view settingsL
         authorizeAdmin settings =<< maybeAuthId
 
     -- Writing RepoR is Admin-only
-    isAuthorized (RepoP _ _ RepoR) True = do
+    isAuthorized (RepoP _ _ RepoR) True = traceAppSegment "Authorize" $ do
         settings <- getsYesod $ view settingsL
         authorizeAdmin settings =<< maybeAuthId
 
-    isAuthorized (RepoP owner repo _) _ = do
+    isAuthorized (RepoP owner repo _) _ = traceAppSegment "Authorize" $ do
         settings <- getsYesod $ view settingsL
         authorizeRepo settings owner repo =<< maybeAuthId
 
-    isAuthorized (SystemP _) _ = do
+    isAuthorized (SystemP _) _ = traceAppSegment "Authorize" $ do
         settings <- getsYesod $ view settingsL
         authorizeAdmin settings =<< maybeAuthId
 
@@ -163,7 +169,7 @@ instance Yesod App where
 
     messageLoggerSource app _logger = logFuncLog $ app ^. logFuncL
 
-    yesodMiddleware handler =
+    yesodMiddleware handler = traceAppSegment "Handler" $ do
         handleSqlErrorState sqlStateQueryCanceled
             (\_ -> serverUnavailable "Database operation took too long")
             (defaultYesodMiddleware handler)
@@ -229,7 +235,10 @@ instance YesodAuthPersist App
 instance YesodAuth App where
     type AuthId App = UserId
 
-    authenticate = liftHandler . runDB . authenticateUser
+    authenticate = liftHandler
+        . traceAppSegment "Authenticate"
+        . runDB
+        . authenticateUser
 
     loginDest _ = HomeR
     logoutDest _ = HomeR

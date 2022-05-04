@@ -92,6 +92,7 @@ emptySettings = AppSettings
     , appRestylerLogStreamPrefix = ""
     , appAwsTrace = False
     , appRestylerQueues = defaultQueues
+    , appTracingConfig = error "unused"
     }
 
 userWithEmail :: Text -> User

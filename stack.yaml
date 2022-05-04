@@ -1,5 +1,9 @@
 resolver: lts-18.14
 extra-deps:
+  # The way it builds the newrelic shared library requires a local checkout for
+  # some reason. Annoying
+  - ../tracing-newrelic
+
   # 1.6.1 + fixes needed for newer unliftio, until 2.0 drops.
   # https://github.com/brendanhay/amazonka/pull/617#issuecomment-830606997
   - github: brendanhay/amazonka

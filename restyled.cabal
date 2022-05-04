@@ -91,6 +91,11 @@ library
       Restyled.SyncMarketplace
       Restyled.Time
       Restyled.TimeRange
+      Restyled.Tracing
+      Restyled.Tracing.App
+      Restyled.Tracing.Config
+      Restyled.Tracing.Middleware
+      Restyled.Tracing.TransactionId
       Restyled.UsCents
       Restyled.WebSockets
       Restyled.Widgets.ContainsURLs
@@ -148,6 +153,7 @@ library
     , blaze-html
     , blaze-markup
     , bytestring
+    , case-insensitive
     , cassava
     , composition-extra
     , conduit
@@ -188,6 +194,7 @@ library
     , postgresql-simple
     , quickcheck-instances
     , random
+    , resource-pool
     , retry
     , rio
     , rio-orphans
@@ -198,6 +205,7 @@ library
     , template-haskell
     , text
     , time
+    , tracing-newrelic
     , transformers
     , unliftio
     , unordered-containers

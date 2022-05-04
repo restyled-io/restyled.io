@@ -13,6 +13,7 @@ import Restyled.Prelude hiding (get, set)
 
 import qualified Data.Text as T
 import Database.Redis (expire, get, set)
+import Restyled.Tracing
 import Restyled.Yesod
 
 newtype CacheKey = CacheKey Text
@@ -42,11 +43,7 @@ instance MonadCache m => MonadCache (SqlPersistT m) where
     getCache = lift . getCache
     setCache k = lift . setCache k
 
-instance HasRedis env => MonadCache (RIO env) where
-    getCache = getCacheRedis
-    setCache = setCacheRedis
-
-instance HasRedis env => MonadCache (HandlerFor env) where
+instance (HasRedis env, HasTracingApp env) => MonadCache (HandlerFor env) where
     getCache = getCacheRedis
     setCache = setCacheRedis
 
@@ -63,7 +60,13 @@ caching = withCache . cacheKey
 -- NB. All errors are smashed into a @'Nothing'@ result.
 --
 getCacheRedis
-    :: (MonadIO m, MonadReader env m, HasRedis env, FromJSON a)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasRedis env
+       , HasTracingApp env
+       , HasTransactionId env
+       , FromJSON a
+       )
     => CacheKey
     -> m (Maybe a)
 getCacheRedis (CacheKey key) = runRedis $ do
@@ -75,7 +78,13 @@ getCacheRedis (CacheKey key) = runRedis $ do
 -- Keys are set to expire in 300 seconds.
 --
 setCacheRedis
-    :: (ToJSON a, HasRedis env, MonadReader env m, MonadIO m)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasRedis env
+       , HasTracingApp env
+       , HasTransactionId env
+       , ToJSON a
+       )
     => CacheKey
     -> a
     -> m ()

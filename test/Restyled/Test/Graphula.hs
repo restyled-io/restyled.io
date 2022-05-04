@@ -22,7 +22,7 @@ graph
     :: HasSqlPool env
     => GraphulaT (YesodExample env) (YesodExample env) a
     -> YesodExample env ()
-graph = void . runGraphulaT Nothing runDB
+graph = void . runGraphulaT Nothing runDBUntraced
 
 onlyKey :: Entity e -> Only (Key e)
 onlyKey = only . entityKey

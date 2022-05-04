@@ -34,19 +34,19 @@ import Text.Shakespeare.Text (st)
 -- | A monomorphic alias just to avoid annotations in specs
 runDB
     :: HasSqlPool env => SqlPersistT (YesodExample env) a -> YesodExample env a
-runDB = RIO.runDB
+runDB = RIO.runDBUntraced
 
 -- | A monomorphic alias just to avoid annotations in specs
 runRedis :: HasRedis env => Redis a -> YesodExample env a
-runRedis = RIO.runRedis
+runRedis = RIO.runRedisUntraced
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
     loadEnvFrom ".env.test"
     foundation <- loadApp
     runRIO foundation $ do
-        RIO.runDB wipeDB
-        RIO.runRedis wipeRedis
+        RIO.runDBUntraced wipeDB
+        RIO.runRedisUntraced wipeRedis
     return (foundation, waiMiddleware foundation)
 
 wipeDB :: MonadIO m => SqlPersistT m ()

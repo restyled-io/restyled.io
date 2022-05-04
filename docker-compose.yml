@@ -14,6 +14,11 @@ services:
     ports:
       - 6379:6379
 
+  newrelic:
+    image: newrelic/c-daemon
+    ports:
+      - 31339:31339
+
   agent:
     image: restyled/agent:main
     entrypoint: sh

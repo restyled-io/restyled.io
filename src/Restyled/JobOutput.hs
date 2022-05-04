@@ -17,6 +17,7 @@ import Network.AWS.CloudWatchLogs.Types
 import Network.AWS.Pager (AWSPager(..))
 import Restyled.Models
 import Restyled.Settings
+import Restyled.Tracing
 
 -- | Return all of the Job's log that we have now and stop
 fetchJobOutput
@@ -32,6 +33,8 @@ followJobOutput
        , MonadAWS m
        , MonadReader env m
        , HasSqlPool env
+       , HasTracingApp env
+       , HasTransactionId env
        , HasSettings env
        )
     => JobId

@@ -13,6 +13,7 @@ import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
 import Restyled.Env
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
+import Restyled.Tracing
 import Restyled.UsCents
 
 data AppSettings = AppSettings
@@ -61,6 +62,12 @@ instance HasLogFunc App where
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x { appSettings = y }
 
+instance HasTracingApp App where
+    tracingAppL = lens (const TracingDisabled) const
+
+instance HasTransactionId App where
+    transactionIdL = lens (const Nothing) const
+
 instance HasSqlPool App where
     sqlPoolL = lens appSqlPool $ \x y -> x { appSqlPool = y }
 
@@ -78,6 +85,8 @@ syncMarketplace
        , HasLogFunc env
        , HasSettings env
        , HasSqlPool env
+       , HasTracingApp env
+       , HasTransactionId env
        )
     => m ()
 syncMarketplace = do
@@ -103,6 +112,8 @@ synchronizePlanAccounts
        , HasLogFunc env
        , HasSettings env
        , HasSqlPool env
+       , HasTracingApp env
+       , HasTransactionId env
        )
     => GH.MarketplacePlan
     -> MarketplacePlanId
@@ -129,7 +140,13 @@ synchronizePlanAccounts plan planId = do
     traverse (runDB . synchronizeAccount planId) accounts
 
 synchronizePlanAccountsError
-    :: (MonadUnliftIO m, MonadReader env m, HasLogFunc env, HasSqlPool env)
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasLogFunc env
+       , HasSqlPool env
+       , HasTracingApp env
+       , HasTransactionId env
+       )
     => GH.MarketplacePlan
     -> MarketplacePlanId
     -> SomeException
