@@ -62,7 +62,7 @@ setup:
 setup.lint:
 	stack install --copy-compiler-tool \
 	  hlint \
-	  weeder-2.2.0
+	  weeder
 
 .PHONY: setup.tools
 setup.tools:

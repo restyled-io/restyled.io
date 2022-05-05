@@ -35,12 +35,11 @@ oauth2GitHubStudents clientId clientSecret =
             }
   where
     oauth2 = OAuth2
-        { oauthClientId = clientId
-        , oauthClientSecret = Just clientSecret
-        , oauthOAuthorizeEndpoint =
+        { oauth2ClientId = clientId
+        , oauth2ClientSecret = Just clientSecret
+        , oauth2AuthorizeEndpoint =
             "https://github.com/login/oauth/authorize"
                 `withQuery` [scopeParam "," defaultScopes]
-        , oauthAccessTokenEndpoint =
-            "https://github.com/login/oauth/access_token"
-        , oauthCallback = Nothing
+        , oauth2TokenEndpoint = "https://github.com/login/oauth/access_token"
+        , oauth2RedirectUri = Nothing
         }

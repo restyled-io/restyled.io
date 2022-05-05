@@ -8,8 +8,8 @@ module Restyled.Foundation
 
 import Restyled.Prelude
 
+import qualified Amazonka as AWS (Env)
 import Data.Text (splitOn)
-import qualified Network.AWS as AWS (Env)
 import Restyled.ApiError
 import Restyled.ApiToken
 import Restyled.Authentication

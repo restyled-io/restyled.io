@@ -7,21 +7,26 @@ module Restyled.JobOutput
 
 import Restyled.Prelude
 
+import Amazonka.CloudWatchLogs.GetLogEvents
+import Amazonka.CloudWatchLogs.Types
+import Amazonka.Pager (AWSPager(..))
 import Conduit
 import Control.Lens ((?~))
 import qualified Data.List.NonEmpty as NE
 import Data.Semigroup (Last(..))
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime, utcTimeToPOSIXSeconds)
-import Network.AWS.CloudWatchLogs.GetLogEvents
-import Network.AWS.CloudWatchLogs.Types
-import Network.AWS.Pager (AWSPager(..))
 import Restyled.Models
 import Restyled.Settings
 import Restyled.Tracing
 
 -- | Return all of the Job's log that we have now and stop
 fetchJobOutput
-    :: (MonadUnliftIO m, MonadAWS m, MonadReader env m, HasSettings env)
+    :: ( MonadUnliftIO m
+       , MonadResource m
+       , MonadReader env m
+       , HasSettings env
+       , HasAWS env
+       )
     => JobId
     -> m [JobLogLine]
 fetchJobOutput jobId =
@@ -30,12 +35,13 @@ fetchJobOutput jobId =
 -- | Stream a Job's log so long as it is in progress
 followJobOutput
     :: ( MonadUnliftIO m
-       , MonadAWS m
+       , MonadResource m
        , MonadReader env m
+       , HasSettings env
        , HasSqlPool env
        , HasTracingApp env
        , HasTransactionId env
-       , HasSettings env
+       , HasAWS env
        )
     => JobId
     -> ([JobLogLine] -> m ())
@@ -65,16 +71,16 @@ getLastCreatedAt = fmap (Last . jobLogLineCreatedAt . NE.last) . NE.nonEmpty
 instance AWSPager GetLogEvents where
     page req resp = do
         -- Events were present in last response
-        guard $ not $ null $ resp ^. glersEvents
+        guard $ not $ null $ resp ^. getLogEventsResponse_events
 
         -- Forward token present, and differs from what we just used
-        nextToken <- resp ^. glersNextForwardToken
-        guard $ req ^. gleNextToken /= Just nextToken
+        nextToken <- resp ^. getLogEventsResponse_nextForwardToken
+        guard $ req ^. getLogEvents_nextToken /= Just nextToken
 
-        pure $ req & (gleNextToken ?~ nextToken)
+        pure $ req & (getLogEvents_nextToken ?~ nextToken)
 
 streamJobLogLines
-    :: (MonadAWS m, MonadReader env m, HasSettings env)
+    :: (MonadResource m, MonadReader env m, HasAWS env, HasSettings env)
     => JobId
     -> Maybe UTCTime
     -> ConduitT () [JobLogLine] m ()
@@ -84,20 +90,24 @@ streamJobLogLines jobId mSince = do
     let groupName = appRestylerLogGroup
         streamName = appRestylerLogStreamPrefix <> toPathPiece jobId
         req =
-            getLogEvents groupName streamName
-                & (gleStartTime .~ startMilliseconds)
-                & (gleStartFromHead ?~ True)
+            newGetLogEvents groupName streamName
+                & (getLogEvents_startTime .~ startMilliseconds)
+                & (getLogEvents_startFromHead ?~ True)
 
     paginate req .| mapC fromGetLogEvents
     where startMilliseconds = (+ 1) . utcTimeToPOSIXMilliseconds <$> mSince
 
 fromGetLogEvents :: GetLogEventsResponse -> [JobLogLine]
-fromGetLogEvents resp = mapMaybe fromOutputLogEvent $ resp ^. glersEvents
+fromGetLogEvents resp =
+    mapMaybe fromOutputLogEvent
+        $ fromMaybe []
+        $ resp
+        ^. getLogEventsResponse_events
 
 fromOutputLogEvent :: OutputLogEvent -> Maybe JobLogLine
 fromOutputLogEvent event = do
-    message <- event ^. oleMessage
-    timestamp <- event ^. oleTimestamp
+    message <- event ^. outputLogEvent_message
+    timestamp <- event ^. outputLogEvent_timestamp
     pure $ jobLogLine (posixMillisecondsToUTCTime timestamp) message
 
 utcTimeToPOSIXMilliseconds :: Integral n => UTCTime -> n
