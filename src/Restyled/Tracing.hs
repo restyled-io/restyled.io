@@ -21,6 +21,4 @@ traceAppSegment
     => SegmentName
     -> m a
     -> m a
-traceAppSegment name untraced = do
-    mTxId <- view transactionIdL
-    traceSegment mTxId (Just name) (Just $ SegmentCategory "App") untraced
+traceAppSegment name = traceSegment (Just name) (Just $ SegmentCategory "App")
