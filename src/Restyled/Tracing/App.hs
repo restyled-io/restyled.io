@@ -37,9 +37,12 @@ instance HasTracingApp TracingApp where
 instance HasTracingApp env => HasTracingApp (HandlerData child env) where
     tracingAppL = envL . siteL . tracingAppL
 
-newTracingApp :: MonadIO m => TracingConfig -> m TracingApp
-newTracingApp TracingConfig {..} = liftIO
-    $ maybe (pure TracingDisabled) (newApp <=< go) tcLicenseKey
+newTracingApp :: MonadUnliftIO m => TracingConfig -> m TracingApp
+newTracingApp TracingConfig {..} =
+    handleAny (const $ pure TracingDisabled) $ liftIO $ maybe
+        (pure TracingDisabled)
+        (newApp <=< go)
+        tcLicenseKey
   where
     go key = do
         void $ init tcDaemonSocket $ TimeLimitMs 1000
