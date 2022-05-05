@@ -3,8 +3,6 @@
 module RIO.AWS
     ( HasAWS(..)
     , discoverAWS
-    -- , implementAWS
-    -- , MonadAWS(..)
     , send
     , paginate
     ) where
@@ -13,11 +11,7 @@ import RIO
 
 import qualified Amazonka as AWS
 import Conduit
--- import Control.Monad.Catch (MonadCatch(..))
--- import qualified Control.Monad.Trans.AWS as AWS
--- import Network.AWS (AWS, MonadAWS(..), paginate, runAWS, runResourceT, send)
 import RIO.Orphans ()
--- import qualified UnliftIO.Exception as UnliftIO
 import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
 
@@ -34,10 +28,11 @@ discoverAWS
     :: MonadIO m
     => Bool -- ^ Debug?
     -> m AWS.Env
-discoverAWS _debug = do
-    -- let level = if debug then AWS.Debug else AWS.Info
-    -- lgr <- AWS.newLogger level stdout
-    liftIO $ AWS.newEnv AWS.discover -- <&> AWS.envLogger .~ lgr
+discoverAWS debug = do
+    let level = if debug then AWS.Debug else AWS.Info
+    lgr <- AWS.newLogger level stdout
+    env <- liftIO $ AWS.newEnv AWS.discover
+    pure $ env { AWS.envLogger = lgr }
 
 send
     :: (MonadResource m, MonadReader env m, HasAWS env, AWS.AWSRequest a)
