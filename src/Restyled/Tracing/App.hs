@@ -75,11 +75,9 @@ endTransaction
     => TransactionId
     -> m ()
 endTransaction txId = view tracingAppL >>= \case
-    -- TODO: think about how this ought to work
-    TracingApp _ ref -> liftIO $ bracket
-        (atomicModifyIORef' ref $ deleteLookup txId)
-        (traverse_ NR.endTransaction)
-        (const $ pure ())
+    TracingApp _ ref -> liftIO $ do
+        mTxId <- atomicModifyIORef' ref $ deleteLookup txId
+        traverse_ NR.endTransaction mTxId
     TracingDisabled -> pure ()
   where
     deleteLookup
@@ -120,19 +118,21 @@ newtype SegmentCategory = SegmentCategory
     }
 
 traceSegment
-    :: (MonadUnliftIO m, MonadReader env m, HasTracingApp env)
-    => Maybe TransactionId
-    -> Maybe SegmentName
+    :: ( MonadUnliftIO m
+       , MonadReader env m
+       , HasTracingApp env
+       , HasTransactionId env
+       )
+    => Maybe SegmentName
     -> Maybe SegmentCategory
     -> m a
     -> m a
-traceSegment mTxId name category untraced = go mTxId
+traceSegment name category untraced = do
+    maybe untraced go =<< view transactionIdL
   where
-    go = maybe untraced $ \txId -> do
-        mSegment <- withTransaction txId start
+    go txId = do
+        mSegment <- withTransaction txId $ \tx -> liftIO $ startSegment
+            tx
+            (unSegmentName <$> name)
+            (unSegmentCategory <$> category)
         untraced `finally` traverse_ (liftIO . endSegment) mSegment
-
-    start tx = liftIO $ startSegment
-        tx
-        (unSegmentName <$> name)
-        (unSegmentCategory <$> category)

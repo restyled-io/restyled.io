@@ -6,10 +6,11 @@ module Restyled.Tracing.Middleware
 
 import RIO
 
-import Control.Lens ((?~))
+import Control.Lens (_1, _2, (?~))
+import Data.Coerce (coerce)
 import Network.HTTP.Types.Status (statusCode, statusIsServerError)
 import Network.Wai
-    (Middleware, Response, pathInfo, requestMethod, responseStatus)
+    (Middleware, Request, Response, pathInfo, requestMethod, responseStatus)
 import RIO.Text (pack)
 import qualified RIO.Text as T
 import Restyled.Tracing.App
@@ -66,9 +67,21 @@ updateTracedResponse txId resp = do
 traceMiddlewareSegment
     :: HasTracingApp env => env -> SegmentName -> Middleware -> Middleware
 traceMiddlewareSegment env name middle app req respond = do
-    let mTxId = view transactionIdL req
-
-    flip runReaderT env
-        $ traceSegment mTxId (Just name) (Just $ SegmentCategory "Middleware")
+    flip runReaderT (withRequest env req)
+        $ traceSegment (Just name) (Just $ SegmentCategory "Middleware")
         $ lift
         $ middle app req respond
+
+newtype WithRequest env = WithRequest (env, Request)
+
+unL :: Lens' (WithRequest env) (env, Request)
+unL = lens coerce $ const coerce
+
+instance HasTracingApp env => HasTracingApp (WithRequest env) where
+    tracingAppL = unL . _1 . tracingAppL
+
+instance HasTransactionId (WithRequest env) where
+    transactionIdL = unL . _2 . transactionIdL
+
+withRequest :: env -> Request -> WithRequest env
+withRequest x req = WithRequest (x, req)
