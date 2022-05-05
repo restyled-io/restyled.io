@@ -37,21 +37,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: |
-          curl --location --output .hlint.yaml \
-            https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
-      - uses: freckle/stack-cache-action@v1
+      - uses: freckle/stack-cache-action@v2
       - run: bin/setup-tracing-newrelic
-      - run: stack install --no-terminal --copy-compiler-tool dbmigrations-postgresql
+      - run: |
+          stack install --no-terminal \
+            --copy-compiler-tool dbmigrations-postgresql
       - run: db/migrate test upgrade
-      - uses: freckle/stack-action@main
-        with:
-          hlint-arguments: . --ignore-glob 'src/Restyled/Widgets/Job.hs'
-          weeder-version: 2.2.0
-          weeder-arguments: --require-hs-files
+      - uses: freckle/stack-action@v3
       - run: db/pending-prod-migrations --check
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      - uses: freckle/weeder-action@v1
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          curl --location --output .hlint.yaml \
+            https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
+      - uses: rwe/actions-hlint-setup@v1
+      - uses: rwe/actions-hlint-run@v2
+        with:
+          fail-on: warning
 
   image:
     runs-on: ubuntu-latest
