@@ -31,13 +31,15 @@ default-extensions:
   # Needed here just so HLint doesn't strip it
   - ViewPatterns
 
-ghc-options: >-
-  -Weverything
-  -Wno-all-missed-specialisations
-  -Wno-missing-import-lists
-  -Wno-missing-safe-haskell-mode
-  -Wno-prepositive-qualified-module
-  -Wno-unsafe
+ghc-options:
+  - -fwrite-ide-info
+  - -Weverything
+  - -Wno-all-missed-specialisations
+  - -Wno-missing-exported-signatures # re-enables missing-signatures
+  - -Wno-missing-import-lists
+  - -Wno-missing-safe-haskell-mode
+  - -Wno-prepositive-qualified-module
+  - -Wno-unsafe
 
 dependencies:
   - base
@@ -60,14 +62,11 @@ library:
     - composition-extra
     - conduit
     - conduit-extra
-    - containers
     - data-default
     - envparse
     - errors
     - esqueleto
-    - exceptions
     - extra
-    - fast-logger
     - file-embed
     - formatting
     - generic-arbitrary
@@ -109,8 +108,7 @@ library:
     - time
     - tracing-newrelic
     - transformers
-    - unliftio
-    - unordered-containers
+    # - unliftio
     - uri-encode
     - uuid
     - vector
@@ -185,11 +183,8 @@ tests:
       - monad-validate
       - mtl
       - persistent
-      - rio
       - shakespeare
       - text
-      - time
       - wai-extra
-      - yesod-auth
       - yesod-core
       - yesod-test

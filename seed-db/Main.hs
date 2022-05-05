@@ -10,5 +10,5 @@ import Restyled.Development.Seeds
 main :: IO ()
 main = do
     setupCLI
-    app <- loadApp
-    runRIO app $ runDB seedDB
+    withApp $ \app -> do
+        runRIO app $ runDB seedDB

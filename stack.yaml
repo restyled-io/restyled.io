@@ -1,38 +1,31 @@
-resolver: lts-18.14
+resolver: lts-19.6
 extra-deps:
   # The way it builds the newrelic shared library requires a local checkout for
   # some reason. Annoying
   - ../tracing-newrelic
 
-  # 1.6.1 + fixes needed for newer unliftio, until 2.0 drops.
-  # https://github.com/brendanhay/amazonka/pull/617#issuecomment-830606997
   - github: brendanhay/amazonka
-    commit: 14bc3248c423f486ae710d523b8996ddb3dac854
+    commit: f73a957d05f64863e867cf39d0db260718f0fadd # main, as of SSO support
     subdirs:
-      - amazonka
+      - lib/amazonka
+      - lib/amazonka-core
+      - lib/services/amazonka-cloudwatch-logs
+      - lib/services/amazonka-sso
+      - lib/services/amazonka-sts
 
-  - github-0.27@sha256:074e69ad24b94b1199331b156e5373e9d4fa4a4452e02217f3539fe94a21a838,6995
-  - monad-validate-1.2.0.0@sha256:9850f408431098b28806dd464b6825a88a0b56c84f380d7fe0454c1df9d6f881,3505
-
-  # For brittany
-  - data-tree-print-0.1.0.2@sha256:d845e99f322df70e0c06d6743bf80336f5918d5423498528beb0593a2afc1703,1620
+  # https://github.com/hasura/monad-validate/pull/5
+  - github: LeapYear/monad-validate
+    commit: 5b181b7c57d6e2c975c533b0a0072e9aeb15fb99
 
   # For weeder
-  - dhall-1.40.1@sha256:f286fa8474927b5717a611444008ec274a0f0ebea0911088cec87b2e84c0dc6f,35396
-  - generic-lens-2.2.0.0@sha256:4008a39f464e377130346e46062e2ac1211f9d2e256bbb1857216e889c7196be,3867
+  - algebraic-graphs-0.5
 
-  # For generic-lens
-  - generic-lens-core-2.2.0.0@sha256:b6b69e992f15fa80001de737f41f2123059011a1163d6c8941ce2e3ab44f8c03,2913
-
-  # For dbmigrations-postgresql
-  - HDBC-postgresql-2.5.0.0@sha256:10ceb4f456bbd4768a3f0ab425d9b4d40cb0e17992083b881b37fe5d91b58aba,3050
-  - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
+  # # For dbmigrations-postgresql
+  - HDBC-postgresql-2.5.0.1
+  - dbmigrations-2.0.0
 
   # For dbmigrations
-  - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d,1887
+  - yaml-light-0.1.4
 
   # For yaml-light
-  - HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da,1818
-
-ghc-options:
-  "$locals": -fwrite-ide-info
+  - HsSyck-0.53

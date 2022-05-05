@@ -43,14 +43,14 @@ import Database.Esqueleto.PostgreSQL
 
 selectMap
     :: (MonadIO m, SqlSelect a r) => (r -> b) -> SqlQuery a -> SqlPersistT m [b]
-selectMap f = fmap (map f) . select
+selectMap f q = map f <$> select q
 
 selectFoldMap
     :: (MonadIO m, SqlSelect a r, Monoid b)
     => (r -> b)
     -> SqlQuery a
     -> SqlPersistT m b
-selectFoldMap f = fmap (foldMap f) . select
+selectFoldMap f q = foldMap f <$> select q
 
 aggregate
     :: (PersistField a, PersistField [a])

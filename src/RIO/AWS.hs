@@ -3,20 +3,22 @@
 module RIO.AWS
     ( HasAWS(..)
     , discoverAWS
-    , implementAWS
-    , MonadAWS(..)
+    -- , implementAWS
+    -- , MonadAWS(..)
     , send
     , paginate
     ) where
 
 import RIO
 
-import Control.Monad.Catch (MonadCatch(..))
-import qualified Control.Monad.Trans.AWS as AWS
-import Network.AWS (AWS, MonadAWS(..), paginate, runAWS, runResourceT, send)
+import qualified Amazonka as AWS
+import Conduit
+-- import Control.Monad.Catch (MonadCatch(..))
+-- import qualified Control.Monad.Trans.AWS as AWS
+-- import Network.AWS (AWS, MonadAWS(..), paginate, runAWS, runResourceT, send)
 import RIO.Orphans ()
-import qualified UnliftIO.Exception as UnliftIO
-import Yesod.Core.Types (HandlerData, HandlerFor)
+-- import qualified UnliftIO.Exception as UnliftIO
+import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
 
 class HasAWS env where
@@ -32,22 +34,26 @@ discoverAWS
     :: MonadIO m
     => Bool -- ^ Debug?
     -> m AWS.Env
-discoverAWS debug = do
-    let level = if debug then AWS.Debug else AWS.Info
-    lgr <- AWS.newLogger level stdout
-    liftIO $ AWS.newEnv AWS.Discover <&> AWS.envLogger .~ lgr
+discoverAWS _debug = do
+    -- let level = if debug then AWS.Debug else AWS.Info
+    -- lgr <- AWS.newLogger level stdout
+    liftIO $ AWS.newEnv AWS.discover -- <&> AWS.envLogger .~ lgr
 
-implementAWS
-    :: (MonadUnliftIO m, MonadReader env m, HasAWS env) => AWS a -> m a
-implementAWS req = do
+send
+    :: (MonadResource m, MonadReader env m, HasAWS env, AWS.AWSRequest a)
+    => a
+    -> m (AWS.AWSResponse a)
+send req = do
     env <- view awsEnvL
-    runResourceT $ runAWS env req
+    AWS.send env req
 
-instance HasAWS env => MonadAWS (RIO env) where
-    liftAWS = implementAWS
+paginate
+    :: (MonadResource m, MonadReader env m, HasAWS env, AWS.AWSPager a)
+    => a
+    -> ConduitM () (AWS.AWSResponse a) m ()
+paginate req = do
+    env <- view awsEnvL
+    AWS.paginateEither env req >>= hoistEither
 
-instance MonadCatch (HandlerFor app) where
-    catch = UnliftIO.catch
-
-instance HasAWS app => MonadAWS (HandlerFor app) where
-    liftAWS = implementAWS
+hoistEither :: MonadIO m => Either AWS.Error a -> m a
+hoistEither = either (liftIO . throwIO) pure

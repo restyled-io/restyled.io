@@ -1,21 +1,21 @@
 module Restyled.Development.Seeds
     ( App
-    , loadApp
+    , withApp
     , seedDB
     ) where
 
 import Restyled.Prelude
 
-import Control.Monad.Catch (MonadCatch)
+import qualified Amazonka as AWS (Env)
+import Amazonka.CloudWatchLogs.CreateLogStream
+import Amazonka.CloudWatchLogs.DeleteLogStream
+import Amazonka.CloudWatchLogs.PutLogEvents
+import Amazonka.CloudWatchLogs.Types
+import Conduit (MonadResource)
 import qualified Data.List.NonEmpty as NE
 import Data.Monoid (First)
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
-import qualified Network.AWS as AWS (Env)
-import Network.AWS.CloudWatchLogs.CreateLogStream
-import Network.AWS.CloudWatchLogs.DeleteLogStream
-import Network.AWS.CloudWatchLogs.PutLogEvents
-import Network.AWS.CloudWatchLogs.Types
-import Network.AWS.Lens (catching_)
+import RIO.Orphans
 import Restyled.Env
 import Restyled.Marketplace
 import Restyled.Models
@@ -62,6 +62,7 @@ data App = App
     , appSettings :: AppSettings
     , appSqlPool :: ConnectionPool
     , appAWSEnv :: AWS.Env
+    , appResourceMap :: ResourceMap
     }
 
 instance HasLogFunc App where
@@ -82,17 +83,25 @@ instance HasSqlPool App where
 instance HasAWS App where
     awsEnvL = lens appAWSEnv $ \x y -> x { appAWSEnv = y }
 
-loadApp :: IO App
-loadApp = do
-    appSettings@AppSettings {..} <- loadSettings
-    appLogFunc <- terminalLogFunc stdout appLogLevel
+instance HasResourceMap App where
+    resourceMapL = lens appResourceMap $ \x y -> x { appResourceMap = y }
+
+withApp :: MonadUnliftIO m => (App -> m a) -> m a
+withApp f = do
+    appSettings@AppSettings {..} <- liftIO loadSettings
+    appLogFunc <- liftIO $ terminalLogFunc stdout appLogLevel
     appSqlPool <- runRIO appLogFunc
         $ createConnectionPool appDatabaseConf appStatementTimeout
     appAWSEnv <- discoverAWS appAwsTrace
-    pure App { .. }
+    withResourceMap $ \appResourceMap -> f $ App { .. }
 
 seedDB
-    :: (MonadUnliftIO m, MonadAWS m, MonadReader env m, HasSettings env)
+    :: ( MonadUnliftIO m
+       , MonadResource m
+       , MonadReader env m
+       , HasSettings env
+       , HasAWS env
+       )
     => SqlPersistT m ()
 seedDB = do
     now <- liftIO getCurrentTime
@@ -154,7 +163,12 @@ restyledRepoPrivate :: RepoName -> Repo
 restyledRepoPrivate name = (restyledRepo name) { repoIsPrivate = True }
 
 seedJob
-    :: (MonadUnliftIO m, MonadAWS m, MonadReader env m, HasSettings env)
+    :: ( MonadUnliftIO m
+       , MonadResource m
+       , MonadReader env m
+       , HasSettings env
+       , HasAWS env
+       )
     => Repo
     -> PullRequestNum
     -> UTCTime
@@ -382,7 +396,12 @@ configErrorOutput1 =
     ]
 
 seedJobLogLines
-    :: (MonadAWS m, MonadReader env m, HasSettings env)
+    :: ( MonadUnliftIO m
+       , MonadResource m
+       , MonadReader env m
+       , HasSettings env
+       , HasAWS env
+       )
     => JobId
     -> NonEmpty JobLogLine
     -> m ()
@@ -393,20 +412,25 @@ seedJobLogLines jobId jobLogLines = do
         stream = appRestylerLogStreamPrefix <> toPathPiece jobId
         events = toInputLogEvent <$> jobLogLines
 
-    ignoring _ResourceNotFoundException $ void $ send $ deleteLogStream
+    ignoring _ResourceNotFoundException $ void $ send $ newDeleteLogStream
         group
         stream
 
-    void $ send $ createLogStream group stream
-    void $ send $ putLogEvents group stream events
+    void $ send $ newCreateLogStream group stream
+    void $ send $ newPutLogEvents group stream events
 
 toInputLogEvent :: JobLogLine -> InputLogEvent
-toInputLogEvent ln = inputLogEvent
+toInputLogEvent ln = newInputLogEvent
     (utcTimeToPOSIXMilliseconds $ jobLogLineCreatedAt ln)
     (jobLogLineContent ln)
 
 utcTimeToPOSIXMilliseconds :: Integral n => UTCTime -> n
 utcTimeToPOSIXMilliseconds = round . (* 1000) . utcTimeToPOSIXSeconds
 
-ignoring :: MonadCatch m => Getting (First a) SomeException a -> m () -> m ()
+ignoring
+    :: MonadUnliftIO m => Getting (First a) SomeException a -> m () -> m ()
 ignoring l f = catching_ l f $ pure ()
+
+catching_
+    :: MonadUnliftIO m => Getting (First a) SomeException a -> m r -> m r -> m r
+catching_ l a b = catchJust (preview l) a (const b)

@@ -34,7 +34,7 @@ import Control.Monad.Extra as X (fromMaybeM, partitionM)
 import Control.Monad.Logger as X
     (logDebugN, logErrorN, logInfoN, logOtherN, logWarnN)
 import Control.Monad.Trans.Maybe as X
-import Data.Aeson as X hiding (Result(..))
+import Data.Aeson as X hiding (Key, Result(..))
 import Data.Aeson.Casing as X
 import Data.Bitraversable as X (bimapM)
 import Data.Char as X (isSpace, toLower)
