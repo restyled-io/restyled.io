@@ -8,14 +8,18 @@ module Restyled.Foundation
 
 import Restyled.Prelude
 
-import qualified Amazonka as AWS (Env)
 import Data.Text (splitOn)
+import Lens.Micro ((^.))
+import Restyled.AWS (HasAWS(..))
+import qualified Restyled.AWS as AWS
 import Restyled.ApiError
 import Restyled.ApiToken
 import Restyled.Authentication
 import Restyled.Authorization
+import Restyled.DB
 import Restyled.Models
 import Restyled.Queues
+import Restyled.Redis
 import Restyled.ServerUnavailable
 import Restyled.Settings
 import Restyled.SqlError
@@ -29,9 +33,8 @@ import qualified Yesod.Persist as YP
 import Yesod.Static
 
 data App = App
-    { appLogFunc :: LogFunc
-    , appSettings :: AppSettings
-    , appProcessContext :: ProcessContext
+    { appSettings :: AppSettings
+    , appLogger :: Logger
     , appConnPool :: ConnectionPool
     , appRedisConn :: Connection
     , appAWSEnv :: AWS.Env
@@ -39,15 +42,11 @@ data App = App
     , appStatic :: Static
     }
 
-instance HasLogFunc App where
-    logFuncL = lens appLogFunc $ \x y -> x { appLogFunc = y }
-
-instance HasProcessContext App where
-    processContextL =
-        lens appProcessContext $ \x y -> x { appProcessContext = y }
-
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x { appSettings = y }
+
+instance HasLogger App where
+    loggerL = lens appLogger $ \x y -> x { appLogger = y }
 
 instance HasQueues App where
     queuesL = settingsL . queuesL
@@ -68,19 +67,17 @@ loadApp :: IO App
 loadApp = do
     settings@AppSettings {..} <- loadSettings
 
-    logFunc <- terminalLogFunc stdout appLogLevel
-
-    runRIO logFunc $ logInfoN "Starting up..."
     let createPool = createConnectionPool appDatabaseConf appStatementTimeout
         makeStatic
             | appMutableStatic = staticDevel
             | otherwise = static
 
-    App logFunc settings
-        <$> mkDefaultProcessContext
-        <*> runRIO logFunc createPool
+    logger <- newLogger appLogSettings
+
+    App settings logger
+        <$> runLoggerLoggingT logger createPool
         <*> checkedConnect appRedisConf
-        <*> discoverAWS appAwsTrace
+        <*> runLoggerLoggingT logger AWS.discover
         <*> newTracingApp appTracingConfig
         <*> makeStatic appStaticDir
 
@@ -148,10 +145,6 @@ instance Yesod App where
         settings <- getsYesod $ view settingsL
         authorizeRepo settings owner repo =<< maybeAuthId
 
-    isAuthorized (SystemP _) _ = traceAppSegment "Authorize" $ do
-        settings <- getsYesod $ view settingsL
-        authorizeAdmin settings =<< maybeAuthId
-
     addStaticContent ext mime content = do
         staticDir <- getsYesod $ appStaticDir . view settingsL
 
@@ -167,7 +160,8 @@ instance Yesod App where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
-    messageLoggerSource app _logger = logFuncLog $ app ^. logFuncL
+    messageLoggerSource app _logger loc source level msg =
+        runLoggerLoggingT app $ monadLoggerLog loc source level msg
 
     yesodMiddleware handler = traceAppSegment "Handler" $ do
         handleSqlErrorState sqlStateQueryCanceled
@@ -223,7 +217,7 @@ fragmentLayout = withUrlRenderer . pageBody <=< widgetToPageContent
 staticR :: FilePath -> Route App
 staticR path = StaticR $ StaticRoute (splitOn "/" $ pack path) []
 
--- | Only needed for YesodAuth to work, we use @'RIO.DB.runDB'@ directly
+-- | Only needed for YesodAuth to work, we use @'Restyled.DB.runDB'@ directly
 instance YesodPersist App where
     type YesodPersistBackend App = SqlBackend
     runDB = runDB

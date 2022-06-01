@@ -6,9 +6,11 @@ module Restyled.Authorization
     , authRepoCacheKey
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude hiding ((??))
 
+import Control.Error.Util ((??))
 import Restyled.Cache
+import Restyled.DB
 import Restyled.Models
 import Restyled.Settings
 import Restyled.Tracing
@@ -98,13 +100,12 @@ authorizePrivateRepo settings@AppSettings {..} repo@Repo {..} user@User {..} =
         let isAdmin = userIsAdmin settings user
             (granted, reason, mErr) = resolveAuth isAdmin result
 
-        logInfoN $ mconcat
-            [ "AUTHORIZE"
-            , " user=" <> maybe "<unknown>" toPathPiece userGithubUsername
-            , " repo=" <> repoPath repoOwner repoName
-            , " granted=" <> tshow granted
-            , " reason=" <> tshow reason
-            , " error=" <> maybe "" tshow mErr
+        logInfo $ "Authorize" :# catMaybes
+            [ Just $ "user" .= userGithubUsername
+            , Just $ "repo" .= repoPath repoOwner repoName
+            , Just $ "granted" .= granted
+            , Just $ "reason" .= reason
+            , ("error" .=) <$> mErr
             ]
 
         authorizeWhen granted

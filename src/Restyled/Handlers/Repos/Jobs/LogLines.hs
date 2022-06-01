@@ -2,10 +2,11 @@ module Restyled.Handlers.Repos.Jobs.LogLines
     ( getRepoJobLogLinesR
     ) where
 
-import Restyled.Prelude hiding (send)
+import Restyled.Prelude
 
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.JobOutput
 import Restyled.Models

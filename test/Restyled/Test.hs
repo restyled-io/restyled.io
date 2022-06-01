@@ -10,7 +10,7 @@ module Restyled.Test
 import Restyled.Application as X ()
 import Restyled.Foundation as X
 import Restyled.Models as X
-import Restyled.Prelude as X hiding (fieldLens, get, runDB, runRedis)
+import Restyled.Prelude as X hiding (fieldLens, get)
 import Restyled.Routes as X
 import Restyled.Settings as X
 import Restyled.Test.Authentication as X
@@ -26,27 +26,29 @@ import Database.Persist.Sql (rawExecute, rawSql, unSingle)
 import Database.Persist.Sql.Types.Internal (connEscapeRawName)
 import Database.Redis (del, keys)
 import LoadEnv (loadEnvFrom)
-import qualified RIO.DB as RIO
-import qualified RIO.Redis as RIO
 import Restyled.Application (waiMiddleware)
+import Restyled.DB hiding (runDB)
+import qualified Restyled.DB as DB
+import Restyled.Redis hiding (runRedis)
+import qualified Restyled.Redis as Redis
 import Text.Shakespeare.Text (st)
 
 -- | A monomorphic alias just to avoid annotations in specs
 runDB
     :: HasSqlPool env => SqlPersistT (YesodExample env) a -> YesodExample env a
-runDB = RIO.runDBUntraced
+runDB = DB.runDBUntraced
 
 -- | A monomorphic alias just to avoid annotations in specs
 runRedis :: HasRedis env => Redis a -> YesodExample env a
-runRedis = RIO.runRedisUntraced
+runRedis = Redis.runRedisUntraced
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
     loadEnvFrom ".env.test"
     foundation <- loadApp
-    runRIO foundation $ do
-        RIO.runDBUntraced wipeDB
-        RIO.runRedisUntraced wipeRedis
+    runLoggerLoggingT foundation $ flip runReaderT foundation $ do
+        DB.runDBUntraced wipeDB
+        Redis.runRedisUntraced wipeRedis
     return (foundation, waiMiddleware foundation)
 
 wipeDB :: MonadIO m => SqlPersistT m ()

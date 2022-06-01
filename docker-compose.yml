@@ -46,12 +46,11 @@ services:
     image: restyled/agent:main
     depends_on:
       - redis
-    entrypoint: sh
-    command: -c "/bin/agent --debug"
     env_file: ./.env.development
     environment:
       AWS_ACCESS_KEY_ID: x
       AWS_SECRET_ACCESS_KEY: x
+      LOG_LEVEL: DEBUG,Amazonka:info
       REDIS_URL: redis://redis
       RESTYLER_POOL_SIZE: 3
       SHUTDOWN_TIMEOUT: 600000

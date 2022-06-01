@@ -47,18 +47,18 @@ dependencies:
 library:
   source-dirs: src
   dependencies:
+    - Blammo
     - QuickCheck
     - aeson
     - aeson-casing
-    - ansi-terminal
     - amazonka
     - amazonka-cloudwatch-logs
     - amazonka-core
     - blaze-html
     - blaze-markup
     - bytestring
-    - cassava
     - case-insensitive
+    - cassava
     - composition-extra
     - conduit
     - conduit-extra
@@ -73,19 +73,20 @@ library:
     - github
     - gitrev
     - graphula
+    - hashable
     - hedis
     - hjsmin
+    - hoauth2
     - http-conduit
     - http-types
-    - hoauth2
     - iso8601-time
     - jwt
-    - lens
+    - microlens
+    - microlens-mtl
     - lens-aeson
     - load-env
     - megaparsec
     - monad-logger
-    - monad-logger-aeson
     - monad-validate
     - mtl
     - optparse-applicative
@@ -99,8 +100,7 @@ library:
     - resource-pool
     - resourcet
     - retry
-    - rio
-    - rio-orphans
+    - relude
     - safe-exceptions
     - semigroups
     - shakespeare
@@ -110,6 +110,9 @@ library:
     - time
     - tracing-newrelic
     - transformers
+    - unliftio
+    - unliftio-core
+    - unordered-containers
     - uri-encode
     - uuid
     - vector
@@ -176,11 +179,11 @@ tests:
       - hspec-expectations-lifted
       - hspec-expectations-json
       - http-types
-      - lens
+      - microlens
+      # - microlens-mtl
       - lens-aeson
       - load-env
       - megaparsec
-      - monad-logger
       - monad-validate
       - mtl
       - persistent

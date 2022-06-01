@@ -7,7 +7,7 @@ module Restyled.Tracing
     , module Restyled.Tracing.TransactionId
     ) where
 
-import RIO
+import Restyled.Prelude
 
 import Restyled.Tracing.App
 import Restyled.Tracing.TransactionId

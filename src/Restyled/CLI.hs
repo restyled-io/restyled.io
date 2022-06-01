@@ -2,7 +2,7 @@ module Restyled.CLI
     ( setupCLI
     ) where
 
-import RIO
+import Restyled.Prelude
 
 import LoadEnv (loadEnvFrom)
 import Options.Applicative

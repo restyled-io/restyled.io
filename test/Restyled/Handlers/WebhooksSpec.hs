@@ -6,6 +6,7 @@ import Restyled.Test
 
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.Lazy.Char8 as L8
+import Restyled.Redis (brpop)
 import System.FilePath ((</>))
 
 spec :: Spec

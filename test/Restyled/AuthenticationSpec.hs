@@ -7,6 +7,7 @@ module Restyled.AuthenticationSpec
 import Restyled.Test
 
 import qualified Data.Text as T
+import qualified Prelude as Unsafe
 import Restyled.Authentication
 import Restyled.Test.Graphula
 import Restyled.Yesod
@@ -18,8 +19,8 @@ instance Eq (AuthenticationResult App) where
     _ == _ = False
 
 instance Show (AuthenticationResult App) where
-    show (Authenticated userId) = "Authenticated: " <> show userId
-    show (ServerError msg) = "ServerError: " <> show msg
+    show (Authenticated userId) = "Authenticated: " <> show @String userId
+    show (ServerError msg) = "ServerError: " <> show @String msg
     show (UserError msg) = unpack ("UserError: " <> defaultMessage msg)
 
 spec :: Spec

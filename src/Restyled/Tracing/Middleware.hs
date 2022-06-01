@@ -4,15 +4,13 @@ module Restyled.Tracing.Middleware
     , traceMiddlewareSegment
     ) where
 
-import RIO
+import Restyled.Prelude
 
-import Control.Lens (_1, _2, (?~))
-import Data.Coerce (coerce)
+import qualified Data.Text as T
+import Lens.Micro (_1, _2, (?~))
 import Network.HTTP.Types.Status (statusCode, statusIsServerError)
 import Network.Wai
     (Middleware, Request, Response, pathInfo, requestMethod, responseStatus)
-import RIO.Text (pack)
-import qualified RIO.Text as T
 import Restyled.Tracing.App
 import Restyled.Tracing.TransactionId
 import qualified Tracing.NewRelic as NR

@@ -1,6 +1,5 @@
 module Restyled.SqlError
     ( SqlError(..)
-    , DisplaySqlError(..)
     , SqlState
     , sqlStateQueryCanceled
     , handleSqlErrorState
@@ -9,20 +8,6 @@ module Restyled.SqlError
 import Restyled.Prelude
 
 import Database.PostgreSQL.Simple (SqlError(..))
-
--- | Wrapper in order to provide a 'Display' instance
-newtype DisplaySqlError = DisplaySqlError SqlError
-
-instance Display DisplaySqlError where
-    display (DisplaySqlError SqlError {..}) = mconcat
-        [ "SqlError "
-        , "{ state=" <> displayBytesUtf8 sqlState
-        , ", execStatus=" <> displayShow sqlExecStatus
-        , ", message=" <> displayBytesUtf8 sqlErrorMsg
-        , ", detail=" <> displayBytesUtf8 sqlErrorDetail
-        , ", hint=" <> displayBytesUtf8 sqlErrorHint
-        , "}"
-        ]
 
 -- | Encapsulation of known States to handle by
 --

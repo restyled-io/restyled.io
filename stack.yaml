@@ -1,4 +1,4 @@
-resolver: lts-19.6
+resolver: lts-19.10
 extra-deps:
   # The way it builds the newrelic shared library requires a local checkout for
   # some reason. Annoying
@@ -17,10 +17,12 @@ extra-deps:
   - github: LeapYear/monad-validate
     commit: 5b181b7c57d6e2c975c533b0a0072e9aeb15fb99
 
-  - monad-logger-aeson-0.2.0.0
+  - Blammo-1.0.1.1
 
-  # For monad-logger-aeson
+  # For Blammo
+  - monad-logger-aeson-0.2.0.1
   - context-0.2.0.0
+
   # For weeder
   - algebraic-graphs-0.5
 

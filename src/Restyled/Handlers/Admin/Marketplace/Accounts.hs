@@ -11,6 +11,7 @@ import Restyled.Prelude
 
 import Formatting (format)
 import Formatting.Time (dateDash, diff, hm)
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Metrics
 import Restyled.Models

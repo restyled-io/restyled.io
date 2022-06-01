@@ -7,6 +7,7 @@ import Restyled.Prelude
 
 import Control.Monad.Validate
 import Restyled.Api.UpsertRepo
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Handlers.Repos.Jobs
 import Restyled.Yesod

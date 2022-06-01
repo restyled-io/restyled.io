@@ -6,12 +6,12 @@ module Restyled.Handlers.JobsSpec
 
 import Restyled.Test
 
-import Control.Lens ((^?!))
 import Data.Aeson.Lens
 import Data.Aeson.QQ
 import qualified Data.Text as T
 import qualified Database.Persist as P
 import Database.Persist.Sql (toSqlKey)
+import Lens.Micro ((^?!))
 import Restyled.Test.Graphula
 
 spec :: Spec

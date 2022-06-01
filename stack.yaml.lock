@@ -81,12 +81,19 @@ packages:
   original:
     url: https://github.com/LeapYear/monad-validate/archive/5b181b7c57d6e2c975c533b0a0072e9aeb15fb99.tar.gz
 - completed:
-    hackage: monad-logger-aeson-0.2.0.0@sha256:c855d721e74608b94b68b5d94ce30bbb49f535d92ae534c8b4c8cb9bb56524f5,5158
+    hackage: Blammo-1.0.1.1@sha256:d3c7f5bed8a7778db116fe8318751037596afa0655ed12c190e4ff671b72e527,3954
+    pantry-tree:
+      size: 1115
+      sha256: 3881a44247abaa2ea26497eb070b6a2b345b845b0b13f0979b7c9ddc4b76b671
+  original:
+    hackage: Blammo-1.0.1.1
+- completed:
+    hackage: monad-logger-aeson-0.2.0.1@sha256:3ce33913e0f0f73cd272ce734abaae460bdbc48ad9c4d7192a912849060114b0,5156
     pantry-tree:
       size: 5103
-      sha256: 3ebd7fed0fd9da25f070ef84bd14d9eaf12a2f4fc4fe736802454e3e8e679520
+      sha256: f221efc9a29a358c63b571cc3fb8e86cdcab3ee6aa29c8d4395ca85adb8fe2af
   original:
-    hackage: monad-logger-aeson-0.2.0.0
+    hackage: monad-logger-aeson-0.2.0.1
 - completed:
     hackage: context-0.2.0.0@sha256:6b643adb4a64fe521873d08df0497f71f88e18b9ecff4b68b4eef938e446cfc9,1886
     pantry-tree:
@@ -131,7 +138,7 @@ packages:
     hackage: HsSyck-0.53
 snapshots:
 - completed:
-    size: 618876
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/6.yaml
-    sha256: fb634b19f31da06684bb07ce02a20c75a3162138f279b388905b03ebd57bb50f
-  original: lts-19.6
+    size: 618509
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/10.yaml
+    sha256: 005f204647467d65c4ab549a5ca35d54b3d90a84a99a4ffc5d421a4018854fe2
+  original: lts-19.10

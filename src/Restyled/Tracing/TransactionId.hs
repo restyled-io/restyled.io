@@ -5,7 +5,7 @@ module Restyled.Tracing.TransactionId
     , newTransactionId
     ) where
 
-import RIO
+import Restyled.Prelude
 
 import Data.CaseInsensitive (CI)
 import Data.UUID (UUID)

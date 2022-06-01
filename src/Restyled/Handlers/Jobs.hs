@@ -8,6 +8,7 @@ import Restyled.Prelude
 import Control.Monad.Validate
 import Restyled.Api.CreateJob
 import Restyled.Api.UpdateJob
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models.DB
 import Restyled.Yesod

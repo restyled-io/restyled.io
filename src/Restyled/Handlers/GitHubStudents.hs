@@ -7,6 +7,7 @@ module Restyled.Handlers.GitHubStudents
 
 import Restyled.Prelude
 
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.GitHubStudents
 import Restyled.Marketplace

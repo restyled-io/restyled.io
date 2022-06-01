@@ -6,7 +6,6 @@ module Restyled.PrivateRepoEnabled
 
 import Restyled.Prelude
 
-import Data.List (genericLength)
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 

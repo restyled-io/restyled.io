@@ -5,16 +5,19 @@ module Restyled.JobOutput
     , followJobOutput
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude hiding (Last(..))
 
 import Amazonka.CloudWatchLogs.GetLogEvents
 import Amazonka.CloudWatchLogs.Types
 import Amazonka.Pager (AWSPager(..))
 import Conduit
-import Control.Lens ((?~))
 import qualified Data.List.NonEmpty as NE
 import Data.Semigroup (Last(..))
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime, utcTimeToPOSIXSeconds)
+import Lens.Micro ((.~), (?~), (^.))
+import Restyled.AWS (HasAWS)
+import qualified Restyled.AWS as AWS
+import Restyled.DB
 import Restyled.Models
 import Restyled.Settings
 import Restyled.Tracing
@@ -94,7 +97,7 @@ streamJobLogLines jobId mSince = do
                 & (getLogEvents_startTime .~ startMilliseconds)
                 & (getLogEvents_startFromHead ?~ True)
 
-    paginate req .| mapC fromGetLogEvents
+    AWS.paginate req .| mapC fromGetLogEvents
     where startMilliseconds = (+ 1) . utcTimeToPOSIXMilliseconds <$> mSince
 
 fromGetLogEvents :: GetLogEventsResponse -> [JobLogLine]

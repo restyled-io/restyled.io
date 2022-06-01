@@ -6,9 +6,9 @@ module Restyled.Handlers.ReposSpec
 
 import Restyled.Test
 
-import Control.Lens ((^?!))
 import Data.Aeson.Lens
 import Data.Aeson.QQ
+import Lens.Micro ((^?!))
 import Restyled.Test.Graphula
 
 spec :: Spec

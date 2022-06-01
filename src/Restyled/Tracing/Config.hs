@@ -9,9 +9,8 @@ module Restyled.Tracing.Config
     , defaultTracingLogLevel
     ) where
 
-import RIO hiding (LogLevel(..))
+import Restyled.Prelude hiding (LogLevel(..))
 
-import Data.Char (toLower)
 import Tracing.NewRelic
 
 data TracingConfig = TracingConfig

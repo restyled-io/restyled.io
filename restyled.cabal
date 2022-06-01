@@ -33,8 +33,10 @@ library
       Restyled.Application
       Restyled.Authentication
       Restyled.Authorization
+      Restyled.AWS
       Restyled.Cache
       Restyled.CLI
+      Restyled.DB
       Restyled.Development.Seeds
       Restyled.Env
       Restyled.Foundation
@@ -62,7 +64,6 @@ library
       Restyled.Handlers.Repos.Pulls.Jobs
       Restyled.Handlers.Revision
       Restyled.Handlers.Robots
-      Restyled.Handlers.System.Metrics
       Restyled.Handlers.Thanks
       Restyled.Handlers.Webhooks
       Restyled.Job.Completion
@@ -79,10 +80,10 @@ library
       Restyled.Percentage
       Restyled.Prelude
       Restyled.Prelude.Esqueleto
-      Restyled.Prelude2
       Restyled.PrivateRepoAllowance
       Restyled.PrivateRepoEnabled
       Restyled.Queues
+      Restyled.Redis
       Restyled.RestylerImage
       Restyled.Routes
       Restyled.Scrub
@@ -102,10 +103,6 @@ library
       Restyled.Widgets.ContainsURLs
       Restyled.Widgets.Job
       Restyled.Yesod
-      RIO.AWS
-      RIO.DB
-      RIO.Logger
-      RIO.Redis
       SVCS.GitHub
       SVCS.Names
       SVCS.Payload
@@ -143,13 +140,13 @@ library
       ViewPatterns
   ghc-options: -fwrite-ide-info -Weverything -Wno-all-missed-specialisations -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -Wno-unsafe
   build-depends:
-      QuickCheck
+      Blammo
+    , QuickCheck
     , aeson
     , aeson-casing
     , amazonka
     , amazonka-cloudwatch-logs
     , amazonka-core
-    , ansi-terminal
     , base
     , blaze-html
     , blaze-markup
@@ -170,6 +167,7 @@ library
     , github
     , gitrev
     , graphula
+    , hashable
     , hedis
     , hjsmin
     , hoauth2
@@ -177,12 +175,12 @@ library
     , http-types
     , iso8601-time
     , jwt
-    , lens
     , lens-aeson
     , load-env
     , megaparsec
+    , microlens
+    , microlens-mtl
     , monad-logger
-    , monad-logger-aeson
     , monad-validate
     , mtl
     , optparse-applicative
@@ -193,11 +191,10 @@ library
     , postgresql-simple
     , quickcheck-instances
     , random
+    , relude
     , resource-pool
     , resourcet
     , retry
-    , rio
-    , rio-orphans
     , safe-exceptions
     , semigroups
     , shakespeare
@@ -207,6 +204,9 @@ library
     , time
     , tracing-newrelic
     , transformers
+    , unliftio
+    , unliftio-core
+    , unordered-containers
     , uri-encode
     , uuid
     , vector
@@ -415,11 +415,10 @@ test-suite test
     , hspec-expectations-json
     , hspec-expectations-lifted
     , http-types
-    , lens
     , lens-aeson
     , load-env
     , megaparsec
-    , monad-logger
+    , microlens
     , monad-validate
     , mtl
     , persistent

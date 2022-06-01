@@ -69,7 +69,3 @@
       / AdminStatsReposR GET
     /jobs AdminStatsJobsP:
       / AdminStatsJobsR GET
-
-/system SystemP:
-  /metrics SystemMetricsP:
-    / SystemMetricsR GET

@@ -1,4 +1,4 @@
-User
+User json
   email Text Maybe
 
   -- For some reason persistent wanted to migrate this as var char, which it
@@ -17,7 +17,7 @@ User
   UniqueUser credsPlugin credsIdent
   deriving Eq Show Generic
 
-Repo
+Repo json
   svcs RepoSVCS default='github'
   owner OwnerName
   name RepoName

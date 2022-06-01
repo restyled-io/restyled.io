@@ -18,15 +18,15 @@ data AdminSettings = AdminSettings
     }
 
 instance Show AdminSettings where
-    show AdminSettings {..} = unlines
+    show AdminSettings {..} = unpack $ unlines
         [ "AdminSettings"
         , "  { asAppSettings ="
         , "    AppSettings"
-        , "      { appAdmins = " <> show (appAdmins asAppSettings)
+        , "      { appAdmins = " <> show @Text (appAdmins asAppSettings)
         , "      , ..."
         , "      }"
-        , "  , asSomeAdminEmail = " <> show asSomeAdminEmail
-        , "  , asSomeOtherEmail = " <> show asSomeOtherEmail
+        , "  , asSomeAdminEmail = " <> show @Text asSomeAdminEmail
+        , "  , asSomeOtherEmail = " <> show @Text asSomeOtherEmail
         , "  }"
         ]
 
@@ -69,7 +69,7 @@ emptySettings = AppSettings
     , appRoot = error "unused"
     , appHost = error "unused"
     , appPort = 0
-    , appLogLevel = error "unused"
+    , appLogSettings = error "unused"
     , appCopyright = ""
     , appGitHubAppId = error "unused"
     , appGitHubAppKey = error "unused"
@@ -81,7 +81,6 @@ emptySettings = AppSettings
     , appAdmins = []
     , appAllowDummyAuth = error "unused"
     , appFavicon = error "unused"
-    , appDetailedRequestLogger = False
     , appMutableStatic = False
     , appStaticDir = error "unused"
     , appStubMarketplaceListing = True
@@ -90,7 +89,6 @@ emptySettings = AppSettings
     , appRequestTimeout = 30
     , appRestylerLogGroup = ""
     , appRestylerLogStreamPrefix = ""
-    , appAwsTrace = False
     , appRestylerQueues = defaultQueues
     , appTracingConfig = error "unused"
     }

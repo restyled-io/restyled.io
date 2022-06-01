@@ -8,6 +8,7 @@ module Restyled.Handlers.Offers
 
 import Restyled.Prelude
 
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Offers

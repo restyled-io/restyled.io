@@ -4,8 +4,9 @@ module Restyled.Handlers.Profile
     ( getProfileR
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude hiding (identity)
 
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.GitHubOrg
 import Restyled.Models
