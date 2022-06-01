@@ -2,7 +2,7 @@ module Main
     ( main
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude2
 
 import Restyled.CLI
 import Restyled.SyncMarketplace
@@ -10,5 +10,4 @@ import Restyled.SyncMarketplace
 main :: IO ()
 main = do
     setupCLI
-    app <- loadApp
-    runRIO app syncMarketplace
+    runApp syncMarketplace
