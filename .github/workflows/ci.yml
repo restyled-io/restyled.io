@@ -47,9 +47,9 @@ jobs:
       - run: db/pending-prod-migrations --check
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      - uses: freckle/weeder-action@v1
-        with:
-          weeder-version: 2.3.0
+      # - uses: freckle/weeder-action@v1
+      #   with:
+      #     weeder-version: 2.3.0
 
   lint:
     runs-on: ubuntu-latest
