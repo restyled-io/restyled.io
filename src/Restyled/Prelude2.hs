@@ -122,4 +122,3 @@ percent n1 n2 = format (Formatters.fixed 2 % "%") p
 
 decodeUtf8 :: ByteString -> Text
 decodeUtf8 = decodeUtf8With lenientDecode
-
