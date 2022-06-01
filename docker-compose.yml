@@ -3,16 +3,39 @@ version: "3"
 services:
   postgres:
     image: postgres
+    command: >
+      -c fsync=off
+      -c synchronous_commit=off
+      -c full_page_writes=off
+      -c extra_float_digits=2
+      -c shared_buffers=1875MB
+      -c work_mem=20MB
+      -c maintenance_work_mem=350MB
+      -c effective_cache_size=3750MB
+      -c log_min_duration_statement=0
+      -c log_checkpoints=on
+      -c log_connections=on
+      -c log_disconnections=on
     ports:
       - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+    healthcheck:
+      test: pg_isready
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:6.0.13
     ports:
       - 6379:6379
+    healthcheck:
+      test: "redis-cli ping"
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   newrelic:
     image: newrelic/c-daemon
@@ -21,22 +44,17 @@ services:
 
   agent:
     image: restyled/agent:main
+    depends_on:
+      - redis
     entrypoint: sh
-    command: |
-      -c "/bin/agent \
-      --github-app-id \"$$GITHUB_APP_ID\" \
-      --github-app-key \"$$GITHUB_APP_KEY\" \
-      --restyled-host \"$$RESTYLED_HOST\" \
-      --restyled-token \"$$RESTYLED_TOKEN\" \
-      --restyler-pool-size 1 \
-      --redis-url redis://redis \
-      --termination-delay 600000 \
-      --webhook-timeout 5 \
-      --debug"
+    command: -c "/bin/agent --debug"
     env_file: ./.env.development
     environment:
       AWS_ACCESS_KEY_ID: x
       AWS_SECRET_ACCESS_KEY: x
+      REDIS_URL: redis://redis
+      RESTYLER_POOL_SIZE: 3
+      SHUTDOWN_TIMEOUT: 600000
     volumes:
       - /tmp:/tmp
       - /var/run/docker.sock:/var/run/docker.sock
