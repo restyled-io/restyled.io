@@ -1,21 +1,20 @@
 module Restyled.Development.Seeds
     ( App
-    , withApp
+    , runApp
     , seedDB
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude2
 
 import qualified Amazonka as AWS (Env)
 import Amazonka.CloudWatchLogs.CreateLogStream
 import Amazonka.CloudWatchLogs.DeleteLogStream
 import Amazonka.CloudWatchLogs.PutLogEvents
 import Amazonka.CloudWatchLogs.Types
-import Conduit (MonadResource)
+import Control.Monad.Trans.Resource (MonadResource, ResourceT, runResourceT)
 import qualified Data.List.NonEmpty as NE
 import Data.Monoid (First)
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
-import RIO.Orphans
 import Restyled.Env
 import Restyled.Marketplace
 import Restyled.Models
@@ -49,7 +48,7 @@ loadSettings =
             <*> var auto "PGPOOLSIZE" (def 10)
             )
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
-        <*> var logLevel "LOG_LEVEL" (def LevelInfo)
+        <*> var logLevel2 "LOG_LEVEL" (def LevelInfo)
         <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
         <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
         <*> switch "AWS_TRACE" mempty
@@ -58,15 +57,10 @@ defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 data App = App
-    { appLogFunc :: LogFunc
-    , appSettings :: AppSettings
+    { appSettings :: AppSettings
     , appSqlPool :: ConnectionPool
     , appAWSEnv :: AWS.Env
-    , appResourceMap :: ResourceMap
     }
-
-instance HasLogFunc App where
-    logFuncL = lens appLogFunc $ \x y -> x { appLogFunc = y }
 
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x { appSettings = y }
@@ -83,17 +77,24 @@ instance HasSqlPool App where
 instance HasAWS App where
     awsEnvL = lens appAWSEnv $ \x y -> x { appAWSEnv = y }
 
-instance HasResourceMap App where
-    resourceMapL = lens appResourceMap $ \x y -> x { appResourceMap = y }
-
-withApp :: MonadUnliftIO m => (App -> m a) -> m a
-withApp f = do
+runApp :: ReaderT App (ResourceT (LoggingT IO)) a -> IO a
+runApp f = do
     appSettings@AppSettings {..} <- liftIO loadSettings
-    appLogFunc <- liftIO $ terminalLogFunc stdout appLogLevel
-    appSqlPool <- runRIO appLogFunc
+
+    let app :: Text
+        app = "seed-db"
+
+        runLogging :: LoggingT IO a -> IO a
+        runLogging =
+            runStdoutLoggingT
+                . filterLogger (const (>= appLogLevel))
+                . withThreadContext ["app" .= app]
+
+    appSqlPool <- runLogging
         $ createConnectionPool appDatabaseConf appStatementTimeout
     appAWSEnv <- discoverAWS appAwsTrace
-    withResourceMap $ \appResourceMap -> f $ App { .. }
+
+    runLogging $ runResourceT $ runReaderT f App { .. }
 
 seedDB
     :: ( MonadUnliftIO m

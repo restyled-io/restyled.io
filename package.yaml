@@ -97,6 +97,7 @@ library:
     - quickcheck-instances
     - random
     - resource-pool
+    - resourcet
     - retry
     - rio
     - rio-orphans
