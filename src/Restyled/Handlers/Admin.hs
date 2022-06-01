@@ -10,11 +10,12 @@ module Restyled.Handlers.Admin
 
 import Restyled.Prelude.Esqueleto
 
-import Control.Lens (_1, _3)
 import Data.List (elemIndex)
 import Formatting (format)
 import Formatting.Formatters as Formatters
 import Formatting.Time (diff)
+import Lens.Micro (_1, _3)
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Metrics
 import Restyled.Models
@@ -87,12 +88,13 @@ getAdminStatsReposR :: Handler Html
 getAdminStatsReposR = do
     (range, timeRange) <- getAdminStatsTimeRange
     RepoStats {..} <- runDB $ fetchRepoStats timeRange
+    let trange = show @Text range
 
     fragmentLayout [whamlet|
         <p>#{pluralizeWith Formatters.commas "Repo" "Repos" totalRepos}
         <p>#{pluralizeWith Formatters.commas "Unique Owner" "Unique Owners" uniqueOwners}
         <p>
-            #{format Formatters.commas activeRepos} (#{activeReposPercent}) with Jobs this #{show range}
+            #{format Formatters.commas activeRepos} (#{activeReposPercent}) with Jobs this #{trange}
             ^{changedWidget activeReposChanged}
     |]
 
@@ -155,10 +157,11 @@ getAdminStatsJobsR :: Handler Html
 getAdminStatsJobsR = do
     (range, timeRange) <- getAdminStatsTimeRange
     JobStats {..} <- runDB $ fetchJobStats timeRange
+    let trange = show @Text range
 
     fragmentLayout [whamlet|
         <p>
-            #{pluralizeWith Formatters.commas "Job" "Jobs" totalJobs} this #{show range}
+            #{pluralizeWith Formatters.commas "Job" "Jobs" totalJobs} this #{trange}
             ^{changedWidget totalJobsChanged}
         <p>
             #{format Formatters.commas succeededJobs} (#{succeededJobsPercent}) succeeded

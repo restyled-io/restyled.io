@@ -4,6 +4,7 @@ module Restyled.Handlers.Admin.Marketplace.Plans
 
 import Restyled.Prelude
 
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Yesod

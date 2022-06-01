@@ -12,10 +12,9 @@ module Restyled.Offers
 
 import Restyled.Prelude
 
-import Control.Monad.State (State, evalState)
 import qualified Control.Monad.State as State
-import Data.List ((!!))
 import Database.Persist.Sql (updateWhereCount)
+import qualified Prelude as Unsafe ((!!))
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.UsCents
@@ -33,7 +32,7 @@ data CreateOffer = CreateOffer
 createOffer :: MonadIO m => CreateOffer -> SqlPersistT m ()
 createOffer CreateOffer {..} = do
     planId <- case (coPlanId, coPrivateRepos) of
-        (Nothing, Nothing) -> undefined
+        (Nothing, Nothing) -> error "TODO"
         (Just planId, _) -> pure planId
         (_, Just repos) -> insert MarketplacePlan
             { marketplacePlanGithubId = Nothing
@@ -80,7 +79,7 @@ pureGenerateClaimCodes g n = evalState (replicateM n $ pack <$> pickChars) g
     pickChar :: State StdGen Char
     pickChar = do
         (idx, g') <- State.gets $ randomR (0, length chars - 1)
-        chars !! idx <$ State.put g'
+        chars Unsafe.!! idx <$ State.put g'
 
     chars :: String
     chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

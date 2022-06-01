@@ -44,7 +44,6 @@ import Database.Persist.Sql
 import GitHub.Data
 import GitHub.Data.Apps
 import GitHub.Data.Installations
-import RIO (Display(..))
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Instances.Text ()
 import Text.Blaze (ToMarkup(..))
@@ -128,9 +127,6 @@ instance PersistFieldSql (Id a) where
 instance ToMarkup (Id a) where
     toMarkup = toMarkup . untagId
 
-instance Display (Id a) where
-    display = display . untagId
-
 deriving newtype instance Arbitrary IssueNumber
 deriving newtype instance Num IssueNumber
 deriving newtype instance Read IssueNumber
@@ -138,7 +134,6 @@ deriving newtype instance PathPiece IssueNumber
 deriving newtype instance PersistField IssueNumber
 deriving newtype instance PersistFieldSql IssueNumber
 deriving newtype instance ToMarkup IssueNumber
-deriving newtype instance Display IssueNumber
 
 instance Arbitrary (Name a) where
     arbitrary = mkName Proxy <$> arbitrary
@@ -162,9 +157,6 @@ instance ToMarkup (Name a) where
 
 instance ToField (Name a) where
     toField = toField . untagName
-
-instance Display (Name a) where
-    display = display . untagName
 
 instance Num (Id a) where
     fromInteger = mkId Proxy . fromInteger

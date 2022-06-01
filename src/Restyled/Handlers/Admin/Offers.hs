@@ -14,6 +14,8 @@ import Restyled.Prelude.Esqueleto hiding (Value)
 import Data.Aeson.Lens
 import qualified Data.Text.Lazy.Encoding as TL
 import qualified Database.Persist as P
+import Lens.Micro ((^?))
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Offers
@@ -90,7 +92,7 @@ postAdminOfferClaimsR offerId = do
         provideRep @_ @Html $ do
             n <- fromMaybe defaultN <$> runInputPost (iopt intField "number")
             runDB $ addClaimCodes offerId n
-            setMessage $ toHtml $ tshow n <> " claim codes generated"
+            setMessage $ toHtml $ show @Text n <> " claim codes generated"
             redirect $ AdminP $ AdminOffersP AdminOffersR
 
 data ClaimCode = ClaimCode

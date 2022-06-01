@@ -12,6 +12,7 @@ import Restyled.Prelude
 
 import Graphula
 import Graphula.Arbitrary
+import Restyled.DB
 import Restyled.Test.Yesod
 import Test.QuickCheck.Arbitrary
 

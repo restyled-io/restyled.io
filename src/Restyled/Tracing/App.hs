@@ -14,12 +14,12 @@ module Restyled.Tracing.App
     , traceSegment
     ) where
 
-import RIO
+import Restyled.Prelude
 
-import qualified RIO.HashMap as HashMap
+import qualified Data.HashMap.Strict as HashMap
 import Restyled.Tracing.Config
 import Restyled.Tracing.TransactionId
-import Tracing.NewRelic hiding (endTransaction, startWebTransaction)
+import Tracing.NewRelic hiding (endTransaction, init, startWebTransaction)
 import qualified Tracing.NewRelic as NR
 import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
@@ -45,7 +45,7 @@ newTracingApp TracingConfig {..} =
         tcLicenseKey
   where
     go key = do
-        void $ init tcDaemonSocket $ TimeLimitMs 1000
+        void $ NR.init tcDaemonSocket $ TimeLimitMs 1000
         config <- createAppConfig tcAppName key
         void $ configureLog tcLog $ unTracingLogLevel tcLogLevel
         createApp config tcTimeoutMs

@@ -5,10 +5,10 @@ module Restyled.Handlers.Webhooks
 import Restyled.Prelude
 
 import Conduit
-import Data.ByteString.Lazy (toStrict)
 import Data.Conduit.Binary
 import Restyled.Foundation
 import Restyled.Queues
+import Restyled.Redis
 import Restyled.Yesod
 
 postWebhooksR :: Handler ()

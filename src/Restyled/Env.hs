@@ -1,8 +1,6 @@
 -- | Local version of @envparse@
 module Restyled.Env
-    (
-    -- * Re-exports
-      Error
+    ( Error
     , Parser
     , auto
     , def
@@ -19,18 +17,19 @@ module Restyled.Env
     , eitherReader
 
     -- * Specialized @'Reader'@s
-    , logLevel
-    , logLevel2
     , connectInfo
     , githubId
+
+    -- * Specialized @'Parser'@s
+    , postgresConf
     ) where
 
 import Restyled.Prelude hiding (Reader)
 
-import qualified Control.Monad.Logger.Aeson as Logger
 import Database.Redis (ConnectInfo, parseConnectInfo)
 import Env hiding (parse, splitOn)
 import qualified Env
+import Restyled.DB
 
 parse :: Parser Error a -> IO a
 parse = Env.parse id
@@ -41,24 +40,19 @@ splitOn c = (pack <$$>) . Env.splitOn c
 eitherReader :: AsUnread e => (String -> Either String a) -> Reader e a
 eitherReader f = first unread . f
 
-logLevel :: Reader e LogLevel
-logLevel x = case map toLower x of
-    "debug" -> Right LevelDebug
-    "info" -> Right LevelInfo
-    "warn" -> Right LevelWarn
-    "error" -> Right LevelError
-    _ -> Right $ LevelOther $ pack x
-
-logLevel2 :: Reader e Logger.LogLevel
-logLevel2 x = case map toLower x of
-    "debug" -> Right Logger.LevelDebug
-    "info" -> Right Logger.LevelInfo
-    "warn" -> Right Logger.LevelWarn
-    "error" -> Right Logger.LevelError
-    _ -> Right $ Logger.LevelOther $ pack x
-
 connectInfo :: AsUnread e => Reader e ConnectInfo
 connectInfo = eitherReader parseConnectInfo
 
 githubId :: AsUnread e => Reader e (Id a)
 githubId = fmap (mkId Proxy) . auto
+
+postgresConf :: Parser Error PostgresConf
+postgresConf =
+    PostgresConf
+        <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
+        <*> var auto "PGPOOLSTRIPES" (def 1)
+        <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
+        <*> var auto "PGPOOLSIZE" (def 10)
+
+defaultDatabaseURL :: ByteString
+defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"

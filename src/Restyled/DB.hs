@@ -1,4 +1,4 @@
-module RIO.DB
+module Restyled.DB
     ( HasSqlPool(..)
     , runDB
     , runDBUntraced
@@ -8,18 +8,15 @@ module RIO.DB
     , createConnectionPool
 
     -- * Re-export
-    , SqlPersistT
     , ConnectionPool
     ) where
 
-import RIO
+import Restyled.Prelude
 
-import Control.Monad.Logger (MonadLoggerIO)
 import Data.Pool (withResource)
 import Database.Persist.Postgresql
     (PostgresConf(..), createPostgresqlPool, createPostgresqlPoolModified)
-import Database.Persist.Sql
-    (ConnectionPool, SqlBackend, SqlPersistT, runSqlConn, runSqlPool)
+import Database.Persist.Sql (ConnectionPool, runSqlConn, runSqlPool)
 import Database.PostgreSQL.Simple (Connection, execute)
 import Restyled.Tracing
 import Yesod.Core.Types (HandlerData)

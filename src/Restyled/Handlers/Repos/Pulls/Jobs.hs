@@ -6,6 +6,7 @@ module Restyled.Handlers.Repos.Pulls.Jobs
 
 import Restyled.Prelude
 
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Settings

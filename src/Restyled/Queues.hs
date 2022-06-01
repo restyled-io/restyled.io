@@ -6,24 +6,19 @@ module Restyled.Queues
 
     -- * Enqueuing
     , enqueue
-
-    -- * Metrics
-    , getQueuesMetrics
     ) where
 
 import Restyled.Prelude
 
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
-import Restyled.Metric
-import Restyled.Tracing
+import Restyled.Redis
 import Test.QuickCheck
-import Text.Read (readEither)
 import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
 
 newtype Queues = Queues
-    { unQueues :: NonEmpty Queue
+    { _unQueues :: NonEmpty Queue
     }
 
 data Queue = Queue
@@ -59,7 +54,7 @@ instance HasQueues env => HasQueues (HandlerData child env) where
 -- > RESTYLER_QUEUES=restyled:agent:webhooks/1,restyled:hooks:webhooks/2
 --
 readQueues :: String -> Either String Queues
-readQueues = go . pack
+readQueues = first unpack . go . pack
   where
     go t = case NE.nonEmpty $ map T.strip $ T.splitOn "," t of
         Nothing -> Left "Queues value cannot be empty"
@@ -71,7 +66,7 @@ defaultQueues = Queues $ pure $ Queue
     , queueFrequency = 1
     }
 
-readQueue :: Text -> Either String Queue
+readQueue :: Text -> Either Text Queue
 readQueue t = case T.breakOn "/" t of
     (q, _) | T.null q -> Left "Queue name cannot be empty"
     (q, f) | T.null f -> Right $ Queue (encodeUtf8 q) 1
@@ -89,45 +84,3 @@ selectQueue (Queues qs)
   where
     toPair :: Queue -> (Int, Gen Queue)
     toPair q = (fromIntegral $ queueFrequency q, pure q)
-
-getQueuesMetrics
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasRedis env
-       , HasTracingApp env
-       , HasTransactionId env
-       )
-    => Queues
-    -> m [Metric Integer]
-getQueuesMetrics = traverse getQueueMetric . NE.toList . unQueues
-
-getQueueMetric
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , HasLogFunc env
-       , HasRedis env
-       , HasTracingApp env
-       , HasTransactionId env
-       )
-    => Queue
-    -> m (Metric Integer)
-getQueueMetric q = do
-    depth <- fromMaybeM (0 <$ logDepthError) $ runRedis $ queueDepth q
-    pure $ queueDepthMetric name depth
-  where
-    name = queueName q
-    logDepthError =
-        logError $ "Unable to get depth for queue: " <> displayBytesUtf8 name
-
-queueDepth :: Queue -> Redis (Maybe Integer)
-queueDepth q = hush <$> llen (queueName q)
-
-queueDepthMetric :: ByteString -> Integer -> Metric Integer
-queueDepthMetric name depth = Metric
-    { mName = "QueueDepth"
-    , mValue = depth
-    , mUnit = Count
-    , mDimensions =
-        [Dimension { dName = "QueueName", dValue = decodeUtf8 name }]
-    }

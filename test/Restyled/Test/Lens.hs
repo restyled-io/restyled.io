@@ -9,8 +9,8 @@ module Restyled.Test.Lens
 
 import Restyled.Prelude hiding (fieldLens)
 
-import Control.Lens ((?~))
 import qualified Database.Persist as P
+import Lens.Micro ((.~), (?~), (^.), (^..), (^?))
 
 -- | Use an 'EntityField' as a lens
 --
@@ -24,4 +24,4 @@ fieldLens
 fieldLens field = unsafeEntityLens . P.fieldLens field
 
 unsafeEntityLens :: Lens' record (Entity record)
-unsafeEntityLens = lens (Entity undefined) $ \_ y -> entityVal y
+unsafeEntityLens = lens (Entity (error "unused")) $ \_ y -> entityVal y

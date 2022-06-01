@@ -8,6 +8,7 @@ import Restyled.Prelude
 
 import qualified Data.Text as T
 import Restyled.Api.Repo (ApiRepo, apiRepo)
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Settings

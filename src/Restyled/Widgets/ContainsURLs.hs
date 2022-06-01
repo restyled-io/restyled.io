@@ -10,7 +10,7 @@ module Restyled.Widgets.ContainsURLs
     , contentPartsP
     ) where
 
-import Restyled.Prelude hiding (some, try)
+import Restyled.Prelude hiding (some)
 
 import Restyled.Foundation
 import Restyled.Yesod

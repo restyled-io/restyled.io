@@ -15,8 +15,10 @@ module Yesod.Core.Types.Lens
     , headerL
     ) where
 
-import RIO
+import Prelude
 
+import Data.ByteString (ByteString)
+import Lens.Micro (Lens', lens)
 import Network.HTTP.Types.Header (Header, HeaderName)
 import Network.Wai (Request(..), Response, mapResponseHeaders, responseHeaders)
 import Yesod.Core.Types (HandlerData(..), RunHandlerEnv(..), YesodRequest(..))

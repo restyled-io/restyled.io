@@ -11,6 +11,7 @@ import Restyled.Prelude
 import Formatting (format)
 import Formatting.Time (diff)
 import Restyled.ApiToken
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models
 import Restyled.Settings

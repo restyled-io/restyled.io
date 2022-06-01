@@ -9,8 +9,7 @@ module Restyled.Prelude.Esqueleto
     ) where
 
 import Restyled.Prelude as X hiding
-    ( LogFunc
-    , SqlEntity
+    ( SqlEntity
     , Value
     , count
     , delete
@@ -18,7 +17,6 @@ import Restyled.Prelude as X hiding
     , isNothing
     , on
     , selectSource
-    , set
     , update
     , (!=.)
     , (*=.)
@@ -32,7 +30,6 @@ import Restyled.Prelude as X hiding
     , (==.)
     , (>.)
     , (>=.)
-    , (^.)
     , (||.)
     )
 

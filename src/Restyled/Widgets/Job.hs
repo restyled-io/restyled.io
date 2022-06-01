@@ -10,7 +10,6 @@ module Restyled.Widgets.Job
 
 import Restyled.Prelude
 
-import Data.Semigroup (First(..))
 import qualified Data.Text as T
 import Formatting (format)
 import Formatting.Time (diff)

@@ -9,10 +9,9 @@ module Restyled.Metrics
 
 import Restyled.Prelude.Esqueleto
 
-import Data.Semigroup (Sum(..))
+import qualified Data.Maybe as Maybe
 import Data.Semigroup.Generic
 import Restyled.Models
-import qualified Restyled.Prelude as Prelude
 import Restyled.TimeRange
 
 data JobMetrics = JobMetrics
@@ -67,7 +66,7 @@ jobMetric (Entity _ Job {..}) = JobMetrics
     { jmSucceeded = sumIfMaybe (== 0) jobExitCode
     , jmFailed = sumIfMaybe (/= 0) jobExitCode
     , jmFailedUnknown = sumIfMaybe (== 99) jobExitCode
-    , jmUnfinished = sumIf $ Prelude.isNothing jobCompletedAt
+    , jmUnfinished = sumIf $ Maybe.isNothing jobCompletedAt
     , jmTotal = 1
     }
   where

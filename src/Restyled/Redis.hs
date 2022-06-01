@@ -1,4 +1,4 @@
-module RIO.Redis
+module Restyled.Redis
     ( HasRedis(..)
     , runRedis
     , runRedisUntraced
@@ -18,10 +18,8 @@ module RIO.Redis
     , encodeStrict
     ) where
 
-import RIO
+import Restyled.Prelude
 
-import Data.Aeson (ToJSON, encode)
-import Data.ByteString.Lazy (toStrict)
 import Database.Redis (Connection, Redis, brpop, checkedConnect, llen, lpush)
 import qualified Database.Redis as Redis
 import Restyled.Tracing

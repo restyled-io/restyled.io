@@ -2,7 +2,7 @@ module Restyled.Widgets.ContainsURLsSpec
     ( spec
     ) where
 
-import Restyled.Test
+import Restyled.Test hiding (toText)
 
 import Restyled.Widgets.ContainsURLs
 import Text.Megaparsec (errorBundlePretty, parse)

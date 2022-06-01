@@ -4,12 +4,15 @@ module Restyled.SyncMarketplace
     , syncMarketplace
     ) where
 
-import Restyled.Prelude2
+import Restyled.Prelude
 
+import qualified Blammo.Logging.LogSettings.Env as LoggingEnv
 import Control.Retry (exponentialBackoff, limitRetries, retrying)
+import Data.Vector (Vector)
 import qualified Data.Vector as V
 import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
+import Restyled.DB
 import Restyled.Env
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
@@ -19,7 +22,7 @@ import Restyled.UsCents
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
     , appStatementTimeout :: Maybe Integer
-    , appLogLevel :: LogLevel
+    , appLogSettings :: LogSettings
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
     , appStubMarketplaceListing :: Bool
@@ -35,20 +38,12 @@ loadSettings :: IO AppSettings
 loadSettings =
     parse
         $ AppSettings
-        <$> (PostgresConf
-            <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
-            <*> var auto "PGPOOLSTRIPES" (def 1)
-            <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
-            <*> var auto "PGPOOLSIZE" (def 10)
-            )
+        <$> postgresConf
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
-        <*> var logLevel2 "LOG_LEVEL" (def LevelInfo)
+        <*> LoggingEnv.parser
         <*> var githubId "GITHUB_APP_ID" mempty
         <*> var nonempty "GITHUB_APP_KEY" mempty
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
-
-defaultDatabaseURL :: ByteString
-defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 data App = App
     { appSettings :: AppSettings
@@ -71,14 +66,14 @@ runApp :: ReaderT App (LoggingT IO) a -> IO a
 runApp f = do
     appSettings@AppSettings {..} <- loadSettings
 
+    logger <- newLogger appLogSettings
+
     let app :: Text
         app = "sync-marketplace"
 
         runLogging :: LoggingT IO a -> IO a
         runLogging =
-            runStdoutLoggingT
-                . filterLogger (const (>= appLogLevel))
-                . withThreadContext ["app" .= app]
+            runLoggerLoggingT logger . withThreadContext ["app" .= app]
 
     appSqlPool <- runLogging
         $ createConnectionPool appDatabaseConf appStatementTimeout

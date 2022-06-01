@@ -5,6 +5,7 @@ module Restyled.Api.Repo
 
 import Restyled.Prelude
 
+import Blammo.Logging.LogSettings (shouldLogLevel)
 import Restyled.Marketplace
 import Restyled.Models.DB
 import Restyled.RestylerImage
@@ -42,5 +43,21 @@ apiRepo (Entity _ Repo {..}) AppSettings {..} mAllows = ApiRepo
     , marketplacePlanAllows = mAllows
     , restylerImage = fromMaybe appRestylerImage repoRestylerImage
     , restylerLogLevel = ApiLogLevel
-        $ if repoDebugEnabled then LevelDebug else appLogLevel
+        $ if repoDebugEnabled then LevelDebug else guessLogLevel appLogSettings
     }
+
+logLevelToText :: LogLevel -> Text
+logLevelToText = \case
+    LevelDebug -> "DEBUG"
+    LevelInfo -> "INFO"
+    LevelWarn -> "WARN"
+    LevelError -> "ERROR"
+    LevelOther x -> x
+
+guessLogLevel :: LogSettings -> LogLevel
+guessLogLevel settings = fromMaybe (LevelOther "unknown")
+    $ find shouldLog sortedLevels
+  where
+    shouldLog = shouldLogLevel settings ""
+    sortedLevels =
+        [LevelOther "trace", LevelDebug, LevelInfo, LevelWarn, LevelError]

@@ -7,7 +7,8 @@ module Restyled.Handlers.Admin.Marketplace
 
 import Restyled.Prelude
 
-import Data.List (genericLength, nub)
+import Data.List (nub)
+import Restyled.DB
 import Restyled.Foundation
 import Restyled.Marketplace (isPrivateRepoPlan)
 import Restyled.Models

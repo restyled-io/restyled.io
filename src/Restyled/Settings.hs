@@ -18,15 +18,17 @@ where
 
 import Restyled.Prelude
 
+import qualified Blammo.Logging.LogSettings.Env as LoggingEnv
 import qualified Data.Default as Default (def)
 import Database.Redis (ConnectInfo(..), defaultConnectInfo)
 import Language.Haskell.TH.Syntax (Exp, Q)
 import Network.Wai.Handler.Warp (HostPreference)
+import Restyled.DB
 import Restyled.Env
 import Restyled.Queues
 import Restyled.RestylerImage
 import Restyled.Tracing.Config
-import Restyled.Yesod hiding (LogLevel(..))
+import Restyled.Yesod
 import Yesod.Auth.Dummy
 import Yesod.Core.Types (HandlerData(..))
 
@@ -56,7 +58,7 @@ data AppSettings = AppSettings
     , appRoot :: Text
     , appHost :: HostPreference
     , appPort :: Int
-    , appLogLevel :: LogLevel
+    , appLogSettings :: LogSettings
     , appCopyright :: Text
     , appGitHubAppId :: GitHubAppId
     , appGitHubAppKey :: GitHubAppKey
@@ -68,7 +70,6 @@ data AppSettings = AppSettings
     , appAdmins :: [Text]
     , appAllowDummyAuth :: Bool
     , appFavicon :: FilePath
-    , appDetailedRequestLogger :: Bool
     , appMutableStatic :: Bool
     , appStaticDir :: FilePath
     , appStubMarketplaceListing :: Bool
@@ -77,7 +78,6 @@ data AppSettings = AppSettings
     , appRequestTimeout :: Int
     , appRestylerLogGroup :: Text
     , appRestylerLogStreamPrefix :: Text
-    , appAwsTrace :: Bool
     , appRestylerQueues :: Queues
     , appTracingConfig :: TracingConfig
     }
@@ -103,18 +103,13 @@ loadSettings :: IO AppSettings
 loadSettings =
     parse
         $ AppSettings
-        <$> (PostgresConf
-            <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
-            <*> var auto "PGPOOLSTRIPES" (def 1)
-            <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
-            <*> var auto "PGPOOLSIZE" (def 10)
-            )
+        <$> postgresConf
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
         <*> var connectInfo "REDIS_URL" (def defaultConnectInfo)
         <*> var str "APPROOT" (def "http://localhost:3000")
         <*> var str "HOST" (def "*4")
         <*> var auto "PORT" (def 3000)
-        <*> var logLevel "LOG_LEVEL" (def LevelInfo)
+        <*> LoggingEnv.parser
         <*> var str "COPYRIGHT" (def "Patrick Brisbin 2018-2019")
         <*> var githubId "GITHUB_APP_ID" mempty
         <*> var nonempty "GITHUB_APP_KEY" mempty
@@ -137,7 +132,6 @@ loadSettings =
         <*> var (splitOn ',') "ADMIN_EMAILS" (def [])
         <*> switch "AUTH_DUMMY_LOGIN" mempty
         <*> var str "FAVICON" (def "config/favicon.ico")
-        <*> switch "DETAILED_REQUEST_LOGGER" mempty
         <*> switch "MUTABLE_STATIC" mempty
         <*> var nonempty "STATIC_DIR" (def "static")
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
@@ -146,7 +140,6 @@ loadSettings =
         <*> var auto "REQUEST_TIMEOUT" (def 20)
         <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
         <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
-        <*> switch "AWS_TRACE" mempty
         <*> var (eitherReader readQueues) "RESTYLER_QUEUES" (def defaultQueues)
         <*> (TracingConfig
             <$> (DaemonSocket <$> optional (var nonempty "NEW_RELIC_DAEMON_SOCKET" mempty))
@@ -156,9 +149,6 @@ loadSettings =
             <*> var nonempty "NEW_RELIC_LOG" (def "stdout")
             <*> var (eitherReader readTracingLogLevel) "NEW_RELIC_LOG_LEVEL" (def defaultTracingLogLevel)
             )
-
-defaultDatabaseURL :: ByteString
-defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 -- brittany-disable-next-binding
 

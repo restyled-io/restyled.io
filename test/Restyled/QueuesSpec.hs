@@ -5,6 +5,7 @@ module Restyled.QueuesSpec
 import Restyled.Test
 
 import Restyled.Queues
+import Restyled.Redis (brpop)
 
 spec :: Spec
 spec = withApp $ do

@@ -9,10 +9,11 @@ module Restyled.Cache
     , setCacheRedis
     ) where
 
-import Restyled.Prelude hiding (get, set)
+import Restyled.Prelude hiding (get)
 
 import qualified Data.Text as T
 import Database.Redis (expire, get, set)
+import Restyled.Redis
 import Restyled.Tracing
 import Restyled.Yesod
 

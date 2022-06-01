@@ -8,7 +8,7 @@ module Restyled.GitHubStudents
 import Restyled.Prelude hiding (id)
 
 import Data.Aeson.Lens
-import qualified Data.Text as T
+import Lens.Micro ((^?))
 import Network.HTTP.Simple
 import Network.HTTP.Types.Header (hAccept, hAuthorization)
 import qualified Network.OAuth.OAuth2 as OAuth2
@@ -37,17 +37,14 @@ giftGitHubStudents creds = void $ runMaybeT $ do
 
     lift $ do
         verified <- verifyIsGitHubStudent accessToken
-        logInfoN
-            $ "Verified GitHub Student "
-            <> displayGitHubStudent student verified
+        logInfo
+            $ "Verified GitHub Student"
+            :# githubStudentDetails student verified
         handleGitHubStudent student verified
 
-displayGitHubStudent :: GitHubStudent -> Bool -> Text
-displayGitHubStudent GitHubStudent { id, login } verified = T.unwords
-    [ "github_id=" <> toPathPiece id
-    , "github_login=" <> toPathPiece login
-    , "verified=" <> tshow verified
-    ]
+githubStudentDetails :: GitHubStudent -> Bool -> [Series]
+githubStudentDetails GitHubStudent { id, login } verified =
+    ["githubId" .= id, "githubLogin" .= login, "verified" .= verified]
 
 handleGitHubStudent :: MonadIO m => GitHubStudent -> Bool -> SqlPersistT m ()
 handleGitHubStudent GitHubStudent { id, login, email } verified =
@@ -86,7 +83,7 @@ verifyIsGitHubStudent token = do
 
     case body ^? key "student" . _Bool of
         Nothing -> do
-            logWarnN $ "Unexpected response: " <> tshow body
+            logWarn $ "Unexpected response" :# ["body" .= decodeUtf8 @Text body]
             pure False
         Just x -> pure x
   where

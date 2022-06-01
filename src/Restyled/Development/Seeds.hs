@@ -4,17 +4,19 @@ module Restyled.Development.Seeds
     , seedDB
     ) where
 
-import Restyled.Prelude2
+import Restyled.Prelude hiding (First)
 
-import qualified Amazonka as AWS (Env)
 import Amazonka.CloudWatchLogs.CreateLogStream
 import Amazonka.CloudWatchLogs.DeleteLogStream
 import Amazonka.CloudWatchLogs.PutLogEvents
 import Amazonka.CloudWatchLogs.Types
+import qualified Blammo.Logging.LogSettings.Env as LoggingEnv
 import Control.Monad.Trans.Resource (MonadResource, ResourceT, runResourceT)
 import qualified Data.List.NonEmpty as NE
-import Data.Monoid (First)
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
+import Restyled.AWS (HasAWS(..))
+import qualified Restyled.AWS as AWS
+import Restyled.DB
 import Restyled.Env
 import Restyled.Marketplace
 import Restyled.Models
@@ -22,13 +24,18 @@ import Restyled.PrivateRepoAllowance
 import Restyled.Tracing
 import Restyled.UsCents
 
+-- Fort the catching_, ignoring_ overrides
+import Data.Monoid (First)
+import Lens.Micro (Getting)
+import Lens.Micro.Mtl (preview)
+import UnliftIO.Exception (catchJust)
+
 data AppSettings = AppSettings
     { appDatabaseConf :: PostgresConf
     , appStatementTimeout :: Maybe Integer
-    , appLogLevel :: LogLevel
+    , appLogSettings :: LogSettings
     , appRestylerLogGroup :: Text
     , appRestylerLogStreamPrefix :: Text
-    , appAwsTrace :: Bool
     }
 
 class HasSettings env where
@@ -41,20 +48,11 @@ loadSettings :: IO AppSettings
 loadSettings =
     parse
         $ AppSettings
-        <$> (PostgresConf
-            <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
-            <*> var auto "PGPOOLSTRIPES" (def 1)
-            <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
-            <*> var auto "PGPOOLSIZE" (def 10)
-            )
+        <$> postgresConf
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
-        <*> var logLevel2 "LOG_LEVEL" (def LevelInfo)
+        <*> LoggingEnv.parser
         <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
         <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
-        <*> switch "AWS_TRACE" mempty
-
-defaultDatabaseURL :: ByteString
-defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 data App = App
     { appSettings :: AppSettings
@@ -81,18 +79,20 @@ runApp :: ReaderT App (ResourceT (LoggingT IO)) a -> IO a
 runApp f = do
     appSettings@AppSettings {..} <- liftIO loadSettings
 
+    logger <- newLogger appLogSettings
+
     let app :: Text
         app = "seed-db"
 
         runLogging :: LoggingT IO a -> IO a
         runLogging =
-            runStdoutLoggingT
-                . filterLogger (const (>= appLogLevel))
-                . withThreadContext ["app" .= app]
+            runLoggerLoggingT logger . withThreadContext ["app" .= app]
 
-    appSqlPool <- runLogging
-        $ createConnectionPool appDatabaseConf appStatementTimeout
-    appAWSEnv <- discoverAWS appAwsTrace
+    (appSqlPool, appAWSEnv) <-
+        runLogging
+        $ (,)
+        <$> createConnectionPool appDatabaseConf appStatementTimeout
+        <*> AWS.discover
 
     runLogging $ runResourceT $ runReaderT f App { .. }
 
@@ -409,16 +409,16 @@ seedJobLogLines
 seedJobLogLines jobId jobLogLines = do
     AppSettings {..} <- view settingsL
 
-    let group = appRestylerLogGroup
-        stream = appRestylerLogStreamPrefix <> toPathPiece jobId
+    let logGroup = appRestylerLogGroup
+        logStream = appRestylerLogStreamPrefix <> toPathPiece jobId
         events = toInputLogEvent <$> jobLogLines
 
-    ignoring _ResourceNotFoundException $ void $ send $ newDeleteLogStream
-        group
-        stream
+    ignoring _ResourceNotFoundException $ void $ AWS.send $ newDeleteLogStream
+        logGroup
+        logStream
 
-    void $ send $ newCreateLogStream group stream
-    void $ send $ newPutLogEvents group stream events
+    void $ AWS.send $ newCreateLogStream logGroup logStream
+    void $ AWS.send $ newPutLogEvents logGroup logStream events
 
 toInputLogEvent :: JobLogLine -> InputLogEvent
 toInputLogEvent ln = newInputLogEvent
