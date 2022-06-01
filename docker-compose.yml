@@ -22,7 +22,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     healthcheck:
-      test: pg_isready
+      test: "pg_isready -U $$POSTGRES_USER"
       interval: 10s
       timeout: 5s
       retries: 5
