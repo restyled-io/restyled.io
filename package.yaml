@@ -50,7 +50,6 @@ library:
     - QuickCheck
     - aeson
     - aeson-casing
-    - ansi-terminal
     - amazonka
     - amazonka-cloudwatch-logs
     - amazonka-core
