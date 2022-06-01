@@ -81,6 +81,20 @@ packages:
   original:
     url: https://github.com/LeapYear/monad-validate/archive/5b181b7c57d6e2c975c533b0a0072e9aeb15fb99.tar.gz
 - completed:
+    hackage: monad-logger-aeson-0.2.0.0@sha256:c855d721e74608b94b68b5d94ce30bbb49f535d92ae534c8b4c8cb9bb56524f5,5158
+    pantry-tree:
+      size: 5103
+      sha256: 3ebd7fed0fd9da25f070ef84bd14d9eaf12a2f4fc4fe736802454e3e8e679520
+  original:
+    hackage: monad-logger-aeson-0.2.0.0
+- completed:
+    hackage: context-0.2.0.0@sha256:6b643adb4a64fe521873d08df0497f71f88e18b9ecff4b68b4eef938e446cfc9,1886
+    pantry-tree:
+      size: 952
+      sha256: b041ec197787d7cef078a2de33a74853179821e3083882f22b6d185e5764d75e
+  original:
+    hackage: context-0.2.0.0
+- completed:
     hackage: algebraic-graphs-0.5@sha256:6eeec5ed1687ff7aa916e7bf9f02f51aaabde6f314dc0b7b1a84156974d7da73,8071
     pantry-tree:
       size: 4128

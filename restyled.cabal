@@ -79,6 +79,7 @@ library
       Restyled.Percentage
       Restyled.Prelude
       Restyled.Prelude.Esqueleto
+      Restyled.Prelude2
       Restyled.PrivateRepoAllowance
       Restyled.PrivateRepoEnabled
       Restyled.Queues
@@ -181,6 +182,7 @@ library
     , load-env
     , megaparsec
     , monad-logger
+    , monad-logger-aeson
     , monad-validate
     , mtl
     , optparse-applicative

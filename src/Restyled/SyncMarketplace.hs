@@ -1,10 +1,10 @@
 module Restyled.SyncMarketplace
     ( App
-    , loadApp
+    , runApp
     , syncMarketplace
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude2
 
 import Control.Retry (exponentialBackoff, limitRetries, retrying)
 import qualified Data.Vector as V
@@ -42,7 +42,7 @@ loadSettings =
             <*> var auto "PGPOOLSIZE" (def 10)
             )
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
-        <*> var logLevel "LOG_LEVEL" (def LevelInfo)
+        <*> var logLevel2 "LOG_LEVEL" (def LevelInfo)
         <*> var githubId "GITHUB_APP_ID" mempty
         <*> var nonempty "GITHUB_APP_KEY" mempty
         <*> switch "STUB_MARKETPLACE_LISTING" mempty
@@ -51,13 +51,9 @@ defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"
 
 data App = App
-    { appLogFunc :: LogFunc
-    , appSettings :: AppSettings
+    { appSettings :: AppSettings
     , appSqlPool :: ConnectionPool
     }
-
-instance HasLogFunc App where
-    logFuncL = lens appLogFunc $ \x y -> x { appLogFunc = y }
 
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x { appSettings = y }
@@ -71,18 +67,28 @@ instance HasTransactionId App where
 instance HasSqlPool App where
     sqlPoolL = lens appSqlPool $ \x y -> x { appSqlPool = y }
 
-loadApp :: IO App
-loadApp = do
+runApp :: ReaderT App (LoggingT IO) a -> IO a
+runApp f = do
     appSettings@AppSettings {..} <- loadSettings
-    appLogFunc <- terminalLogFunc stdout appLogLevel
-    appSqlPool <- runRIO appLogFunc
+
+    let app :: Text
+        app = "sync-marketplace"
+
+        runLogging :: LoggingT IO a -> IO a
+        runLogging =
+            runStdoutLoggingT
+                . filterLogger (const (>= appLogLevel))
+                . withThreadContext ["app" .= app]
+
+    appSqlPool <- runLogging
         $ createConnectionPool appDatabaseConf appStatementTimeout
-    pure App { .. }
+
+    runLogging $ runReaderT f App { .. }
 
 syncMarketplace
     :: ( MonadUnliftIO m
        , MonadReader env m
-       , HasLogFunc env
+       , MonadLogger m
        , HasSettings env
        , HasSqlPool env
        , HasTracingApp env
@@ -97,7 +103,7 @@ syncMarketplace = do
     auth <- liftIO $ authJWTMax appGitHubAppId appGitHubAppKey
     plans <- retryWithBackoff $ GH.marketplaceListingPlans auth useStubbed
 
-    logDebug $ "Synchronizing " <> displayShow (length plans) <> " plans"
+    logDebug $ "Synchronizing plans" :# ["count" .= length plans]
     synchronizedAccountIds <- for plans $ \plan -> do
         planId <- runDB $ synchronizePlan plan
         synchronizePlanAccounts plan planId
@@ -109,7 +115,7 @@ syncMarketplace = do
 synchronizePlanAccounts
     :: ( MonadUnliftIO m
        , MonadReader env m
-       , HasLogFunc env
+       , MonadLogger m
        , HasSettings env
        , HasSqlPool env
        , HasTracingApp env
@@ -129,11 +135,8 @@ synchronizePlanAccounts plan planId = do
         $ GH.marketplacePlanId plan
 
     logDebug
-        $ "Synchronizing "
-        <> displayShow (length accounts)
-        <> " Accounts for "
-        <> displayMarketplacePlan plan
-
+        $ "Synchronizing accounts"
+        :# ["count" .= length accounts, "plan" .= marketplacePlanDetails plan]
     logPlanChange plan (length accounts)
         =<< runDB (count [MarketplaceAccountMarketplacePlan ==. planId])
 
@@ -142,7 +145,7 @@ synchronizePlanAccounts plan planId = do
 synchronizePlanAccountsError
     :: ( MonadUnliftIO m
        , MonadReader env m
-       , HasLogFunc env
+       , MonadLogger m
        , HasSqlPool env
        , HasTracingApp env
        , HasTransactionId env
@@ -152,39 +155,35 @@ synchronizePlanAccountsError
     -> SomeException
     -> m (Vector MarketplaceAccountId)
 synchronizePlanAccountsError plan planId ex = do
-    logError $ displayShow ex
     logError
-        $ "Error synchronizing Accounts for "
-        <> displayMarketplacePlan plan
-        <> ", maintaining all current Accounts"
+        $ "Error synchronizing Accounts, maintaining all current Accounts"
+        :# [ "exception" .= displayException ex
+           , "plan" .= marketplacePlanDetails plan
+           ]
 
     runDB
         $ V.fromList
         <$> selectKeysList [MarketplaceAccountMarketplacePlan ==. planId] []
 
-displayMarketplacePlan :: GH.MarketplacePlan -> Utf8Builder
-displayMarketplacePlan plan =
-    "Plan "
-        <> display (toPathPart $ GH.marketplacePlanId plan)
-        <> " ("
-        <> display (GH.marketplacePlanName plan)
-        <> ", "
-        <> display (GH.marketplacePlanState plan)
-        <> ")"
+marketplacePlanDetails :: GH.MarketplacePlan -> Value
+marketplacePlanDetails plan = object
+    [ "id" .= toPathPart (GH.marketplacePlanId plan)
+    , "name" .= GH.marketplacePlanName plan
+    , "state" .= GH.marketplacePlanState plan
+    ]
 
 logPlanChange
-    :: (MonadIO m, MonadReader env m, HasLogFunc env)
+    :: MonadLogger m
     => GH.MarketplacePlan
     -> Int -- ^ New count
     -> Int -- ^ Old count
     -> m ()
 logPlanChange plan newCount oldCount = case newCount `compare` oldCount of
-    LT -> logWarn $ prefix <> "lost" <> suffix
-    EQ -> logInfo $ prefix <> "no accounts lost or gained"
-    GT -> logInfo $ prefix <> "gained" <> suffix
+    LT -> logWarn $ "Accounts lost" :# series
+    EQ -> logInfo $ "No accounts lost or gained" :# series
+    GT -> logInfo $ "Accounts gained" :# series
   where
-    prefix = displayMarketplacePlan plan <> ": "
-    suffix = display $ " " <> pluralize "account" "accounts" diff
+    series = ["plan" .= marketplacePlanDetails plan, "diff" .= diff]
     diff = abs $ newCount - oldCount
 
 synchronizePlan
@@ -235,9 +234,7 @@ synchronizeAccount planId account = entityKey <$> upsert
     ]
 
 deleteUnsynchronized
-    :: (MonadIO m, MonadReader env m, HasLogFunc env)
-    => [MarketplaceAccountId]
-    -> SqlPersistT m ()
+    :: (MonadIO m, MonadLogger m) => [MarketplaceAccountId] -> SqlPersistT m ()
 deleteUnsynchronized synchronizedAccountIds = do
     nonGitHubPlanIds <- selectKeysList [MarketplacePlanGithubId ==. Nothing] []
     unsynchronizedAccounts <- selectList
@@ -249,9 +246,8 @@ deleteUnsynchronized synchronizedAccountIds = do
     unless (null unsynchronizedAccounts)
         $ lift
         $ logWarn
-        $ "Deleting "
-        <> displayShow (length unsynchronizedAccounts)
-        <> " unsynchronized accounts"
+        $ "Deleting unsynchronized accounts"
+        :# ["count" .= length unsynchronizedAccounts]
 
     let accountIds = map entityKey unsynchronizedAccounts
     deleteWhere [MarketplaceEnabledRepoMarketplaceAccount <-. accountIds]
@@ -261,9 +257,7 @@ vconcat :: Vector (Vector a) -> [a]
 vconcat = V.toList . V.concat . V.toList
 
 retryWithBackoff
-    :: (MonadIO m, MonadReader env m, HasLogFunc env, Exception e)
-    => IO (Either e a)
-    -> m a
+    :: (MonadIO m, MonadLogger m, Exception e) => IO (Either e a) -> m a
 retryWithBackoff f = do
     result <- retrying
         (exponentialBackoff 1000000 <> limitRetries 5)
@@ -271,9 +265,5 @@ retryWithBackoff f = do
         (\_ -> liftIO f)
     either throwIO pure result
   where
-    logRetry
-        :: (MonadIO m, MonadReader env m, HasLogFunc env, Exception e)
-        => e
-        -> m ()
-    logRetry ex =
-        logWarn $ "Retrying (" <> fromString (displayException ex) <> ")"
+    logRetry :: (MonadLogger m, Exception e) => e -> m ()
+    logRetry ex = logWarn $ "Retrying" :# ["exception" .= displayException ex]
