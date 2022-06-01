@@ -2,7 +2,7 @@ module Main
     ( main
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude2
 
 import Restyled.CLI
 import Restyled.Development.Seeds
@@ -10,5 +10,4 @@ import Restyled.Development.Seeds
 main :: IO ()
 main = do
     setupCLI
-    withApp $ \app -> do
-        runRIO app $ runDB seedDB
+    runApp $ runDB seedDB
