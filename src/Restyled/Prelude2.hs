@@ -25,25 +25,24 @@ module Restyled.Prelude2
     , module X
     ) where
 
-import RIO as X
-    hiding
-        ( Handler
-        , LogLevel(..)
-        , LogSource
-        , logDebug
-        , logDebugS
-        , logError
-        , logErrorS
-        , logInfo
-        , logInfoS
-        , logOther
-        , logOtherS
-        , logWarn
-        , logWarnS
-        )
+import RIO as X hiding
+    ( Handler
+    , LogLevel(..)
+    , LogSource
+    , logDebug
+    , logDebugS
+    , logError
+    , logErrorS
+    , logInfo
+    , logInfoS
+    , logOther
+    , logOtherS
+    , logWarn
+    , logWarnS
+    )
 
 import Control.Error.Util as X
-    ((??), exceptT, hoistMaybe, hush, hushT, note, noteT)
+    (exceptT, hoistMaybe, hush, hushT, note, noteT, (??))
 import Control.Monad.Except as X
 import Control.Monad.Extra as X (fromMaybeM, partitionM)
 import Control.Monad.Logger.Aeson as X
@@ -72,7 +71,7 @@ import SVCS.Payload as X
 import Web.PathPieces as X
 
 import qualified Data.Text.Lazy as TL
-import Formatting ((%), Format, format)
+import Formatting (Format, format, (%))
 import qualified Formatting.Formatters as Formatters
 
 firstM :: (Bitraversable t, Applicative f) => (a -> f c) -> t a b -> f (t c b)
