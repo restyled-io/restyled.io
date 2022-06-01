@@ -11,7 +11,6 @@ import qualified Data.Vector as V
 import Restyled.Cache
 import Restyled.Models
 import Restyled.Settings
-import Restyled.Yesod
 
 -- | Wrapper for JSON instances for caching
 newtype GitHubOrg = GitHubOrg SimpleOrganization
@@ -63,5 +62,5 @@ requestUserNameOrgs username = caching (githubOrgsCacheKey username) $ do
         FetchAll
 
     case result of
-        Left err -> [] <$ logWarnN (tshow err)
+        Left err -> [] <$ logWarn ("GitHub error" :# ["message" .= show err])
         Right orgs -> pure $ GitHubOrg <$> V.toList orgs

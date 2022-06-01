@@ -22,23 +22,18 @@ import Yesod.Auth.OAuth2 as X
 import Yesod.Auth.OAuth2.GitHub as X
 import Yesod.Auth.OAuth2.GitHubStudents as X
 import Yesod.Auth.OAuth2.GitLab as X
-import Yesod.Core as X hiding (requireJsonBody)
+import Yesod.Core as X hiding
+    (logDebug, logError, logInfo, logOther, logWarn, requireJsonBody)
 import Yesod.Core.Types.Lens as X
 import Yesod.Form as X
 import Yesod.Paginator as X
 import Yesod.Persist as X (get404, getBy404)
 
+import Restyled.Prelude
+
 import Data.Csv (DefaultOrdered(..), ToNamedRecord)
 import qualified Data.Csv as Csv
 import Data.Csv.Builder (encodeHeaderWith, encodeNamedRecordWith)
-import Restyled.Prelude
-import Yesod.Core.Types (HandlerData)
-
-instance HasLogFunc env => HasLogFunc (HandlerData child env) where
-    logFuncL = envL . siteL . logFuncL
-
-instance HasProcessContext env => HasProcessContext (HandlerData child env) where
-    processContextL = envL . siteL . processContextL
 
 requireJsonBody :: (MonadHandler m, FromJSON a) => m a
 requireJsonBody = requireCheckJsonBody

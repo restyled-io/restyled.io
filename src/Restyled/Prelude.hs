@@ -25,14 +25,27 @@ module Restyled.Prelude
     , module X
     ) where
 
-import RIO as X hiding (Handler)
+import RIO as X hiding
+    ( Handler
+    , LogLevel(..)
+    , LogSource
+    , logDebug
+    , logDebugS
+    , logError
+    , logErrorS
+    , logInfo
+    , logInfoS
+    , logOther
+    , logOtherS
+    , logWarn
+    , logWarnS
+    )
 
 import Control.Error.Util as X
     (exceptT, hoistMaybe, hush, hushT, note, noteT, (??))
 import Control.Monad.Except as X
 import Control.Monad.Extra as X (fromMaybeM, partitionM)
-import Control.Monad.Logger as X
-    (logDebugN, logErrorN, logInfoN, logOtherN, logWarnN)
+import Control.Monad.Logger.Aeson as X
 import Control.Monad.Trans.Maybe as X
 import Data.Aeson as X hiding (Key, Result(..))
 import Data.Aeson.Casing as X
@@ -48,7 +61,6 @@ import Database.Persist.Sql as X (SqlBackend)
 import RIO.AWS as X
 import RIO.DB as X
 import RIO.List as X (headMaybe, partition)
-import RIO.Logger as X
 import RIO.Process as X
 import RIO.Redis as X
 import RIO.Time as X

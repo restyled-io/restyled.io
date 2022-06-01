@@ -20,14 +20,12 @@ module Restyled.Env
 
     -- * Specialized @'Reader'@s
     , logLevel
-    , logLevel2
     , connectInfo
     , githubId
     ) where
 
 import Restyled.Prelude hiding (Reader)
 
-import qualified Control.Monad.Logger.Aeson as Logger
 import Database.Redis (ConnectInfo, parseConnectInfo)
 import Env hiding (parse, splitOn)
 import qualified Env
@@ -48,14 +46,6 @@ logLevel x = case map toLower x of
     "warn" -> Right LevelWarn
     "error" -> Right LevelError
     _ -> Right $ LevelOther $ pack x
-
-logLevel2 :: Reader e Logger.LogLevel
-logLevel2 x = case map toLower x of
-    "debug" -> Right Logger.LevelDebug
-    "info" -> Right Logger.LevelInfo
-    "warn" -> Right Logger.LevelWarn
-    "error" -> Right Logger.LevelError
-    _ -> Right $ Logger.LevelOther $ pack x
 
 connectInfo :: AsUnread e => Reader e ConnectInfo
 connectInfo = eitherReader parseConnectInfo

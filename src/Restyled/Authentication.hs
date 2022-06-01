@@ -37,8 +37,11 @@ authenticateUser
 authenticateUser creds = do
     mUserId <- findUserForCreds creds
 
-    logDebugN $ "Authentication credentials: " <> tshow creds
-    logDebugN $ "Existing User: " <> maybe "none" toPathPiece mUserId
+    logDebug $ "Authentication" :# ["credentials" .= show creds]
+    logDebug $ maybe
+        "No existing user"
+        (\userId -> "Existing user" :# ["id" .= userId])
+        mUserId
 
     case (mUserId, userFromCreds creds) of
         -- Existing user, good data: update accordingly
@@ -56,7 +59,7 @@ authenticateUser creds = do
 
         -- No user, no data: bail
         (Nothing, Left err) -> do
-            logWarnN $ "OAuth2 response error: " <> pack err
+            logWarn $ "OAuth2 response error" :# ["error" .= err]
             pure $ UserError $ IdentifierNotFound "Unexpected OAuth2 Response"
 
 findUserForCreds :: MonadIO m => Creds site -> SqlPersistT m (Maybe UserId)

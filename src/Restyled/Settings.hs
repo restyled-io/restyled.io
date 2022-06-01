@@ -1,7 +1,8 @@
 {-# LANGUAGE CPP #-}
 
 module Restyled.Settings
-    ( OAuthKeys(..)
+    ( runAppLogging
+    , OAuthKeys(..)
     , addOAuth2Plugin
 
     -- * Runtime @'AppSettings'@
@@ -26,7 +27,7 @@ import Restyled.Env
 import Restyled.Queues
 import Restyled.RestylerImage
 import Restyled.Tracing.Config
-import Restyled.Yesod hiding (LogLevel(..))
+import Restyled.Yesod
 import Yesod.Auth.Dummy
 import Yesod.Core.Types (HandlerData(..))
 
@@ -35,6 +36,11 @@ import Yesod.Default.Util (widgetFileReload)
 #else
 import Yesod.Default.Util (widgetFileNoReload)
 #endif
+
+runAppLogging :: HasSettings app => app -> LoggingT m a -> m a
+runAppLogging app f = do
+    let level = app ^. settingsL . to appLogLevel
+    runStdoutLoggingT $ filterLogger (const (>= level)) f
 
 data OAuthKeys = OAuthKeys
     { oauthKeysClientId :: Text

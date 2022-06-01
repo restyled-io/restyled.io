@@ -62,7 +62,6 @@ library
       Restyled.Handlers.Repos.Pulls.Jobs
       Restyled.Handlers.Revision
       Restyled.Handlers.Robots
-      Restyled.Handlers.System.Metrics
       Restyled.Handlers.Thanks
       Restyled.Handlers.Webhooks
       Restyled.Job.Completion
@@ -79,7 +78,6 @@ library
       Restyled.Percentage
       Restyled.Prelude
       Restyled.Prelude.Esqueleto
-      Restyled.Prelude2
       Restyled.PrivateRepoAllowance
       Restyled.PrivateRepoEnabled
       Restyled.Queues
@@ -419,7 +417,6 @@ test-suite test
     , lens-aeson
     , load-env
     , megaparsec
-    , monad-logger
     , monad-validate
     , mtl
     , persistent

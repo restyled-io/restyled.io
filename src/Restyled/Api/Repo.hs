@@ -44,3 +44,11 @@ apiRepo (Entity _ Repo {..}) AppSettings {..} mAllows = ApiRepo
     , restylerLogLevel = ApiLogLevel
         $ if repoDebugEnabled then LevelDebug else appLogLevel
     }
+
+logLevelToText :: LogLevel -> Text
+logLevelToText = \case
+    LevelDebug -> "DEBUG"
+    LevelInfo -> "INFO"
+    LevelWarn -> "WARN"
+    LevelError -> "ERROR"
+    LevelOther x -> x

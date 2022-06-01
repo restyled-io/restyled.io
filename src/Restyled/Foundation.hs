@@ -29,22 +29,13 @@ import qualified Yesod.Persist as YP
 import Yesod.Static
 
 data App = App
-    { appLogFunc :: LogFunc
-    , appSettings :: AppSettings
-    , appProcessContext :: ProcessContext
+    { appSettings :: AppSettings
     , appConnPool :: ConnectionPool
     , appRedisConn :: Connection
     , appAWSEnv :: AWS.Env
     , appTracingApp :: TracingApp
     , appStatic :: Static
     }
-
-instance HasLogFunc App where
-    logFuncL = lens appLogFunc $ \x y -> x { appLogFunc = y }
-
-instance HasProcessContext App where
-    processContextL =
-        lens appProcessContext $ \x y -> x { appProcessContext = y }
 
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x { appSettings = y }
@@ -68,17 +59,13 @@ loadApp :: IO App
 loadApp = do
     settings@AppSettings {..} <- loadSettings
 
-    logFunc <- terminalLogFunc stdout appLogLevel
-
-    runRIO logFunc $ logInfoN "Starting up..."
     let createPool = createConnectionPool appDatabaseConf appStatementTimeout
         makeStatic
             | appMutableStatic = staticDevel
             | otherwise = static
 
-    App logFunc settings
-        <$> mkDefaultProcessContext
-        <*> runRIO logFunc createPool
+    App settings
+        <$> runAppLogging settings createPool
         <*> checkedConnect appRedisConf
         <*> discoverAWS appAwsTrace
         <*> newTracingApp appTracingConfig
@@ -148,10 +135,6 @@ instance Yesod App where
         settings <- getsYesod $ view settingsL
         authorizeRepo settings owner repo =<< maybeAuthId
 
-    isAuthorized (SystemP _) _ = traceAppSegment "Authorize" $ do
-        settings <- getsYesod $ view settingsL
-        authorizeAdmin settings =<< maybeAuthId
-
     addStaticContent ext mime content = do
         staticDir <- getsYesod $ appStaticDir . view settingsL
 
@@ -167,7 +150,8 @@ instance Yesod App where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
-    messageLoggerSource app _logger = logFuncLog $ app ^. logFuncL
+    messageLoggerSource app _logger loc source level msg =
+        runAppLogging app $ monadLoggerLog loc source level msg
 
     yesodMiddleware handler = traceAppSegment "Handler" $ do
         handleSqlErrorState sqlStateQueryCanceled

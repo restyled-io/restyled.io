@@ -4,7 +4,7 @@ module Restyled.SyncMarketplace
     , syncMarketplace
     ) where
 
-import Restyled.Prelude2
+import Restyled.Prelude
 
 import Control.Retry (exponentialBackoff, limitRetries, retrying)
 import qualified Data.Vector as V
@@ -42,7 +42,7 @@ loadSettings =
             <*> var auto "PGPOOLSIZE" (def 10)
             )
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
-        <*> var logLevel2 "LOG_LEVEL" (def LevelInfo)
+        <*> var logLevel "LOG_LEVEL" (def LevelInfo)
         <*> var githubId "GITHUB_APP_ID" mempty
         <*> var nonempty "GITHUB_APP_KEY" mempty
         <*> switch "STUB_MARKETPLACE_LISTING" mempty

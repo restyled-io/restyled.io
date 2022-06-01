@@ -4,7 +4,7 @@ module Restyled.Development.Seeds
     , seedDB
     ) where
 
-import Restyled.Prelude2
+import Restyled.Prelude
 
 import qualified Amazonka as AWS (Env)
 import Amazonka.CloudWatchLogs.CreateLogStream
@@ -48,7 +48,7 @@ loadSettings =
             <*> var auto "PGPOOLSIZE" (def 10)
             )
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
-        <*> var logLevel2 "LOG_LEVEL" (def LevelInfo)
+        <*> var logLevel "LOG_LEVEL" (def LevelInfo)
         <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
         <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
         <*> switch "AWS_TRACE" mempty

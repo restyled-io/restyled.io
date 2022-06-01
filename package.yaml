@@ -180,7 +180,6 @@ tests:
       - lens-aeson
       - load-env
       - megaparsec
-      - monad-logger
       - monad-validate
       - mtl
       - persistent

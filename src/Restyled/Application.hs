@@ -15,7 +15,6 @@ import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.ForceSSL
 import Network.Wai.Middleware.MethodOverridePost
-import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Network.Wai.Middleware.Routed
 import Network.Wai.Middleware.Timeout
 import qualified RIO.NonEmpty as NE
@@ -42,7 +41,6 @@ import Restyled.Handlers.Repos.Pulls
 import Restyled.Handlers.Repos.Pulls.Jobs
 import Restyled.Handlers.Revision
 import Restyled.Handlers.Robots
-import Restyled.Handlers.System.Metrics
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
 import Restyled.Settings
@@ -67,11 +65,7 @@ waiMiddleware app =
               (not . isWebsocketsLogs)
               (traceMiddlewareSegment app "Timeout" $ timeout timeoutSeconds)
   where
-    requestLogger
-        | app ^. settingsL . to appLogLevel > LevelInfo = id
-        | app ^. settingsL . to appDetailedRequestLogger = logStdoutDev
-        | otherwise = logStdout
-
+    requestLogger = id -- TODO
     timeoutSeconds = app ^. settingsL . to appRequestTimeout
 
 isWebsocketsLogs :: [Text] -> Bool
@@ -85,7 +79,7 @@ warpSettings app =
     host = appHost $ app ^. settingsL
     onEx _req ex =
         when (defaultShouldDisplayException ex)
-            $ runRIO app
-            $ logErrorN
-            $ "Warp exception: "
-            <> tshow ex
+            $ runAppLogging app
+            $ logError
+            $ "Warp exception"
+            :# ["exception" .= displayException ex]

@@ -98,14 +98,14 @@ authorizePrivateRepo settings@AppSettings {..} repo@Repo {..} user@User {..} =
         let isAdmin = userIsAdmin settings user
             (granted, reason, mErr) = resolveAuth isAdmin result
 
-        logInfoN $ mconcat
-            [ "AUTHORIZE"
-            , " user=" <> maybe "<unknown>" toPathPiece userGithubUsername
-            , " repo=" <> repoPath repoOwner repoName
-            , " granted=" <> tshow granted
-            , " reason=" <> tshow reason
-            , " error=" <> maybe "" tshow mErr
-            ]
+        logInfo
+            $ "Authorize"
+            :# [ " user" .= userGithubUsername
+               , " repo" .= repoPath repoOwner repoName
+               , " granted" .= granted
+               , " reason" .= reason
+               , " error" .= mErr
+               ]
 
         authorizeWhen granted
 
