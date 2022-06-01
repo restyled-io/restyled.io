@@ -43,6 +43,7 @@ import Restyled.Handlers.Revision
 import Restyled.Handlers.Robots
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
+import Restyled.Logging.Middleware
 import Restyled.Settings
 import Restyled.Tracing.Middleware
 import Restyled.Yesod hiding (LogLevel(..))
@@ -59,14 +60,12 @@ waiMiddleware app =
     transactionMiddleware app
         . traceMiddlewareSegment app "Force SSL" forceSSL
         . traceMiddlewareSegment app "Method override" methodOverridePost
-        . traceMiddlewareSegment app "Logger" requestLogger
+        . traceMiddlewareSegment app "Logger" (requestLogger app)
         . traceMiddlewareSegment app "Default" defaultMiddlewaresNoLogging
         . routedMiddleware
               (not . isWebsocketsLogs)
               (traceMiddlewareSegment app "Timeout" $ timeout timeoutSeconds)
-  where
-    requestLogger = id -- TODO
-    timeoutSeconds = app ^. settingsL . to appRequestTimeout
+    where timeoutSeconds = app ^. settingsL . to appRequestTimeout
 
 isWebsocketsLogs :: [Text] -> Bool
 isWebsocketsLogs = maybe False ((== "log") . NE.last) . NE.nonEmpty

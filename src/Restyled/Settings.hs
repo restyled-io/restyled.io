@@ -74,7 +74,6 @@ data AppSettings = AppSettings
     , appAdmins :: [Text]
     , appAllowDummyAuth :: Bool
     , appFavicon :: FilePath
-    , appDetailedRequestLogger :: Bool
     , appMutableStatic :: Bool
     , appStaticDir :: FilePath
     , appStubMarketplaceListing :: Bool
@@ -143,7 +142,6 @@ loadSettings =
         <*> var (splitOn ',') "ADMIN_EMAILS" (def [])
         <*> switch "AUTH_DUMMY_LOGIN" mempty
         <*> var str "FAVICON" (def "config/favicon.ico")
-        <*> switch "DETAILED_REQUEST_LOGGER" mempty
         <*> switch "MUTABLE_STATIC" mempty
         <*> var nonempty "STATIC_DIR" (def "static")
         <*> switch "STUB_MARKETPLACE_LISTING" mempty

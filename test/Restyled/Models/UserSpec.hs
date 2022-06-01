@@ -81,7 +81,6 @@ emptySettings = AppSettings
     , appAdmins = []
     , appAllowDummyAuth = error "unused"
     , appFavicon = error "unused"
-    , appDetailedRequestLogger = False
     , appMutableStatic = False
     , appStaticDir = error "unused"
     , appStubMarketplaceListing = True
