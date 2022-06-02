@@ -158,6 +158,7 @@ library
     , bytestring
     , case-insensitive
     , cassava
+    , clock
     , composition-extra
     , conduit
     , conduit-extra

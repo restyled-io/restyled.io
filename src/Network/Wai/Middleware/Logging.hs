@@ -26,15 +26,23 @@ import Network.Wai
     , responseHeaders
     , responseStatus
     )
+import qualified System.Clock as Clock
 
 requestLogger :: HasLogger env => env -> Middleware
 requestLogger env app req respond =
-    runLoggerLoggingT env $ withRunInIO $ \runInIO -> app req $ \resp -> do
-        recvd <- respond resp
-        recvd <$ runInIO (logResponse req resp)
+    runLoggerLoggingT env $ withRunInIO $ \runInIO -> do
+        begin <- getTime
+        app req $ \resp -> do
+            recvd <- respond resp
+            duration <- toMillis . subtract begin <$> getTime
+            recvd <$ runInIO (logResponse duration req resp)
+  where
+    getTime = Clock.getTime Clock.Monotonic
 
-logResponse :: MonadLogger m => Request -> Response -> m ()
-logResponse req resp
+    toMillis x = fromIntegral @_ @Double (Clock.toNanoSecs x) / 10000
+
+logResponse :: MonadLogger m => Double -> Request -> Response -> m ()
+logResponse duration req resp
     | statusCode status >= 500 = logError $ message :# details
     | statusCode status == 404 = logDebug $ message :# details
     | statusCode status >= 400 = logWarn $ message :# details
@@ -57,6 +65,7 @@ logResponse req resp
             [ "code" .= statusCode status
             , "message" .= decodeUtf8 (statusMessage status)
             ]
+        , "durationMs" .= duration
         , "requestHeaders"
             .= headerObject ["authorization", "cookie"] (requestHeaders req)
         , "responseHeaders"
