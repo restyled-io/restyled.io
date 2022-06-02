@@ -35,7 +35,7 @@ db.migrate:
 
 .PHONY: db.seed
 db.seed:
-	./bin/restyled.io-dev seed-db | jq
+	./bin/restyled.io-dev seed-db
 
 .PHONY: db.setup
 db.setup: db.create db.migrate

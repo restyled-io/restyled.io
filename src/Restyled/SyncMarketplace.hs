@@ -11,6 +11,7 @@ import qualified Data.Vector as V
 import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
 import Restyled.Env
+import Restyled.Logging
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.Tracing
@@ -71,14 +72,13 @@ runApp :: ReaderT App (LoggingT IO) a -> IO a
 runApp f = do
     appSettings@AppSettings {..} <- loadSettings
 
+    logger <- newLogger $ setLogSettingsLevel appLogLevel defaultLogSettings
+
     let app :: Text
         app = "sync-marketplace"
 
         runLogging :: LoggingT IO a -> IO a
-        runLogging =
-            runStdoutLoggingT
-                . filterLogger (const (>= appLogLevel))
-                . withThreadContext ["app" .= app]
+        runLogging = runAppLoggingT logger . withThreadContext ["app" .= app]
 
     appSqlPool <- runLogging
         $ createConnectionPool appDatabaseConf appStatementTimeout

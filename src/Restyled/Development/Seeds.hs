@@ -16,6 +16,7 @@ import qualified Data.List.NonEmpty as NE
 import Data.Monoid (First)
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
 import Restyled.Env
+import Restyled.Logging
 import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
@@ -81,17 +82,16 @@ runApp :: ReaderT App (ResourceT (LoggingT IO)) a -> IO a
 runApp f = do
     appSettings@AppSettings {..} <- liftIO loadSettings
 
+    logger <- newLogger $ setLogSettingsLevel appLogLevel defaultLogSettings
+
     let app :: Text
         app = "seed-db"
 
         runLogging :: LoggingT IO a -> IO a
-        runLogging =
-            runStdoutLoggingT
-                . filterLogger (const (>= appLogLevel))
-                . withThreadContext ["app" .= app]
+        runLogging = runAppLoggingT logger . withThreadContext ["app" .= app]
 
-    appSqlPool <- runLogging
-        $ createConnectionPool appDatabaseConf appStatementTimeout
+    appSqlPool <- runLogging $ do
+        createConnectionPool appDatabaseConf appStatementTimeout
     appAWSEnv <- discoverAWS appAwsTrace
 
     runLogging $ runResourceT $ runReaderT f App { .. }

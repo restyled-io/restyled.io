@@ -67,6 +67,7 @@ library
       Restyled.Job.Completion
       Restyled.JobOutput
       Restyled.Logging
+      Restyled.Logging.Colors
       Restyled.Logging.Middleware
       Restyled.Marketplace
       Restyled.Metric
