@@ -110,6 +110,7 @@ library:
     - time
     - tracing-newrelic
     - transformers
+    - unliftio-core
     - uri-encode
     - uuid
     - vector

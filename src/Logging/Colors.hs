@@ -1,4 +1,4 @@
-module Restyled.Logging.Colors
+module Logging.Colors
     ( Colors(..)
     , getColors
     ) where

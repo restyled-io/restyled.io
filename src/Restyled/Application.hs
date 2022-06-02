@@ -14,6 +14,7 @@ import Restyled.Prelude hiding (timeout)
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.ForceSSL
+import Network.Wai.Middleware.Logging
 import Network.Wai.Middleware.MethodOverridePost
 import Network.Wai.Middleware.Routed
 import Network.Wai.Middleware.Timeout
@@ -43,8 +44,6 @@ import Restyled.Handlers.Revision
 import Restyled.Handlers.Robots
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
-import Restyled.Logging
-import Restyled.Logging.Middleware
 import Restyled.Settings
 import Restyled.Tracing.Middleware
 import Restyled.Yesod hiding (LogLevel(..))
@@ -79,7 +78,7 @@ warpSettings app =
     host = appHost $ app ^. settingsL
     onEx _req ex =
         when (defaultShouldDisplayException ex)
-            $ runAppLoggingT app
+            $ runLoggerLoggingT app
             $ logError
             $ "Warp exception"
             :# ["exception" .= displayException ex]

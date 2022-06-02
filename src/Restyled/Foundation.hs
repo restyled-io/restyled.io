@@ -10,11 +10,11 @@ import Restyled.Prelude
 
 import qualified Amazonka as AWS (Env)
 import Data.Text (splitOn)
+import Logging.Logger (getLoggerLoggerSet)
 import Restyled.ApiError
 import Restyled.ApiToken
 import Restyled.Authentication
 import Restyled.Authorization
-import Restyled.Logging
 import Restyled.Models
 import Restyled.Queues
 import Restyled.ServerUnavailable
@@ -73,7 +73,7 @@ loadApp = do
     logger <- newLogger $ setLogSettingsLevel appLogLevel defaultLogSettings
 
     App settings logger
-        <$> runAppLoggingT logger createPool
+        <$> runLoggerLoggingT logger createPool
         <*> checkedConnect appRedisConf
         <*> discoverAWS appAwsTrace
         <*> newTracingApp appTracingConfig
@@ -160,10 +160,10 @@ instance Yesod App where
 
     makeLogger App {..} = do
         logger <- defaultMakeLogger
-        pure $ logger { Y.loggerSet = loggerLoggerSet appLogger }
+        pure $ logger { Y.loggerSet = getLoggerLoggerSet appLogger }
 
     messageLoggerSource app _logger loc source level msg =
-        runAppLoggingT app $ monadLoggerLog loc source level msg
+        runLoggerLoggingT app $ monadLoggerLog loc source level msg
 
     yesodMiddleware handler = traceAppSegment "Handler" $ do
         handleSqlErrorState sqlStateQueryCanceled

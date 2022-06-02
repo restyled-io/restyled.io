@@ -15,7 +15,6 @@ import Restyled.Prelude
 import qualified Control.Monad.State as State
 import Network.Wai.Test (SResponse(..))
 import Restyled.Cache as X
-import Restyled.Logging
 import Restyled.Settings
 import Restyled.Test.Expectations
 import Restyled.Tracing
@@ -50,7 +49,7 @@ siteL = lens yedSite $ \x y -> x { yedSite = y }
 instance HasLogger site => MonadLogger (YesodExample site) where
     monadLoggerLog loc source level msg = do
         site <- ask
-        runAppLoggingT site $ monadLoggerLog loc source level msg
+        runLoggerLoggingT site $ monadLoggerLog loc source level msg
 
 instance (HasRedis site, HasTracingApp site) => MonadCache (YesodExample site) where
     getCache = getCacheRedis

@@ -22,6 +22,12 @@ library
       GitHub.Endpoints.MarketplaceListing.Plans.Accounts
       GitHub.Endpoints.Repos.Collaborators.Permissions
       GitHub.Request.Preview
+      Logging
+      Logging.Colors
+      Logging.Logger
+      Logging.Settings
+      Logging.Terminal
+      Network.Wai.Middleware.Logging
       Restyled.Admin.RepoSearch
       Restyled.Api.CreateJob
       Restyled.Api.Job
@@ -66,9 +72,6 @@ library
       Restyled.Handlers.Webhooks
       Restyled.Job.Completion
       Restyled.JobOutput
-      Restyled.Logging
-      Restyled.Logging.Colors
-      Restyled.Logging.Middleware
       Restyled.Marketplace
       Restyled.Metric
       Restyled.Metrics
@@ -207,6 +210,7 @@ library
     , time
     , tracing-newrelic
     , transformers
+    , unliftio-core
     , uri-encode
     , uuid
     , vector

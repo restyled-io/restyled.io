@@ -45,7 +45,6 @@ import Control.Error.Util as X
     (exceptT, hoistMaybe, hush, hushT, note, noteT, (??))
 import Control.Monad.Except as X
 import Control.Monad.Extra as X (fromMaybeM, partitionM)
-import Control.Monad.Logger.Aeson as X
 import Control.Monad.Trans.Maybe as X
 import Data.Aeson as X hiding (Key, Result(..))
 import Data.Aeson.Casing as X
@@ -58,6 +57,7 @@ import Data.Text as X (pack, unpack)
 import Database.Persist as X
 import Database.Persist.JSONB as X
 import Database.Persist.Sql as X (SqlBackend)
+import Logging as X
 import RIO.AWS as X
 import RIO.DB as X
 import RIO.List as X (headMaybe, partition)
