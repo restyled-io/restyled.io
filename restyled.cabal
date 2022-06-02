@@ -162,6 +162,7 @@ library
     , errors
     , esqueleto
     , extra
+    , fast-logger
     , file-embed
     , formatting
     , generic-arbitrary

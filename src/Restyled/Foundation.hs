@@ -24,6 +24,7 @@ import Restyled.Tracing
 import Restyled.Yesod
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
+import qualified Yesod.Core.Types as Y
 import Yesod.Default.Util (addStaticContentExternal)
 import Yesod.Persist (YesodPersist)
 import qualified Yesod.Persist as YP
@@ -157,7 +158,9 @@ instance Yesod App where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
-    makeLogger = pure . toYesodLogger . appLogger
+    makeLogger App {..} = do
+        logger <- defaultMakeLogger
+        pure $ logger { Y.loggerSet = loggerLoggerSet appLogger }
 
     messageLoggerSource app _logger loc source level msg =
         runAppLoggingT app $ monadLoggerLog loc source level msg

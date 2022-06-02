@@ -3,7 +3,7 @@ module Restyled.Logging
     , defaultLogSettings
     , setLogSettingsLevel
     , Logger
-    , toYesodLogger
+    , loggerLoggerSet
     , HasLogger(..)
     , newLogger
     , runAppLoggingT
@@ -11,8 +11,8 @@ module Restyled.Logging
 
 import Restyled.Prelude
 
-import qualified Yesod.Core as Yesod (defaultMakeLogger)
-import qualified Yesod.Core.Types as Yesod (Logger(..))
+import System.Log.FastLogger (defaultBufSize, newStdoutLoggerSet)
+import System.Log.FastLogger.LoggerSet (LoggerSet)
 
 newtype LogSettings = LogSettings
     { lsLevel :: LogLevel
@@ -26,12 +26,12 @@ setLogSettingsLevel :: LogLevel -> LogSettings -> LogSettings
 setLogSettingsLevel level ls = ls { lsLevel = level }
 
 data Logger = Logger
-    { lLogger :: Yesod.Logger
+    { lLoggerSet :: LoggerSet
     , lSettings :: LogSettings
     }
 
-toYesodLogger :: Logger -> Yesod.Logger
-toYesodLogger = lLogger
+loggerLoggerSet :: Logger -> LoggerSet
+loggerLoggerSet = lLoggerSet
 
 class HasLogger env where
     loggerL :: Lens' env Logger
@@ -40,10 +40,11 @@ instance HasLogger Logger where
     loggerL = id
 
 newLogger :: MonadIO m => LogSettings -> m Logger
-newLogger ls = Logger <$> liftIO Yesod.defaultMakeLogger <*> pure ls
+newLogger ls =
+    Logger <$> liftIO (newStdoutLoggerSet defaultBufSize) <*> pure ls
 
 runAppLoggingT :: HasLogger env => env -> LoggingT m a -> m a
 runAppLoggingT env = runFastLoggingT ls . filterLogger (const (>= ml))
   where
-    ls = env ^. loggerL . to (Yesod.loggerSet . lLogger)
+    ls = env ^. loggerL . to lLoggerSet
     ml = env ^. loggerL . to (lsLevel . lSettings)
