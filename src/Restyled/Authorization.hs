@@ -98,14 +98,13 @@ authorizePrivateRepo settings@AppSettings {..} repo@Repo {..} user@User {..} =
         let isAdmin = userIsAdmin settings user
             (granted, reason, mErr) = resolveAuth isAdmin result
 
-        logInfo
-            $ "Authorize"
-            :# [ " user" .= userGithubUsername
-               , " repo" .= repoPath repoOwner repoName
-               , " granted" .= granted
-               , " reason" .= reason
-               , " error" .= mErr
-               ]
+        logInfo $ "Authorize" :# catMaybes
+            [ Just $ "user" .= userGithubUsername
+            , Just $ "repo" .= repoPath repoOwner repoName
+            , Just $ "granted" .= granted
+            , Just $ "reason" .= reason
+            , ("error" .=) <$> mErr
+            ]
 
         authorizeWhen granted
 
