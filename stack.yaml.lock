@@ -131,7 +131,7 @@ packages:
     hackage: HsSyck-0.53
 snapshots:
 - completed:
-    size: 618876
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/6.yaml
-    sha256: fb634b19f31da06684bb07ce02a20c75a3162138f279b388905b03ebd57bb50f
-  original: lts-19.6
+    size: 618507
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/9.yaml
+    sha256: 190a93d09d9d7bccc78a0f00d6fc0350eed76bc533611e5971202800805dd00e
+  original: lts-19.9

@@ -1,4 +1,4 @@
-resolver: lts-19.6
+resolver: lts-19.9
 extra-deps:
   # The way it builds the newrelic shared library requires a local checkout for
   # some reason. Annoying
