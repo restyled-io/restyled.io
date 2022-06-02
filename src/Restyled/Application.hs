@@ -43,6 +43,7 @@ import Restyled.Handlers.Revision
 import Restyled.Handlers.Robots
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
+import Restyled.Logging
 import Restyled.Logging.Middleware
 import Restyled.Settings
 import Restyled.Tracing.Middleware
@@ -78,7 +79,7 @@ warpSettings app =
     host = appHost $ app ^. settingsL
     onEx _req ex =
         when (defaultShouldDisplayException ex)
-            $ runAppLogging app
+            $ runAppLoggingT app
             $ logError
             $ "Warp exception"
             :# ["exception" .= displayException ex]

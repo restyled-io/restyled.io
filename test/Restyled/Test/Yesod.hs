@@ -15,6 +15,7 @@ import Restyled.Prelude
 import qualified Control.Monad.State as State
 import Network.Wai.Test (SResponse(..))
 import Restyled.Cache as X
+import Restyled.Logging
 import Restyled.Settings
 import Restyled.Test.Expectations
 import Restyled.Tracing
@@ -27,6 +28,9 @@ type YesodSpec site = SpecM (TestApp site)
 
 instance HasSettings site => HasSettings (YesodExampleData site) where
     settingsL = siteL . settingsL
+
+instance HasLogger site => HasLogger (YesodExampleData site) where
+    loggerL = siteL . loggerL
 
 instance HasRedis site => HasRedis (YesodExampleData site) where
     redisConnectionL = siteL . redisConnectionL
@@ -43,10 +47,10 @@ instance HasSqlPool site => HasSqlPool (YesodExampleData site) where
 siteL :: Lens' (YesodExampleData site) site
 siteL = lens yedSite $ \x y -> x { yedSite = y }
 
-instance HasSettings site => MonadLogger (YesodExample site) where
+instance HasLogger site => MonadLogger (YesodExample site) where
     monadLoggerLog loc source level msg = do
         site <- ask
-        runAppLogging site $ monadLoggerLog loc source level msg
+        runAppLoggingT site $ monadLoggerLog loc source level msg
 
 instance (HasRedis site, HasTracingApp site) => MonadCache (YesodExample site) where
     getCache = getCacheRedis

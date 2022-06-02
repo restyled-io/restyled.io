@@ -66,6 +66,7 @@ library
       Restyled.Handlers.Webhooks
       Restyled.Job.Completion
       Restyled.JobOutput
+      Restyled.Logging
       Restyled.Logging.Middleware
       Restyled.Marketplace
       Restyled.Metric

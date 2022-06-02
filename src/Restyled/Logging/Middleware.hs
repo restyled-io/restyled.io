@@ -20,11 +20,11 @@ import Network.Wai
     , responseHeaders
     , responseStatus
     )
-import Restyled.Settings
+import Restyled.Logging
 
-requestLogger :: HasSettings env => env -> Middleware
+requestLogger :: HasLogger env => env -> Middleware
 requestLogger env app req respond = do
-    runAppLogging env $ do
+    runAppLoggingT env $ do
         logRequest req
 
         withRunInIO $ \runInIO -> do

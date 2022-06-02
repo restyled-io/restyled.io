@@ -14,6 +14,7 @@ import Restyled.ApiError
 import Restyled.ApiToken
 import Restyled.Authentication
 import Restyled.Authorization
+import Restyled.Logging
 import Restyled.Models
 import Restyled.Queues
 import Restyled.ServerUnavailable
@@ -30,6 +31,7 @@ import Yesod.Static
 
 data App = App
     { appSettings :: AppSettings
+    , appLogger :: Logger
     , appConnPool :: ConnectionPool
     , appRedisConn :: Connection
     , appAWSEnv :: AWS.Env
@@ -39,6 +41,9 @@ data App = App
 
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x { appSettings = y }
+
+instance HasLogger App where
+    loggerL = lens appLogger $ \x y -> x { appLogger = y }
 
 instance HasQueues App where
     queuesL = settingsL . queuesL
@@ -64,8 +69,10 @@ loadApp = do
             | appMutableStatic = staticDevel
             | otherwise = static
 
-    App settings
-        <$> runAppLogging settings createPool
+    logger <- newLogger $ setLogSettingsLevel appLogLevel defaultLogSettings
+
+    App settings logger
+        <$> runAppLoggingT logger createPool
         <*> checkedConnect appRedisConf
         <*> discoverAWS appAwsTrace
         <*> newTracingApp appTracingConfig
@@ -150,8 +157,10 @@ instance Yesod App where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
+    makeLogger = pure . toYesodLogger . appLogger
+
     messageLoggerSource app _logger loc source level msg =
-        runAppLogging app $ monadLoggerLog loc source level msg
+        runAppLoggingT app $ monadLoggerLog loc source level msg
 
     yesodMiddleware handler = traceAppSegment "Handler" $ do
         handleSqlErrorState sqlStateQueryCanceled
