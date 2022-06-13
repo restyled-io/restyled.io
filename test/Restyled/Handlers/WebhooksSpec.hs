@@ -14,7 +14,7 @@ spec = withApp $ do
     describe "POST /webhooks" $ do
         it "stores the body and responds 201" $ do
             let q :: ByteString
-                q = "restyled:hooks:webhooks"
+                q = "restyled:agent:webhooks"
             body <- readFixture "webhooks/github/pull-request-opened.json"
 
             request $ do

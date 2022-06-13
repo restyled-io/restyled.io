@@ -62,7 +62,7 @@ readQueues = first unpack . go . pack
 
 defaultQueues :: Queues
 defaultQueues = Queues $ pure $ Queue
-    { queueName = "restyled:hooks:webhooks"
+    { queueName = "restyled:agent:webhooks"
     , queueFrequency = 1
     }
 
