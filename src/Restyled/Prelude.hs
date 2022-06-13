@@ -6,9 +6,6 @@ module Restyled.Prelude
     -- * Time
     , getCurrentTime
 
-    -- * List
-    , headMaybe
-
     -- * Bifuctor
     , firstM
     , secondM
@@ -63,7 +60,6 @@ import SVCS.GitHub as X
 import SVCS.Names as X
 import SVCS.Payload as X
 
-import qualified Data.List.NonEmpty as NE
 import qualified Data.Text.Lazy as TL
 import qualified Data.Time as Time
 import Formatting (Format, format, (%))
@@ -71,9 +67,6 @@ import qualified Formatting.Formatters as Formatters
 
 getCurrentTime :: MonadIO m => m UTCTime
 getCurrentTime = liftIO Time.getCurrentTime
-
-headMaybe :: [a] -> Maybe a
-headMaybe = fmap NE.head . NE.nonEmpty
 
 firstM :: (Bitraversable t, Applicative f) => (a -> f c) -> t a b -> f (t c b)
 firstM f = bimapM f pure
