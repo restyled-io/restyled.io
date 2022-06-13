@@ -180,7 +180,6 @@ tests:
       - hspec-expectations-json
       - http-types
       - microlens
-      # - microlens-mtl
       - lens-aeson
       - load-env
       - megaparsec
