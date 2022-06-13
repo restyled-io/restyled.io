@@ -51,9 +51,9 @@ services:
       AWS_ACCESS_KEY_ID: x
       AWS_SECRET_ACCESS_KEY: x
       LOG_LEVEL: DEBUG,Amazonka:info
+      LOG_FORMAT: json
       REDIS_URL: redis://redis
-      RESTYLER_POOL_SIZE: 3
-      SHUTDOWN_TIMEOUT: 600000
+      RESTYLER_POOL_SIZE: 2
     volumes:
       - /tmp:/tmp
       - /var/run/docker.sock:/var/run/docker.sock
