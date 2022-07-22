@@ -127,7 +127,7 @@ loadSettings =
             <*> optional (var nonempty "GITHUB_STUDENTS_OAUTH_CLIENT_SECRET" mempty)
             )
         <*> (restylerImage
-            <$> var str "RESTYLER_IMAGE" (def "restyled/restyler:main")
+            <$> var str "RESTYLER_IMAGE" (def "restyled/restyler:edge")
             )
         <*> var (splitOn ',') "ADMIN_EMAILS" (def [])
         <*> switch "AUTH_DUMMY_LOGIN" mempty
