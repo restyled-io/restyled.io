@@ -20,6 +20,8 @@ data ApiRepo = ApiRepo
     , marketplacePlanAllows :: Maybe MarketplacePlanAllows
     , restylerImage :: RestylerImage
     , restylerLogLevel :: ApiLogLevel
+    , restylerLogFormat :: Text
+    -- ^ TODO: 'LogFormat' needs 'ToJSON'
     }
     deriving stock (Show, Generic)
     deriving anyclass ToJSON
@@ -44,6 +46,7 @@ apiRepo (Entity _ Repo {..}) AppSettings {..} mAllows = ApiRepo
     , restylerImage = fromMaybe appRestylerImage repoRestylerImage
     , restylerLogLevel = ApiLogLevel
         $ if repoDebugEnabled then LevelDebug else guessLogLevel appLogSettings
+    , restylerLogFormat = "json"
     }
 
 logLevelToText :: LogLevel -> Text
