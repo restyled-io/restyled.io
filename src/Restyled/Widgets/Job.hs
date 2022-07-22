@@ -8,9 +8,15 @@ module Restyled.Widgets.Job
     , jobLogLine
     ) where
 
-import Restyled.Prelude
+import Restyled.Prelude hiding (Key)
 
+import Control.Monad.Logger.Aeson (LoggedMessage(..))
+import Data.Aeson.Key (Key)
+import qualified Data.Aeson.Key as Key
+import Data.Aeson.KeyMap (KeyMap)
+import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.Text as T
+import qualified Data.Vector as V
 import Formatting (format)
 import Formatting.Time (diff)
 import qualified Network.URI.Encode as URI
@@ -75,39 +81,44 @@ jobOutput (Entity jobId job) = $(widgetFile "widgets/job-output")
 
 jobLogLine :: JobLogLine -> Widget
 jobLogLine ln = $(widgetFile "widgets/log-line")
-    where (content, levelStyle) = getLevelStyle $ jobLogLineContent ln
+  where
+    lm = jobLogLineContentJSON ln
+    level = case loggedMessageLevel lm of
+        LevelDebug -> "debug"
+        LevelInfo -> "info"
+        LevelWarn -> "warn"
+        LevelError -> "error"
+        LevelOther x -> x
 
-data LevelStyle
-    = LevelStyleUnknown
-    | LevelStyleDebug
-    | LevelStyleInfo
-    | LevelStyleWarn
-    | LevelStyleError
+padTo :: Int -> Text -> Text
+padTo n t = t <> T.replicate pad " " where pad = max 0 $ n - T.length t
 
-levelStyleClass :: LevelStyle -> Text
-levelStyleClass = \case
-    LevelStyleUnknown -> "level-unknown"
-    LevelStyleDebug -> "level-debug"
-    LevelStyleInfo -> "level-info"
-    LevelStyleWarn -> "level-warn"
-    LevelStyleError -> "level-error"
+renderKeyMap :: KeyMap Value -> Widget
+renderKeyMap = mconcat . map (uncurry pair) . KeyMap.toList
+  where
+    pair :: Key -> Value -> Widget
+    pair k v = [whamlet|$newline never
+        \ #
+        <span .key-map-key>#{Key.toText k}
+        =
+        <span .key-map-value>#{plainValue v}
+    |]
 
-levelStyleContent :: LevelStyle -> Text
-levelStyleContent = \case
-    LevelStyleUnknown -> "unknown"
-    LevelStyleDebug -> "debug"
-    LevelStyleInfo -> "info"
-    LevelStyleWarn -> "warn"
-    LevelStyleError -> "error"
+    plainValue :: Value -> Text
+    plainValue = \case
+        Object km -> mconcat
+            [ "{"
+            , T.intercalate ","
+            $ map (\(k, v) -> Key.toText k <> ":" <> plainValue v)
+            $ KeyMap.toList km
+            , "}"
+            ]
+        Array vs -> mconcat
+            ["[", T.intercalate "," $ map plainValue $ V.toList vs, "]"]
+        String t -> t
+        Bool b -> if b then "true" else "false"
+        Number n -> dropSuffix ".0" $ show n
+        Null -> "null"
 
-getLevelStyle :: Text -> (Text, LevelStyle)
-getLevelStyle content = maybe (content, LevelStyleUnknown) getFirst
-    $ foldMap (fmap First . firstM (`T.stripPrefix` content)) stylePrefixes
-
-stylePrefixes :: [(Text, LevelStyle)]
-stylePrefixes =
-    [ ("[Debug] ", LevelStyleDebug)
-    , ("[Info] ", LevelStyleInfo)
-    , ("[Warn] ", LevelStyleWarn)
-    , ("[Error] ", LevelStyleError)
-    ]
+    dropSuffix :: Text -> Text -> Text
+    dropSuffix suffix x = fromMaybe x $ T.stripSuffix suffix x

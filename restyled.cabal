@@ -181,6 +181,7 @@ library
     , microlens
     , microlens-mtl
     , monad-logger
+    , monad-logger-aeson
     , monad-validate
     , mtl
     , optparse-applicative

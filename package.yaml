@@ -87,6 +87,7 @@ library:
     - load-env
     - megaparsec
     - monad-logger
+    - monad-logger-aeson
     - monad-validate
     - mtl
     - optparse-applicative

@@ -1,6 +1,10 @@
 $newline never
 <div .log-line>
-  <span .#{levelStyleClass levelStyle} .prefix>
-    ^{levelStyleContent levelStyle}
-  <span .#{levelStyleClass levelStyle} .content>
-    ^{renderWithURLs content}
+  <span .level-#{level} .prefix>
+    #{padTo 9 level}
+  <span .level-#{level} .content>
+    ^{renderWithURLs $ padTo 31 $ loggedMessageText lm}
+    $maybe src <- loggedMessageLogSource lm
+      ^{renderKeyMap $ KeyMap.singleton "source" $ String src}
+    ^{renderKeyMap $ loggedMessageThreadContext lm}
+    ^{renderKeyMap $ loggedMessageMeta lm}
