@@ -168,6 +168,15 @@ details {
   }
 }
 
+
+.log-line .key-map-key {
+  color: #9bddff;
+}
+
+.log-line .key-map-value {
+  color: #ee82ee;
+}
+
 .log-line .prefix:before {
   color: gray;
   content: "[";
