@@ -221,6 +221,8 @@ details {
 }
 .js .logs-stream {
   display: block;
+  max-width: inherit;
+  width: 98%;
 }
 
 .card {
