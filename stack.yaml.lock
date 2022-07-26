@@ -81,26 +81,33 @@ packages:
   original:
     url: https://github.com/LeapYear/monad-validate/archive/5b181b7c57d6e2c975c533b0a0072e9aeb15fb99.tar.gz
 - completed:
-    hackage: Blammo-1.0.1.1@sha256:d3c7f5bed8a7778db116fe8318751037596afa0655ed12c190e4ff671b72e527,3954
+    hackage: Blammo-1.0.2.3@sha256:8ad05477633069b99283ee005c9d85b895d9fa70c091c45e36a39cfeffeeda80,4166
     pantry-tree:
-      size: 1115
-      sha256: 3881a44247abaa2ea26497eb070b6a2b345b845b0b13f0979b7c9ddc4b76b671
+      size: 1257
+      sha256: 1663b20e45100f09277e205e26990fe636f87f208a8634aae8157887cb261ac9
   original:
-    hackage: Blammo-1.0.1.1
+    hackage: Blammo-1.0.2.3
 - completed:
-    hackage: monad-logger-aeson-0.2.0.1@sha256:3ce33913e0f0f73cd272ce734abaae460bdbc48ad9c4d7192a912849060114b0,5156
+    hackage: envparse-0.5.0@sha256:ba9ad793ed2fcfce644b3ebb8eb6c2fef2e44924f75e1b324956340e664c416e,2849
+    pantry-tree:
+      size: 1181
+      sha256: 419a6843224ad32755064276f8e36500c71238db1b5807a2c9596fa4ed909a5a
+  original:
+    hackage: envparse-0.5.0
+- completed:
+    hackage: monad-logger-aeson-0.3.1.0@sha256:dbb1f816d00a820982094362551e20582de0a27c337d430fa7080dcacbe66f34,5193
     pantry-tree:
       size: 5103
-      sha256: f221efc9a29a358c63b571cc3fb8e86cdcab3ee6aa29c8d4395ca85adb8fe2af
+      sha256: 6e213a5fd0d3cd17fb4011b0c7181373bd836a86ae82fea5700b44cfc3d9eb01
   original:
-    hackage: monad-logger-aeson-0.2.0.1
+    hackage: monad-logger-aeson-0.3.1.0
 - completed:
-    hackage: context-0.2.0.0@sha256:6b643adb4a64fe521873d08df0497f71f88e18b9ecff4b68b4eef938e446cfc9,1886
+    hackage: context-0.2.0.1@sha256:b5a1390a5ad11b7edd0449c9ef96823f082bff4988bd09583e37a4e93e9aad10,1891
     pantry-tree:
       size: 952
-      sha256: b041ec197787d7cef078a2de33a74853179821e3083882f22b6d185e5764d75e
+      sha256: ebb043dd007864588c6b1676a0d30e521deab4353a3f19716f6f6f7d52b62817
   original:
-    hackage: context-0.2.0.0
+    hackage: context-0.2.0.1
 - completed:
     hackage: algebraic-graphs-0.5@sha256:6eeec5ed1687ff7aa916e7bf9f02f51aaabde6f314dc0b7b1a84156974d7da73,8071
     pantry-tree:

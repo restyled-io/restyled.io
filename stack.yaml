@@ -17,11 +17,12 @@ extra-deps:
   - github: LeapYear/monad-validate
     commit: 5b181b7c57d6e2c975c533b0a0072e9aeb15fb99
 
-  - Blammo-1.0.1.1
+  - Blammo-1.0.2.3
 
   # For Blammo
-  - monad-logger-aeson-0.2.0.1
-  - context-0.2.0.0
+  - envparse-0.5.0
+  - monad-logger-aeson-0.3.1.0
+  - context-0.2.0.1
 
   # For weeder
   - algebraic-graphs-0.5
