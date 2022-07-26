@@ -42,7 +42,7 @@ giftGitHubStudents creds = void $ runMaybeT $ do
             :# githubStudentDetails student verified
         handleGitHubStudent student verified
 
-githubStudentDetails :: GitHubStudent -> Bool -> [Series]
+githubStudentDetails :: KeyValue a => GitHubStudent -> Bool -> [a]
 githubStudentDetails GitHubStudent { id, login } verified =
     ["githubId" .= id, "githubLogin" .= login, "verified" .= verified]
 
