@@ -110,7 +110,7 @@ loadSettings =
         <*> var str "HOST" (def "*4")
         <*> var auto "PORT" (def 3000)
         <*> LoggingEnv.parser
-        <*> var str "COPYRIGHT" (def "Patrick Brisbin 2018-2019")
+        <*> var str "COPYRIGHT" (def "2018-2022 Patrick Brisbin")
         <*> var githubId "GITHUB_APP_ID" mempty
         <*> var nonempty "GITHUB_APP_KEY" mempty
         <*> (liftA2 OAuthKeys
