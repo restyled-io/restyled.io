@@ -115,10 +115,10 @@ renderKeyMap = mconcat . map (uncurry pair) . KeyMap.toList
             ]
         Array vs -> mconcat
             ["[", T.intercalate "," $ map plainValue $ V.toList vs, "]"]
-        String t -> t
+        String t -> pack $ show t -- encode escapes and quote
         Bool b -> if b then "true" else "false"
         Number n -> dropSuffix ".0" $ show n
         Null -> "null"
 
-    dropSuffix :: Text -> Text -> Text
-    dropSuffix suffix x = fromMaybe x $ T.stripSuffix suffix x
+dropSuffix :: Text -> Text -> Text
+dropSuffix suffix x = fromMaybe x $ T.stripSuffix suffix x
