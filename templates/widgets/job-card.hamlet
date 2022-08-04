@@ -26,6 +26,10 @@
         In progress since
         #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
 
+  <form .toggle-debug>
+    <input id="toggle-debug" name="toggle-debug" type="checkbox">
+    <label for="toggle-debug">Show debug messages
+
   ^{jobOutput $ jobE}
 
   <p>

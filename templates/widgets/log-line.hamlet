@@ -1,5 +1,5 @@
 $newline never
-<div .log-line>
+<div .log-line .log-line-level-#{level}>
   <span .level-#{level} .prefix>
     #{padTo 9 level}
   <span .level-#{level} .content>

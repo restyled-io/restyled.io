@@ -168,7 +168,6 @@ details {
   }
 }
 
-
 .log-line .key-map-key {
   color: #9bddff;
 }
@@ -202,19 +201,39 @@ details {
   color: #2a77ac; /* N.B. matches strapless .info */
 }
 
-/* .content unchanged */
-
 .log-line .level-warn.prefix {
   color: #efefaf;
 }
-
-/* .content unchanged */
 
 .log-line .level-error.prefix {
   color: #cc9393;
 }
 
-/* .content unchanged */
+/* Hide debug by default */
+.js .log-line-level-debug {
+  display: none;
+}
+
+form.toggle-debug {
+  display: none; /* overridden if .js */
+
+  margin: 0;
+  margin-bottom: 0px;
+  padding: 0;
+  padding-left: 0px;
+  padding-left: 15px;
+  font-size: 80%;
+  margin-bottom: -10px;
+}
+
+form.toggle-debug label {
+  display: inline;
+  padding-left: 5px;
+}
+
+.js form.toggle-debug {
+  display: block;
+}
 
 .logs-stream {
   display: none;

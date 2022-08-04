@@ -59,4 +59,12 @@ document.addEventListener("DOMContentLoaded", function () {
   if (stream) {
     new Output(stream, singleCard).connect();
   }
+
+  var toggleDebug = document.getElementById("toggle-debug");
+
+  toggleDebug.addEventListener('change', function (event) {
+    document.querySelectorAll(".log-line-level-debug").forEach(function (el) {
+      el.style.display = event.currentTarget.checked ? "block" : "none";
+    });
+  });
 });
