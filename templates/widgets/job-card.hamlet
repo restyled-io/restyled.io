@@ -39,3 +39,6 @@
       \ | 
       <a target=_blank href=@{repoP (jobOwner job) (jobRepo job) $ jobLogR jobId}>
         Download log
+      \ | 
+      <a target=_blank href=@{repoP (jobOwner job) (jobRepo job) $ jobPatchR jobId}>
+        Download patch

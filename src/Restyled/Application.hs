@@ -39,6 +39,7 @@ import Restyled.Handlers.Profile
 import Restyled.Handlers.Repos
 import Restyled.Handlers.Repos.Jobs
 import Restyled.Handlers.Repos.Jobs.LogLines
+import Restyled.Handlers.Repos.Jobs.Patch
 import Restyled.Handlers.Repos.Pulls
 import Restyled.Handlers.Repos.Pulls.Jobs
 import Restyled.Handlers.Revision

@@ -39,6 +39,7 @@
     /#JobId RepoJobP:
       / RepoJobR GET
       /log RepoJobLogLinesR GET
+      /patch RepoJobPatchR GET
 
   /marketplace RepoMarketplaceP:
     /claim RepoMarketplaceClaimR POST DELETE

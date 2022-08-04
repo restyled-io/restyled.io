@@ -4,6 +4,8 @@ module Restyled.Handlers.Repos.Jobs.LogLines
 
 import Restyled.Prelude
 
+import Control.Monad.Logger.Aeson (LoggedMessage(..))
+import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
 import Restyled.DB
@@ -27,13 +29,15 @@ getRepoJobLogLinesR _owner _name jobId = do
 
     webSockets keepAlivePeriod keepAliveMsg $ \send -> do
         conn <- ask
-        lift $ followJobOutput jobId $ \jobLogLines -> do
-            htmls <- mconcat <$> traverse renderJobLogLine jobLogLines
+        lift $ followJobOutput job $ \jobLogLines -> do
+            htmls <- mconcat <$> traverse
+                renderJobLogLine
+                (excludePatchLines jobLogLines)
             runReaderT (void $ send htmls) conn
 
     -- If not accessed via WebSockets, respond with plain text Job log
     jobLogLines <- fetchJobOutput job
-    pure $ T.unlines $ map jobLogLineContent jobLogLines
+    pure $ T.unlines $ map jobLogLineContent $ excludePatchLines jobLogLines
 
 renderJobLogLine :: JobLogLine -> Handler LT.Text
 renderJobLogLine ln = do
@@ -46,3 +50,12 @@ renderKeepAliveMessage = do
     renderJobLogLine $ jobLogLine
         now
         "No output in the last 30 seconds. Continuing to wait..."
+
+excludePatchLines :: [JobLogLine] -> [JobLogLine]
+excludePatchLines = filter (not . isPatchLine)
+
+isPatchLine :: JobLogLine -> Bool
+isPatchLine ll = fromMaybe False $ do
+    Bool patch <- KeyMap.lookup "patch" loggedMessageThreadContext
+    pure patch
+    where LoggedMessage {..} = jobLogLineContentJSON ll

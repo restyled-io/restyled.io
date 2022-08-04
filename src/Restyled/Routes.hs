@@ -13,6 +13,7 @@ module Restyled.Routes
     , jobsR
     , jobR
     , jobLogR
+    , jobPatchR
 
     -- * Repos' Pulls' Jobs
     , pullJobsR
@@ -49,6 +50,9 @@ jobR jobId = RepoJobsP $ RepoJobP jobId RepoJobR
 
 jobLogR :: JobId -> RepoP
 jobLogR jobId = RepoJobsP $ RepoJobP jobId RepoJobLogLinesR
+
+jobPatchR :: JobId -> RepoP
+jobPatchR jobId = RepoJobsP $ RepoJobP jobId RepoJobPatchR
 
 pullJobsR :: PullRequestNum -> RepoP
 pullJobsR num = pullP num $ RepoPullJobsP RepoPullJobsR
