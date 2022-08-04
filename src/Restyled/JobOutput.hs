@@ -20,6 +20,7 @@ import qualified Restyled.AWS as AWS
 import Restyled.DB
 import Restyled.Models
 import Restyled.Settings
+import Restyled.Time
 import Restyled.Tracing
 
 -- | Return all of the Job's log that we have now and stop
@@ -30,10 +31,16 @@ fetchJobOutput
        , HasSettings env
        , HasAWS env
        )
-    => JobId
+    => Entity Job
     -> m [JobLogLine]
-fetchJobOutput jobId =
-    runConduit $ streamJobLogLines jobId Nothing .| concatC .| sinkList
+fetchJobOutput (Entity jobId Job {..}) = do
+    expired <- (jobUpdatedAt <=) <$> getLogRetentionStart
+    if expired
+        then pure []
+        else runConduit $ streamJobLogLines jobId Nothing .| concatC .| sinkList
+
+getLogRetentionStart :: MonadIO m => m UTCTime
+getLogRetentionStart = subtractTime (Days $ 30 + 5) <$> getCurrentTime
 
 -- | Stream a Job's log so long as it is in progress
 followJobOutput
@@ -46,11 +53,13 @@ followJobOutput
        , HasTransactionId env
        , HasAWS env
        )
-    => JobId
+    => Entity Job
     -> ([JobLogLine] -> m ())
     -- ^ Action to take with each batch of log-lines
     -> m ()
-followJobOutput jobId f = loop Nothing
+followJobOutput (Entity jobId job) f = do
+    expired <- (jobUpdatedAt job <=) <$> getLogRetentionStart
+    if expired then pure () else loop Nothing
   where
     loop mSince = do
         mLastCreatedAt <-
