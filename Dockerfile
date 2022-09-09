@@ -16,10 +16,6 @@ RUN \
 RUN mkdir -p /src
 WORKDIR /src
 
-# Setup annoying tracing-newrelic
-COPY bin/setup-tracing-newrelic /usr/local/bin/setup-tracing-newrelic
-RUN cd /src && setup-tracing-newrelic
-
 # Dependencies
 COPY stack.yaml package.yaml /src/
 RUN stack install --dependencies-only

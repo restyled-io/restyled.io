@@ -57,7 +57,6 @@ library:
     - blaze-html
     - blaze-markup
     - bytestring
-    - case-insensitive
     - cassava
     - composition-extra
     - conduit
@@ -98,7 +97,6 @@ library:
     - postgresql-simple
     - quickcheck-instances
     - random
-    - resource-pool
     - resourcet
     - retry
     - relude
@@ -109,11 +107,9 @@ library:
     - template-haskell
     - text
     - time
-    - tracing-newrelic
     - transformers
     - unliftio
     - unliftio-core
-    - unordered-containers
     - uri-encode
     - uuid
     - vector

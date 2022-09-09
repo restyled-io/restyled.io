@@ -13,17 +13,10 @@ import Restyled.Cache
 import Restyled.DB
 import Restyled.Models
 import Restyled.Settings
-import Restyled.Tracing
 import Restyled.Yesod
 
 authorizeAdmin
-    :: ( MonadUnliftIO m
-       , MonadHandler m
-       , MonadReader env m
-       , HasSqlPool env
-       , HasTracingApp env
-       , HasTransactionId env
-       )
+    :: (MonadUnliftIO m, MonadHandler m, MonadReader env m, HasSqlPool env)
     => AppSettings
     -> Maybe UserId
     -> m AuthResult
@@ -39,8 +32,6 @@ authorizeRepo
        , MonadHandler m
        , MonadReader env m
        , HasSqlPool env
-       , HasTracingApp env
-       , HasTransactionId env
        )
     => AppSettings
     -> OwnerName
@@ -63,14 +54,7 @@ authorizeRepo settings owner name mUserId = do
 
 -- | Authorize if the @'User'@ is a Collaborator according to GitHub
 authorizePrivateRepo
-    :: ( HasCallStack
-       , MonadUnliftIO m
-       , MonadHandler m
-       , MonadCache m
-       , MonadReader env m
-       , HasTracingApp env
-       , HasTransactionId env
-       )
+    :: (HasCallStack, MonadUnliftIO m, MonadHandler m, MonadCache m)
     => AppSettings
     -> Repo
     -> User
@@ -80,20 +64,16 @@ authorizePrivateRepo settings@AppSettings {..} repo@Repo {..} user@User {..} =
         result <- runExceptT $ do
             username <- userGithubUsername ?? "User has no GitHub Username"
             caching (authRepoCacheKey repo username) $ withExceptT show $ do
-                auth <-
-                    ExceptT
-                    $ traceAppSegment "GitHub /installations/token"
-                    $ liftIO
-                    $ githubAuthInstallation
-                          appGitHubAppId
-                          appGitHubAppKey
-                          repoInstallationId
+                auth <- ExceptT $ liftIO $ githubAuthInstallation
+                    appGitHubAppId
+                    appGitHubAppKey
+                    repoInstallationId
 
-                permissions <-
-                    ExceptT
-                    $ traceAppSegment "GithHub /collaborator/permissions"
-                    $ liftIO
-                    $ collaboratorPermissions auth repoOwner repoName username
+                permissions <- ExceptT $ liftIO $ collaboratorPermissions
+                    auth
+                    repoOwner
+                    repoName
+                    username
 
                 pure $ collaboratorCanRead permissions
 

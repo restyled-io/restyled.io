@@ -94,11 +94,6 @@ library
       Restyled.SyncMarketplace
       Restyled.Time
       Restyled.TimeRange
-      Restyled.Tracing
-      Restyled.Tracing.App
-      Restyled.Tracing.Config
-      Restyled.Tracing.Middleware
-      Restyled.Tracing.TransactionId
       Restyled.UsCents
       Restyled.WebSockets
       Restyled.Widgets.ContainsURLs
@@ -152,7 +147,6 @@ library
     , blaze-html
     , blaze-markup
     , bytestring
-    , case-insensitive
     , cassava
     , composition-extra
     , conduit
@@ -194,7 +188,6 @@ library
     , quickcheck-instances
     , random
     , relude
-    , resource-pool
     , resourcet
     , retry
     , safe-exceptions
@@ -204,11 +197,9 @@ library
     , template-haskell
     , text
     , time
-    , tracing-newrelic
     , transformers
     , unliftio
     , unliftio-core
-    , unordered-containers
     , uri-encode
     , uuid
     , vector
