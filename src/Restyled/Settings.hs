@@ -27,7 +27,6 @@ import Restyled.DB
 import Restyled.Env
 import Restyled.Queues
 import Restyled.RestylerImage
-import Restyled.Tracing.Config
 import Restyled.Yesod
 import Yesod.Auth.Dummy
 import Yesod.Core.Types (HandlerData(..))
@@ -79,7 +78,6 @@ data AppSettings = AppSettings
     , appRestylerLogGroup :: Text
     , appRestylerLogStreamPrefix :: Text
     , appRestylerQueues :: Queues
-    , appTracingConfig :: TracingConfig
     }
 
 class HasSettings env where
@@ -141,14 +139,6 @@ loadSettings =
         <*> var nonempty "RESTYLER_LOG_GROUP" (def "restyled/dev/restyler")
         <*> var nonempty "RESTYLER_LOG_STREAM_PREFIX" (def "jobs/")
         <*> var (eitherReader readQueues) "RESTYLER_QUEUES" (def defaultQueues)
-        <*> (TracingConfig
-            <$> (DaemonSocket <$> optional (var nonempty "NEW_RELIC_DAEMON_SOCKET" mempty))
-            <*> (AppName <$> var nonempty "NEW_RELIC_APP_NAME" (def "restyled.io"))
-            <*> (LicenseKey <$$> optional (var nonempty "NEW_RELIC_LICENSE_KEY" mempty))
-            <*> (TimeoutMs <$> var auto "NEW_RELIC_TIMEOUT_MS" (def 10000))
-            <*> var nonempty "NEW_RELIC_LOG" (def "stdout")
-            <*> var (eitherReader readTracingLogLevel) "NEW_RELIC_LOG_LEVEL" (def defaultTracingLogLevel)
-            )
 
 -- brittany-disable-next-binding
 

@@ -37,11 +37,6 @@ services:
       timeout: 5s
       retries: 5
 
-  newrelic:
-    image: newrelic/c-daemon
-    ports:
-      - 31339:31339
-
   agent:
     image: restyled/agent:main
     depends_on:

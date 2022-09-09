@@ -21,7 +21,6 @@ import Restyled.DB
 import Restyled.Models
 import Restyled.Settings
 import Restyled.Time
-import Restyled.Tracing
 
 -- | Return all of the Job's log that we have now and stop
 fetchJobOutput
@@ -49,8 +48,6 @@ followJobOutput
        , MonadReader env m
        , HasSettings env
        , HasSqlPool env
-       , HasTracingApp env
-       , HasTransactionId env
        , HasAWS env
        )
     => Entity Job

@@ -4,8 +4,6 @@ module Restyled.Handlers.Repos.Jobs.Patch
 
 import Restyled.Prelude
 
-import Control.Monad.Logger.Aeson (LoggedMessage(..))
-import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.Text as T
 import Restyled.DB
 import Restyled.Foundation
@@ -17,7 +15,7 @@ getRepoJobPatchR :: OwnerName -> RepoName -> JobId -> Handler Text
 getRepoJobPatchR _owner _name jobId = do
     job <- runDB $ getEntity404 jobId
     jobLogLines <- fetchJobOutput job
-    let patchLines = mapMaybe toPatchLine jobLogLines
+    let patchLines = mapMaybe jobLogLineContentPatch jobLogLines
 
     if null patchLines
         then sendResponseStatus status404 emptyPatch
@@ -26,9 +24,3 @@ getRepoJobPatchR _owner _name jobId = do
     emptyPatch :: Text
     emptyPatch
         = "Patch not found. There may have been no style differences, or this Job's log may have expired."
-
-toPatchLine :: JobLogLine -> Maybe Text
-toPatchLine ll = do
-    Bool patch <- KeyMap.lookup "patch" loggedMessageThreadContext
-    loggedMessageText <$ guard patch
-    where LoggedMessage {..} = jobLogLineContentJSON ll

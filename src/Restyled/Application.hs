@@ -47,7 +47,6 @@ import Restyled.Handlers.Robots
 import Restyled.Handlers.Thanks
 import Restyled.Handlers.Webhooks
 import Restyled.Settings
-import Restyled.Tracing.Middleware
 import Restyled.Yesod hiding (LogLevel(..))
 
 mkYesodDispatch "App" resourcesApp
@@ -59,14 +58,11 @@ runWaiApp app = do
 
 waiMiddleware :: App -> Middleware
 waiMiddleware app =
-    transactionMiddleware app
-        . traceMiddlewareSegment app "Force SSL" forceSSL
-        . traceMiddlewareSegment app "Method override" methodOverridePost
-        . traceMiddlewareSegment app "Logger" (requestLogger app)
-        . traceMiddlewareSegment app "Default" defaultMiddlewaresNoLogging
-        . routedMiddleware
-              (not . isWebsocketsLogs)
-              (traceMiddlewareSegment app "Timeout" $ timeout timeoutSeconds)
+    forceSSL
+        . methodOverridePost
+        . requestLogger app
+        . defaultMiddlewaresNoLogging
+        . routedMiddleware (not . isWebsocketsLogs) (timeout timeoutSeconds)
     where timeoutSeconds = app ^. settingsL . to appRequestTimeout
 
 isWebsocketsLogs :: [Text] -> Bool

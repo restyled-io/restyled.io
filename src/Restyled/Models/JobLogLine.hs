@@ -4,11 +4,14 @@ module Restyled.Models.JobLogLine
     , jobLogLineCreatedAt
     , jobLogLineContent
     , jobLogLineContentJSON
+    , jobLogLineContentPatch
+    , jobLogLineIsPatch
     ) where
 
 import Restyled.Prelude
 
 import Control.Monad.Logger.Aeson (LoggedMessage(..))
+import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import Restyled.Scrub
@@ -37,6 +40,21 @@ jobLogLineContentJSON ll =
         $ BSL.fromStrict
         $ encodeUtf8
         $ jobLogLineContent ll
+
+jobLogLineContentPatch :: JobLogLine -> Maybe Text
+jobLogLineContentPatch = loggedMessageTextPatch . jobLogLineContentJSON
+
+jobLogLineIsPatch :: JobLogLine -> Bool
+jobLogLineIsPatch = loggedMessageIsPatch . jobLogLineContentJSON
+
+loggedMessageTextPatch :: LoggedMessage -> Maybe Text
+loggedMessageTextPatch lm =
+    loggedMessageText lm <$ guard (loggedMessageIsPatch lm)
+
+loggedMessageIsPatch :: LoggedMessage -> Bool
+loggedMessageIsPatch LoggedMessage {..} = fromMaybe False $ do
+    Bool patch <- KeyMap.lookup "patch" loggedMessageThreadContext
+    pure patch
 
 fakeLoggedMessage :: JobLogLine -> LoggedMessage
 fakeLoggedMessage ll = LoggedMessage

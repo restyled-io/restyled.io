@@ -16,7 +16,6 @@ import Restyled.DB
 import Restyled.Env
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
-import Restyled.Tracing
 import Restyled.UsCents
 
 data AppSettings = AppSettings
@@ -53,12 +52,6 @@ data App = App
 instance HasSettings App where
     settingsL = lens appSettings $ \x y -> x { appSettings = y }
 
-instance HasTracingApp App where
-    tracingAppL = lens (const TracingDisabled) const
-
-instance HasTransactionId App where
-    transactionIdL = lens (const Nothing) const
-
 instance HasSqlPool App where
     sqlPoolL = lens appSqlPool $ \x y -> x { appSqlPool = y }
 
@@ -86,8 +79,6 @@ syncMarketplace
        , MonadLogger m
        , HasSettings env
        , HasSqlPool env
-       , HasTracingApp env
-       , HasTransactionId env
        )
     => m ()
 syncMarketplace = do
@@ -113,8 +104,6 @@ synchronizePlanAccounts
        , MonadLogger m
        , HasSettings env
        , HasSqlPool env
-       , HasTracingApp env
-       , HasTransactionId env
        )
     => GH.MarketplacePlan
     -> MarketplacePlanId
@@ -138,13 +127,7 @@ synchronizePlanAccounts plan planId = do
     traverse (runDB . synchronizeAccount planId) accounts
 
 synchronizePlanAccountsError
-    :: ( MonadUnliftIO m
-       , MonadReader env m
-       , MonadLogger m
-       , HasSqlPool env
-       , HasTracingApp env
-       , HasTransactionId env
-       )
+    :: (MonadUnliftIO m, MonadReader env m, MonadLogger m, HasSqlPool env)
     => GH.MarketplacePlan
     -> MarketplacePlanId
     -> SomeException

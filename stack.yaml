@@ -1,9 +1,5 @@
 resolver: lts-19.10
 extra-deps:
-  # The way it builds the newrelic shared library requires a local checkout for
-  # some reason. Annoying
-  - ../tracing-newrelic
-
   - github: brendanhay/amazonka
     commit: f73a957d05f64863e867cf39d0db260718f0fadd # main, as of SSO support
     subdirs:
