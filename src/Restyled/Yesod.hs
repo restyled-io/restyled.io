@@ -27,7 +27,6 @@ import Yesod.Core as X hiding
     (logDebug, logError, logInfo, logOther, logWarn, requireJsonBody)
 import Yesod.Core.Types.Lens as X
 import Yesod.Form as X
-import Yesod.Paginator as X
 import Yesod.Persist as X (get404, getBy404)
 
 import Restyled.Prelude

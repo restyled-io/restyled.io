@@ -10,16 +10,18 @@ import Restyled.Prelude
 import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models
+import Restyled.Paginate
 import Restyled.Settings
 import Restyled.Widgets.Job
 import Restyled.Yesod
 
 getRepoJobsR :: OwnerName -> RepoName -> Handler Html
 getRepoJobsR owner name = do
-    pages <- runDB $ selectPaginated
-        15
+    page <- runDB $ paginateBy
+        JobCreatedAt
+        Descending
+        2
         [JobOwner ==. owner, JobRepo ==. name]
-        [Desc JobCreatedAt]
 
     defaultLayout $ do
         setTitle $ toHtml $ repoPath owner name <> " jobs"

@@ -122,7 +122,7 @@ library:
     - yesod-auth-oauth2
     - yesod-core
     - yesod-form
-    - yesod-paginator
+    - yesod-page-cursor
     - yesod-persistent
     - yesod-static
     - yesod-websockets

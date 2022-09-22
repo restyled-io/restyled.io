@@ -1,9 +1,2 @@
 <section>
-  $if null $ pageItems $ pagesCurrent pages
-    <p>Hmm, no Jobs yet...
-  $else
-    $forall job <- pageItems $ pagesCurrent pages
-      ^{jobListItem job}
-
-    <aside>
-      ^{simple 3 pages}
+  ^{renderPaginated jobListItem page}

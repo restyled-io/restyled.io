@@ -78,6 +78,8 @@ library
       Restyled.Models.Repo
       Restyled.Models.User
       Restyled.Offers
+      Restyled.Paginate
+      Restyled.Paginate.Direction
       Restyled.Percentage
       Restyled.Prelude
       Restyled.Prelude.Esqueleto
@@ -212,7 +214,7 @@ library
     , yesod-auth-oauth2
     , yesod-core
     , yesod-form
-    , yesod-paginator
+    , yesod-page-cursor
     , yesod-persistent
     , yesod-static
     , yesod-websockets
