@@ -1,6 +1,5 @@
 module Restyled.Admin.RepoSearch
     ( SearchResults(..)
-    , noResults
     , searchRepos
     ) where
 
@@ -11,11 +10,11 @@ import Restyled.Api.Repo (ApiRepo, apiRepo)
 import Restyled.DB
 import Restyled.Foundation
 import Restyled.Models
+import Restyled.Paginate
 import Restyled.Settings
 
-data SearchResults = SearchResults
-    { srRepos :: [ApiRepo]
-    , srTotal :: Int
+newtype SearchResults = SearchResults
+    { srPage :: Page ApiRepo
     }
     deriving stock Generic
 
@@ -23,28 +22,17 @@ instance ToJSON SearchResults where
     toJSON = genericToJSON $ aesonPrefix camelCase
     toEncoding = genericToEncoding $ aesonPrefix camelCase
 
--- | Empty @'SearchResults'@
-noResults :: SearchResults
-noResults = SearchResults [] 0
-
 -- | Search for @'Repo'@s by Owner or Name
 --
 -- This is just @owner|name ILIKE %{query}%@
 --
 searchRepos :: Int -> Text -> Handler SearchResults
 searchRepos limit q = do
+    page <- runDB $ paginateBy persistIdField Ascending limit $ searchFilters q
     settings <- view settingsL
-
-    runDB $ do
-        repos <- selectList (searchFilters q) [LimitTo limit]
-        total <- if length repos == limit
-            then count $ searchFilters q
-            else pure $ length repos
-
-        pure SearchResults
-            { srRepos = map (\repo -> apiRepo repo settings Nothing) repos
-            , srTotal = total
-            }
+    pure SearchResults
+        { srPage = (\repo -> apiRepo repo settings Nothing) <$> page
+        }
 
 searchFilters :: Text -> [Filter Repo]
 searchFilters q = case T.breakOn "/" q of

@@ -1,24 +1,40 @@
 $(function() {
   function handleSearch(q) {
     $.getJSON(`/admin/repos/search?q=${q}`, function(data) {
-      const results = $("ul#results");
+      const page = data?.page;
 
-      results.empty();
+      if (page !== null && page !== undefined) {
+        const results = $("ul#results");
 
-      _.each(data.repos, function(repo) {
-        const result = $(`
-          <li>
-            <a href="/gh/${repo.owner}/repos/${repo.name}/jobs">
-              ${repo.owner} / ${repo.name}
-            </a>
-          </li>
-        `);
+        results.empty();
 
-        results.append(result);
-      });
+        _.each(page.data, function(repo) {
+          const result = $(`
+            <li>
+              <a href="/gh/${repo.owner}/repos/${repo.name}/jobs">
+                ${repo.owner} / ${repo.name}
+              </a>
+            </li>
+          `);
 
-      $("#count").html(data.repos.length);
-      $("#total").html(data.total);
+          results.append(result);
+        });
+
+        $(".pagination .prev a").attr("href", page.previous)
+        $(".pagination .next a").attr("href", page.next);
+
+        if (page.previous === null) {
+          $(".pagination .prev").addClass("disabled");
+        } else {
+          $(".pagination .prev").removeClass("disabled");
+        }
+
+        if (page.next === null) {
+          $(".pagination .next").addClass("disabled");
+        } else {
+          $(".pagination .next").removeClass("disabled");
+        }
+      }
     });
   }
 

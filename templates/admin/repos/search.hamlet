@@ -8,16 +8,20 @@
       <button type=submit>
         <i .fas .fa-search>
 <section>
-  <ul #results>
-    $forall repo <- srRepos results
-      <li>
-        <a href=@{repoP (ApiRepo.owner repo) (ApiRepo.name repo) jobsR}>
-          #{ApiRepo.owner repo} / #{ApiRepo.name repo}
+  $maybe results <- mResults
+    $with page <- srPage results
+      <ul #results>
+        $forall repo <- pageData page
+          <li>
+            <a href=@{repoP (ApiRepo.owner repo) (ApiRepo.name repo) jobsR}>
+              #{ApiRepo.owner repo} / #{ApiRepo.name repo}
 
-  <p>
-    <i>
-      Showing
-      <span #count>#{length $ srRepos results}
-      /
-      <span #total>#{srTotal results}
-      results
+      ^{renderPagination page}
+  $nothing
+    <ul #results>
+    <aside>
+      <ul .pagination>
+        <li .prev .disabled>
+            <a>«
+        <li .next .disabled>
+            <a>»

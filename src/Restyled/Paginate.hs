@@ -3,7 +3,9 @@
 module Restyled.Paginate
     ( Direction(..)
     , paginateBy
+    , Page(..)
     , renderPaginated
+    , renderPagination
     ) where
 
 import Restyled.Prelude hiding (sort)
@@ -60,20 +62,25 @@ renderPaginated renderOne page = [whamlet|
         $forall item <- pageData page
             ^{renderOne item}
 
-        <aside>
-            <ul .pagination>
-                $maybe p <- pagePrevious page
-                    <li .prev>
-                        <a href=#{renderedRouteText p}>«
-                $nothing
-                    <li .prev .disabled>
-                        <a>«
-                $maybe n <- pageNext page
-                    <li .next>
-                        <a href=#{renderedRouteText n}>»
-                $nothing
-                    <li .next .disabled>
-                        <a>»
+        ^{renderPagination page}
+|]
+
+renderPagination :: Page a -> Widget
+renderPagination page = [whamlet|
+<aside>
+    <ul .pagination>
+        $maybe p <- pagePrevious page
+            <li .prev>
+                <a href=#{renderedRouteText p}>«
+        $nothing
+            <li .prev .disabled>
+                <a>«
+        $maybe n <- pageNext page
+            <li .next>
+                <a href=#{renderedRouteText n}>»
+        $nothing
+            <li .next .disabled>
+                <a>»
 |]
 
 renderedRouteText :: RenderedRoute -> Text
