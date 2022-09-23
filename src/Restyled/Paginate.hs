@@ -2,7 +2,6 @@
 
 module Restyled.Paginate
     ( Direction(..)
-    , paginate
     , paginateBy
     , renderPaginated
     ) where
@@ -16,21 +15,15 @@ import Restyled.Yesod
 import Yesod.Page
 import Yesod.Page.RenderedRoute
 
--- | Paginate by an Entity's @id@, ascending
-paginate
-    :: ( MonadHandler m
-       , PersistEntity entity
-       , PersistEntityBackend entity ~ SqlBackend
-       , Yesod (HandlerSite m)
-       )
-    => Int
-    -> [Filter entity]
-    -> SqlPersistT m (Page (Entity entity))
-paginate = paginateBy persistIdField Ascending
-
 -- | Paginate on an arbitrary field in an arbitrary 'Direction'
 --
 -- This field must be indexed for the resulting queries to be performant.
+--
+-- Exmaple:
+--
+-- @
+-- 'paginateBy' 'persistIdField' 'Ascending'
+-- @
 --
 paginateBy
     :: ( MonadHandler m
