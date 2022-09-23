@@ -48,14 +48,8 @@ directionOrderBy = \case
         Page.Last -> Asc
 
 directionSort :: Direction -> Position position -> [a] -> [a]
-directionSort = \case
-    Ascending -> \case
-        Page.First -> id
-        Page.Previous _ -> reverse
-        Page.Next _ -> id
-        Page.Last -> reverse
-    Descending -> \case
-        Page.First -> reverse
-        Page.Previous _ -> id
-        Page.Next _ -> reverse
-        Page.Last -> id
+directionSort _ = \case
+    Page.First -> id
+    Page.Previous _ -> reverse
+    Page.Next _ -> id
+    Page.Last -> reverse
