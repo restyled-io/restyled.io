@@ -20,7 +20,7 @@ getRepoJobsR owner name = do
     page <- runDB $ paginateBy
         JobCreatedAt
         Descending
-        2
+        15
         [JobOwner ==. owner, JobRepo ==. name]
 
     defaultLayout $ do
