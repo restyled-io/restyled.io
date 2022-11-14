@@ -167,11 +167,10 @@ logPlanChange plan newCount oldCount = case newCount `compare` oldCount of
 synchronizePlan
     :: MonadIO m => GH.MarketplacePlan -> SqlPersistT m MarketplacePlanId
 synchronizePlan plan = entityKey <$> upsert
-    -- Initialize unknown plans as non-private, we'll manually change that after
-    -- it gets created on the first sync
     MarketplacePlan
         { marketplacePlanGithubId = Just $ untagId $ GH.marketplacePlanId plan
-        , marketplacePlanPrivateRepoAllowance = PrivateRepoAllowanceNone
+        , marketplacePlanPrivateRepoAllowance = inferPrivateRepoAllowanceByName
+            $ GH.marketplacePlanName plan
         , marketplacePlanName = GH.marketplacePlanName plan
         , marketplacePlanDescription = GH.marketplacePlanDescription plan
         , marketplacePlanMonthlyRevenue = fromCents
@@ -184,6 +183,12 @@ synchronizePlan plan = entityKey <$> upsert
         =. fromCents (GH.marketplacePlanMonthlyPriceInCents plan)
     , MarketplacePlanRetired =. GH.marketplacePlanState plan == "retired"
     ]
+
+inferPrivateRepoAllowanceByName :: Text -> PrivateRepoAllowance
+inferPrivateRepoAllowanceByName = \case
+    "Unlimited" -> PrivateRepoAllowanceUnlimited
+    "Solo" -> PrivateRepoAllowanceLimited 1
+    _ -> PrivateRepoAllowanceNone
 
 synchronizeAccount
     :: MonadIO m
