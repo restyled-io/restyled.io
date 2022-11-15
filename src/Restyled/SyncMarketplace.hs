@@ -186,7 +186,7 @@ synchronizePlan plan = entityKey <$> upsert
 
 inferPrivateRepoAllowanceByName :: Text -> PrivateRepoAllowance
 inferPrivateRepoAllowanceByName = \case
-    "Unlimited" -> PrivateRepoAllowanceUnlimited
+    "Unlimited" -> PrivateRepoAllowanceNone
     "Solo" -> PrivateRepoAllowanceLimited 1
     _ -> PrivateRepoAllowanceNone
 
