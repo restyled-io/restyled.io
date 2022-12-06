@@ -9,13 +9,13 @@
     <details>
       <summary>#{pluralize "active account" "active accounts" $ length owners}
       <ul>
-        $forall (owner, mAccountId, _expired) <- owners
+        $forall owner <- owners
           <li>
-            $maybe accountId <- mAccountId
+            $maybe accountId <- baoAccountId owner
               <a href=@{adminMarketplaceAccountR accountId}>
-                #{owner}
+                #{baoName owner}
             $nothing
-              #{owner}
+              #{baoName owner}
 
   $if null expiredOwners
     <p>
@@ -24,10 +24,10 @@
     <details>
       <summary>#{pluralize "expired account" "expired accounts" $ length expiredOwners}
       <ul>
-        $forall (owner, mAccountId, _expired) <- expiredOwners
+        $forall owner <- expiredOwners
           <li>
-            $maybe accountId <- mAccountId
+            $maybe accountId <- baoAccountId owner
               <a href=@{adminMarketplaceAccountR accountId}>
-                #{owner}
+                #{baoName owner}
             $nothing
-              #{owner}
+              #{baoName owner}

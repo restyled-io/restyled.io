@@ -31,19 +31,30 @@ mpwaOwnerNames = map (accountOwner . entityVal) . mpwaAccounts
     accountOwner :: MarketplaceAccount -> OwnerName
     accountOwner = nameToName . marketplaceAccountGithubLogin
 
+data BriefAccountOwner = BriefAccountOwner
+    { baoName :: OwnerName
+    , baoAccountId :: Maybe MarketplaceAccountId
+    , baoExpired :: Bool
+    }
+
+briefAccountOwner :: UTCTime -> Entity MarketplaceAccount -> BriefAccountOwner
+briefAccountOwner now (Entity accountId MarketplaceAccount {..}) =
+    BriefAccountOwner
+        { baoName = nameToName marketplaceAccountGithubLogin
+        , baoAccountId = Just accountId
+        , baoExpired = maybe False (<= now) marketplaceAccountExpiresAt
+        }
+
+nonAccountOwner :: OwnerName -> BriefAccountOwner
+nonAccountOwner name = BriefAccountOwner
+    { baoName = name
+    , baoAccountId = Nothing
+    , baoExpired = False
+    }
+
 mpwaOwnerAccounts
-    :: UTCTime
-    -> MarketplacePlanWithAccounts
-    -> [(OwnerName, Maybe MarketplaceAccountId, Bool)]
-mpwaOwnerAccounts now =
-    map
-            (\(Entity accountId MarketplaceAccount {..}) ->
-                ( nameToName marketplaceAccountGithubLogin
-                , Just accountId
-                , maybe False (<= now) marketplaceAccountExpiresAt
-                )
-            )
-        . mpwaAccounts
+    :: UTCTime -> MarketplacePlanWithAccounts -> [BriefAccountOwner]
+mpwaOwnerAccounts now = map (briefAccountOwner now) . mpwaAccounts
 
 mpwaMonthlyRevenue :: MarketplacePlanWithAccounts -> UsCents
 mpwaMonthlyRevenue MarketplacePlanWithAccounts {..} =
@@ -67,7 +78,7 @@ getAdminMarketplaceR = do
 
         let planOwners = concatMap mpwaOwnerNames plans
         (plans, )
-            . map (, Nothing, False)
+            . map nonAccountOwner
             <$> fetchUniqueRepoOwnersExcept planOwners
 
     adminLayout $ do
@@ -85,8 +96,8 @@ fetchUniqueRepoOwnersExcept exceptOwners = do
 -- brittany-disable-next-binding
 
 accountsList
-    :: Maybe Text -> [(OwnerName, Maybe MarketplaceAccountId, Bool)] -> Widget
+    :: Maybe Text -> [BriefAccountOwner] -> Widget
 accountsList mDescription allOwners = do
     $(widgetFile "admin/marketplace/accounts-list")
   where
-    (expiredOwners, owners) = partition (\(_, _, x) -> x) allOwners
+    (expiredOwners, owners) = partition baoExpired allOwners
