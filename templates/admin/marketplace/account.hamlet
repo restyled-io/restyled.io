@@ -3,12 +3,24 @@
     #{marketplaceAccountGithubLogin}
 
 <section>
+
   <h2 .uncenter>Plan
   $maybe plan <- mPlan
     <p>
       <strong>#{marketplacePlanName plan}</strong>
       $if marketplacePlanRetired plan
          (retired)
+
+    $maybe expiresAt <- marketplaceAccountExpiresAt
+      $if expiresAt <= now
+        <p>
+          Account expired 
+          <strong>#{format (diff True) $ diffUTCTime now expiresAt}
+      $else
+        <p>
+          Account expires 
+          <strong>#{format (diff True) $ diffUTCTime expiresAt now}
+
     <p>
       $case accountRevenue now account plan
         $of RealRevenue revenue
