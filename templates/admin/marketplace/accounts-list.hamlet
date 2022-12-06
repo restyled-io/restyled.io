@@ -4,12 +4,27 @@
       <em>#{description}
   $if null owners
     <p>
-      <em>No accounts
+      <em>No active accounts
   $else
     <details>
-      <summary>#{pluralize "account" "accounts" $ length owners}
+      <summary>#{pluralize "active account" "active accounts" $ length owners}
       <ul>
-        $forall (owner, mAccountId) <- owners
+        $forall (owner, mAccountId, _expired) <- owners
+          <li>
+            $maybe accountId <- mAccountId
+              <a href=@{adminMarketplaceAccountR accountId}>
+                #{owner}
+            $nothing
+              #{owner}
+
+  $if null expiredOwners
+    <p>
+      <em>No expired accounts
+  $else
+    <details>
+      <summary>#{pluralize "expired account" "expired accounts" $ length expiredOwners}
+      <ul>
+        $forall (owner, mAccountId, _expired) <- expiredOwners
           <li>
             $maybe accountId <- mAccountId
               <a href=@{adminMarketplaceAccountR accountId}>

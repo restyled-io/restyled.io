@@ -32,12 +32,18 @@ mpwaOwnerNames = map (accountOwner . entityVal) . mpwaAccounts
     accountOwner = nameToName . marketplaceAccountGithubLogin
 
 mpwaOwnerAccounts
-    :: MarketplacePlanWithAccounts -> [(OwnerName, Maybe MarketplaceAccountId)]
-mpwaOwnerAccounts =
-    map (accountOwner . entityVal &&& Just . entityKey) . mpwaAccounts
-  where
-    accountOwner :: MarketplaceAccount -> OwnerName
-    accountOwner = nameToName . marketplaceAccountGithubLogin
+    :: UTCTime
+    -> MarketplacePlanWithAccounts
+    -> [(OwnerName, Maybe MarketplaceAccountId, Bool)]
+mpwaOwnerAccounts now =
+    map
+            (\(Entity accountId MarketplaceAccount {..}) ->
+                ( nameToName marketplaceAccountGithubLogin
+                , Just accountId
+                , maybe False (<= now) marketplaceAccountExpiresAt
+                )
+            )
+        . mpwaAccounts
 
 mpwaMonthlyRevenue :: MarketplacePlanWithAccounts -> UsCents
 mpwaMonthlyRevenue MarketplacePlanWithAccounts {..} =
@@ -46,6 +52,7 @@ mpwaMonthlyRevenue MarketplacePlanWithAccounts {..} =
 
 getAdminMarketplaceR :: Handler Html
 getAdminMarketplaceR = do
+    now <- getCurrentTime
     (plans, noPlanRepoOwners) <- runDB $ do
         plans' <- selectList
             []
@@ -59,7 +66,9 @@ getAdminMarketplaceR = do
                 [Asc MarketplaceAccountGithubId]
 
         let planOwners = concatMap mpwaOwnerNames plans
-        (plans, ) . map (, Nothing) <$> fetchUniqueRepoOwnersExcept planOwners
+        (plans, )
+            . map (, Nothing, False)
+            <$> fetchUniqueRepoOwnersExcept planOwners
 
     adminLayout $ do
         setTitle "Admin - Marketplace"
@@ -76,6 +85,8 @@ fetchUniqueRepoOwnersExcept exceptOwners = do
 -- brittany-disable-next-binding
 
 accountsList
-    :: Maybe Text -> [(OwnerName, Maybe MarketplaceAccountId)] -> Widget
-accountsList mDescription owners =
+    :: Maybe Text -> [(OwnerName, Maybe MarketplaceAccountId, Bool)] -> Widget
+accountsList mDescription allOwners = do
     $(widgetFile "admin/marketplace/accounts-list")
+  where
+    (expiredOwners, owners) = partition (\(_, _, x) -> x) allOwners

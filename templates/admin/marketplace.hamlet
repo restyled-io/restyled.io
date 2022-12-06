@@ -19,7 +19,7 @@
             <small>[#{x}]
 
         $if not $ marketplacePlanRetired p
-          ^{accountsList (Just $ mpwaDescription plan) $ mpwaOwnerAccounts plan}
+          ^{accountsList (Just $ mpwaDescription plan) $ mpwaOwnerAccounts now plan}
 
   <div .card>
     <header>
