@@ -15,7 +15,7 @@
       $if expiresAt <= now
         <p>
           Account expired 
-          <strong>#{format (diff True) $ diffUTCTime now expiresAt}
+          <strong>#{format (diff True) $ diffUTCTime expiresAt now}
       $else
         <p>
           Account expires 
