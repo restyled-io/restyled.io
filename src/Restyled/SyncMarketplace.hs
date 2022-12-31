@@ -214,6 +214,12 @@ synchronizeAccount planId account = entityKey <$> upsert
     , MarketplaceAccountMarketplacePlan =. planId
     , MarketplaceAccountTrialEndsAt =. GH.marketplacePurchaseFreeTrialEndsOn
         (GH.marketplaceAccountMarketplacePurchase account)
+
+    -- Always reset expires-at. We don't use this for GH Marketplace so we want
+    -- to reset it if someone is moving from an Offer- or Student-based Plan
+    -- with expiry to a real GH plan. Doing it every time will also fix some bad
+    -- data from before we did this.
+    , MarketplaceAccountExpiresAt =. Nothing
     ]
 
 deleteUnsynchronized
