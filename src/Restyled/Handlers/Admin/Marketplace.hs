@@ -65,18 +65,12 @@ getAdminMarketplaceR :: Handler Html
 getAdminMarketplaceR = do
     now <- getCurrentTime
     (plans, noPlanRepoOwners) <- runDB $ do
-        plans' <- selectList
-            []
-            [ Asc MarketplacePlanRetired
-            , Desc MarketplacePlanMonthlyRevenue
-            , Asc MarketplacePlanName
-            ]
-        plans <- for plans' $ \plan ->
-            MarketplacePlanWithAccounts plan <$> selectList
-                [MarketplaceAccountMarketplacePlan ==. entityKey plan]
-                [Asc MarketplaceAccountGithubId]
+        plans <-
+            map (uncurry MarketplacePlanWithAccounts)
+                <$> fetchMarketplacePlanAccounts
 
         let planOwners = concatMap mpwaOwnerNames plans
+
         (plans, )
             . map nonAccountOwner
             <$> fetchUniqueRepoOwnersExcept planOwners
