@@ -27,6 +27,8 @@ module Restyled.Env
 import Restyled.Prelude hiding (Reader)
 
 import Database.Redis (ConnectInfo, parseConnectInfo)
+import Database.Redis.TLS (clientParamsNoVerify)
+import qualified Database.Redis.TLS as TLS
 import Env hiding (parse, splitOn)
 import qualified Env
 import Restyled.DB
@@ -41,7 +43,8 @@ eitherReader :: AsUnread e => (String -> Either String a) -> Reader e a
 eitherReader f = first unread . f
 
 connectInfo :: AsUnread e => Reader e ConnectInfo
-connectInfo = eitherReader parseConnectInfo
+connectInfo = eitherReader $ \url ->
+    TLS.parseConnectInfo clientParamsNoVerify url <|> parseConnectInfo url
 
 githubId :: AsUnread e => Reader e (Id a)
 githubId = fmap (mkId Proxy) . auto

@@ -127,6 +127,10 @@ library:
     - yesod-static
     - yesod-websockets
 
+    # Database.Redis.TLS
+    - data-default-class
+    - tls
+
 executables:
   restyled.io:
     main: Main.hs

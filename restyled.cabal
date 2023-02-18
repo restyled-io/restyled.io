@@ -13,6 +13,7 @@ build-type:     Simple
 library
   exposed-modules:
       Database.Persist.JSONB
+      Database.Redis.TLS
       GitHub.Auth.JWT
       GitHub.Data.AccessTokens
       GitHub.Data.Apps
@@ -155,6 +156,7 @@ library
     , conduit
     , conduit-extra
     , data-default
+    , data-default-class
     , envparse
     , errors
     , esqueleto
@@ -200,6 +202,7 @@ library
     , template-haskell
     , text
     , time
+    , tls
     , transformers
     , unliftio
     , unliftio-core
