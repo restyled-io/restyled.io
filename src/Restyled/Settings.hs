@@ -103,7 +103,9 @@ loadSettings =
         $ AppSettings
         <$> postgresConf
         <*> optional (var auto "STATEMENT_TIMEOUT" mempty)
-        <*> var connectInfo "REDIS_URL" (def defaultConnectInfo)
+        <*> (var connectInfo "REDIS_TLS_URL" mempty
+         <|> var connectInfo "REDIS_URL" mempty
+         <|> pure defaultConnectInfo)
         <*> var str "APPROOT" (def "http://localhost:3000")
         <*> var str "HOST" (def "*4")
         <*> var auto "PORT" (def 3000)
