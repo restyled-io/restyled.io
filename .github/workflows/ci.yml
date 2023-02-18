@@ -22,6 +22,8 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: restyled_test
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
           --health-interval 10s
@@ -29,6 +31,8 @@ jobs:
           --health-retries 5
       redis:
         image: redis
+        ports:
+          - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -42,12 +46,7 @@ jobs:
           stack install --no-terminal \
             --copy-compiler-tool dbmigrations-postgresql
       - run: db/migrate test upgrade
-        env:
-          DBM_DATABASE: postgres://postgres:password@postgres/restyled_test
       - uses: freckle/stack-action@v3
-        env:
-          DATABASE_URL: postgres://postgres:password@postgres:5432/restyled_test
-          REDIS_URL: redis://redis:6379/15
       - run: db/pending-prod-migrations --check
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
