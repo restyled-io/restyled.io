@@ -32,6 +32,7 @@ default-extensions:
   - ViewPatterns
 
 ghc-options:
+  - -fignore-optim-changes
   - -fwrite-ide-info
   - -Weverything
   - -Wno-all-missed-specialisations
