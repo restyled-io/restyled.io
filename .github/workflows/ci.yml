@@ -47,6 +47,8 @@ jobs:
             --copy-compiler-tool dbmigrations-postgresql
       - run: db/migrate test upgrade
       - uses: freckle/stack-action@v3
+        env:
+          REDIS_TLS_URL: ""
       - run: db/pending-prod-migrations --check
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
