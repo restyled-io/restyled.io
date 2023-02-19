@@ -62,7 +62,7 @@ services:
       AWS_SECRET_ACCESS_KEY: x
       LOG_LEVEL: DEBUG,Amazonka:info
       LOG_FORMAT: json
-      REDIS_URL: redis://redis
+      REDIS_URL: rediss://redis
       RESTYLER_POOL_SIZE: 2
     volumes:
       - /tmp:/tmp
