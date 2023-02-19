@@ -42,7 +42,12 @@ services:
       --tls-ca-cert-file /tls/ca.crt
       --tls-auth-clients no
     healthcheck:
-      test: "redis-cli ping"
+      test: >
+        redis-cli
+        --tls
+        --cert /tls/redis.crt
+        --key /tls/redis.key
+        --cacert /tls/ca.crt
       interval: 10s
       timeout: 5s
       retries: 5
