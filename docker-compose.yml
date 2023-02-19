@@ -28,11 +28,26 @@ services:
       retries: 5
 
   redis:
-    image: redis:6.0.13
+    image: redis:6.2
     ports:
       - 6379:6379
+    volumes:
+      - ./certs/redis:/tls:ro
+    entrypoint: redis-server
+    command: >
+      --port 0
+      --tls-port 6379
+      --tls-cert-file /tls/redis.crt
+      --tls-key-file /tls/redis.key
+      --tls-ca-cert-file /tls/ca.crt
+      --tls-auth-clients no
     healthcheck:
-      test: "redis-cli ping"
+      test: >
+        redis-cli
+        --tls
+        --cert /tls/redis.crt
+        --key /tls/redis.key
+        --cacert /tls/ca.crt
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,7 +62,7 @@ services:
       AWS_SECRET_ACCESS_KEY: x
       LOG_LEVEL: DEBUG,Amazonka:info
       LOG_FORMAT: json
-      REDIS_URL: redis://redis
+      REDIS_URL: rediss://redis
       RESTYLER_POOL_SIZE: 2
     volumes:
       - /tmp:/tmp
