@@ -12,7 +12,7 @@ module Restyled.Application
 import Restyled.Prelude
 
 import qualified Data.List.NonEmpty as NE
-import Lens.Micro (to, (^.))
+import Lens.Micro ((^.), to)
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.ForceSSL
@@ -62,11 +62,11 @@ waiMiddleware app =
         . methodOverridePost
         . requestLogger app
         . defaultMiddlewaresNoLogging
-        . routedMiddleware (not . isWebsocketsLogs) (timeout timeoutSeconds)
+        . routedMiddleware (not . isLogsRoute) (timeout timeoutSeconds)
     where timeoutSeconds = app ^. settingsL . to appRequestTimeout
 
-isWebsocketsLogs :: [Text] -> Bool
-isWebsocketsLogs = maybe False ((== "log") . NE.last) . NE.nonEmpty
+isLogsRoute :: [Text] -> Bool
+isLogsRoute = maybe False ((`elem` ["log", "patch"]) . NE.last) . NE.nonEmpty
 
 warpSettings :: App -> Settings
 warpSettings app =
