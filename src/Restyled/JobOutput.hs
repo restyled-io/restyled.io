@@ -80,7 +80,8 @@ getLastCreatedAt = fmap (Last . jobLogLineCreatedAt . NE.last) . NE.nonEmpty
 instance AWSPager GetLogEvents where
     page req resp = do
         -- Events were present in last response
-        guard $ not $ null $ resp ^. getLogEventsResponse_events
+        events <- resp ^. getLogEventsResponse_events
+        guard $ not $ null events
 
         -- Forward token present, and differs from what we just used
         nextToken <- resp ^. getLogEventsResponse_nextForwardToken
