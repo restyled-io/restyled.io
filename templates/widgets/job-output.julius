@@ -1,12 +1,19 @@
 // Multiple Jobs on one page can totally use the same Output prototype
 if (typeof Output === "undefined") {
-  function Output(elem, singleCard) {
+  function Output(elem, singleCard, failed, toggle) {
     this.elem = elem;
     this.singleCard = singleCard;
+    this.failed = failed
+    this.toggle = toggle;
     this.streamUrl = elem
       .getAttribute("data-stream-url")
       .replace(/http(s?):/, "ws$1:");
     this.logsSeen = false;
+
+    var self = this;
+    toggle.addEventListener('change', function (event) {
+      self.toggleDebug(event.currentTarget.checked);
+    });
   }
 
   Output.prototype.append = function (html) {
@@ -47,24 +54,30 @@ if (typeof Output === "undefined") {
       if (!self.logsSeen) {
         self.append("The log for this Job was empty or has expired");
       }
+
+      if (self.failed) {
+        self.toggleDebug(true);
+        self.toggle.checked = true;
+      }
     };
   };
+
+  Output.prototype.toggleDebug = function(checked) {
+    const display = checked ? "block" : "none";
+    document.querySelectorAll(".log-line-level-debug").forEach(function (el) {
+      el.style.display = display;
+    });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   var cards = document.getElementsByClassName("card");
   var singleCard = cards.length === 1;
   var stream = document.getElementById("#{rawJS streamElementId}");
+  var toggle = document.getElementById("toggle-debug");
+  var failed = document.getElementById("job-icon").dataset.jobStatus === "failure"
 
   if (stream) {
-    new Output(stream, singleCard).connect();
+    new Output(stream, singleCard, failed, toggle).connect();
   }
-
-  var toggleDebug = document.getElementById("toggle-debug");
-
-  toggleDebug.addEventListener('change', function (event) {
-    document.querySelectorAll(".log-line-level-debug").forEach(function (el) {
-      el.style.display = event.currentTarget.checked ? "block" : "none";
-    });
-  });
 });

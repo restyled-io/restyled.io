@@ -11,18 +11,19 @@
   <p>
     $case jobCompletion job
       $of JobSuccess completedAt
-        <span .green>
+        <span #job-icon .green data-job-status=success>
           <i .fas .fa-check-circle>
         Succeeded
         #{format (diff True) $ diffUTCTime completedAt now}
         (took #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt})
       $of JobFailure completedAt _exitCode
-        <span .red>
+        <span #job-icon .red data-job-status=failure>
           <i .fas .fa-times-circle>
         Failed
         #{format (diff True) $ diffUTCTime completedAt now}
         (took #{format (diff False) $ diffUTCTime (jobCreatedAt job) completedAt})
       $of JobInProgress
+        <span #job-icon data-job-status=in-progress>
         In progress since
         #{format (diff True) $ diffUTCTime (jobCreatedAt job) now}
 
