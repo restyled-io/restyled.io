@@ -99,7 +99,7 @@ watch:
 
 .PHONY: ngrok.http
 ngrok.http:
-	ngrok http -subdomain restyled 3000
+	ngrok http --subdomain restyled 3000
 
 .PHONY: image
 image:
