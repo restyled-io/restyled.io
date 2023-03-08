@@ -21,6 +21,7 @@ module Restyled.Prelude
     , getT
 
     -- * Formatting
+    , pluralize
     , pluralizeWith
     , percent
 
@@ -98,6 +99,9 @@ getByT = MaybeT . getBy
 
 getT :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) a
 getT = MaybeT . get
+
+pluralize :: TL.Text -> TL.Text -> Int -> TL.Text
+pluralize = pluralizeWith Formatters.commas
 
 pluralizeWith
     :: (Num a, Eq a)

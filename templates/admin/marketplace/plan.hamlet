@@ -3,7 +3,7 @@
 
   <h2 .uncenter>Accounts
   $if null accounts
-    <p>No Accounts
+    <p>No active Accounts
   $else
     <ul>
       $forall account <- accounts
@@ -13,8 +13,7 @@
               #{baoName account}
           $nothing
             #{baoName account}
-          $if baoExpired account
-            <small> [expired]
+  <p>#{pluralize "expired Account" "expired Accounts" $ length expiredAccounts}
 
   <h2 .uncenter>Monthly Revenue
   <p>#{multiplyCents (length accounts) marketplacePlanMonthlyRevenue}

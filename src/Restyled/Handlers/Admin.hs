@@ -91,8 +91,8 @@ getAdminStatsReposR = do
     let trange = show @Text range
 
     fragmentLayout [whamlet|
-        <p>#{pluralizeWith Formatters.commas "Repo" "Repos" totalRepos}
-        <p>#{pluralizeWith Formatters.commas "Unique Owner" "Unique Owners" uniqueOwners}
+        <p>#{pluralize "Repo" "Repos" totalRepos}
+        <p>#{pluralize "Unique Owner" "Unique Owners" uniqueOwners}
         <p>
             #{format Formatters.commas activeRepos} (#{activeReposPercent}) with Jobs this #{trange}
             ^{changedWidget activeReposChanged}
@@ -161,7 +161,7 @@ getAdminStatsJobsR = do
 
     fragmentLayout [whamlet|
         <p>
-            #{pluralizeWith Formatters.commas "Job" "Jobs" totalJobs} this #{trange}
+            #{pluralize "Job" "Jobs" totalJobs} this #{trange}
             ^{changedWidget totalJobsChanged}
         <p>
             #{format Formatters.commas succeededJobs} (#{succeededJobsPercent}) succeeded

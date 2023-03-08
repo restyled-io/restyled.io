@@ -69,7 +69,10 @@ getAdminMarketplacePlansNoneR = do
     accounts <- map (uncurry briefNonAccountOwner)
         <$> runDB fetchUniqueOwnersWithoutPlan
 
-    let marketplacePlanName :: Text
+    let expiredAccounts :: [BriefAccountOwner]
+        expiredAccounts = []
+
+        marketplacePlanName :: Text
         marketplacePlanName = "No Markeplace Plan"
 
         marketplacePlanMonthlyRevenue :: UsCents
@@ -82,13 +85,15 @@ getAdminMarketplacePlansNoneR = do
 getAdminMarketplacePlanR :: MarketplacePlanId -> Handler Html
 getAdminMarketplacePlanR planId = do
     now <- liftIO getCurrentTime
-    (MarketplacePlan {..}, accounts) <-
+    (MarketplacePlan {..}, allAccounts) <-
         runDB
         $ (,)
         <$> get404 planId
         <*> (map (briefAccountOwner now)
             <$> selectList [MarketplaceAccountMarketplacePlan ==. planId] []
             )
+
+    let (expiredAccounts, accounts) = partition baoExpired allAccounts
 
     adminLayout $ do
         setTitle "Admin - Marketplace Plan"
