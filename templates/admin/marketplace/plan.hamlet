@@ -21,6 +21,6 @@
         <li>
           $maybe accountId <- baoAccountId account
             <a href=@{adminMarketplaceAccountR accountId}>
-              #{baoName account}
+              #{baoName account} (#{pluralize "repo" "repos" $ baoRepos account})
           $nothing
-            #{baoName account}
+            #{baoName account} (#{pluralize "repo" "repos" $ baoRepos account})

@@ -4,11 +4,12 @@
       <header>
         <div .right>
           $if isPrivateRepoPlan plan
-            <i .fas .fa-lock>
+            #{multiplyCents nAccounts $ marketplacePlanMonthlyRevenue plan}
+            \ (#{nAccounts} ✕ #{marketplacePlanMonthlyRevenue plan})
+            <i .fas .fa-money-bill>
+
           $if marketplacePlanRetired plan
             <i .fas .fa-trash>
-
-          <small>#{multiplyCents nAccounts $ marketplacePlanMonthlyRevenue plan}
 
         <a href=@{adminMarketplacePlanR planId}>
           #{marketplacePlanName plan}
