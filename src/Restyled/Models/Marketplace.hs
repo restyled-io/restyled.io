@@ -12,15 +12,12 @@ import Restyled.Models.DB
 fetchMarketplacePlans
     :: MonadIO m => SqlPersistT m [(Entity MarketplacePlan, Int)]
 fetchMarketplacePlans =
-    selectMap (over _2 unValue) $ from $ \(plans `InnerJoin` accounts) -> do
-        on
-            $ accounts
-            ^. MarketplaceAccountMarketplacePlan
-            ==. plans
-            ^. persistIdField
+    selectMap (over _2 unValue) $ from $ \(plans `LeftOuterJoin` accounts) -> do
+        on $ accounts ?. MarketplaceAccountMarketplacePlan ==. just
+            (plans ^. persistIdField)
 
         let nAccounts :: SqlExpr (Value Int)
-            nAccounts = count $ accounts ^. persistIdField
+            nAccounts = count $ accounts ?. persistIdField
 
         groupBy $ plans ^. persistIdField
 
