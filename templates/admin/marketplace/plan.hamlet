@@ -3,7 +3,7 @@
     #{marketplacePlanName} - #{multiplyCents (length accounts) marketplacePlanMonthlyRevenue}
 
   <p>
-    #{pluralize "active Account" "active Accounts" $ length accounts}
+    active #{pluralize "Account" "Accounts" $ length accounts}
   <ul>
     $forall account <- accounts
       <li>
@@ -15,7 +15,7 @@
 
   <details>
     <summary>
-      #{pluralize "expired Account" "expired Accounts" $ length expiredAccounts}
+      expired #{pluralize "Account" "Accounts" $ length expiredAccounts}
     <ul>
       $forall account <- expiredAccounts
         <li>
