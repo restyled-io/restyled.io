@@ -19,5 +19,6 @@
       <p>
         <strong>Accounts</strong>: #{nAccounts}
 
-  <a href=@{AdminP $ AdminMarketplaceP $ AdminMarketplacePlansP AdminMarketplacePlansNoneR}>
-    <em>No Marketplace Account
+  <p>
+    <a href=@{AdminP $ AdminMarketplaceP $ AdminMarketplacePlansP AdminMarketplacePlansNoneR}>
+      <em>No Marketplace Account
