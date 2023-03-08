@@ -8,7 +8,6 @@ import Restyled.Prelude
 
 import Restyled.DB
 import Restyled.Foundation
-import Restyled.Marketplace (isPrivateRepoPlan)
 import Restyled.Models
 import Restyled.Routes
 import Restyled.Settings
