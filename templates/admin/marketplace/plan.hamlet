@@ -1,5 +1,5 @@
 <section>
-  <h1>#{marketplacePlanName plan}
+  <h1>#{marketplacePlanName}
 
   <h2 .uncenter>Accounts
   $if null accounts
@@ -17,4 +17,4 @@
             <small> [expired]
 
   <h2 .uncenter>Monthly Revenue
-  <p>#{multiplyCents (length accounts) $ marketplacePlanMonthlyRevenue plan}
+  <p>#{multiplyCents (length accounts) marketplacePlanMonthlyRevenue}

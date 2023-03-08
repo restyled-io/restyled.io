@@ -1,4 +1,7 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 module Restyled.Prelude
     ( module X
@@ -20,6 +23,9 @@ module Restyled.Prelude
     -- * Formatting
     , pluralizeWith
     , percent
+
+    -- * Base
+    , constrainMe
     ) where
 
 import Relude as X hiding (First(..), Last(..), get)
@@ -105,3 +111,6 @@ pluralizeWith f s p n = format (f % " " % Formatters.plural s p) n n
 percent :: (Integral n1, Integral n2) => n1 -> n2 -> TL.Text
 percent n1 n2 = format (Formatters.fixed 2 % "%") p
     where p = fromIntegral @_ @Double n1 / fromIntegral n2 * 100
+
+constrainMe :: forall c a . (c :: Constraint) => a -> a
+constrainMe x = x

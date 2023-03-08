@@ -3,39 +3,41 @@ module Restyled.Prelude.Esqueleto
     , selectMap
     , selectFoldMap
     , aggregate
+    , stringEqual
     , unValue2
     , unValue3
     , unValue5
     ) where
 
-import Restyled.Prelude as X hiding
-    ( SqlEntity
-    , Value
-    , count
-    , delete
-    , exists
-    , isNothing
-    , on
-    , selectSource
-    , update
-    , (!=.)
-    , (*=.)
-    , (+=.)
-    , (-=.)
-    , (/=.)
-    , (<&>)
-    , (<.)
-    , (<=.)
-    , (=.)
-    , (==.)
-    , (>.)
-    , (>=.)
-    , (||.)
-    )
+import Restyled.Prelude as X
+    hiding
+        ( (!=.)
+        , (*=.)
+        , (+=.)
+        , (-=.)
+        , (/=.)
+        , (<&>)
+        , (<.)
+        , (<=.)
+        , (=.)
+        , (==.)
+        , (>.)
+        , (>=.)
+        , SqlEntity
+        , Value
+        , count
+        , delete
+        , exists
+        , isNothing
+        , on
+        , selectSource
+        , update
+        , (||.)
+        )
 
 import Database.Esqueleto.Legacy as X
 
-import Database.Esqueleto.Internal.Internal (SqlSelect)
+import Database.Esqueleto.Internal.Internal (SqlSelect, unsafeSqlBinOp)
 import Database.Esqueleto.PostgreSQL
 
 selectMap
@@ -54,6 +56,21 @@ aggregate
     => SqlExpr (Value a)
     -> SqlExpr (Value [a])
 aggregate = maybeArray . arrayAgg
+
+-- | Compare two values by their string representation for equality
+stringEqual
+    :: forall s t
+     . (SqlString s, SqlString t)
+    => SqlExpr (Value s)
+    -> SqlExpr (Value t)
+    -> SqlExpr (Value Bool)
+stringEqual x y = unsafeSqlBinOp
+    " = "
+    (constrainMe @(SqlString s) x)
+    (constrainMe @(SqlString t) y)
+
+-- Matches (==.)
+infix 4 `stringEqual`
 
 unValue2 :: (Value a, Value b) -> (a, b)
 unValue2 (Value a, Value b) = (a, b)

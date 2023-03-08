@@ -2,6 +2,7 @@
 
 module Restyled.Handlers.Admin.Marketplace.Plans
     ( getAdminMarketplacePlansR
+    , getAdminMarketplacePlansNoneR
     , getAdminMarketplacePlanR
     ) where
 
@@ -43,6 +44,7 @@ data BriefAccountOwner = BriefAccountOwner
     { baoName :: OwnerName
     , baoAccountId :: Maybe MarketplaceAccountId
     , baoExpired :: Bool
+    , baoRepos :: Maybe Int
     }
 
 briefAccountOwner :: UTCTime -> Entity MarketplaceAccount -> BriefAccountOwner
@@ -51,12 +53,36 @@ briefAccountOwner now (Entity accountId MarketplaceAccount {..}) =
         { baoName = nameToName marketplaceAccountGithubLogin
         , baoAccountId = Just accountId
         , baoExpired = maybe False (<= now) marketplaceAccountExpiresAt
+        , baoRepos = Nothing
         }
+
+briefNonAccountOwner :: OwnerName -> Int -> BriefAccountOwner
+briefNonAccountOwner owner repos = BriefAccountOwner
+    { baoName = owner
+    , baoAccountId = Nothing
+    , baoExpired = False
+    , baoRepos = Just repos
+    }
+
+getAdminMarketplacePlansNoneR :: Handler Html
+getAdminMarketplacePlansNoneR = do
+    accounts <- map (uncurry briefNonAccountOwner)
+        <$> runDB fetchUniqueOwnersWithoutPlan
+
+    let marketplacePlanName :: Text
+        marketplacePlanName = "No Markeplace Plan"
+
+        marketplacePlanMonthlyRevenue :: UsCents
+        marketplacePlanMonthlyRevenue = 0
+
+    adminLayout $ do
+        setTitle "Admin - Marketplace Plan"
+        $(widgetFile "admin/marketplace/plan")
 
 getAdminMarketplacePlanR :: MarketplacePlanId -> Handler Html
 getAdminMarketplacePlanR planId = do
     now <- liftIO getCurrentTime
-    (plan, accounts) <-
+    (MarketplacePlan {..}, accounts) <-
         runDB
         $ (,)
         <$> get404 planId

@@ -51,6 +51,7 @@
   /marketplace AdminMarketplaceP:
     / AdminMarketplaceR GET
     /plans AdminMarketplacePlansP:
+      !/none AdminMarketplacePlansNoneR GET
       / AdminMarketplacePlansR GET
       /#MarketplacePlanId AdminMarketplacePlanP:
         / AdminMarketplacePlanR GET

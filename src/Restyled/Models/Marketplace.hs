@@ -1,5 +1,6 @@
 module Restyled.Models.Marketplace
     ( fetchMarketplacePlans
+    , fetchUniqueOwnersWithoutPlan
     ) where
 
 import Restyled.Prelude.Esqueleto
@@ -25,8 +26,24 @@ fetchMarketplacePlans =
         orderBy
             [ asc $ plans ^. MarketplacePlanRetired
             , desc $ plans ^. MarketplacePlanMonthlyRevenue
-            , asc $ plans ^. MarketplacePlanName
             , desc nAccounts
+            , asc $ plans ^. MarketplacePlanName
             ]
 
         pure (plans, nAccounts)
+
+fetchUniqueOwnersWithoutPlan :: MonadIO m => SqlPersistT m [(OwnerName, Int)]
+fetchUniqueOwnersWithoutPlan =
+    selectMap unValue2 $ from $ \(repos `LeftOuterJoin` accounts) -> do
+        on $ accounts ?. MarketplaceAccountGithubLogin `stringEqual` just
+            (repos ^. RepoOwner)
+        where_ $ isNothing $ accounts ?. persistIdField
+
+        groupBy $ repos ^. RepoOwner
+
+        let nRepos :: SqlExpr (Value Int)
+            nRepos = count $ repos ^. persistIdField
+
+        orderBy [desc nRepos, asc $ repos ^. RepoOwner]
+
+        pure (repos ^. RepoOwner, nRepos)

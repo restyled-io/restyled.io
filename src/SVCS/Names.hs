@@ -40,6 +40,7 @@ import Data.Bifunctor (first)
 import Data.Csv (ToField(..))
 import Data.Proxy
 import Data.Text (Text, unpack)
+import qualified Database.Esqueleto.Legacy as E
 import Database.Persist.Sql
 import GitHub.Data
 import GitHub.Data.Apps
@@ -151,6 +152,8 @@ instance PersistField (Name a) where
 
 instance PersistFieldSql (Name a) where
     sqlType _ = sqlType (Proxy :: Proxy Text)
+
+instance E.SqlString (Name a)
 
 instance ToMarkup (Name a) where
     toMarkup = toMarkup . untagName
