@@ -20,11 +20,11 @@ fetchMarketplacePlans =
             nAccounts = count $ accounts ?. persistIdField
 
         groupBy $ plans ^. persistIdField
-
         orderBy
-            [ asc $ plans ^. MarketplacePlanRetired
+            [ desc $ nAccounts *. castNum
+                (plans ^. MarketplacePlanMonthlyRevenue)
+            , asc $ plans ^. MarketplacePlanRetired
             , desc $ plans ^. MarketplacePlanMonthlyRevenue
-            , desc nAccounts
             , asc $ plans ^. MarketplacePlanName
             ]
 
