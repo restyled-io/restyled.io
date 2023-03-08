@@ -41,7 +41,6 @@ fetchMarketplaceAccountsWithPlan planId =
     selectMap (over _2 unValue) $ from $ \(accounts `LeftOuterJoin` repos) -> do
         on $ repos ?. RepoOwner `stringEqual` just
             (accounts ^. MarketplaceAccountGithubLogin)
-
         where_ $ accounts ^. MarketplaceAccountMarketplacePlan ==. val planId
         (_, n) <- groupCountBy accounts persistIdField
         pure (accounts, n)
