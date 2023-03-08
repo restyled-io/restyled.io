@@ -1,36 +1,26 @@
 <section>
-  <h1>#{marketplacePlanName}
+  <h1>
+    #{marketplacePlanName} - #{multiplyCents (length accounts) marketplacePlanMonthlyRevenue}
 
-  <h2 .uncenter>Accounts
-  $if null accounts
-    <p>No active Accounts
-  $else
-    <p>#{pluralize "active Account" "active Accounts" $ length accounts}
-    <details>
-      <summary>Show accounts
-      <ul>
-        $forall account <- accounts
-          <li>
-            $maybe accountId <- baoAccountId account
-              <a href=@{adminMarketplaceAccountR accountId}>
-                #{baoName account}
-            $nothing
+  <p>
+    #{pluralize "active Account" "active Accounts" $ length accounts}
+  <ul>
+    $forall account <- accounts
+      <li>
+        $maybe accountId <- baoAccountId account
+          <a href=@{adminMarketplaceAccountR accountId}>
+            #{baoName account}
+        $nothing
+          #{baoName account}
+
+  <details>
+    <summary>
+      #{pluralize "expired Account" "expired Accounts" $ length expiredAccounts}
+    <ul>
+      $forall account <- expiredAccounts
+        <li>
+          $maybe accountId <- baoAccountId account
+            <a href=@{adminMarketplaceAccountR accountId}>
               #{baoName account}
-
-  $if null expiredAccounts
-    <p>No expired Accounts
-  $else
-    <p>#{pluralize "expired Account" "expired Accounts" $ length expiredAccounts}
-    <details>
-      <summary>Show accounts
-      <ul>
-        $forall account <- expiredAccounts
-          <li>
-            $maybe accountId <- baoAccountId account
-              <a href=@{adminMarketplaceAccountR accountId}>
-                #{baoName account}
-            $nothing
-              #{baoName account}
-
-  <h2 .uncenter>Monthly Revenue
-  <p>#{multiplyCents (length accounts) marketplacePlanMonthlyRevenue}
+          $nothing
+            #{baoName account}

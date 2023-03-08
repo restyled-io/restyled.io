@@ -38,14 +38,12 @@ fetchMarketplaceAccountsWithPlan
     => MarketplacePlanId
     -> SqlPersistT m [(Entity MarketplaceAccount, Int)]
 fetchMarketplaceAccountsWithPlan planId =
-    selectMap (over _2 unValue) $ from $ \(repos `InnerJoin` accounts) -> do
-        on
-            $ accounts
-            ^. MarketplaceAccountGithubLogin
-            `stringEqual` repos
-            ^. RepoOwner
+    selectMap (over _2 unValue) $ from $ \(accounts `LeftOuterJoin` repos) -> do
+        on $ repos ?. RepoOwner `stringEqual` just
+            (accounts ^. MarketplaceAccountGithubLogin)
+
         where_ $ accounts ^. MarketplaceAccountMarketplacePlan ==. val planId
-        (_, n) <- groupCountBy accounts MarketplaceAccountGithubLogin
+        (_, n) <- groupCountBy accounts persistIdField
         pure (accounts, n)
 
 fetchUniqueOwnersWithoutPlan :: MonadIO m => SqlPersistT m [(OwnerName, Int)]
