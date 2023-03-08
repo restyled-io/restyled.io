@@ -18,7 +18,6 @@ module Restyled.Prelude
     , getT
 
     -- * Formatting
-    , pluralize
     , pluralizeWith
     , percent
     ) where
@@ -62,7 +61,7 @@ import SVCS.Payload as X
 
 import qualified Data.Text.Lazy as TL
 import qualified Data.Time as Time
-import Formatting (Format, format, (%))
+import Formatting ((%), Format, format)
 import qualified Formatting.Formatters as Formatters
 
 getCurrentTime :: MonadIO m => m UTCTime
@@ -93,13 +92,6 @@ getByT = MaybeT . getBy
 
 getT :: (MonadIO m, SqlEntity a) => Key a -> MaybeT (SqlPersistT m) a
 getT = MaybeT . get
-
-pluralize
-    :: TL.Text -- ^ Singular
-    -> TL.Text -- ^ Plural
-    -> Int -- ^ Amount
-    -> TL.Text
-pluralize = pluralizeWith Formatters.int
 
 pluralizeWith
     :: (Num a, Eq a)

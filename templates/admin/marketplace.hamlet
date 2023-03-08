@@ -1,29 +1,20 @@
 <section>
-  $forall plan <- plans
-    $with p <- entityVal $ mpwaPlan plan
-      <div .card>
-        <header>
-          <div .right>
-            $if isPrivateRepoPlan p
-              <i .fas .fa-lock>
-            $if marketplacePlanRetired p
-              <i .fas .fa-trash>
+  $forall (Entity planId plan, nAccounts) <- planCounts
+    <div .card>
+      <header>
+        <div .right>
+          $if isPrivateRepoPlan plan
+            <i .fas .fa-lock>
+          $if marketplacePlanRetired plan
+            <i .fas .fa-trash>
 
-            $with revenue <- mpwaMonthlyRevenue plan
-              $if revenue /= 0
-                <small>#{revenue}
+          <small>#{multiplyCents nAccounts $ marketplacePlanMonthlyRevenue plan}
 
-          #{marketplacePlanName p} #
+        <a href=@{adminMarketplacePlanR planId}>
+          #{marketplacePlanName plan}
 
-          $maybe x <- marketplacePlanGithubId p
-            <small>[#{x}]
+        $maybe x <- marketplacePlanGithubId plan
+          <small> [#{x}]
 
-        $if not $ marketplacePlanRetired p
-          ^{accountsList (Just $ mpwaDescription plan) $ mpwaOwnerAccounts now plan}
-
-  <div .card>
-    <header>
-      <div .right>
-        <i .fas .fa-ban>
-      <em>No Marketplace Account
-    ^{accountsList Nothing noPlanRepoOwners}
+      <p>
+        <strong>Accounts</strong>: #{nAccounts}

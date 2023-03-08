@@ -1,0 +1,20 @@
+<section>
+  <h1>#{marketplacePlanName plan}
+
+  <h2 .uncenter>Accounts
+  $if null accounts
+    <p>No Accounts
+  $else
+    <ul>
+      $forall account <- accounts
+        <li>
+          $maybe accountId <- baoAccountId account
+            <a href=@{adminMarketplaceAccountR accountId}>
+              #{baoName account}
+          $nothing
+            #{baoName account}
+          $if baoExpired account
+            <small> [expired]
+
+  <h2 .uncenter>Monthly Revenue
+  <p>#{multiplyCents (length accounts) $ marketplacePlanMonthlyRevenue plan}

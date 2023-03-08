@@ -52,6 +52,8 @@
     / AdminMarketplaceR GET
     /plans AdminMarketplacePlansP:
       / AdminMarketplacePlansR GET
+      /#MarketplacePlanId AdminMarketplacePlanP:
+        / AdminMarketplacePlanR GET
     /accounts AdminMarketplaceAccountsP:
       / AdminMarketplaceAccountsR GET
       /#MarketplaceAccountId AdminMarketplaceAccountP:

@@ -21,6 +21,7 @@ module Restyled.Routes
     -- * Admin
     , adminStatsReposR
     , adminStatsJobsR
+    , adminMarketplacePlanR
     , adminMarketplaceAccountR
     ) where
 
@@ -62,6 +63,13 @@ adminStatsReposR = AdminP $ AdminStatsP $ AdminStatsReposP AdminStatsReposR
 
 adminStatsJobsR :: Route App
 adminStatsJobsR = AdminP $ AdminStatsP $ AdminStatsJobsP AdminStatsJobsR
+
+adminMarketplacePlanR :: MarketplacePlanId -> Route App
+adminMarketplacePlanR planId =
+    AdminP
+        $ AdminMarketplaceP
+        $ AdminMarketplacePlansP
+        $ AdminMarketplacePlanP planId AdminMarketplacePlanR
 
 adminMarketplaceAccountR :: MarketplaceAccountId -> Route App
 adminMarketplaceAccountR accountId =

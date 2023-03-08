@@ -3,6 +3,7 @@
 module Restyled.UsCents
     ( UsCents
     , fromCents
+    , multiplyCents
     ) where
 
 import Restyled.Prelude
@@ -26,3 +27,6 @@ instance ToMarkup UsCents where
 
 fromCents :: Natural -> UsCents
 fromCents = UsCents
+
+multiplyCents :: Integral a => a -> UsCents -> UsCents
+multiplyCents a c = fromIntegral a * c

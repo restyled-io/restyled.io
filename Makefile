@@ -62,13 +62,13 @@ setup:
 setup.lint:
 	stack install --copy-compiler-tool \
 	  hlint \
-	  weeder
+	  weeder-2.3.1
 
 .PHONY: setup.tools
 setup.tools:
 	stack install --copy-compiler-tool \
 	  dhall \
-	  brittany \
+	  brittany-0.14.0.2 \
 	  fast-tags \
 	  stylish-haskell \
 	  apply-refact
