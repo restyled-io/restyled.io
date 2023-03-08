@@ -44,16 +44,17 @@ data BriefAccountOwner = BriefAccountOwner
     { baoName :: OwnerName
     , baoAccountId :: Maybe MarketplaceAccountId
     , baoExpired :: Bool
-    , baoRepos :: Maybe Int
+    , baoRepos :: Int
     }
 
-briefAccountOwner :: UTCTime -> Entity MarketplaceAccount -> BriefAccountOwner
-briefAccountOwner now (Entity accountId MarketplaceAccount {..}) =
+briefAccountOwner
+    :: UTCTime -> Entity MarketplaceAccount -> Int -> BriefAccountOwner
+briefAccountOwner now (Entity accountId MarketplaceAccount {..}) repos =
     BriefAccountOwner
         { baoName = nameToName marketplaceAccountGithubLogin
         , baoAccountId = Just accountId
         , baoExpired = maybe False (<= now) marketplaceAccountExpiresAt
-        , baoRepos = Nothing
+        , baoRepos = repos
         }
 
 briefNonAccountOwner :: OwnerName -> Int -> BriefAccountOwner
@@ -61,7 +62,7 @@ briefNonAccountOwner owner repos = BriefAccountOwner
     { baoName = owner
     , baoAccountId = Nothing
     , baoExpired = False
-    , baoRepos = Just repos
+    , baoRepos = repos
     }
 
 getAdminMarketplacePlansNoneR :: Handler Html
@@ -89,8 +90,8 @@ getAdminMarketplacePlanR planId = do
         runDB
         $ (,)
         <$> get404 planId
-        <*> (map (briefAccountOwner now)
-            <$> selectList [MarketplaceAccountMarketplacePlan ==. planId] []
+        <*> (map (uncurry $ briefAccountOwner now)
+            <$> fetchMarketplaceAccountsWithPlan planId
             )
 
     let (expiredAccounts, accounts) = partition baoExpired allAccounts

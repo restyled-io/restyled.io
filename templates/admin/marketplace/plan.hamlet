@@ -5,15 +5,32 @@
   $if null accounts
     <p>No active Accounts
   $else
-    <ul>
-      $forall account <- accounts
-        <li>
-          $maybe accountId <- baoAccountId account
-            <a href=@{adminMarketplaceAccountR accountId}>
+    <p>#{pluralize "active Account" "active Accounts" $ length accounts}
+    <details>
+      <summary>Show accounts
+      <ul>
+        $forall account <- accounts
+          <li>
+            $maybe accountId <- baoAccountId account
+              <a href=@{adminMarketplaceAccountR accountId}>
+                #{baoName account}
+            $nothing
               #{baoName account}
-          $nothing
-            #{baoName account}
-  <p>#{pluralize "expired Account" "expired Accounts" $ length expiredAccounts}
+
+  $if null expiredAccounts
+    <p>No expired Accounts
+  $else
+    <p>#{pluralize "expired Account" "expired Accounts" $ length expiredAccounts}
+    <details>
+      <summary>Show accounts
+      <ul>
+        $forall account <- expiredAccounts
+          <li>
+            $maybe accountId <- baoAccountId account
+              <a href=@{adminMarketplaceAccountR accountId}>
+                #{baoName account}
+            $nothing
+              #{baoName account}
 
   <h2 .uncenter>Monthly Revenue
   <p>#{multiplyCents (length accounts) marketplacePlanMonthlyRevenue}
