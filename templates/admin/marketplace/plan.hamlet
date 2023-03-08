@@ -3,19 +3,19 @@
     #{marketplacePlanName} - #{multiplyCents (length accounts) marketplacePlanMonthlyRevenue}
 
   <p>
-    active #{pluralize "Account" "Accounts" $ length accounts}
+    #{pluralize "active Account" "active Accounts" $ length accounts}
   <ul>
     $forall account <- accounts
       <li>
         $maybe accountId <- baoAccountId account
           <a href=@{adminMarketplaceAccountR accountId}>
-            #{baoName account}
+            #{baoName account} (#{pluralize "repo" "repos" $ baoRepos account})
         $nothing
-          #{baoName account}
+          #{baoName account} (#{pluralize "repo" "repos" $ baoRepos account})
 
   <details>
     <summary>
-      expired #{pluralize "Account" "Accounts" $ length expiredAccounts}
+      #{pluralize "expired Account" "expired Accounts" $ length expiredAccounts}
     <ul>
       $forall account <- expiredAccounts
         <li>
