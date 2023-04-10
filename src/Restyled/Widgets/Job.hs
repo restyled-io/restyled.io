@@ -55,6 +55,9 @@ Please use the below template to report an issue with this Job. **Don't submit
 sensitive information**, this is a public project. If you'd rather communicate
 privately, email support@restyled.io.
 
+Before reporting, please check the _Common Errors_ section found in [the wiki](https://github.com/restyled-io/restyled.io/wiki)
+sidebar.
+
 ---
 
 Hi there-
@@ -67,6 +70,9 @@ I'm having a problem with a Restyled Job
 **What I expected to happen**:
 
 **What happened instead**:
+
+_Please try to be specific. Avoid saying "it failed" or "it errored"; instead,
+copy over any error messages or other details when available._
 
 **Configuration** (if applicable):
 
