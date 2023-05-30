@@ -19,21 +19,10 @@ data ApiRepo = ApiRepo
     , installationId :: InstallationId
     , marketplacePlanAllows :: Maybe MarketplacePlanAllows
     , restylerImage :: RestylerImage
-    , restylerLogLevel :: ApiLogLevel
-    , restylerLogFormat :: Text
-    -- ^ TODO: 'LogFormat' needs 'ToJSON'
+    , restylerEnv :: [Text]
     }
     deriving stock (Show, Generic)
     deriving anyclass ToJSON
-
-newtype ApiLogLevel = ApiLogLevel
-    { unApiLogLevel :: LogLevel
-    }
-    deriving newtype Show
-
-instance ToJSON ApiLogLevel where
-    toJSON = toJSON . logLevelToText . unApiLogLevel
-    toEncoding = toEncoding . logLevelToText . unApiLogLevel
 
 apiRepo :: Entity Repo -> AppSettings -> Maybe MarketplacePlanAllows -> ApiRepo
 apiRepo (Entity _ Repo {..}) AppSettings {..} mAllows = ApiRepo
@@ -44,10 +33,15 @@ apiRepo (Entity _ Repo {..}) AppSettings {..} mAllows = ApiRepo
     , installationId = repoInstallationId
     , marketplacePlanAllows = mAllows
     , restylerImage = fromMaybe appRestylerImage repoRestylerImage
-    , restylerLogLevel = ApiLogLevel
-        $ if repoDebugEnabled then LevelDebug else guessLogLevel appLogSettings
-    , restylerLogFormat = "json"
+    , restylerEnv =
+        [ "DEBUG=" <> if logLevel == LevelDebug then "x" else ""
+        , "LOG_LEVEL=" <> logLevelToText logLevel
+        , "LOG_FORMAT=json"
+        ]
     }
+  where
+    logLevel =
+        if repoDebugEnabled then LevelDebug else guessLogLevel appLogSettings
 
 logLevelToText :: LogLevel -> Text
 logLevelToText = \case
