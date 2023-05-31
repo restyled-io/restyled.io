@@ -18,7 +18,6 @@ data ApiRepo = ApiRepo
     , isPrivate :: Bool
     , isEnabled :: Bool
     , installationId :: InstallationId
-    , marketplacePlanAllows :: Maybe MarketplacePlanAllows
     , restylerImage :: RestylerImage
     , restylerEnv :: [Text]
     }
@@ -32,7 +31,6 @@ apiRepo (Entity _ Repo {..}) AppSettings {..} mAllows = ApiRepo
     , isPrivate = repoIsPrivate
     , isEnabled = repoEnabled
     , installationId = repoInstallationId
-    , marketplacePlanAllows = mAllows -- Remove after agent is updated
     , restylerImage = fromMaybe appRestylerImage repoRestylerImage
     , restylerEnv =
         [ "REPO_DISABLED=" <> if repoEnabled then "" else "x"

@@ -134,11 +134,6 @@ spec = withApp $ do
                     ^?! key "installationId"
                     . _JSON @_ @InstallationId
                     `shouldBe` 1
-                resp
-                    ^? key "marketplacePlanAllows"
-                    . key "tag"
-                    . _String
-                    `shouldBe` Just "MarketplacePlanAllows"
                 Just (Entity _ Repo {..}) <- runDB $ getBy $ UniqueRepo
                     GitHubSVCS
                     "foo"

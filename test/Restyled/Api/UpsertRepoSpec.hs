@@ -4,10 +4,11 @@ module Restyled.Api.UpsertRepoSpec
 
 import Restyled.Test hiding (upsertRepo)
 
+import qualified Data.Text as T
+import Restyled.Api.Repo (ApiRepo)
 import qualified Restyled.Api.Repo as ApiRepo
 import Restyled.Api.UpsertRepo (ApiUpsertRepo(ApiUpsertRepo), upsertRepo)
 import qualified Restyled.Api.UpsertRepo as ApiUpsertRepo
-import Restyled.Marketplace
 import Restyled.Test.Graphula
 
 spec :: Spec
@@ -53,13 +54,12 @@ spec = withApp $ do
                 repoIsPrivate repo `shouldBe` False
                 repoInstallationId repo `shouldBe` 1
 
-        context "marketplacePlanAllows" $ do
+        context "restylerEnv" $ do
             it "allows public repos" $ runDB $ do
                 Right repo <- runValidateT
                     $ upsertRepo body { ApiUpsertRepo.isPrivate = False }
 
-                ApiRepo.marketplacePlanAllows repo
-                    `shouldBe` Just MarketplacePlanAllows
+                lookupRestylerEnv "PLAN_RESTRICTION" repo `shouldBe` Just ""
 
             it "handles private plans" $ graph $ do
                 plan <- node @MarketplacePlan () $ edit $ setPlanLimited 1
@@ -70,20 +70,27 @@ spec = withApp $ do
                           )
                     $ edit setAccountUnexpired
 
-                lift $ runDB $ do
-                    Right (repo1, repo2) <-
-                        runValidateT
-                        $ (,)
-                        <$> upsertRepo body
-                                { ApiUpsertRepo.name = "one"
-                                , ApiUpsertRepo.isPrivate = True
-                                }
-                        <*> upsertRepo body
-                                { ApiUpsertRepo.name = "two"
-                                , ApiUpsertRepo.isPrivate = True
-                                }
+                Right (repo1, repo2) <-
+                    lift
+                    $ runDB
+                    $ runValidateT
+                    $ (,)
+                    <$> upsertRepo body
+                            { ApiUpsertRepo.name = "one"
+                            , ApiUpsertRepo.isPrivate = True
+                            }
+                    <*> upsertRepo body
+                            { ApiUpsertRepo.name = "two"
+                            , ApiUpsertRepo.isPrivate = True
+                            }
 
-                    ApiRepo.marketplacePlanAllows repo1
-                        `shouldBe` Just MarketplacePlanAllows
-                    ApiRepo.marketplacePlanAllows repo2 `shouldBe` Just
-                        (MarketplacePlanForbids MarketplacePlanMaxRepos)
+                lookupRestylerEnv "PLAN_RESTRICTION" repo1 `shouldBe` Just ""
+                lookupRestylerEnv "PLAN_RESTRICTION" repo2
+                    `shouldBe` Just
+                                   "You have reached the maximum number of private repositories for the Marketplace plan for the owner of this repository (foo)"
+
+lookupRestylerEnv :: Text -> ApiRepo -> Maybe Text
+lookupRestylerEnv k =
+    fmap (T.drop (T.length k + 1))
+        . find ((k <> "=") `T.isPrefixOf`)
+        . ApiRepo.restylerEnv
