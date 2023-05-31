@@ -5,147 +5,147 @@
 
 packages:
 - completed:
-    size: 27775608
-    subdir: lib/amazonka
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
     name: amazonka
-    version: '2.0'
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
     pantry-tree:
-      size: 1257
       sha256: 0257a27c3332e400abc0f4a38f7a875c4a2a04b03ac342d7481e19d9d5665040
+      size: 1257
+    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
+    size: 27775608
+    subdir: lib/amazonka
+    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
+    version: '2.0'
   original:
     subdir: lib/amazonka
     url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
 - completed:
-    size: 27775608
-    subdir: lib/amazonka-core
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
     name: amazonka-core
-    version: '2.0'
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
     pantry-tree:
-      size: 3117
       sha256: 2eadbad33f65f20781409c4de9faee04e7e4baa92906db696b78689f53de0a83
+      size: 3117
+    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
+    size: 27775608
+    subdir: lib/amazonka-core
+    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
+    version: '2.0'
   original:
     subdir: lib/amazonka-core
     url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
 - completed:
-    size: 27775608
-    subdir: lib/services/amazonka-cloudwatch-logs
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
     name: amazonka-cloudwatch-logs
-    version: '2.0'
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
     pantry-tree:
-      size: 13187
       sha256: 601fdd737cfb7f67cc4bcacf72486bb78ba11b4a76b4503ed0f00192500217d5
+      size: 13187
+    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
+    size: 27775608
+    subdir: lib/services/amazonka-cloudwatch-logs
+    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
+    version: '2.0'
   original:
     subdir: lib/services/amazonka-cloudwatch-logs
     url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
 - completed:
-    size: 27775608
-    subdir: lib/services/amazonka-sso
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
     name: amazonka-sso
-    version: '2.0'
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
     pantry-tree:
-      size: 1869
       sha256: f11babeeaf0481ae68134ced86e9d1d9396d1beb7bd70e0a1e6b77bc4148a192
+      size: 1869
+    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
+    size: 27775608
+    subdir: lib/services/amazonka-sso
+    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
+    version: '2.0'
   original:
     subdir: lib/services/amazonka-sso
     url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
 - completed:
+    name: amazonka-sts
+    pantry-tree:
+      sha256: 64ed22eaaea868b32cf56f162d1bd7332b048d8f2ea073c4e9827ed08e71cc70
+      size: 2932
+    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
     size: 27775608
     subdir: lib/services/amazonka-sts
     url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-    name: amazonka-sts
     version: '2.0'
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
-    pantry-tree:
-      size: 2932
-      sha256: 64ed22eaaea868b32cf56f162d1bd7332b048d8f2ea073c4e9827ed08e71cc70
   original:
     subdir: lib/services/amazonka-sts
     url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
 - completed:
+    name: monad-validate
+    pantry-tree:
+      sha256: 2520040223ec05c14da5f1d2ac7a38e5ed2caf0ec307bce4566924da54c28166
+      size: 869
+    sha256: 3cf178595f6dee0cbf73d1263327b38f69df1e9ae406429e4252be634fa88f1e
     size: 18146
     url: https://github.com/LeapYear/monad-validate/archive/5b181b7c57d6e2c975c533b0a0072e9aeb15fb99.tar.gz
-    name: monad-validate
     version: 1.2.0.0
-    sha256: 3cf178595f6dee0cbf73d1263327b38f69df1e9ae406429e4252be634fa88f1e
-    pantry-tree:
-      size: 869
-      sha256: 2520040223ec05c14da5f1d2ac7a38e5ed2caf0ec307bce4566924da54c28166
   original:
     url: https://github.com/LeapYear/monad-validate/archive/5b181b7c57d6e2c975c533b0a0072e9aeb15fb99.tar.gz
 - completed:
-    hackage: Blammo-1.0.2.3@sha256:8ad05477633069b99283ee005c9d85b895d9fa70c091c45e36a39cfeffeeda80,4166
+    hackage: Blammo-1.1.2.0@sha256:64b0114d67aacda2a77ed64cf1a1af030090907a4b1457a0f49ddf5a3be59303,4045
     pantry-tree:
-      size: 1257
-      sha256: 1663b20e45100f09277e205e26990fe636f87f208a8634aae8157887cb261ac9
+      sha256: 0712ebf2a7af368499f0bea836f0619c01280324caf3dc52107a5ce91bbbb1ac
+      size: 1490
   original:
-    hackage: Blammo-1.0.2.3
+    hackage: Blammo-1.1.2.0
 - completed:
     hackage: envparse-0.5.0@sha256:ba9ad793ed2fcfce644b3ebb8eb6c2fef2e44924f75e1b324956340e664c416e,2849
     pantry-tree:
-      size: 1181
       sha256: 419a6843224ad32755064276f8e36500c71238db1b5807a2c9596fa4ed909a5a
+      size: 1181
   original:
     hackage: envparse-0.5.0
 - completed:
     hackage: monad-logger-aeson-0.3.1.0@sha256:dbb1f816d00a820982094362551e20582de0a27c337d430fa7080dcacbe66f34,5193
     pantry-tree:
-      size: 5103
       sha256: 6e213a5fd0d3cd17fb4011b0c7181373bd836a86ae82fea5700b44cfc3d9eb01
+      size: 5103
   original:
     hackage: monad-logger-aeson-0.3.1.0
 - completed:
     hackage: context-0.2.0.1@sha256:b5a1390a5ad11b7edd0449c9ef96823f082bff4988bd09583e37a4e93e9aad10,1891
     pantry-tree:
-      size: 952
       sha256: ebb043dd007864588c6b1676a0d30e521deab4353a3f19716f6f6f7d52b62817
+      size: 952
   original:
     hackage: context-0.2.0.1
 - completed:
     hackage: algebraic-graphs-0.5@sha256:6eeec5ed1687ff7aa916e7bf9f02f51aaabde6f314dc0b7b1a84156974d7da73,8071
     pantry-tree:
-      size: 4128
       sha256: cca4a0348bb126506cacd8436948a68aad62e75d45df8c71f4090a00e69b45ee
+      size: 4128
   original:
     hackage: algebraic-graphs-0.5
 - completed:
     hackage: HDBC-postgresql-2.5.0.1@sha256:37bb911cd996d12c91fa711002877f32f91bcc488de76d85a05865c3af9dc580,3032
     pantry-tree:
-      size: 1611
       sha256: bb1e349a28844e59ed36e1a3963cd6946e57f5e39244a6d36397d6291d68a138
+      size: 1611
   original:
     hackage: HDBC-postgresql-2.5.0.1
 - completed:
     hackage: dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
     pantry-tree:
-      size: 3935
       sha256: c0ed60caea8b8aace63e40628c753ba8b007edcea17ccc270317b533d07c8e28
+      size: 3935
   original:
     hackage: dbmigrations-2.0.0
 - completed:
     hackage: yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d,1887
     pantry-tree:
-      size: 217
       sha256: ed05f839d189a312392f35d41888602b5929a8c0bcd54ee50bffe013552526ba
+      size: 217
   original:
     hackage: yaml-light-0.1.4
 - completed:
     hackage: HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da,1818
     pantry-tree:
-      size: 1024
       sha256: d0465b8296fc621a76c7362eadf1364489781ca09d79441ec22b7a18b12eed46
+      size: 1024
   original:
     hackage: HsSyck-0.53
 snapshots:
 - completed:
+    sha256: 005f204647467d65c4ab549a5ca35d54b3d90a84a99a4ffc5d421a4018854fe2
     size: 618509
     url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/10.yaml
-    sha256: 005f204647467d65c4ab549a5ca35d54b3d90a84a99a4ffc5d421a4018854fe2
   original: lts-19.10

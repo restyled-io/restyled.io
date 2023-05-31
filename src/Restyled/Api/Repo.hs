@@ -5,7 +5,8 @@ module Restyled.Api.Repo
 
 import Restyled.Prelude
 
-import Blammo.Logging.LogSettings (shouldLogLevel)
+import Blammo.Logging.LogSettings (getLogSettingsLevels)
+import Blammo.Logging.LogSettings.LogLevels (newLogLevels, showLogLevels)
 import Restyled.Marketplace
 import Restyled.Models.DB
 import Restyled.RestylerImage
@@ -31,30 +32,45 @@ apiRepo (Entity _ Repo {..}) AppSettings {..} mAllows = ApiRepo
     , isPrivate = repoIsPrivate
     , isEnabled = repoEnabled
     , installationId = repoInstallationId
-    , marketplacePlanAllows = mAllows
+    , marketplacePlanAllows = mAllows -- Remove after agent is updated
     , restylerImage = fromMaybe appRestylerImage repoRestylerImage
     , restylerEnv =
-        [ "DEBUG=" <> if logLevel == LevelDebug then "x" else ""
-        , "LOG_LEVEL=" <> logLevelToText logLevel
+        [ "REPO_DISABLED=" <> if repoEnabled then "" else "x"
+        , "PLAN_RESTRICTION=" <> fromMaybe "" mPlanRestriction
+        , "PLAN_UPGRADE_URL=https://github.com/marketplace/restyled-io"
         , "LOG_FORMAT=json"
+        , "LOG_LEVEL=" <> pack (showLogLevels logLevels)
         ]
     }
   where
-    logLevel =
-        if repoDebugEnabled then LevelDebug else guessLogLevel appLogSettings
+    mPlanRestriction =
+        fmap (toPlanRestriction repoOwner) $ getLimitation =<< mAllows
 
-logLevelToText :: LogLevel -> Text
-logLevelToText = \case
-    LevelDebug -> "DEBUG"
-    LevelInfo -> "INFO"
-    LevelWarn -> "WARN"
-    LevelError -> "ERROR"
-    LevelOther x -> x
+    logLevels = if repoDebugEnabled
+        then newLogLevels LevelDebug []
+        else getLogSettingsLevels appLogSettings
 
-guessLogLevel :: LogSettings -> LogLevel
-guessLogLevel settings = fromMaybe (LevelOther "unknown")
-    $ find shouldLog sortedLevels
-  where
-    shouldLog = shouldLogLevel settings ""
-    sortedLevels =
-        [LevelOther "trace", LevelDebug, LevelInfo, LevelWarn, LevelError]
+toPlanRestriction :: OwnerName -> MarketplacePlanLimitation -> Text
+toPlanRestriction ownerName = \case
+    MarketplacePlanNotFound ->
+        "No Marketplace plan for the owner of this repository ("
+            <> toPathPart ownerName
+            <> ")"
+    MarketplacePlanPublicOnly ->
+        "Marketplace plan for the owner of this repository ("
+            <> toPathPart ownerName
+            <> ") only allows public repositories"
+    MarketplacePlanMaxRepos ->
+        "You have reached the maximum number of private repositories for the Marketplace plan for the owner of this repository ("
+            <> toPathPart ownerName
+            <> ")"
+    MarketplacePlanAccountExpired asOf ->
+        "Marketplace plan for the owner of this repository ("
+            <> toPathPart ownerName
+            <> ") expired at "
+            <> pack (show asOf)
+
+getLimitation :: MarketplacePlanAllows -> Maybe MarketplacePlanLimitation
+getLimitation = \case
+    MarketplacePlanAllows -> Nothing
+    MarketplacePlanForbids x -> Just x
