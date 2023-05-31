@@ -70,5 +70,5 @@ toPlanRestriction ownerName = \case
 
 getLimitation :: MarketplacePlanAllows -> Maybe MarketplacePlanLimitation
 getLimitation = \case
-    MarketplacePlanAllows -> Nothing
+    MarketplacePlanAllows{} -> Nothing
     MarketplacePlanForbids x -> Just x

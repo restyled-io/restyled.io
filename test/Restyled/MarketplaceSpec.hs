@@ -13,13 +13,13 @@ spec = withApp $ do
     describe "marketplacePlanAllows" $ do
         it "always allows public repos" $ graph $ do
             repo <- node @Repo () $ ensure $ not . repoIsPrivate
-            lift $ runDB $ shouldAllow repo
+            lift $ runDB $ shouldAllow repo Nothing
 
         it "allows private repos on the unlimited plan" $ graph $ do
             repo <- node @Repo () $ ensure repoIsPrivate
             plan <- node @MarketplacePlan () $ edit setPlanUnlimited
             void $ genAccount repo plan setAccountUnexpired
-            lift $ runDB $ shouldAllow repo
+            lift $ runDB $ shouldAllow repo $ Just $ entityVal plan
 
         it "disallows private repos on expired plans" $ graph $ do
             expiredAt <- subtractTime (Days 1) <$> getCurrentTime
@@ -55,16 +55,20 @@ spec = withApp $ do
             void $ genAccount privateRepo1 plan setAccountUnexpired
 
             lift $ runDB $ do
-                shouldAllow privateRepo1
-                shouldAllow ossRepo
+                shouldAllow privateRepo1 $ Just $ entityVal plan
+                shouldAllow ossRepo Nothing
                 shouldForbid privateRepo2 MarketplacePlanMaxRepos
-                shouldAllow privateRepo1
+                shouldAllow privateRepo1 $ Just $ entityVal plan
                 shouldForbid privateRepo2 MarketplacePlanMaxRepos
 
-shouldAllow :: (HasCallStack, MonadIO m) => Entity Repo -> SqlPersistT m ()
-shouldAllow repo = do
+shouldAllow
+    :: (HasCallStack, MonadIO m)
+    => Entity Repo
+    -> Maybe MarketplacePlan
+    -> SqlPersistT m ()
+shouldAllow repo mPlan = do
     allows <- marketplacePlanAllows repo
-    allows `shouldBe` MarketplacePlanAllows
+    allows `shouldBe` MarketplacePlanAllows mPlan
 
 shouldForbid
     :: (HasCallStack, MonadIO m)

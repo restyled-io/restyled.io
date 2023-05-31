@@ -38,7 +38,7 @@ fetchUserHasMarketplacePlan planId login = exists
     ]
 
 data MarketplacePlanAllows
-    = MarketplacePlanAllows
+    = MarketplacePlanAllows (Maybe MarketplacePlan)
     | MarketplacePlanForbids MarketplacePlanLimitation
     deriving stock (Eq, Show, Generic)
     deriving anyclass (FromJSON, ToJSON)
@@ -55,7 +55,7 @@ marketplacePlanAllows
     :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
 marketplacePlanAllows repo@(Entity _ Repo {..})
     | repoIsPrivate = marketplacePlanAllowsPrivate repo
-    | otherwise = pure MarketplacePlanAllows
+    | otherwise = pure $ MarketplacePlanAllows Nothing
 
 marketplacePlanAllowsPrivate
     :: MonadIO m => Entity Repo -> SqlPersistT m MarketplacePlanAllows
@@ -64,7 +64,7 @@ marketplacePlanAllowsPrivate repo = do
 
     pure $ case mEnabled of
         Nothing -> MarketplacePlanForbids MarketplacePlanNotFound
-        Just PrivateRepoEnabled -> MarketplacePlanAllows
+        Just (PrivateRepoEnabled plan) -> MarketplacePlanAllows $ Just plan
         Just PrivateRepoNotAllowed ->
             MarketplacePlanForbids MarketplacePlanPublicOnly
         Just PrivateRepoLimited ->

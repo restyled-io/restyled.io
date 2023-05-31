@@ -22,7 +22,7 @@ postRepoMarketplaceClaimR owner name = do
 
     case mEnabled of
         Nothing -> notFound
-        Just PrivateRepoEnabled -> do
+        Just PrivateRepoEnabled{} -> do
             setMessage "Private repository enabled"
             redirectOr $ sendResponseStatus status201 ()
         Just PrivateRepoNotAllowed ->

@@ -10,7 +10,7 @@ import Restyled.Models
 import Restyled.PrivateRepoAllowance
 
 data PrivateRepoEnabled
-    = PrivateRepoEnabled
+    = PrivateRepoEnabled MarketplacePlan
     | PrivateRepoNotAllowed
     | PrivateRepoLimited
     | PrivateRepoAccountExpired UTCTime
@@ -36,22 +36,23 @@ enableMarketplaceRepoIdForAccountT
     -> Entity MarketplaceAccount
     -> MaybeT (SqlPersistT m) PrivateRepoEnabled
 enableMarketplaceRepoIdForAccountT repoId (Entity accountId account) = do
-    Entity planId plan <- getEntityT $ marketplaceAccountMarketplacePlan account
+    plan <- getEntityT $ marketplaceAccountMarketplacePlan account
 
     lift
-        $ enableMarketplaceRepoForPlan planId accountId repoId
-        $ marketplacePlanPrivateRepoAllowance plan
+        $ enableMarketplaceRepoForPlan plan accountId repoId
+        $ marketplacePlanPrivateRepoAllowance
+        $ entityVal plan
 
 enableMarketplaceRepoForPlan
     :: MonadIO m
-    => MarketplacePlanId
+    => Entity MarketplacePlan
     -> MarketplaceAccountId
     -> RepoId
     -> PrivateRepoAllowance
     -> SqlPersistT m PrivateRepoEnabled
-enableMarketplaceRepoForPlan planId accountId repoId = \case
+enableMarketplaceRepoForPlan (Entity planId plan) accountId repoId = \case
     PrivateRepoAllowanceNone -> pure PrivateRepoNotAllowed
-    PrivateRepoAllowanceUnlimited -> pure PrivateRepoEnabled
+    PrivateRepoAllowanceUnlimited -> pure $ PrivateRepoEnabled plan
     PrivateRepoAllowanceLimited limit -> do
         enabledRepoIds <-
             marketplaceEnabledRepoRepo
@@ -63,7 +64,7 @@ enableMarketplaceRepoForPlan planId accountId repoId = \case
                      []
 
         result <- checkEnabledRepos enabledRepoIds limit
-        pure $ if result then PrivateRepoEnabled else PrivateRepoLimited
+        pure $ if result then PrivateRepoEnabled plan else PrivateRepoLimited
   where
     checkEnabledRepos enabledRepoIds limit
         | repoId `elem` enabledRepoIds = pure True
