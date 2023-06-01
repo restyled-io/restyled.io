@@ -59,7 +59,7 @@ spec = withApp $ do
                 Right repo <- runValidateT
                     $ upsertRepo body { ApiUpsertRepo.isPrivate = False }
 
-                lookupRestylerEnv "PLAN_RESTRICTION" repo `shouldBe` Just ""
+                lookupRestylerEnv "PLAN_RESTRICTION" repo `shouldBe` Nothing
 
             it "handles private plans" $ graph $ do
                 plan <- node @MarketplacePlan () $ edit $ setPlanLimited 1
@@ -84,7 +84,7 @@ spec = withApp $ do
                             , ApiUpsertRepo.isPrivate = True
                             }
 
-                lookupRestylerEnv "PLAN_RESTRICTION" repo1 `shouldBe` Just ""
+                lookupRestylerEnv "PLAN_RESTRICTION" repo1 `shouldBe` Nothing
                 lookupRestylerEnv "PLAN_RESTRICTION" repo2
                     `shouldBe` Just
                                    "You have reached the maximum number of private repositories for the Marketplace plan for the owner of this repository (foo)"

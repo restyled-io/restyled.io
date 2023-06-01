@@ -7,6 +7,8 @@ import Restyled.Prelude
 
 import Blammo.Logging.LogSettings (getLogSettingsLevels)
 import Blammo.Logging.LogSettings.LogLevels (newLogLevels, showLogLevels)
+import Restyled.Bytes
+import Restyled.CpuShares
 import Restyled.Marketplace
 import Restyled.Models.DB
 import Restyled.RestylerImage
@@ -32,18 +34,23 @@ apiRepo (Entity _ Repo {..}) AppSettings {..} mAllows = ApiRepo
     , isEnabled = repoEnabled
     , installationId = repoInstallationId
     , restylerImage = fromMaybe appRestylerImage repoRestylerImage
-    , restylerEnv =
-        [ "REPO_DISABLED=" <> if repoEnabled then "" else "x"
-        , "PLAN_RESTRICTION=" <> fromMaybe "" mPlanRestriction
-        , "PLAN_UPGRADE_URL=https://github.com/marketplace/restyled-io"
-        , "LOG_FORMAT=json"
-        , "LOG_LEVEL=" <> pack (showLogLevels logLevels)
+    , restylerEnv = catMaybes
+        [ Just $ "REPO_DISABLED=" <> if repoEnabled then "" else "x"
+        , Just "LOG_FORMAT=json"
+        , Just $ "LOG_LEVEL=" <> pack (showLogLevels logLevels)
+        , Just "PLAN_UPGRADE_URL=https://github.com/marketplace/restyled-io"
+        , ("PLAN_RESTRICTION=" <>)
+        . toPlanRestriction repoOwner
+        <$> (getLimitation =<< mAllows)
+        , ("RESTYLER_CPU_SHARES=" <>)
+        . cpuSharesToText
+        <$> (marketplacePlanCpuShares =<< getPlan =<< mAllows)
+        , ("RESTYLER_MEMORY=" <>)
+        . bytesToText
+        <$> (marketplacePlanMemory =<< getPlan =<< mAllows)
         ]
     }
   where
-    mPlanRestriction =
-        fmap (toPlanRestriction repoOwner) $ getLimitation =<< mAllows
-
     logLevels = if repoDebugEnabled
         then newLogLevels LevelDebug []
         else getLogSettingsLevels appLogSettings
@@ -67,6 +74,11 @@ toPlanRestriction ownerName = \case
             <> toPathPart ownerName
             <> ") expired at "
             <> pack (show asOf)
+
+getPlan :: MarketplacePlanAllows -> Maybe MarketplacePlan
+getPlan = \case
+    MarketplacePlanAllows x -> x
+    MarketplacePlanForbids{} -> Nothing
 
 getLimitation :: MarketplacePlanAllows -> Maybe MarketplacePlanLimitation
 getLimitation = \case
