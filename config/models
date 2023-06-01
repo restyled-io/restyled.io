@@ -51,6 +51,8 @@ MarketplacePlan json
   privateRepoAllowance PrivateRepoAllowance
   monthlyRevenue UsCents
   retired Bool
+  cpuShares CpuShares Maybe
+  memory Bytes Maybe
 
   UniqueMarketplacePlan githubId !force
   deriving Eq Show Generic

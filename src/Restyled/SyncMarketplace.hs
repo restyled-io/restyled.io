@@ -12,6 +12,7 @@ import Data.Vector (Vector)
 import qualified Data.Vector as V
 import qualified GitHub.Endpoints.MarketplaceListing.Plans as GH
 import qualified GitHub.Endpoints.MarketplaceListing.Plans.Accounts as GH
+import Restyled.Bytes
 import Restyled.DB
 import Restyled.Env
 import Restyled.Models
@@ -176,6 +177,9 @@ synchronizePlan plan = entityKey <$> upsert
         , marketplacePlanMonthlyRevenue = fromCents
             $ GH.marketplacePlanMonthlyPriceInCents plan
         , marketplacePlanRetired = GH.marketplacePlanState plan == "retired"
+        , marketplacePlanCpuShares = Nothing
+        , marketplacePlanMemory = inferMemoryRestrictionByName
+            $ GH.marketplacePlanName plan
         }
     [ MarketplacePlanName =. GH.marketplacePlanName plan
     , MarketplacePlanDescription =. GH.marketplacePlanDescription plan
@@ -189,6 +193,12 @@ inferPrivateRepoAllowanceByName = \case
     "Unlimited" -> PrivateRepoAllowanceUnlimited
     "Solo" -> PrivateRepoAllowanceLimited 1
     _ -> PrivateRepoAllowanceNone
+
+inferMemoryRestrictionByName :: Text -> Maybe Bytes
+inferMemoryRestrictionByName = \case
+    "Unlimited" -> Just $ Bytes 1 $ Just G
+    "Solo" -> Nothing
+    _ -> Nothing
 
 synchronizeAccount
     :: MonadIO m

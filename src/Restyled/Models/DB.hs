@@ -17,6 +17,8 @@ import Database.Persist.Quasi
 import Database.Persist.Sql (toSqlKey)
 import Database.Persist.TH
 import Graphula
+import Restyled.Bytes
+import Restyled.CpuShares
 import Restyled.PrivateRepoAllowance
 import Restyled.RestylerImage
 import Restyled.UsCents

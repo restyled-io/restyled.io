@@ -101,4 +101,6 @@ githubStudentsPlan = MarketplacePlan
     , marketplacePlanDescription = "Free Unlimited for verified GitHub Students"
     , marketplacePlanMonthlyRevenue = fromCents 0
     , marketplacePlanRetired = False
+    , marketplacePlanCpuShares = Nothing
+    , marketplacePlanMemory = Nothing
     }

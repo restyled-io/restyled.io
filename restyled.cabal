@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
+-- This file has been generated from package.yaml by hpack version 0.35.2.
 --
 -- see: https://github.com/sol/hpack
 
@@ -35,8 +35,10 @@ library
       Restyled.Authentication
       Restyled.Authorization
       Restyled.AWS
+      Restyled.Bytes
       Restyled.Cache
       Restyled.CLI
+      Restyled.CpuShares
       Restyled.DB
       Restyled.Development.Seeds
       Restyled.Env

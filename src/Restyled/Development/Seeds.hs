@@ -117,6 +117,8 @@ seedDB = do
         , marketplacePlanDescription = "Manually managed discount plan"
         , marketplacePlanMonthlyRevenue = fromCents 0
         , marketplacePlanRetired = False
+        , marketplacePlanCpuShares = Nothing
+        , marketplacePlanMemory = Nothing
         }
 
     void $ upsert

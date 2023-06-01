@@ -41,6 +41,8 @@ createOffer CreateOffer {..} = do
             , marketplacePlanPrivateRepoAllowance = fromNumeric repos
             , marketplacePlanMonthlyRevenue = fromCents 0
             , marketplacePlanRetired = False
+            , marketplacePlanCpuShares = Nothing
+            , marketplacePlanMemory = Nothing
             }
     offerId <- insert Offer
         { offerName = coName
