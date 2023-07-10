@@ -1,6 +1,6 @@
 module Restyled.Handlers.Favicon
-    ( getFaviconR
-    ) where
+  ( getFaviconR
+  ) where
 
 import Restyled.Prelude
 
@@ -11,6 +11,6 @@ import Restyled.Yesod
 
 getFaviconR :: Handler TypedContent
 getFaviconR = do
-    cacheSeconds $ 60 * 60 * 24 * 30 -- cache for a month
-    favicon <- liftIO . C8.readFile =<< getsYesod (appFavicon . view settingsL)
-    pure $ TypedContent "image/x-icon" $ toContent favicon
+  cacheSeconds $ 60 * 60 * 24 * 30 -- cache for a month
+  favicon <- liftIO . C8.readFile =<< getsYesod (appFavicon . view settingsL)
+  pure $ TypedContent "image/x-icon" $ toContent favicon

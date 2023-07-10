@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Robots
-    ( getRobotsR
-    ) where
+  ( getRobotsR
+  ) where
 
 import Restyled.Prelude
 
@@ -12,4 +12,4 @@ import Restyled.Yesod
 
 getRobotsR :: Handler TypedContent
 getRobotsR =
-    pure . TypedContent typePlain $ toContent $(embedFile "config/robots.txt")
+  pure . TypedContent typePlain $ toContent $(embedFile "config/robots.txt")

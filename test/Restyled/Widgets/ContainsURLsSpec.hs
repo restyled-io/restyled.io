@@ -1,6 +1,6 @@
 module Restyled.Widgets.ContainsURLsSpec
-    ( spec
-    ) where
+  ( spec
+  ) where
 
 import Restyled.Test hiding (toText)
 
@@ -9,49 +9,48 @@ import Text.Megaparsec (errorBundlePretty, parse)
 
 spec :: Spec
 spec = do
-    describe "containsURLs" $ do
-        it "round-trips" . property $ \(Parsed c) ->
-            containsURLs (concatParts c) == c
+  describe "containsURLs" $ do
+    it "round-trips" . property $ \(Parsed c) ->
+      containsURLs (concatParts c) == c
 
-        it "parses URLs within content" $ do
-            "Hi http://google.com there."
-                `shouldParseTo` [ ContentPart "Hi "
-                                , URLPart "http://google.com"
-                                , ContentPart " there."
-                                ]
+    it "parses URLs within content" $ do
+      "Hi http://google.com there."
+        `shouldParseTo` [ ContentPart "Hi "
+                        , URLPart "http://google.com"
+                        , ContentPart " there."
+                        ]
 
 concatParts :: ContainsURLs -> Text
 concatParts (ContainsURLs parts) = mconcat $ map toText parts
-  where
-    toText (ContentPart t) = t
-    toText (URLPart t) = t
+ where
+  toText (ContentPart t) = t
+  toText (URLPart t) = t
 
 shouldParseTo :: Text -> [ContentPart] -> Expectation
 shouldParseTo input expected =
-    either (expectationFailure . errorBundlePretty) (`shouldBe` expected)
-        $ parse contentPartsP "" input
+  either (expectationFailure . errorBundlePretty) (`shouldBe` expected)
+    $ parse contentPartsP "" input
 
 newtype Parsed = Parsed ContainsURLs
-    deriving stock Show
+  deriving stock (Show)
 
 instance Arbitrary Parsed where
-    arbitrary = do
-        n <- getPositive <$> arbitrary
-        parts <-
-            oneof
-                [ alternating contentPart urlPart
-                , alternating urlPart contentPart
-                ]
-        pure $ Parsed $ ContainsURLs $ spaced $ take n parts
+  arbitrary = do
+    n <- getPositive <$> arbitrary
+    parts <-
+      oneof
+        [ alternating contentPart urlPart
+        , alternating urlPart contentPart
+        ]
+    pure $ Parsed $ ContainsURLs $ spaced $ take n parts
 
 -- | Add a leading space to any @'ContentPart'@ after a @'URLPart'@
 --
 -- URL parts are (naively) parsed by ending whitespace, so any Content parts
 -- parsed after a URL part would always have that.
---
 spaced :: [ContentPart] -> [ContentPart]
 spaced (URLPart url : ContentPart t : rest) =
-    URLPart url : ContentPart (" " <> t) : spaced rest
+  URLPart url : ContentPart (" " <> t) : spaced rest
 spaced [] = []
 spaced (x : xs) = x : spaced xs
 
@@ -60,16 +59,16 @@ contentPart = ContentPart . pack . getNonEmpty <$> arbitrary
 
 urlPart :: Gen ContentPart
 urlPart = URLPart <$> url
-  where
-    url = (<>) <$> scheme <*> withoutSpaces
+ where
+  url = (<>) <$> scheme <*> withoutSpaces
 
-    scheme :: Gen Text
-    scheme = elements ["http://", "https://"]
+  scheme :: Gen Text
+  scheme = elements ["http://", "https://"]
 
 withoutSpaces :: Gen Text
 withoutSpaces = do
-    n <- arbitrary `suchThat` (> 0)
-    pack <$> replicateM n nonSpace
+  n <- arbitrary `suchThat` (> 0)
+  pack <$> replicateM n nonSpace
 
 nonSpace :: Gen Char
 nonSpace = arbitrary `suchThat` (not . isSpace)

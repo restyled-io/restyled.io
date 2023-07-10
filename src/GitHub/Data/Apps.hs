@@ -1,8 +1,8 @@
 module GitHub.Data.Apps
-    ( App
-    , AppKey
-    , unAppKey
-    ) where
+  ( App
+  , AppKey
+  , unAppKey
+  ) where
 
 import Prelude
 
@@ -12,5 +12,5 @@ import Data.String
 data App
 
 -- | RSA key content in PEM format, for authorizing via JWT
-newtype AppKey = AppKey { unAppKey :: String }
-    deriving newtype IsString
+newtype AppKey = AppKey {unAppKey :: String}
+  deriving newtype (IsString)

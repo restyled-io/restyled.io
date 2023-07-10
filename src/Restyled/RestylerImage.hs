@@ -1,7 +1,7 @@
 module Restyled.RestylerImage
-    ( RestylerImage
-    , restylerImage
-    ) where
+  ( RestylerImage
+  , restylerImage
+  ) where
 
 import Restyled.Prelude
 
@@ -11,15 +11,15 @@ import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Instances.Text ()
 
 newtype RestylerImage = RestylerImage Text
-    deriving stock (Eq, Show)
-    deriving newtype
-        ( Arbitrary
-        , PersistField
-        , PersistFieldSql
-        , SqlString
-        , FromJSON
-        , ToJSON
-        )
+  deriving stock (Eq, Show)
+  deriving newtype
+    ( Arbitrary
+    , PersistField
+    , PersistFieldSql
+    , SqlString
+    , FromJSON
+    , ToJSON
+    )
 
 restylerImage :: Text -> RestylerImage
 restylerImage = RestylerImage

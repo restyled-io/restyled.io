@@ -1,11 +1,10 @@
 module Restyled.Models.User
-    (
-    -- * Virtual properties
-      userIsAdmin
+  ( -- * Virtual properties
+    userIsAdmin
 
     -- * Data access
-    , fetchMarketplaceAccountForLoginT
-    ) where
+  , fetchMarketplaceAccountForLoginT
+  ) where
 
 import Restyled.Prelude
 
@@ -16,7 +15,7 @@ userIsAdmin :: AppSettings -> User -> Bool
 userIsAdmin AppSettings {..} = maybe False (`elem` appAdmins) . userEmail
 
 fetchMarketplaceAccountForLoginT
-    :: MonadIO m
-    => GitHubUserName
-    -> MaybeT (SqlPersistT m) (Entity MarketplaceAccount)
+  :: MonadIO m
+  => GitHubUserName
+  -> MaybeT (SqlPersistT m) (Entity MarketplaceAccount)
 fetchMarketplaceAccountForLoginT = getByT . UniqueMarketplaceAccount

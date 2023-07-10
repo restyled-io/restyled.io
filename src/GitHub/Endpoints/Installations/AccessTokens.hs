@@ -1,6 +1,6 @@
 module GitHub.Endpoints.Installations.AccessTokens
-    ( accessTokenForR
-    ) where
+  ( accessTokenForR
+  ) where
 
 import Prelude
 
@@ -10,7 +10,8 @@ import GitHub.Data.Installations
 import GitHub.Request.Preview
 
 accessTokenForR :: Id Installation -> PreviewRequest 'RW AccessToken
-accessTokenForR installationId = Command
+accessTokenForR installationId =
+  Command
     Post
     ["app", "installations", toPathPart installationId, "access_tokens"]
     mempty

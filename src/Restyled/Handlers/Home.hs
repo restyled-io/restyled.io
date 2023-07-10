@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Home
-    ( getHomeR
-    ) where
+  ( getHomeR
+  ) where
 
 import Restyled.Prelude
 
@@ -12,5 +12,5 @@ import Restyled.Yesod
 
 getHomeR :: Handler Html
 getHomeR = defaultLayout $ do
-    setTitle "Restyled"
-    $(widgetFile "homepage")
+  setTitle "Restyled"
+  $(widgetFile "homepage")

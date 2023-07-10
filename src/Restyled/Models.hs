@@ -1,6 +1,6 @@
 module Restyled.Models
-    ( module X
-    ) where
+  ( module X
+  ) where
 
 import Restyled.Models.DB as X
 import Restyled.Models.JobLogLine as X

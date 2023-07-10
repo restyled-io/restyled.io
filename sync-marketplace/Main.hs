@@ -1,6 +1,6 @@
 module Main
-    ( main
-    ) where
+  ( main
+  ) where
 
 import Restyled.Prelude
 
@@ -9,5 +9,5 @@ import Restyled.SyncMarketplace
 
 main :: IO ()
 main = do
-    setupCLI
-    runApp syncMarketplace
+  setupCLI
+  runApp syncMarketplace

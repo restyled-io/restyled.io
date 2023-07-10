@@ -1,24 +1,26 @@
 module Restyled.Models.UserSpec
-    ( spec
-    ) where
+  ( spec
+  ) where
 
 import Restyled.Test
 
-import qualified Prelude as Unsafe
 import Restyled.Queues
 import Restyled.RestylerImage
+import qualified Prelude as Unsafe
 
 data AdminSettings = AdminSettings
-    { asAppSettings :: AppSettings
-    -- ^ An @'AppSettings'@ with non-empty @'appAdmins'@
-    , asSomeAdminEmail :: Text
-    -- ^ A random element from the @'appAdmins'@ list
-    , asSomeOtherEmail :: Text
-    -- ^ A random email /not/ in said list
-    }
+  { asAppSettings :: AppSettings
+  -- ^ An @'AppSettings'@ with non-empty @'appAdmins'@
+  , asSomeAdminEmail :: Text
+  -- ^ A random element from the @'appAdmins'@ list
+  , asSomeOtherEmail :: Text
+  -- ^ A random email /not/ in said list
+  }
 
 instance Show AdminSettings where
-    show AdminSettings {..} = unpack $ unlines
+  show AdminSettings {..} =
+    unpack
+      $ unlines
         [ "AdminSettings"
         , "  { asAppSettings ="
         , "    AppSettings"
@@ -31,38 +33,40 @@ instance Show AdminSettings where
         ]
 
 instance Arbitrary AdminSettings where
-    arbitrary = do
-        len <- getPositive <$> arbitrary
-        idx <- choose (0, len - 1)
-        emails <- replicateM len arbitrary
-        someOtherEmail <- arbitrary `suchThat` (`notElem` emails)
-        pure AdminSettings
-            { asAppSettings = emptySettings { appAdmins = map pack emails }
-            , asSomeAdminEmail = pack $ emails Unsafe.!! idx
-            , asSomeOtherEmail = pack someOtherEmail
-            }
+  arbitrary = do
+    len <- getPositive <$> arbitrary
+    idx <- choose (0, len - 1)
+    emails <- replicateM len arbitrary
+    someOtherEmail <- arbitrary `suchThat` (`notElem` emails)
+    pure
+      AdminSettings
+        { asAppSettings = emptySettings {appAdmins = map pack emails}
+        , asSomeAdminEmail = pack $ emails Unsafe.!! idx
+        , asSomeOtherEmail = pack someOtherEmail
+        }
 
 spec :: Spec
 spec = do
-    describe "userIsAdmin" $ do
-        it "is False without admins"
-            $ property
-            $ not
-            . userIsAdmin emptySettings
-            . userWithEmail
-            . pack
+  describe "userIsAdmin" $ do
+    it "is False without admins"
+      $ property
+      $ not
+      . userIsAdmin emptySettings
+      . userWithEmail
+      . pack
 
-        it "is False without email" $ property $ \AdminSettings {..} ->
-            not $ userIsAdmin asAppSettings emptyUser
+    it "is False without email" $ property $ \AdminSettings {..} ->
+      not $ userIsAdmin asAppSettings emptyUser
 
-        it "is False for non-admins" $ property $ \AdminSettings {..} ->
-            not $ userIsAdmin asAppSettings $ userWithEmail asSomeOtherEmail
+    it "is False for non-admins" $ property $ \AdminSettings {..} ->
+      not $ userIsAdmin asAppSettings $ userWithEmail asSomeOtherEmail
 
-        it "is True for admins" $ property $ \AdminSettings {..} ->
-            userIsAdmin asAppSettings $ userWithEmail asSomeAdminEmail
+    it "is True for admins" $ property $ \AdminSettings {..} ->
+      userIsAdmin asAppSettings $ userWithEmail asSomeAdminEmail
 
 emptySettings :: AppSettings
-emptySettings = AppSettings
+emptySettings =
+  AppSettings
     { appDatabaseConf = error "unused"
     , appStatementTimeout = error "unused"
     , appRedisConf = error "unused"
@@ -93,10 +97,11 @@ emptySettings = AppSettings
     }
 
 userWithEmail :: Text -> User
-userWithEmail email = emptyUser { userEmail = Just email }
+userWithEmail email = emptyUser {userEmail = Just email}
 
 emptyUser :: User
-emptyUser = User
+emptyUser =
+  User
     { userEmail = Nothing
     , userGithubUserId = Nothing
     , userGithubUsername = Nothing

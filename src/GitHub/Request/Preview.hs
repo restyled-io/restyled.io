@@ -1,12 +1,12 @@
 module GitHub.Request.Preview
-    ( PreviewRequest
-    , MachineManPreviewJson
-    ) where
+  ( PreviewRequest
+  , MachineManPreviewJson
+  ) where
 
 import Prelude
 
 import Data.Aeson
-import Data.Tagged (Tagged(..))
+import Data.Tagged (Tagged (..))
 import GitHub.Data
 import GitHub.Request
 
@@ -21,10 +21,9 @@ data MachineManPreviewJson
 -- | Sets @Accept: application/vnd.github.machine-man-preview+json@
 --
 -- Unclear if this impacts @POST@ bodies, but it seem to work.
---
 instance PreviewAccept MachineManPreviewJson where
-    previewContentType = "application/vnd.github.machine-man-preview+json"
+  previewContentType = "application/vnd.github.machine-man-preview+json"
 
 -- | Use @'parseResponseJSON'@
 instance FromJSON a => PreviewParseResponse MachineManPreviewJson a where
-    previewParseResponse _req = Tagged . parseResponseJSON
+  previewParseResponse _req = Tagged . parseResponseJSON

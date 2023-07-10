@@ -1,12 +1,12 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 module Restyled.Paginate
-    ( Direction(..)
-    , paginateBy
-    , Page(..)
-    , renderPaginated
-    , renderPagination
-    ) where
+  ( Direction (..)
+  , paginateBy
+  , Page (..)
+  , renderPaginated
+  , renderPagination
+  ) where
 
 import Restyled.Prelude hiding (sort)
 
@@ -26,36 +26,37 @@ import Yesod.Page.RenderedRoute
 -- @
 -- 'paginateBy' 'persistIdField' 'Ascending'
 -- @
---
 paginateBy
-    :: ( MonadHandler m
-       , PersistEntity entity
-       , PersistEntityBackend entity ~ SqlBackend
-       , Yesod (HandlerSite m)
-       , PersistField a
-       , ToJSON a
-       , FromJSON a
-       )
-    => EntityField entity a
-    -> Direction
-    -> Int
-    -> [Filter entity]
-    -> SqlPersistT m (Page (Entity entity))
+  :: ( MonadHandler m
+     , PersistEntity entity
+     , PersistEntityBackend entity ~ SqlBackend
+     , Yesod (HandlerSite m)
+     , PersistField a
+     , ToJSON a
+     , FromJSON a
+     )
+  => EntityField entity a
+  -> Direction
+  -> Int
+  -> [Filter entity]
+  -> SqlPersistT m (Page (Entity entity))
 paginateBy field direction size userFilters =
-    withPageAbsolute size (^. fieldLens field) $ \Cursor {..} -> do
-        let filters = case directionWhere direction cursorPosition of
-                Nothing -> userFilters
-                Just f -> f field : userFilters
+  withPageAbsolute size (^. fieldLens field) $ \Cursor {..} -> do
+    let
+      filters = case directionWhere direction cursorPosition of
+        Nothing -> userFilters
+        Just f -> f field : userFilters
 
-            options =
-                [ LimitTo $ unLimit cursorLimit
-                , directionOrderBy direction cursorPosition field
-                ]
+      options =
+        [ LimitTo $ unLimit cursorLimit
+        , directionOrderBy direction cursorPosition field
+        ]
 
-        directionSort direction cursorPosition <$> selectList filters options
+    directionSort direction cursorPosition <$> selectList filters options
 
 renderPaginated :: (a -> Widget) -> Page a -> Widget
-renderPaginated renderOne page = [whamlet|
+renderPaginated renderOne page =
+  [whamlet|
     $if null $ pageData page
         <p>Hmm, nothing here yet...
     $else
@@ -66,7 +67,8 @@ renderPaginated renderOne page = [whamlet|
 |]
 
 renderPagination :: Page a -> Widget
-renderPagination page = [whamlet|
+renderPagination page =
+  [whamlet|
 <aside>
     <ul .pagination>
         $maybe p <- pagePrevious page
@@ -85,5 +87,5 @@ renderPagination page = [whamlet|
 
 renderedRouteText :: RenderedRoute -> Text
 renderedRouteText r = case toJSON r of
-    String t -> t
-    _ -> error "RenderedRoute's ToJSON changed"
+  String t -> t
+  _ -> error "RenderedRoute's ToJSON changed"

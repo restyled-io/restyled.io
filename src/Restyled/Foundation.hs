@@ -3,14 +3,14 @@
 {-# OPTIONS_GHC -Wno-missing-local-signatures #-}
 
 module Restyled.Foundation
-    ( module Restyled.Foundation
-    ) where
+  ( module Restyled.Foundation
+  ) where
 
 import Restyled.Prelude
 
 import Data.Text (splitOn)
 import Lens.Micro ((^.))
-import Restyled.AWS (HasAWS(..))
+import Restyled.AWS (HasAWS (..))
 import qualified Restyled.AWS as AWS
 import Restyled.ApiError
 import Restyled.ApiToken
@@ -32,48 +32,49 @@ import qualified Yesod.Persist as YP
 import Yesod.Static
 
 data App = App
-    { appSettings :: AppSettings
-    , appLogger :: Logger
-    , appConnPool :: ConnectionPool
-    , appRedisConn :: Connection
-    , appAWSEnv :: AWS.Env
-    , appStatic :: Static
-    }
+  { appSettings :: AppSettings
+  , appLogger :: Logger
+  , appConnPool :: ConnectionPool
+  , appRedisConn :: Connection
+  , appAWSEnv :: AWS.Env
+  , appStatic :: Static
+  }
 
 instance HasSettings App where
-    settingsL = lens appSettings $ \x y -> x { appSettings = y }
+  settingsL = lens appSettings $ \x y -> x {appSettings = y}
 
 instance HasLogger App where
-    loggerL = lens appLogger $ \x y -> x { appLogger = y }
+  loggerL = lens appLogger $ \x y -> x {appLogger = y}
 
 instance HasQueues App where
-    queuesL = settingsL . queuesL
+  queuesL = settingsL . queuesL
 
 instance HasSqlPool App where
-    sqlPoolL = lens appConnPool $ \x y -> x { appConnPool = y }
+  sqlPoolL = lens appConnPool $ \x y -> x {appConnPool = y}
 
 instance HasRedis App where
-    redisConnectionL = lens appRedisConn $ \x y -> x { appRedisConn = y }
+  redisConnectionL = lens appRedisConn $ \x y -> x {appRedisConn = y}
 
 instance HasAWS App where
-    awsEnvL = lens appAWSEnv $ \x y -> x { appAWSEnv = y }
+  awsEnvL = lens appAWSEnv $ \x y -> x {appAWSEnv = y}
 
 loadApp :: IO App
 loadApp = do
-    settings@AppSettings {..} <- loadSettings
+  settings@AppSettings {..} <- loadSettings
 
-    let createPool = createConnectionPool appDatabaseConf appStatementTimeout
-        makeStatic
-            | appMutableStatic = staticDevel
-            | otherwise = static
+  let
+    createPool = createConnectionPool appDatabaseConf appStatementTimeout
+    makeStatic
+      | appMutableStatic = staticDevel
+      | otherwise = static
 
-    logger <- newLogger appLogSettings
+  logger <- newLogger appLogSettings
 
-    App settings logger
-        <$> runLoggerLoggingT logger createPool
-        <*> checkedConnect appRedisConf
-        <*> runLoggerLoggingT logger AWS.discover
-        <*> makeStatic appStaticDir
+  App settings logger
+    <$> runLoggerLoggingT logger createPool
+    <*> checkedConnect appRedisConf
+    <*> runLoggerLoggingT logger AWS.discover
+    <*> makeStatic appStaticDir
 
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
@@ -82,121 +83,116 @@ type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 -- brittany-disable-next-binding
 
 instance Yesod App where
-    approot = ApprootMaster $ appRoot . view settingsL
+  approot = ApprootMaster $ appRoot . view settingsL
 
-    makeSessionBackend _ = Just
-        -- 2 week session timeout
-        <$> envClientSessionBackend (60 * 24 * 14) "SESSION_KEY"
+  makeSessionBackend _ =
+    Just
+      -- 2 week session timeout
+      <$> envClientSessionBackend (60 * 24 * 14) "SESSION_KEY"
 
-    defaultLayout widget = do
-        master <- getYesod
-        mmsg <- getMessage
-        mUser <- maybeAuth
+  defaultLayout widget = do
+    master <- getYesod
+    mmsg <- getMessage
+    mUser <- maybeAuth
 
-        pc <- widgetToPageContent $ do
-            addStylesheet $ staticR "css/strapless.css"
-            addStylesheet $ staticR "css/main.css"
-            $(widgetFile "default-layout")
-        withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+    pc <- widgetToPageContent $ do
+      addStylesheet $ staticR "css/strapless.css"
+      addStylesheet $ staticR "css/main.css"
+      $(widgetFile "default-layout")
+    withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
-    authRoute _ = Just $ AuthR LoginR
+  authRoute _ = Just $ AuthR LoginR
 
-    isAuthorized (AuthR _) _ = pure Authorized
-    isAuthorized (StaticR _) _ = pure Authorized
-    isAuthorized FaviconR _ = pure Authorized
-    isAuthorized WebhooksR _ = pure Authorized
-    isAuthorized PrivacyPolicyR _ = pure Authorized
-    isAuthorized HomeR _ = pure Authorized
-    isAuthorized RevisionR _ = pure Authorized
-    isAuthorized RobotsR _ = pure Authorized
-    isAuthorized (OffersP _) _ = pure Authorized
-    isAuthorized ThanksGitHubR _ = pure Authorized
-    isAuthorized ThanksGitHubSetupR _ = pure Authorized
-    isAuthorized (GitHubStudentsP _) _ = pure Authorized
+  isAuthorized (AuthR _) _ = pure Authorized
+  isAuthorized (StaticR _) _ = pure Authorized
+  isAuthorized FaviconR _ = pure Authorized
+  isAuthorized WebhooksR _ = pure Authorized
+  isAuthorized PrivacyPolicyR _ = pure Authorized
+  isAuthorized HomeR _ = pure Authorized
+  isAuthorized RevisionR _ = pure Authorized
+  isAuthorized RobotsR _ = pure Authorized
+  isAuthorized (OffersP _) _ = pure Authorized
+  isAuthorized ThanksGitHubR _ = pure Authorized
+  isAuthorized ThanksGitHubSetupR _ = pure Authorized
+  isAuthorized (GitHubStudentsP _) _ = pure Authorized
+  isAuthorized ProfileR _ =
+    maybe AuthenticationRequired (const Authorized) <$> maybeAuthId
+  isAuthorized AdminR _ = do
+    settings <- getsYesod $ view settingsL
+    authorizeAdmin settings =<< maybeAuthId
+  isAuthorized (AdminP _) _ = do
+    settings <- getsYesod $ view settingsL
+    authorizeAdmin settings =<< maybeAuthId
 
-    isAuthorized ProfileR _ =
-        maybe AuthenticationRequired (const Authorized) <$> maybeAuthId
+  -- Jobs API is Admin-only
+  isAuthorized (JobsP _) _ = do
+    settings <- getsYesod $ view settingsL
+    authorizeAdmin settings =<< maybeAuthId
 
-    isAuthorized AdminR _ = do
-        settings <- getsYesod $ view settingsL
-        authorizeAdmin settings =<< maybeAuthId
+  -- Writing RepoR is Admin-only
+  isAuthorized (RepoP _ _ RepoR) True = do
+    settings <- getsYesod $ view settingsL
+    authorizeAdmin settings =<< maybeAuthId
+  isAuthorized (RepoP owner repo _) _ = do
+    settings <- getsYesod $ view settingsL
+    authorizeRepo settings owner repo =<< maybeAuthId
 
-    isAuthorized (AdminP _) _ = do
-        settings <- getsYesod $ view settingsL
-        authorizeAdmin settings =<< maybeAuthId
+  addStaticContent ext mime content = do
+    staticDir <- getsYesod $ appStaticDir . view settingsL
 
-    -- Jobs API is Admin-only
-    isAuthorized (JobsP _) _ = do
-        settings <- getsYesod $ view settingsL
-        authorizeAdmin settings =<< maybeAuthId
+    addStaticContentExternal
+      minifym
+      genFileName
+      staticDir
+      (StaticR . flip StaticRoute [])
+      ext
+      mime
+      content
+   where
+    -- Generate a unique filename based on the content itself
+    genFileName lbs = "autogen-" ++ base64md5 lbs
 
-    -- Writing RepoR is Admin-only
-    isAuthorized (RepoP _ _ RepoR) True = do
-        settings <- getsYesod $ view settingsL
-        authorizeAdmin settings =<< maybeAuthId
+  messageLoggerSource app _logger loc source level msg =
+    runLoggerLoggingT app $ monadLoggerLog loc source level msg
 
-    isAuthorized (RepoP owner repo _) _ = do
-        settings <- getsYesod $ view settingsL
-        authorizeRepo settings owner repo =<< maybeAuthId
+  yesodMiddleware handler = do
+    handleSqlErrorState
+      sqlStateQueryCanceled
+      (\_ -> serverUnavailable "Database operation took too long")
+      (defaultYesodMiddleware handler)
 
-    addStaticContent ext mime content = do
-        staticDir <- getsYesod $ appStaticDir . view settingsL
+  defaultMessageWidget title body = $(widgetFile "default-message-widget")
 
-        addStaticContentExternal
-            minifym
-            genFileName
-            staticDir
-            (StaticR . flip StaticRoute [])
-            ext
-            mime
-            content
-      where
-        -- Generate a unique filename based on the content itself
-        genFileName lbs = "autogen-" ++ base64md5 lbs
+  errorHandler NotFound = do
+    mUserId <- maybeAuthId
 
-    messageLoggerSource app _logger loc source level msg =
-        runLoggerLoggingT app $ monadLoggerLog loc source level msg
-
-    yesodMiddleware handler = do
-        handleSqlErrorState sqlStateQueryCanceled
-            (\_ -> serverUnavailable "Database operation took too long")
-            (defaultYesodMiddleware handler)
-
-    defaultMessageWidget title body = $(widgetFile "default-message-widget")
-
-    errorHandler NotFound = do
-        mUserId <- maybeAuthId
-
-        selectRep $ do
-            provideRep $ defaultLayout $ do
-                setTitle "Not Found"
-                $(widgetFile "not-found")
-            provideRep $ sendApiError $ ApiErrorNotFound $ isJust mUserId
-
-    errorHandler x | Just message <- serverUnavailableMessage x = do
-        selectRep $ do
-            provideRep $ defaultLayout $ do
-                setTitle "Unavailable"
-                $(widgetFile "unavailable")
-            provideRep $ sendApiError $ ApiErrorUnavailable message
-
-    errorHandler x = defaultErrorHandler x
-
+    selectRep $ do
+      provideRep $ defaultLayout $ do
+        setTitle "Not Found"
+        $(widgetFile "not-found")
+      provideRep $ sendApiError $ ApiErrorNotFound $ isJust mUserId
+  errorHandler x | Just message <- serverUnavailableMessage x = do
+    selectRep $ do
+      provideRep $ defaultLayout $ do
+        setTitle "Unavailable"
+        $(widgetFile "unavailable")
+      provideRep $ sendApiError $ ApiErrorUnavailable message
+  errorHandler x = defaultErrorHandler x
 
 -- | Just like default-layout, but admin-specific nav and CSS
 adminLayout :: Widget -> Handler Html
 adminLayout widget = do
-    master <- getYesod
-    mmsg <- getMessage
-    pc <- widgetToPageContent $ do
-        addScript $ staticR "js/admin.js"
-        addStylesheet $ staticR "css/strapless.css"
-        addStylesheet $ staticR "css/main.css"
-        addStylesheet $ staticR "css/admin.css"
-        addScriptRemote "https://underscorejs.org/underscore-min.js"
-        addScriptRemote "https://code.jquery.com/jquery-3.3.1.min.js"
-        $(widgetFile "admin-layout")
-    withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+  master <- getYesod
+  mmsg <- getMessage
+  pc <- widgetToPageContent $ do
+    addScript $ staticR "js/admin.js"
+    addStylesheet $ staticR "css/strapless.css"
+    addStylesheet $ staticR "css/main.css"
+    addStylesheet $ staticR "css/admin.css"
+    addScriptRemote "https://underscorejs.org/underscore-min.js"
+    addScriptRemote "https://code.jquery.com/jquery-3.3.1.min.js"
+    $(widgetFile "admin-layout")
+  withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
 -- | Non-layout for delivering HTML fragments to load into the DOM via JS
 fragmentLayout :: Widget -> Handler Html
@@ -207,54 +203,59 @@ fragmentLayout = withUrlRenderer . pageBody <=< widgetToPageContent
 -- This removes the type-safety of the TH-defined functions, but makes we don't
 -- need compile-time knowledge of our static-directory, and there is value with
 -- keeping all possible settings entirely runtime-defined.
---
 staticR :: FilePath -> Route App
 staticR path = StaticR $ StaticRoute (splitOn "/" $ pack path) []
 
 -- | Only needed for YesodAuth to work, we use @'Restyled.DB.runDB'@ directly
 instance YesodPersist App where
-    type YesodPersistBackend App = SqlBackend
-    runDB = runDB
+  type YesodPersistBackend App = SqlBackend
+  runDB = runDB
 
 instance YesodAuthPersist App
 
 -- brittany-disable-next-binding
 
 instance YesodAuth App where
-    type AuthId App = UserId
+  type AuthId App = UserId
 
-    authenticate = liftHandler
-        . runDB
-        . authenticateUser
+  authenticate =
+    liftHandler
+      . runDB
+      . authenticateUser
 
-    loginDest _ = HomeR
-    logoutDest _ = HomeR
+  loginDest _ = HomeR
+  logoutDest _ = HomeR
 
-    loginHandler = do
-        plugins <- getsYesod authPlugins
+  loginHandler = do
+    plugins <- getsYesod authPlugins
 
-        let
-            -- Nothing results in hiding that plugin on the Login page
-            formatPluginName :: Text -> Maybe Text
-            formatPluginName = \case
-                "github" -> Just "GitHub"
-                "gitlab" -> Just "GitLab"
-                _ -> Nothing
+    let
+      -- Nothing results in hiding that plugin on the Login page
+      formatPluginName :: Text -> Maybe Text
+      formatPluginName = \case
+        "github" -> Just "GitHub"
+        "gitlab" -> Just "GitLab"
+        _ -> Nothing
 
-        authLayout $ do
-            setTitle "Log In"
-            $(widgetFile "login")
+    authLayout $ do
+      setTitle "Log In"
+      $(widgetFile "login")
 
-    authPlugins app = addAuthBackDoor (app ^. settingsL)
-        . addOAuth2Plugin oauth2GitLab (appGitLabOAuthKeys $ app ^. settingsL)
-        . addOAuth2Plugin oauth2GitHub (appGitHubOAuthKeys $ app ^. settingsL)
-        . addOAuth2Plugin oauth2GitHubStudents (appGitHubStudentsOAuthKeys $ app ^. settingsL)
-        $ []
+  authPlugins app =
+    addAuthBackDoor (app ^. settingsL)
+      . addOAuth2Plugin oauth2GitLab (appGitLabOAuthKeys $ app ^. settingsL)
+      . addOAuth2Plugin oauth2GitHub (appGitHubOAuthKeys $ app ^. settingsL)
+      . addOAuth2Plugin
+        oauth2GitHubStudents
+        (appGitHubStudentsOAuthKeys $ app ^. settingsL)
+      $ []
 
-    maybeAuthId = runMaybeT $ asum
+  maybeAuthId =
+    runMaybeT
+      $ asum
         [ MaybeT defaultMaybeAuthId
         , MaybeT $ liftHandler $ runDB getUserIdByApiToken
         ]
 
 instance RenderMessage App FormMessage where
-    renderMessage _ _ = defaultFormMessage
+  renderMessage _ _ = defaultFormMessage

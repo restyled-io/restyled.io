@@ -1,28 +1,28 @@
 -- | Local version of @envparse@
 module Restyled.Env
-    ( Error
-    , Parser
-    , auto
-    , def
-    , nonempty
-    , str
-    , switch
-    , var
+  ( Error
+  , Parser
+  , auto
+  , def
+  , nonempty
+  , str
+  , switch
+  , var
 
     -- * Overrides
-    , parse
-    , splitOn
+  , parse
+  , splitOn
 
     -- * Extensions
-    , eitherReader
+  , eitherReader
 
     -- * Specialized @'Reader'@s
-    , connectInfo
-    , githubId
+  , connectInfo
+  , githubId
 
     -- * Specialized @'Parser'@s
-    , postgresConf
-    ) where
+  , postgresConf
+  ) where
 
 import Restyled.Prelude hiding (Reader)
 
@@ -44,18 +44,18 @@ eitherReader f = first unread . f
 
 connectInfo :: AsUnread e => Reader e ConnectInfo
 connectInfo = eitherReader $ \url ->
-    TLS.parseConnectInfo clientParamsNoVerify url <|> parseConnectInfo url
+  TLS.parseConnectInfo clientParamsNoVerify url <|> parseConnectInfo url
 
 githubId :: AsUnread e => Reader e (Id a)
 githubId = fmap (mkId Proxy) . auto
 
 postgresConf :: Parser Error PostgresConf
 postgresConf =
-    PostgresConf
-        <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
-        <*> var auto "PGPOOLSTRIPES" (def 1)
-        <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
-        <*> var auto "PGPOOLSIZE" (def 10)
+  PostgresConf
+    <$> var nonempty "DATABASE_URL" (def defaultDatabaseURL)
+    <*> var auto "PGPOOLSTRIPES" (def 1)
+    <*> var auto "PGPOOLIDLETIMEOUT" (def 20)
+    <*> var auto "PGPOOLSIZE" (def 10)
 
 defaultDatabaseURL :: ByteString
 defaultDatabaseURL = "postgres://postgres:password@localhost:5432/restyled"

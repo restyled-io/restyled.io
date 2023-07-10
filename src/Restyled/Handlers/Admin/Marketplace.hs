@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Admin.Marketplace
-    ( getAdminMarketplaceR
-    ) where
+  ( getAdminMarketplaceR
+  ) where
 
 import Restyled.Prelude
 
@@ -16,12 +16,12 @@ import Restyled.Yesod
 
 getAdminMarketplaceR :: Handler Html
 getAdminMarketplaceR = do
-    planCounts <- filter (uncurry showPlan) <$> runDB fetchMarketplacePlans
+  planCounts <- filter (uncurry showPlan) <$> runDB fetchMarketplacePlans
 
-    adminLayout $ do
-        setTitle "Admin - Marketplace"
-        $(widgetFile "admin/marketplace")
-  where
-    showPlan :: Entity MarketplacePlan -> Int -> Bool
-    showPlan (Entity _ MarketplacePlan {..}) nAccounts =
-        not $ marketplacePlanRetired && nAccounts == 0
+  adminLayout $ do
+    setTitle "Admin - Marketplace"
+    $(widgetFile "admin/marketplace")
+ where
+  showPlan :: Entity MarketplacePlan -> Int -> Bool
+  showPlan (Entity _ MarketplacePlan {..}) nAccounts =
+    not $ marketplacePlanRetired && nAccounts == 0

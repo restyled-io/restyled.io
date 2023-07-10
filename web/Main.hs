@@ -1,6 +1,6 @@
 module Main
-    ( main
-    ) where
+  ( main
+  ) where
 
 import Restyled.Prelude
 
@@ -10,5 +10,5 @@ import Restyled.Foundation (loadApp)
 
 main :: IO ()
 main = do
-    setupCLI
-    runWaiApp =<< loadApp
+  setupCLI
+  runWaiApp =<< loadApp

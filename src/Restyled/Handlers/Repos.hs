@@ -1,7 +1,7 @@
 module Restyled.Handlers.Repos
-    ( getRepoR
-    , putRepoR
-    ) where
+  ( getRepoR
+  , putRepoR
+  ) where
 
 import Restyled.Prelude
 
@@ -19,11 +19,10 @@ getRepoR = getRepoJobsR
 --
 -- - Request: 'ApiUpsertRepo'
 -- - Response: 400 with 'ApiUpsertRepoErrors' or 200 with 'ApiRepo'
---
 putRepoR :: OwnerName -> RepoName -> Handler Value
 putRepoR owner name = do
-    body <- requireJsonBody
-    result <- runDB $ runValidateT $ do
-        assertOwnerName owner body *> assertRepoName name body
-        upsertRepo body
-    either (sendStatusJSON status400) (sendStatusJSON status200) result
+  body <- requireJsonBody
+  result <- runDB $ runValidateT $ do
+    assertOwnerName owner body *> assertRepoName name body
+    upsertRepo body
+  either (sendStatusJSON status400) (sendStatusJSON status200) result

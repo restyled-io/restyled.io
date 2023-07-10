@@ -1,11 +1,11 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 module Restyled.Test
-    ( withApp
-    , runDB
-    , runRedis
-    , module X
-    ) where
+  ( withApp
+  , runDB
+  , runRedis
+  , module X
+  ) where
 
 import Restyled.Application as X ()
 import Restyled.Foundation as X
@@ -35,7 +35,7 @@ import Text.Shakespeare.Text (st)
 
 -- | A monomorphic alias just to avoid annotations in specs
 runDB
-    :: HasSqlPool env => SqlPersistT (YesodExample env) a -> YesodExample env a
+  :: HasSqlPool env => SqlPersistT (YesodExample env) a -> YesodExample env a
 runDB = DB.runDB
 
 -- | A monomorphic alias just to avoid annotations in specs
@@ -44,21 +44,22 @@ runRedis = Redis.runRedis
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
-    loadEnvFrom ".env.test"
-    foundation <- loadApp
-    runLoggerLoggingT foundation $ flip runReaderT foundation $ do
-        DB.runDB wipeDB
-        Redis.runRedis wipeRedis
-    return (foundation, waiMiddleware foundation)
+  loadEnvFrom ".env.test"
+  foundation <- loadApp
+  runLoggerLoggingT foundation $ flip runReaderT foundation $ do
+    DB.runDB wipeDB
+    Redis.runRedis wipeRedis
+  return (foundation, waiMiddleware foundation)
 
 wipeDB :: MonadIO m => SqlPersistT m ()
 wipeDB = do
-    tables <- getTables
-    escape <- asks connEscapeRawName
+  tables <- getTables
+  escape <- asks connEscapeRawName
 
-    let escapedTables = map (escapeWith escape . EntityNameDB) tables
-        query = "TRUNCATE TABLE " <> T.intercalate ", " escapedTables
-    rawExecute query []
+  let
+    escapedTables = map (escapeWith escape . EntityNameDB) tables
+    query = "TRUNCATE TABLE " <> T.intercalate ", " escapedTables
+  rawExecute query []
 
 wipeRedis :: Redis ()
 wipeRedis = void $ runExceptT $ ExceptT . del =<< ExceptT (keys "restyled:*")
@@ -66,10 +67,13 @@ wipeRedis = void $ runExceptT $ ExceptT . del =<< ExceptT (keys "restyled:*")
 -- brittany-disable-next-binding
 
 getTables :: MonadIO m => ReaderT SqlBackend m [Text]
-getTables = map unSingle <$> rawSql
-    [st|
+getTables =
+  map unSingle
+    <$> rawSql
+      [st|
         SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'public'
           AND table_name <> 'installed_migrations';
-    |] []
+    |]
+      []

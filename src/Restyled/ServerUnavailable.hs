@@ -12,25 +12,24 @@
 --
 -- This module encapsulates the pattern /specifically/ for a "Server
 -- Unavailable" case. If we grow more cases, we might need to re-structure this.
---
 module Restyled.ServerUnavailable
-    ( serverUnavailable
-    , serverUnavailableMessage
-    ) where
+  ( serverUnavailable
+  , serverUnavailableMessage
+  ) where
 
 import Restyled.Prelude
 
 import qualified Data.Text as T
 import Restyled.Yesod
-import Yesod.Core.Types (HandlerContents(HCError))
+import Yesod.Core.Types (HandlerContents (HCError))
 
 serverUnavailable :: MonadHandler m => Text -> m a
 serverUnavailable = liftIO . throwIO . HCError . InternalError . (prefix <>)
 
 serverUnavailableMessage :: ErrorResponse -> Maybe Text
 serverUnavailableMessage = \case
-    InternalError x -> T.stripPrefix prefix x
-    _ -> Nothing
+  InternalError x -> T.stripPrefix prefix x
+  _ -> Nothing
 
 prefix :: Text
 prefix = "XServerUnavailable:"

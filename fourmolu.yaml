@@ -1,0 +1,15 @@
+indentation: 2
+column-limit: 80 # ignored until v12 / ghc-9.6
+function-arrows: leading
+comma-style: leading # default
+import-export-style: leading
+indent-wheres: false # default
+record-brace-space: true
+newlines-between-decls: 1 # default
+haddock-style: single-line
+let-style: mixed
+in-style: left-align
+single-constraint-parens: never # ignored until v12 / ghc-9.6
+unicode: never # default
+respectful: true # default
+fixities: [] # default

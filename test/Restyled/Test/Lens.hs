@@ -1,11 +1,11 @@
 module Restyled.Test.Lens
-    ( fieldLens
-    , (.~)
-    , (?~)
-    , (^.)
-    , (^..)
-    , (^?)
-    ) where
+  ( fieldLens
+  , (.~)
+  , (?~)
+  , (^.)
+  , (^..)
+  , (^?)
+  ) where
 
 import Restyled.Prelude hiding (fieldLens)
 
@@ -18,9 +18,8 @@ import Lens.Micro ((.~), (?~), (^.), (^..), (^?))
 -- over just @record@ for Graphula. This is unsafe when used with a key
 -- 'EntityField', such as 'JobId', which is why the library-provided one works
 -- the way that it does.
---
 fieldLens
-    :: PersistEntity record => EntityField record field -> Lens' record field
+  :: PersistEntity record => EntityField record field -> Lens' record field
 fieldLens field = unsafeEntityLens . P.fieldLens field
 
 unsafeEntityLens :: Lens' record (Entity record)

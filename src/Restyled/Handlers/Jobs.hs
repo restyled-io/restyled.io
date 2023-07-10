@@ -1,7 +1,7 @@
 module Restyled.Handlers.Jobs
-    ( postJobsR
-    , patchJobR
-    ) where
+  ( postJobsR
+  , patchJobR
+  ) where
 
 import Restyled.Prelude
 
@@ -17,21 +17,19 @@ import Restyled.Yesod
 --
 -- - Request: 'ApiCreateJob'
 -- - Response: 400 with 'ApiCreateRepoErrors' or 201 with 'ApiJob'
---
 postJobsR :: Handler Value
 postJobsR = do
-    body <- requireJsonBody
-    result <- runDB $ runValidateT $ createJob body
-    either (sendStatusJSON status400) (sendStatusJSON status201) result
+  body <- requireJsonBody
+  result <- runDB $ runValidateT $ createJob body
+  either (sendStatusJSON status400) (sendStatusJSON status201) result
 
 -- | Update a job
 --
 -- - Request: 'ApiUpdateJob'
 -- - Response: 400 with 'ApiUpdateJobErrors' or 200 with 'ApiJob'
---
 patchJobR :: JobId -> Handler Value
 patchJobR jobId = do
-    void $ runDB $ get404 jobId
-    body <- requireJsonBody
-    result <- runDB $ runValidateT $ updateJob jobId body
-    either (sendStatusJSON status400) (sendStatusJSON status200) result
+  void $ runDB $ get404 jobId
+  body <- requireJsonBody
+  result <- runDB $ runValidateT $ updateJob jobId body
+  either (sendStatusJSON status400) (sendStatusJSON status200) result

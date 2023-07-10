@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Admin.Repos
-    ( getAdminReposSearchR
-    ) where
+  ( getAdminReposSearchR
+  ) where
 
 import Restyled.Prelude
 
@@ -16,11 +16,11 @@ import Restyled.Yesod
 
 getAdminReposSearchR :: Handler TypedContent
 getAdminReposSearchR = do
-    mQuery <- runInputGet $ iopt textField "q"
-    mResults <- traverse (searchRepos 10) mQuery
+  mQuery <- runInputGet $ iopt textField "q"
+  mResults <- traverse (searchRepos 10) mQuery
 
-    selectRep $ do
-        provideRep $ pure $ toJSON mResults
-        provideRep $ adminLayout $ do
-            setTitle "Restyled Admin / Search"
-            $(widgetFile "admin/repos/search")
+  selectRep $ do
+    provideRep $ pure $ toJSON mResults
+    provideRep $ adminLayout $ do
+      setTitle "Restyled Admin / Search"
+      $(widgetFile "admin/repos/search")

@@ -1,6 +1,6 @@
 module Restyled.Handlers.Repos.Pulls
-    ( getRepoPullR
-    ) where
+  ( getRepoPullR
+  ) where
 
 import Restyled.Prelude
 

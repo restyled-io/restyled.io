@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Profile
-    ( getProfileR
-    ) where
+  ( getProfileR
+  ) where
 
 import Restyled.Prelude hiding (identity)
 
@@ -17,90 +17,92 @@ import Restyled.Yesod
 
 getProfileR :: Handler Html
 getProfileR = do
-    Entity _ user <- requireAuth
-    mUserIdentity <- runDB $ fetchGitHubIdentityForUser user
+  Entity _ user <- requireAuth
+  mUserIdentity <- runDB $ fetchGitHubIdentityForUser user
 
-    orgs <- requestUserOrgs user
-    orgIdentities <- traverse (runDB . fetchGitHubIdentityForOrg) orgs
+  orgs <- requestUserOrgs user
+  orgIdentities <- traverse (runDB . fetchGitHubIdentityForOrg) orgs
 
-    defaultLayout $ do
-        setTitle "Profile"
-        $(widgetFile "profile")
+  defaultLayout $ do
+    setTitle "Profile"
+    $(widgetFile "profile")
 
 data MarketplaceData = MarketplaceData
-    { mdPlan :: Entity MarketplacePlan
-    , mdAccount :: Entity MarketplaceAccount
-    , mdEnabledRepoIds :: [RepoId]
-    }
+  { mdPlan :: Entity MarketplacePlan
+  , mdAccount :: Entity MarketplaceAccount
+  , mdEnabledRepoIds :: [RepoId]
+  }
 
 fetchMarketplaceData
-    :: MonadIO m => GitHubUserName -> SqlPersistT m (Maybe MarketplaceData)
+  :: MonadIO m => GitHubUserName -> SqlPersistT m (Maybe MarketplaceData)
 fetchMarketplaceData login = runMaybeT $ do
-    account <- fetchMarketplaceAccountForLoginT login
-    plan <- getEntityT $ marketplaceAccountMarketplacePlan $ entityVal account
-    fmap (MarketplaceData plan account)
-        $ lift
-        $ fetchMarketplaceEnabledRepoIds (entityKey plan)
-        $ entityKey account
+  account <- fetchMarketplaceAccountForLoginT login
+  plan <- getEntityT $ marketplaceAccountMarketplacePlan $ entityVal account
+  fmap (MarketplaceData plan account)
+    $ lift
+    $ fetchMarketplaceEnabledRepoIds (entityKey plan)
+    $ entityKey account
 
 data GitHubIdentity = GitHubIdentity
-    { ghiUserName :: GitHubUserName
-    , ghiAvatarUrl :: Text -- ^ TODO: newtype?
-    , ghiKnownRepos :: [Entity Repo]
-    , ghiMarketplaceData :: Maybe MarketplaceData
-    }
+  { ghiUserName :: GitHubUserName
+  , ghiAvatarUrl :: Text
+  -- ^ TODO: newtype?
+  , ghiKnownRepos :: [Entity Repo]
+  , ghiMarketplaceData :: Maybe MarketplaceData
+  }
 
 fetchGitHubIdentityForOrg
-    :: MonadIO m => GitHubOrg -> SqlPersistT m GitHubIdentity
+  :: MonadIO m => GitHubOrg -> SqlPersistT m GitHubIdentity
 fetchGitHubIdentityForOrg (GitHubOrg SimpleOrganization {..}) =
-    GitHubIdentity orgLogin orgAvatarUrl
-        <$> fetchReposByOwnerName (nameToName orgLogin)
-        <*> fetchMarketplaceData (nameToName orgLogin)
-  where
-    orgLogin :: GitHubUserName
-    orgLogin = nameToName simpleOrganizationLogin
+  GitHubIdentity orgLogin orgAvatarUrl
+    <$> fetchReposByOwnerName (nameToName orgLogin)
+    <*> fetchMarketplaceData (nameToName orgLogin)
+ where
+  orgLogin :: GitHubUserName
+  orgLogin = nameToName simpleOrganizationLogin
 
-    orgAvatarUrl :: Text
-    orgAvatarUrl = getUrl simpleOrganizationAvatarUrl
+  orgAvatarUrl :: Text
+  orgAvatarUrl = getUrl simpleOrganizationAvatarUrl
 
 fetchGitHubIdentityForUser
-    :: MonadIO m => User -> SqlPersistT m (Maybe GitHubIdentity)
+  :: MonadIO m => User -> SqlPersistT m (Maybe GitHubIdentity)
 fetchGitHubIdentityForUser User {..} =
-    for mDetails $ \(githubId, githubUsername) ->
-        GitHubIdentity githubUsername (avatarUrl githubId)
-            <$> fetchReposByOwnerName (nameToName githubUsername)
-            <*> fetchMarketplaceData (nameToName githubUsername)
-  where
-    mDetails = (,) <$> userGithubUserId <*> userGithubUsername
+  for mDetails $ \(githubId, githubUsername) ->
+    GitHubIdentity githubUsername (avatarUrl githubId)
+      <$> fetchReposByOwnerName (nameToName githubUsername)
+      <*> fetchMarketplaceData (nameToName githubUsername)
+ where
+  mDetails = (,) <$> userGithubUserId <*> userGithubUsername
 
-    avatarUrl :: GitHubUserId -> Text
-    avatarUrl gid =
-        "https://avatars0.githubusercontent.com/u/" <> toPathPart gid <> "?v=4"
+  avatarUrl :: GitHubUserId -> Text
+  avatarUrl gid =
+    "https://avatars0.githubusercontent.com/u/" <> toPathPart gid <> "?v=4"
 
 -- brittany-disable-next-binding
 
 githubIdentityCard :: GitHubIdentity -> Widget
 githubIdentityCard identity@GitHubIdentity {..} =
-    $(widgetFile "profile/github-identity-card")
-  where
-    claimR Repo {..} = RepoP repoOwner repoName $ RepoMarketplaceP RepoMarketplaceClaimR
+  $(widgetFile "profile/github-identity-card")
+ where
+  claimR Repo {..} = RepoP repoOwner repoName $ RepoMarketplaceP RepoMarketplaceClaimR
 
 data MarketplaceAction
-    = EnablePrivateRepo
-    | DisablePrivateRepo
+  = EnablePrivateRepo
+  | DisablePrivateRepo
 
 getMarketplaceAction
-    :: GitHubIdentity -> Entity Repo -> Maybe MarketplaceAction
+  :: GitHubIdentity -> Entity Repo -> Maybe MarketplaceAction
 getMarketplaceAction GitHubIdentity {..} (Entity repoId Repo {..}) = do
-    MarketplaceData {..} <- ghiMarketplaceData
-    guard $ repoIsPrivate && isLimitedPlan mdPlan
-    pure $ if repoId `notElem` mdEnabledRepoIds
-        then EnablePrivateRepo
-        else DisablePrivateRepo
+  MarketplaceData {..} <- ghiMarketplaceData
+  guard $ repoIsPrivate && isLimitedPlan mdPlan
+  pure
+    $ if repoId `notElem` mdEnabledRepoIds
+      then EnablePrivateRepo
+      else DisablePrivateRepo
 
 isLimitedPlan :: Entity MarketplacePlan -> Bool
 isLimitedPlan (Entity _ MarketplacePlan {..}) =
-    case marketplacePlanPrivateRepoAllowance of
-        PrivateRepoAllowanceNone -> False
-        PrivateRepoAllowanceUnlimited -> False
-        PrivateRepoAllowanceLimited _ -> True
+  case marketplacePlanPrivateRepoAllowance of
+    PrivateRepoAllowanceNone -> False
+    PrivateRepoAllowanceUnlimited -> False
+    PrivateRepoAllowanceLimited _ -> True

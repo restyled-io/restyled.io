@@ -1,14 +1,14 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 module Restyled.Widgets.ContainsURLs
-    ( renderWithURLs
+  ( renderWithURLs
 
     -- * Exported to be tested
-    , ContainsURLs(..)
-    , containsURLs
-    , ContentPart(..)
-    , contentPartsP
-    ) where
+  , ContainsURLs (..)
+  , containsURLs
+  , ContentPart (..)
+  , contentPartsP
+  ) where
 
 import Restyled.Prelude hiding (some)
 
@@ -18,12 +18,12 @@ import Text.Megaparsec
 import Text.Megaparsec.Char
 
 data ContentPart
-    = ContentPart Text
-    | URLPart Text
-    deriving stock (Eq, Show)
+  = ContentPart Text
+  | URLPart Text
+  deriving stock (Eq, Show)
 
 newtype ContainsURLs = ContainsURLs [ContentPart]
-    deriving stock (Eq, Show)
+  deriving stock (Eq, Show)
 
 renderWithURLs :: Text -> Widget
 renderWithURLs = renderContainsURLs . containsURLs
@@ -35,7 +35,8 @@ renderContainsURLs (ContainsURLs parts) = mconcat $ map renderContentPart parts
 
 renderContentPart :: ContentPart -> Widget
 renderContentPart (ContentPart t) = [whamlet|#{t}|]
-renderContentPart (URLPart url) = [whamlet|
+renderContentPart (URLPart url) =
+  [whamlet|
     $newline never
     <a href=#{url}>#{url}
 |]
@@ -53,11 +54,12 @@ contentPartsP = manyTill (urlP <|> contentP) eof
 
 urlP :: Parser ContentPart
 urlP = URLPart <$> url
-    where url = (<>) <$> schemeP <*> (pack <$> some (satisfy $ not . isSpace))
+ where
+  url = (<>) <$> schemeP <*> (pack <$> some (satisfy $ not . isSpace))
 
 contentP :: Parser ContentPart
 contentP =
-    ContentPart . pack <$> manyTill anySingle (void (lookAhead urlP) <|> eof)
+  ContentPart . pack <$> manyTill anySingle (void (lookAhead urlP) <|> eof)
 
 schemeP :: Parser Text
 schemeP = string "https://" <|> string "http://"

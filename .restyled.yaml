@@ -1,29 +1,13 @@
-remote_files:
-  - url: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/config/brittany/config.yaml
-    path: brittany.yaml
-  - url: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
-    path: .hlint.yaml
-  - url: https://raw.githubusercontent.com/pbrisbin/dotfiles/master/stylish-haskell.yaml
-    path: .stylish-haskell.yaml
-
 restylers_version: dev
-
 restylers:
-  - brittany:
-      include:
-        - "**/*.hs"
-        - "!src/Restyled/Settings.hs" # CPP
-        - "!src/Restyled/Handlers/Revision.hs" # CPP
-  - stylish-haskell:
-      include:
-        - "**/*.hs"
-        - "!src/Restyled/Settings.hs" # CPP
-        - "!src/Restyled/Handlers/Revision.hs" # CPP
+  - fourmolu
   - hlint:
       include:
         - "**/*.hs"
         - "!src/Restyled/Settings.hs" # CPP
         - "!src/Restyled/Handlers/Revision.hs" # CPP
+  - stylish-haskell:
+      enabled: false
   - prettier:
       # Explicitly set parser so it works on .julius
       arguments:

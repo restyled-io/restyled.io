@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Repos.Pulls.Jobs
-    ( getRepoPullJobsR
-    ) where
+  ( getRepoPullJobsR
+  ) where
 
 import Restyled.Prelude
 
@@ -16,12 +16,14 @@ import Restyled.Yesod
 
 getRepoPullJobsR :: OwnerName -> RepoName -> PullRequestNum -> Handler Html
 getRepoPullJobsR owner name num = do
-    page <- runDB $ paginateBy
+  page <-
+    runDB
+      $ paginateBy
         JobCreatedAt
         Descending
         10
         [JobOwner ==. owner, JobRepo ==. name, JobPullRequest ==. num]
 
-    defaultLayout $ do
-        setTitle $ toHtml $ repoPullPath owner name num <> " jobs"
-        $(widgetFile "jobs")
+  defaultLayout $ do
+    setTitle $ toHtml $ repoPullPath owner name num <> " jobs"
+    $(widgetFile "jobs")

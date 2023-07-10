@@ -1,9 +1,9 @@
 -- | Extension of @"GitHub.Auth"@ to support JWT-based authorization
 module GitHub.Auth.JWT
-    ( AuthJWT(..)
-    , authJWT
-    , authJWTMax
-    ) where
+  ( AuthJWT (..)
+  , authJWT
+  , authJWTMax
+  ) where
 
 import Prelude
 
@@ -22,21 +22,25 @@ import qualified Web.JWT as JWT
 newtype AuthJWT = AuthJWT ByteString
 
 instance AuthMethod AuthJWT where
-    endpoint (AuthJWT _) = Nothing
+  endpoint (AuthJWT _) = Nothing
 
-    setAuthRequest (AuthJWT token) =
-        addRequestHeader hAuthorization $ "bearer " <> token
+  setAuthRequest (AuthJWT token) =
+    addRequestHeader hAuthorization $ "bearer " <> token
 
 authJWT :: HasCallStack => NominalDiffTime -> Id App -> AppKey -> IO AuthJWT
 authJWT expires githubAppId appKey = do
-    now <- getCurrentTime
-    signer <- maybe (throwString "Invalid RSA data") pure
-        =<< JWT.rsaKeySecret (unAppKey appKey)
+  now <- getCurrentTime
+  signer <-
+    maybe (throwString "Invalid RSA data") pure
+      =<< JWT.rsaKeySecret (unAppKey appKey)
 
-    pure $ AuthJWT $ encodeUtf8 $ JWT.encodeSigned
-        signer
-        mempty { JWT.alg = Just JWT.RS256 }
-        mempty
+  pure $
+    AuthJWT $
+      encodeUtf8 $
+        JWT.encodeSigned
+          signer
+          mempty {JWT.alg = Just JWT.RS256}
+          mempty
             { JWT.iat = numericDate now
             , JWT.exp = numericDate $ addUTCTime expires now
             , JWT.iss = JWT.stringOrURI $ toPathPart githubAppId
@@ -47,7 +51,6 @@ authJWT expires githubAppId appKey = do
 -- 10 minutes is the documented maximum, but I can reliably trigger a "too far
 -- in the future" error, which I assume is due to clocks skew, so we treat 9
 -- minutes as the real maximum.
---
 authJWTMax :: HasCallStack => Id App -> AppKey -> IO AuthJWT
 authJWTMax = authJWT $ 9 * 60
 

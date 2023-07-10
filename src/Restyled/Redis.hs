@@ -1,21 +1,22 @@
 module Restyled.Redis
-    ( HasRedis(..)
-    , runRedis
+  ( HasRedis (..)
+  , runRedis
 
     -- * Re-export
-    , Redis
-    , Connection
-    , checkedConnect
+  , Redis
+  , Connection
+  , checkedConnect
 
     -- * Actions we use
+
     -- | FIXME: encapsulate our own push/pop?
-    , llen
-    , lpush
-    , brpop
+  , llen
+  , lpush
+  , brpop
 
     -- * Convenience
-    , encodeStrict
-    ) where
+  , encodeStrict
+  ) where
 
 import Restyled.Prelude
 
@@ -25,19 +26,19 @@ import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
 
 class HasRedis env where
-    redisConnectionL :: Lens' env Connection
+  redisConnectionL :: Lens' env Connection
 
 instance HasRedis Connection where
-    redisConnectionL = id
+  redisConnectionL = id
 
 instance HasRedis env => HasRedis (HandlerData child env) where
-    redisConnectionL = envL . siteL . redisConnectionL
+  redisConnectionL = envL . siteL . redisConnectionL
 
 runRedis
-    :: (MonadUnliftIO m, MonadReader env m, HasRedis env) => Redis a -> m a
+  :: (MonadUnliftIO m, MonadReader env m, HasRedis env) => Redis a -> m a
 runRedis action = do
-    conn <- view redisConnectionL
-    liftIO $ Redis.runRedis conn action
+  conn <- view redisConnectionL
+  liftIO $ Redis.runRedis conn action
 
 encodeStrict :: ToJSON a => a -> ByteString
 encodeStrict = toStrict . encode

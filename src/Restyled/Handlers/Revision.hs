@@ -2,8 +2,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Revision
-    ( getRevisionR
-    ) where
+  ( getRevisionR
+  ) where
 
 import Restyled.Prelude
 
@@ -18,7 +18,7 @@ import Restyled.Yesod
 getRevisionR :: Handler TypedContent
 getRevisionR = pure . TypedContent typePlain $ toContent appRevision
 
--- brittany-disable-next-binding
+{- FOURMOLU_DISABLE -}
 appRevision :: ByteString
 appRevision =
 #ifdef DOCKERIZED
@@ -26,3 +26,4 @@ appRevision =
 #else
     $(gitHash) <> " - " <> $(gitCommitDate)
 #endif
+{- FOURMOLU_ENABLE -}

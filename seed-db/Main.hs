@@ -1,6 +1,6 @@
 module Main
-    ( main
-    ) where
+  ( main
+  ) where
 
 import Restyled.Prelude
 
@@ -10,5 +10,5 @@ import Restyled.Development.Seeds
 
 main :: IO ()
 main = do
-    setupCLI
-    runApp $ runDB seedDB
+  setupCLI
+  runApp $ runDB seedDB

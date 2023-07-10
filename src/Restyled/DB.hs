@@ -1,53 +1,57 @@
 module Restyled.DB
-    ( HasSqlPool(..)
-    , runDB
+  ( HasSqlPool (..)
+  , runDB
 
     -- * Construction
-    , PostgresConf(..)
-    , createConnectionPool
+  , PostgresConf (..)
+  , createConnectionPool
 
     -- * Re-export
-    , ConnectionPool
-    ) where
+  , ConnectionPool
+  ) where
 
 import Restyled.Prelude
 
 import Database.Persist.Postgresql
-    (PostgresConf(..), createPostgresqlPool, createPostgresqlPoolModified)
+  ( PostgresConf (..)
+  , createPostgresqlPool
+  , createPostgresqlPoolModified
+  )
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.PostgreSQL.Simple (Connection, execute)
 import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
 
 class HasSqlPool env where
-    sqlPoolL :: Lens' env ConnectionPool
+  sqlPoolL :: Lens' env ConnectionPool
 
 instance HasSqlPool ConnectionPool where
-    sqlPoolL = id
+  sqlPoolL = id
 
 instance HasSqlPool env => HasSqlPool (HandlerData child env) where
-    sqlPoolL = envL . siteL . sqlPoolL
+  sqlPoolL = envL . siteL . sqlPoolL
 
 runDB
-    :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
-    => SqlPersistT m a
-    -> m a
+  :: (MonadUnliftIO m, MonadReader env m, HasSqlPool env)
+  => SqlPersistT m a
+  -> m a
 runDB action = do
-    pool <- view sqlPoolL
-    runSqlPool action pool
+  pool <- view sqlPoolL
+  runSqlPool action pool
 
 createConnectionPool
-    :: (MonadUnliftIO m, MonadLoggerIO m)
-    => PostgresConf
-    -> Maybe Integer
-    -> m ConnectionPool
+  :: (MonadUnliftIO m, MonadLoggerIO m)
+  => PostgresConf
+  -> Maybe Integer
+  -> m ConnectionPool
 createConnectionPool PostgresConf {..} = \case
-    Nothing -> createPostgresqlPool pgConnStr pgPoolSize
-    Just ms -> createPostgresqlPoolModified
-        (setStatementTimeout ms)
-        pgConnStr
-        pgPoolSize
+  Nothing -> createPostgresqlPool pgConnStr pgPoolSize
+  Just ms ->
+    createPostgresqlPoolModified
+      (setStatementTimeout ms)
+      pgConnStr
+      pgPoolSize
 
 setStatementTimeout :: Integer -> Connection -> IO ()
 setStatementTimeout ms conn =
-    void $ execute conn "SET statement_timeout = ?" [ms]
+  void $ execute conn "SET statement_timeout = ?" [ms]

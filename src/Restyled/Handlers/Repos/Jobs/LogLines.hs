@@ -1,6 +1,6 @@
 module Restyled.Handlers.Repos.Jobs.LogLines
-    ( getRepoJobLogLinesR
-    ) where
+  ( getRepoJobLogLinesR
+  ) where
 
 import Restyled.Prelude
 
@@ -17,37 +17,41 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 
 getRepoJobLogLinesR :: OwnerName -> RepoName -> JobId -> Handler Text
 getRepoJobLogLinesR _owner _name jobId = do
-    job <- runDB $ getEntity404 jobId
+  job <- runDB $ getEntity404 jobId
 
-    -- Use 28s to be just under the Heroku 30s timeout
-    let keepAlivePeriod :: Int
-        keepAlivePeriod = 28
+  -- Use 28s to be just under the Heroku 30s timeout
+  let
+    keepAlivePeriod :: Int
+    keepAlivePeriod = 28
 
-    keepAliveMsg <- renderKeepAliveMessage
+  keepAliveMsg <- renderKeepAliveMessage
 
-    webSockets keepAlivePeriod keepAliveMsg $ \send -> do
-        conn <- ask
-        lift $ followJobOutput job $ \jobLogLines -> do
-            htmls <- mconcat <$> traverse
-                renderJobLogLine
-                (excludePatchLines jobLogLines)
-            runReaderT (void $ send htmls) conn
+  webSockets keepAlivePeriod keepAliveMsg $ \send -> do
+    conn <- ask
+    lift $ followJobOutput job $ \jobLogLines -> do
+      htmls <-
+        mconcat
+          <$> traverse
+            renderJobLogLine
+            (excludePatchLines jobLogLines)
+      runReaderT (void $ send htmls) conn
 
-    -- If not accessed via WebSockets, respond with plain text Job log
-    jobLogLines <- fetchJobOutput job
-    pure $ T.unlines $ map jobLogLineContent $ excludePatchLines jobLogLines
+  -- If not accessed via WebSockets, respond with plain text Job log
+  jobLogLines <- fetchJobOutput job
+  pure $ T.unlines $ map jobLogLineContent $ excludePatchLines jobLogLines
 
 renderJobLogLine :: JobLogLine -> Handler LT.Text
 renderJobLogLine ln = do
-    pc <- widgetToPageContent $ Widgets.jobLogLine ln
-    renderHtml <$> withUrlRenderer (pageBody pc)
+  pc <- widgetToPageContent $ Widgets.jobLogLine ln
+  renderHtml <$> withUrlRenderer (pageBody pc)
 
 renderKeepAliveMessage :: Handler LT.Text
 renderKeepAliveMessage = do
-    now <- getCurrentTime
-    renderJobLogLine $ jobLogLine
-        now
-        "No output in the last 30 seconds. Continuing to wait..."
+  now <- getCurrentTime
+  renderJobLogLine
+    $ jobLogLine
+      now
+      "No output in the last 30 seconds. Continuing to wait..."
 
 excludePatchLines :: [JobLogLine] -> [JobLogLine]
 excludePatchLines = filter (not . jobLogLineIsPatch)

@@ -1,6 +1,6 @@
 module Restyled.Handlers.Webhooks
-    ( postWebhooksR
-    ) where
+  ( postWebhooksR
+  ) where
 
 import Restyled.Prelude
 
@@ -13,7 +13,7 @@ import Restyled.Yesod
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
-    qs <- view queuesL
-    body <- runConduit $ rawRequestBody .| sinkLbs
-    runRedis $ enqueue qs $ toStrict body
-    sendResponseStatus @_ @Text status201 ""
+  qs <- view queuesL
+  body <- runConduit $ rawRequestBody .| sinkLbs
+  runRedis $ enqueue qs $ toStrict body
+  sendResponseStatus @_ @Text status201 ""

@@ -1,29 +1,28 @@
 -- | Route helpers
 module Restyled.Routes
-    (
-    -- * Repos
-      repoP
-    , repoR
+  ( -- * Repos
+    repoP
+  , repoR
 
     -- * Repos' Pulls
-    , pullP
-    , pullR
+  , pullP
+  , pullR
 
     -- * Repos' Jobs
-    , jobsR
-    , jobR
-    , jobLogR
-    , jobPatchR
+  , jobsR
+  , jobR
+  , jobLogR
+  , jobPatchR
 
     -- * Repos' Pulls' Jobs
-    , pullJobsR
+  , pullJobsR
 
     -- * Admin
-    , adminStatsReposR
-    , adminStatsJobsR
-    , adminMarketplacePlanR
-    , adminMarketplaceAccountR
-    ) where
+  , adminStatsReposR
+  , adminStatsJobsR
+  , adminMarketplacePlanR
+  , adminMarketplaceAccountR
+  ) where
 
 import Restyled.Prelude
 
@@ -66,14 +65,14 @@ adminStatsJobsR = AdminP $ AdminStatsP $ AdminStatsJobsP AdminStatsJobsR
 
 adminMarketplacePlanR :: MarketplacePlanId -> Route App
 adminMarketplacePlanR planId =
-    AdminP
-        $ AdminMarketplaceP
-        $ AdminMarketplacePlansP
-        $ AdminMarketplacePlanP planId AdminMarketplacePlanR
+  AdminP
+    $ AdminMarketplaceP
+    $ AdminMarketplacePlansP
+    $ AdminMarketplacePlanP planId AdminMarketplacePlanR
 
 adminMarketplaceAccountR :: MarketplaceAccountId -> Route App
 adminMarketplaceAccountR accountId =
-    AdminP
-        $ AdminMarketplaceP
-        $ AdminMarketplaceAccountsP
-        $ AdminMarketplaceAccountP accountId AdminMarketplaceAccountR
+  AdminP
+    $ AdminMarketplaceP
+    $ AdminMarketplaceAccountsP
+    $ AdminMarketplaceAccountP accountId AdminMarketplaceAccountR

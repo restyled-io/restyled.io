@@ -1,9 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Handlers.Thanks
-    ( getThanksGitHubR
-    , getThanksGitHubSetupR
-    ) where
+  ( getThanksGitHubR
+  , getThanksGitHubSetupR
+  ) where
 
 import Restyled.Prelude
 
@@ -15,10 +15,10 @@ import Restyled.Yesod
 
 getThanksGitHubR :: Handler Html
 getThanksGitHubR = defaultLayout $ do
-    setTitle "Thanks"
-    $(widgetFile "thanks/github")
+  setTitle "Thanks"
+  $(widgetFile "thanks/github")
 
 getThanksGitHubSetupR :: Handler ()
 getThanksGitHubSetupR = do
-    setUltDest ThanksGitHubR
-    redirect $ AuthR $ oauth2Url "github"
+  setUltDest ThanksGitHubR
+  redirect $ AuthR $ oauth2Url "github"
