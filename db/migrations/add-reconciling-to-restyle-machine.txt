@@ -7,4 +7,3 @@ Apply: |
     ADD COLUMN reconciling bool NOT NULL DEFAULT false
 Revert: |
   ALTER TABLE "restyle_machine" DROP COLUMN IF EXISTS reconciling
-
