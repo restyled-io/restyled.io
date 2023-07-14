@@ -70,51 +70,12 @@ packages:
     subdir: lib/services/amazonka-sts
     url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
 - completed:
-    name: monad-validate
+    hackage: monad-validate-1.2.0.1@sha256:5a100da896f11ca4b7c123da85decbedeb46c37054a097f258ac911e715cb68d,2587
     pantry-tree:
-      sha256: 2520040223ec05c14da5f1d2ac7a38e5ed2caf0ec307bce4566924da54c28166
-      size: 869
-    sha256: 3cf178595f6dee0cbf73d1263327b38f69df1e9ae406429e4252be634fa88f1e
-    size: 18146
-    url: https://github.com/LeapYear/monad-validate/archive/5b181b7c57d6e2c975c533b0a0072e9aeb15fb99.tar.gz
-    version: 1.2.0.0
+      sha256: 034ee4de9765e38b763f5d73b236cc112205728e680cefbfe12d2882accc3264
+      size: 611
   original:
-    url: https://github.com/LeapYear/monad-validate/archive/5b181b7c57d6e2c975c533b0a0072e9aeb15fb99.tar.gz
-- completed:
-    hackage: Blammo-1.1.2.0@sha256:64b0114d67aacda2a77ed64cf1a1af030090907a4b1457a0f49ddf5a3be59303,4045
-    pantry-tree:
-      sha256: 0712ebf2a7af368499f0bea836f0619c01280324caf3dc52107a5ce91bbbb1ac
-      size: 1490
-  original:
-    hackage: Blammo-1.1.2.0
-- completed:
-    hackage: envparse-0.5.0@sha256:ba9ad793ed2fcfce644b3ebb8eb6c2fef2e44924f75e1b324956340e664c416e,2849
-    pantry-tree:
-      sha256: 419a6843224ad32755064276f8e36500c71238db1b5807a2c9596fa4ed909a5a
-      size: 1181
-  original:
-    hackage: envparse-0.5.0
-- completed:
-    hackage: monad-logger-aeson-0.3.1.0@sha256:dbb1f816d00a820982094362551e20582de0a27c337d430fa7080dcacbe66f34,5193
-    pantry-tree:
-      sha256: 6e213a5fd0d3cd17fb4011b0c7181373bd836a86ae82fea5700b44cfc3d9eb01
-      size: 5103
-  original:
-    hackage: monad-logger-aeson-0.3.1.0
-- completed:
-    hackage: context-0.2.0.1@sha256:b5a1390a5ad11b7edd0449c9ef96823f082bff4988bd09583e37a4e93e9aad10,1891
-    pantry-tree:
-      sha256: ebb043dd007864588c6b1676a0d30e521deab4353a3f19716f6f6f7d52b62817
-      size: 952
-  original:
-    hackage: context-0.2.0.1
-- completed:
-    hackage: algebraic-graphs-0.5@sha256:6eeec5ed1687ff7aa916e7bf9f02f51aaabde6f314dc0b7b1a84156974d7da73,8071
-    pantry-tree:
-      sha256: cca4a0348bb126506cacd8436948a68aad62e75d45df8c71f4090a00e69b45ee
-      size: 4128
-  original:
-    hackage: algebraic-graphs-0.5
+    hackage: monad-validate-1.2.0.1
 - completed:
     hackage: HDBC-postgresql-2.5.0.1@sha256:37bb911cd996d12c91fa711002877f32f91bcc488de76d85a05865c3af9dc580,3032
     pantry-tree:
@@ -145,7 +106,7 @@ packages:
     hackage: HsSyck-0.53
 snapshots:
 - completed:
-    sha256: 005f204647467d65c4ab549a5ca35d54b3d90a84a99a4ffc5d421a4018854fe2
-    size: 618509
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/10.yaml
-  original: lts-19.10
+    sha256: 5a59b2a405b3aba3c00188453be172b85893cab8ebc352b1ef58b0eae5d248a2
+    size: 650475
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/26.yaml
+  original: lts-20.26

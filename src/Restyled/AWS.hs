@@ -30,7 +30,7 @@ instance HasAWS AWS.Env where
 instance HasAWS env => HasAWS (HandlerData child env) where
   awsEnvL = envL . siteL . awsEnvL
 
-discover :: (MonadIO m, MonadLoggerIO m) => m Env
+discover :: MonadLoggerIO m => m Env
 discover = do
   loggerIO <- askLoggerIO
   env <- liftIO $ AWS.newEnv AWS.discover

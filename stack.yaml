@@ -1,4 +1,4 @@
-resolver: lts-19.10
+resolver: lts-20.26
 extra-deps:
   - github: brendanhay/amazonka
     commit: f73a957d05f64863e867cf39d0db260718f0fadd # main, as of SSO support
@@ -9,21 +9,19 @@ extra-deps:
       - lib/services/amazonka-sso
       - lib/services/amazonka-sts
 
-  # https://github.com/hasura/monad-validate/pull/5
-  - github: LeapYear/monad-validate
-    commit: 5b181b7c57d6e2c975c533b0a0072e9aeb15fb99
+  - monad-validate-1.2.0.1
 
-  - Blammo-1.1.2.0
+  # - Blammo-1.1.2.0
 
-  # For Blammo
-  - envparse-0.5.0
-  - monad-logger-aeson-0.3.1.0
-  - context-0.2.0.1
+  # # For Blammo
+  # - envparse-0.5.0
+  # - monad-logger-aeson-0.3.1.0
+  # - context-0.2.0.1
 
-  # For weeder
-  - algebraic-graphs-0.5
+  # # For weeder
+  # - algebraic-graphs-0.5
 
-  # # For dbmigrations-postgresql
+  # For dbmigrations-postgresql
   - HDBC-postgresql-2.5.0.1
   - dbmigrations-2.0.0
 

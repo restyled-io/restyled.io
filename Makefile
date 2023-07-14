@@ -1,10 +1,9 @@
 # Bring system up to date after a pull
-update: setup setup.lint setup.tools db.migrate build lint test
+update: setup setup.tools db.migrate build lint test
 
 # Initialize from a fresh clone
 bootstrap: \
   setup \
-  setup.lint \
   setup.tools \
   setup.ngrok \
   db.setup \
@@ -58,20 +57,22 @@ setup:
 	stack install --copy-compiler-tool \
 	  dbmigrations-postgresql
 
-.PHONY: setup.lint
-setup.lint:
-	stack install --copy-compiler-tool \
-	  hlint \
-	  weeder-2.3.1
-
 .PHONY: setup.tools
 setup.tools:
 	stack install --copy-compiler-tool \
+	  apply-refact \
 	  dhall \
-	  brittany-0.14.0.2 \
 	  fast-tags \
-	  stylish-haskell \
-	  apply-refact
+	  hlint \
+	  weeder-2.4.0
+	@# install fourmolu-0.12 using a 9.6 resolver, then move it to the 9.2
+	@# compiler-tools-bin
+	stack \
+	  --resolver nightly-2023-06-26 install \
+	  --copy-compiler-tool fourmolu-0.13.0.0
+	cp -v \
+	  "$$(stack --resolver nightly-2023-06-26 path --compiler-tools-bin)/fourmolu" \
+	  "$$(stack path --compiler-tools-bin)/fourmolu"
 
 .PHONY: setup.ngrok
 setup.ngrok:
