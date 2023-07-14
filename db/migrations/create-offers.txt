@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Create offers
-Created: 2020-10-05 20:25:23.269669821 UTC
+Created: 2020-10-05 20:25:23 UTC
 Depends: create-marketplace-plan
 Apply: |
   CREATE TABLE offer

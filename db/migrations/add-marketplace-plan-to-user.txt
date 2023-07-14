@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add marketplacePlan to user table
-Created: 2019-03-21 16:43:40.165190769 UTC
+Created: 2019-03-21 16:43:40 UTC
 Depends: create-marketplace-plan create-user
 Apply: |
   ALTER TABLE "user"

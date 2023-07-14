@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add API tokens
-Created: 2020-04-14 00:27:59.492208774 UTC
+Created: 2020-04-14 00:27:59 UTC
 Depends: create-user
 Apply: |
   CREATE TABLE api_token (

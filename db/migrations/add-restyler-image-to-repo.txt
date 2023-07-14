@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add restyler_image to repo
-Created: 2020-05-09 18:35:07.196698581 UTC
+Created: 2020-05-09 18:35:07 UTC
 Depends: create-repo
 Apply: |
   ALTER TABLE repo

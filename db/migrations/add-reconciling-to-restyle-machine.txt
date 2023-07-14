@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add reconciling to restyle_machine
-Created: 2020-08-07 18:10:27.13831281 UTC
+Created: 2020-08-07 18:10:27 UTC
 Depends: create-restyle-machine
 Apply: |
     ALTER TABLE "restyle_machine"

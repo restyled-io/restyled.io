@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add machine and container to job data
-Created: 2019-12-10 17:47:27.984139403 UTC
+Created: 2019-12-10 17:47:27 UTC
 Depends: create-job
 Apply: |
   ALTER TABLE job

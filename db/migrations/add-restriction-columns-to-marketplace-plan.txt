@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add restriction columns to marketplace_plan
-Created: 2023-06-01 12:19:52.315243089 UTC
+Created: 2023-06-01 12:19:52 UTC
 Depends: create-marketplace-plan
 Apply: |
   ALTER TABLE marketplace_plan

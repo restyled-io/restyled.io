@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Create restyle_machine table
-Created: 2019-02-27 21:42:49.257899701 UTC
+Created: 2019-02-27 21:42:49 UTC
 Depends:
 Apply: |
   CREATE TABLE "restyle_machine" (

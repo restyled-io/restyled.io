@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Create repo table
-Created: 2018-12-03 13:46:25.602014 UTC
+Created: 2018-12-03 13:46:25 UTC
 Depends:
 Apply: |
   CREATE TABLE repo (

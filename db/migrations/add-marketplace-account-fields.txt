@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add new marketplace_accounts fields
-Created: 2020-02-25 20:49:04.807304481 UTC
+Created: 2020-02-25 20:49:04 UTC
 Depends: add-marketplace-account
 Apply: |
   ALTER TABLE "marketplace_account"

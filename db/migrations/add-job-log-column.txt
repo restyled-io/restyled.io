@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add job log column
-Created: 2020-04-01 18:04:08.995876002 UTC
+Created: 2020-04-01 18:04:08 UTC
 Depends: create-job
 Apply: |
   ALTER TABLE job
