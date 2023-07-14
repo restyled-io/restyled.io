@@ -54,7 +54,7 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       - uses: freckle/weeder-action@v1
         with:
-          weeder-version: 2.3.0
+          weeder-version: 2.4.0
 
   lint:
     runs-on: ubuntu-latest
