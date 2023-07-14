@@ -15,11 +15,3 @@ extra-deps:
   - HDBC-postgresql-2.5.0.1
   - github: jtdaugherty/dbmigrations
     commit: 2cfdf435cb50d9c6cc80231a5f98dfdfcdeb64b6
-
-
-
-  # # For dbmigrations
-  # - yaml-light-0.1.4
-
-  # # For yaml-light
-  # - HsSyck-0.53
