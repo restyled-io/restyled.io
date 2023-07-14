@@ -40,26 +40,27 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: freckle/stack-cache-action@v2
       - run: |
           stack install --no-terminal \
             --copy-compiler-tool dbmigrations-postgresql
       - run: db/migrate test upgrade
-      - uses: freckle/stack-action@v3
+      - id: stack
+        uses: freckle/stack-action@v3
         env:
           REDIS_URL: redis://localhost:6379/15
       - run: db/pending-prod-migrations --check
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      - uses: freckle/weeder-action@v1
+      - uses: freckle/weeder-action@v2
         with:
-          weeder-version: 2.4.0
+          ghc-version: ${{ steps.stack.outputs.compiler-version }}
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           curl --location --output .hlint.yaml \
             https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
