@@ -11,22 +11,15 @@ extra-deps:
 
   - monad-validate-1.2.0.1
 
-  # - Blammo-1.1.2.0
-
-  # # For Blammo
-  # - envparse-0.5.0
-  # - monad-logger-aeson-0.3.1.0
-  # - context-0.2.0.1
-
-  # # For weeder
-  # - algebraic-graphs-0.5
-
   # For dbmigrations-postgresql
   - HDBC-postgresql-2.5.0.1
-  - dbmigrations-2.0.0
+  - github: jtdaugherty/dbmigrations
+    commit: 2cfdf435cb50d9c6cc80231a5f98dfdfcdeb64b6
 
-  # For dbmigrations
-  - yaml-light-0.1.4
 
-  # For yaml-light
-  - HsSyck-0.53
+
+  # # For dbmigrations
+  # - yaml-light-0.1.4
+
+  # # For yaml-light
+  # - HsSyck-0.53
