@@ -84,26 +84,16 @@ packages:
   original:
     hackage: HDBC-postgresql-2.5.0.1
 - completed:
-    hackage: dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
+    name: dbmigrations
     pantry-tree:
-      sha256: c0ed60caea8b8aace63e40628c753ba8b007edcea17ccc270317b533d07c8e28
-      size: 3935
+      sha256: 54d4125a75503fc71388090fb1244ab39ebbe09a33c4fb157b76bbf9f95a2d75
+      size: 4142
+    sha256: dd624bd073a30ed2e72cc3129a290757b16af38fe6db30b8a2e7f7c1b6e81fdf
+    size: 37218
+    url: https://github.com/jtdaugherty/dbmigrations/archive/2cfdf435cb50d9c6cc80231a5f98dfdfcdeb64b6.tar.gz
+    version: 2.1.0
   original:
-    hackage: dbmigrations-2.0.0
-- completed:
-    hackage: yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d,1887
-    pantry-tree:
-      sha256: ed05f839d189a312392f35d41888602b5929a8c0bcd54ee50bffe013552526ba
-      size: 217
-  original:
-    hackage: yaml-light-0.1.4
-- completed:
-    hackage: HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da,1818
-    pantry-tree:
-      sha256: d0465b8296fc621a76c7362eadf1364489781ca09d79441ec22b7a18b12eed46
-      size: 1024
-  original:
-    hackage: HsSyck-0.53
+    url: https://github.com/jtdaugherty/dbmigrations/archive/2cfdf435cb50d9c6cc80231a5f98dfdfcdeb64b6.tar.gz
 snapshots:
 - completed:
     sha256: 5a59b2a405b3aba3c00188453be172b85893cab8ebc352b1ef58b0eae5d248a2

@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Create marketplace_account table
-Created: 2019-03-22 12:54:15.309616868 UTC
+Created: 2019-03-22 12:54:15 UTC
 Depends: create-marketplace-plan
 Apply: |
   CREATE TABLE "marketplace_account" (

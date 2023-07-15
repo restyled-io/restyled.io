@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Fix billing email
-Created: 2020-02-25 21:02:22.688481184 UTC
+Created: 2020-02-25 21:02:22 UTC
 Depends: add-marketplace-account-fields add-marketplace-account
 Apply: |
   ALTER TABLE "marketplace_account"

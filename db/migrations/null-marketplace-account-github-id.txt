@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Null marketplace_account.github_id
-Created: 2020-10-06 14:18:31.910892225 UTC
+Created: 2020-10-06 14:18:31 UTC
 Depends: migrate-plans add-marketplace-account
 Apply: |
   ALTER TABLE marketplace_account

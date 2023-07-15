@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add expires_at to marketplace_account
-Created: 2020-12-11 15:49:19.854420084 UTC
+Created: 2020-12-11 15:49:19 UTC
 Depends: add-marketplace-account
 Apply: |
   ALTER TABLE marketplace_account

@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Create marketplace_enabled_repo table
-Created: 2019-06-27 15:25:44.841020026 UTC
+Created: 2019-06-27 15:25:44 UTC
 Depends: add-marketplace-account create-marketplace-plan create-repo
 Apply: |
   CREATE TABLE "marketplace_enabled_repo" (

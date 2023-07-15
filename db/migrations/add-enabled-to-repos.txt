@@ -1,6 +1,6 @@
 # vim: ft=yaml
 Description: Add enabled to repos
-Created: 2019-12-04 00:57:22.750388541 UTC
+Created: 2019-12-04 00:57:22 UTC
 Depends: create-repo
 Apply: |
   ALTER TABLE repo
