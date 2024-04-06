@@ -40,17 +40,13 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: freckle/stack-cache-action@v2
-      - run: |
-          stack install --no-terminal \
-            --copy-compiler-tool dbmigrations-postgresql
+      - uses: actions/checkout@v4
       - run: db/migrate test upgrade
       - id: stack
-        uses: freckle/stack-action@v3
+        uses: freckle/stack-action@v5
         env:
           REDIS_URL: redis://localhost:6379/15
-      - run: db/pending-prod-migrations --check
+      - run: db/migrate prod check
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       - uses: freckle/weeder-action@v2
@@ -60,12 +56,9 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - run: |
-          curl --location --output .hlint.yaml \
-            https://raw.githubusercontent.com/pbrisbin/dotfiles/master/hlint.yaml
-      - uses: rwe/actions-hlint-setup@v1
-      - uses: rwe/actions-hlint-run@v2
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/hlint-setup@v2
+      - uses: haskell-actions/hlint-run@v2
         with:
           fail-on: warning
 

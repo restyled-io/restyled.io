@@ -10,8 +10,3 @@ extra-deps:
       - lib/services/amazonka-sts
 
   - monad-validate-1.2.0.1
-
-  # For dbmigrations-postgresql
-  - HDBC-postgresql-2.5.0.1
-  - github: jtdaugherty/dbmigrations
-    commit: 2cfdf435cb50d9c6cc80231a5f98dfdfcdeb64b6
