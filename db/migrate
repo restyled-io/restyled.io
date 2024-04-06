@@ -53,7 +53,7 @@ if [ -t 0 ]; then
 fi
 
 # shellcheck disable=2086
-docker run --rm $it_options \
+docker run --rm --net=host $it_options \
   --volume "$migrations:/migrations" \
   --env DBM_DATABASE="$DBM_DATABASE" \
   --env DBM_MIGRATION_STORE=/migrations \
