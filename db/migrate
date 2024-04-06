@@ -10,7 +10,7 @@ if [ -z "$1" ] || [ "$1" = upgrade ]; then
   exit
 fi
 
-DBM_MIGRATION_STORE=$(cd "$(dirname "$0")" && pwd)/migrations
+migrations=$(cd "$(dirname "$0")" && pwd)/migrations
 
 case "$1" in
   dev)
@@ -20,15 +20,34 @@ case "$1" in
     DBM_DATABASE=postgres://postgres:password@localhost/restyled_test
     ;;
   prod)
-    DBM_DATABASE=$(heroku config:get DATABASE_URL --app restyled-io)
+    HEROKU_API_KEY=${HEROKU_API_KEY:-$(heroku auth:token)}
+    export HEROKU_API_KEY
+    DBM_DATABASE=$(curl --silent --fail --show-error \
+      --header "Authorization: Bearer $HEROKU_API_KEY" \
+      --header "Accept: application/vnd.heroku+json; version=3" \
+      https://api.heroku.com/apps/restyled-io/config-vars |
+      jq --raw-output '.DATABASE_URL')
     ;;
   *)
     echo "usage: migrate <env> <cmd>" >&2
     exit 64
     ;;
 esac
+
+if [ "$2" = check ]; then
+  if $0 "$1" upgrade-list 2>/dev/null | grep -Fqx 'Database is up to date.'; then
+    echo "Database is up to date." >&2
+    exit 0
+  else
+    echo "Database is not up to date. Run upgrade-list to see pending migrations." >&2
+    exit 1
+  fi
+fi
+
 shift
 
-export DBM_DATABASE
-export DBM_MIGRATION_STORE
-exec stack exec -- moo-postgresql "$@"
+docker run --rm --interactive --tty \
+  --volume "$migrations:/migrations" \
+  --env DBM_DATABASE="$DBM_DATABASE" \
+  --env DBM_MIGRATION_STORE=/migrations \
+  pbrisbin/dbmigrations:3.0.0-postgresql dbm "$@"

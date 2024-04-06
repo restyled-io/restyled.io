@@ -54,8 +54,6 @@ db.console.prod:
 setup:
 	stack setup
 	stack build --dependencies-only --test --no-run-tests
-	stack install --copy-compiler-tool \
-	  dbmigrations-postgresql
 
 .PHONY: setup.tools
 setup.tools:

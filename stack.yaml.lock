@@ -76,24 +76,6 @@ packages:
       size: 611
   original:
     hackage: monad-validate-1.2.0.1
-- completed:
-    hackage: HDBC-postgresql-2.5.0.1@sha256:37bb911cd996d12c91fa711002877f32f91bcc488de76d85a05865c3af9dc580,3032
-    pantry-tree:
-      sha256: bb1e349a28844e59ed36e1a3963cd6946e57f5e39244a6d36397d6291d68a138
-      size: 1611
-  original:
-    hackage: HDBC-postgresql-2.5.0.1
-- completed:
-    name: dbmigrations
-    pantry-tree:
-      sha256: 54d4125a75503fc71388090fb1244ab39ebbe09a33c4fb157b76bbf9f95a2d75
-      size: 4142
-    sha256: dd624bd073a30ed2e72cc3129a290757b16af38fe6db30b8a2e7f7c1b6e81fdf
-    size: 37218
-    url: https://github.com/jtdaugherty/dbmigrations/archive/2cfdf435cb50d9c6cc80231a5f98dfdfcdeb64b6.tar.gz
-    version: 2.1.0
-  original:
-    url: https://github.com/jtdaugherty/dbmigrations/archive/2cfdf435cb50d9c6cc80231a5f98dfdfcdeb64b6.tar.gz
 snapshots:
 - completed:
     sha256: 5a59b2a405b3aba3c00188453be172b85893cab8ebc352b1ef58b0eae5d248a2
