@@ -36,6 +36,7 @@ import Control.Error.Util as X (exceptT, hush, hushT, note, noteT)
 import Control.Monad.Except as X
 import Control.Monad.Extra as X (fromMaybeM, partitionM)
 import Control.Monad.IO.Unlift as X (MonadUnliftIO (..))
+import Control.Monad.Logger.Aeson as X (SeriesElem)
 import Control.Monad.Reader as X
 import Control.Monad.Trans.Maybe as X
 import Data.Aeson as X hiding (Key, One, Result (..))

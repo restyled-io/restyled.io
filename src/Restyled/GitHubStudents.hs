@@ -37,22 +37,30 @@ giftGitHubStudents creds = void $ runMaybeT $ do
 
   lift $ do
     verified <- verifyIsGitHubStudent accessToken
-    logInfo
-      $ "Verified GitHub Student"
-      :# githubStudentDetails student verified
     handleGitHubStudent student verified
 
-githubStudentDetails :: KeyValue a => GitHubStudent -> Bool -> [a]
-githubStudentDetails GitHubStudent {id, login} verified =
-  ["githubId" .= id, "githubLogin" .= login, "verified" .= verified]
+handleGitHubStudent
+  :: (MonadIO m, MonadLogger m)
+  => GitHubStudent
+  -> Verified
+  -> SqlPersistT m ()
+handleGitHubStudent GitHubStudent {id, login, email} verified = do
+  planId <- findOrCreateMarketplacePlan githubStudentsPlan
 
-handleGitHubStudent :: MonadIO m => GitHubStudent -> Bool -> SqlPersistT m ()
-handleGitHubStudent GitHubStudent {id, login, email} verified =
-  findOrCreateMarketplacePlan githubStudentsPlan >>= go
+  case verified of
+    Verified -> do
+      logInfo $ "Verified GitHub Student" :# context <> ["verified" .= True]
+      addAccount planId
+    Unverified -> do
+      logInfo $ "Verified GitHub Student" :# context <> ["verified" .= False]
+      removeAccount planId
+    VerifyError details -> do
+      logWarn
+        $ "Verified GitHub Student"
+        :# (context <> ["verified" .= ("error" :: Text)] <> details)
  where
-  go planId
-    | verified = addAccount planId
-    | otherwise = removeAccount planId
+  -- Avoid MonadMask by faking withThreadContext
+  context = ["githubId" .= id, "githubLogin" .= login]
 
   addAccount (Entity planId _) = do
     nextYear <- addTime (Years 1) <$> getCurrentTime
@@ -78,16 +86,25 @@ handleGitHubStudent GitHubStudent {id, login, email} verified =
       , MarketplaceAccountMarketplacePlan ==. planId
       ]
 
-verifyIsGitHubStudent
-  :: (MonadIO m, MonadLogger m) => OAuth2.AccessToken -> m Bool
-verifyIsGitHubStudent token = do
-  body <- getResponseBody <$> httpBS req
+data Verified
+  = Verified
+  | Unverified
+  | VerifyError [SeriesElem]
 
-  case body ^? key "student" . _Bool of
-    Nothing -> do
-      logWarn $ "Unexpected response" :# ["body" .= decodeUtf8 @Text body]
-      pure False
-    Just x -> pure x
+verifyIsGitHubStudent :: MonadIO m => OAuth2.AccessToken -> m Verified
+verifyIsGitHubStudent token = do
+  resp <- httpBS req
+
+  let body = getResponseBody resp
+
+  pure $ case body ^? key "student" . _Bool of
+    Nothing ->
+      VerifyError
+        [ "status" .= statusCode (getResponseStatus resp)
+        , "body" .= decodeUtf8 @Text body
+        ]
+    Just True -> Verified
+    Just False -> Unverified
  where
   req =
     addRequestHeader hAccept "application/json"
