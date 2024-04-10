@@ -54,10 +54,18 @@ handleGitHubStudent GitHubStudent {id, login, email} verified = do
     Unverified -> do
       logInfo $ "Verified GitHub Student" :# context <> ["verified" .= False]
       removeAccount planId
-    VerifyError details -> do
+    VerifyError token req resp -> do
       logWarn
         $ "Verified GitHub Student"
-        :# (context <> ["verified" .= ("error" :: Text)] <> details)
+        :# ( context
+              <> [ "verify-error"
+                    .= object
+                      [ "token" .= token
+                      , "request" .= show @Text req
+                      , "response" .= show @Text resp
+                      ]
+                 ]
+           )
  where
   -- Avoid MonadMask by faking withThreadContext
   context = ["githubId" .= id, "githubLogin" .= login]
@@ -89,7 +97,7 @@ handleGitHubStudent GitHubStudent {id, login, email} verified = do
 data Verified
   = Verified
   | Unverified
-  | VerifyError [SeriesElem]
+  | VerifyError Text Request (Response ByteString)
 
 verifyIsGitHubStudent :: MonadIO m => OAuth2.AccessToken -> m Verified
 verifyIsGitHubStudent token = do
@@ -98,11 +106,7 @@ verifyIsGitHubStudent token = do
   let body = getResponseBody resp
 
   pure $ case body ^? key "student" . _Bool of
-    Nothing ->
-      VerifyError
-        [ "status" .= statusCode (getResponseStatus resp)
-        , "body" .= decodeUtf8 @Text body
-        ]
+    Nothing -> VerifyError tokenT req resp
     Just True -> Verified
     Just False -> Unverified
  where
@@ -110,7 +114,8 @@ verifyIsGitHubStudent token = do
     addRequestHeader hAccept "application/json"
       $ addRequestHeader hAuthorization auth
       $ parseRequest_ "https://education.github.com/api/user"
-  auth = "token " <> encodeUtf8 (OAuth2.atoken token)
+  auth = "token " <> encodeUtf8 tokenT
+  tokenT = OAuth2.atoken token
 
 githubStudentsPlan :: MarketplacePlan
 githubStudentsPlan =
