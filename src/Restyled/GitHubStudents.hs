@@ -10,7 +10,7 @@ import Restyled.Prelude hiding (id)
 import Data.Aeson.Lens
 import Lens.Micro ((^?))
 import Network.HTTP.Simple
-import Network.HTTP.Types.Header (hAccept, hAuthorization)
+import Network.HTTP.Types.Header (hAccept, hAuthorization, hUserAgent)
 import qualified Network.OAuth.OAuth2 as OAuth2
 import Restyled.Marketplace
 import Restyled.Models
@@ -113,6 +113,7 @@ verifyIsGitHubStudent token = do
   req =
     addRequestHeader hAccept "application/json"
       $ addRequestHeader hAuthorization auth
+      $ addRequestHeader hUserAgent "Restyled.io"
       $ parseRequest_ "https://education.github.com/api/user"
   auth = "token " <> encodeUtf8 tokenT
   tokenT = OAuth2.atoken token
