@@ -56,6 +56,7 @@ data AppSettings = AppSettings
   , appRoot :: Text
   , appHost :: HostPreference
   , appPort :: Int
+  , appForceSSL :: Bool
   , appLogSettings :: LogSettings
   , appCopyright :: Text
   , appGitHubAppId :: GitHubAppId
@@ -109,6 +110,7 @@ loadSettings =
     <*> var str "APPROOT" (def "http://localhost:3000")
     <*> var str "HOST" (def "*4")
     <*> var auto "PORT" (def 3000)
+    <*> (not <$> switch "NO_FORCE_SSL" mempty)
     <*> LoggingEnv.parser
     <*> var str "COPYRIGHT" (def "2018 Patrick Brisbin")
     <*> var githubId "GITHUB_APP_ID" mempty

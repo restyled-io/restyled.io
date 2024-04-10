@@ -58,13 +58,17 @@ runWaiApp app = do
 
 waiMiddleware :: App -> Middleware
 waiMiddleware app =
-  forceSSL
+  forceSSL'
     . methodOverridePost
     . requestLogger app
     . defaultMiddlewaresNoLogging
     . routedMiddleware (not . isLogsRoute) (timeout timeoutSeconds)
  where
   timeoutSeconds = app ^. settingsL . to appRequestTimeout
+  forceSSL' =
+    if appForceSSL (appSettings app)
+      then forceSSL
+      else id
 
 isLogsRoute :: [Text] -> Bool
 isLogsRoute = maybe False ((`elem` ["log", "patch"]) . NE.last) . NE.nonEmpty

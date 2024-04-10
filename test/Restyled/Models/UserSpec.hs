@@ -73,6 +73,7 @@ emptySettings =
     , appRoot = error "unused"
     , appHost = error "unused"
     , appPort = 0
+    , appForceSSL = False
     , appLogSettings = error "unused"
     , appCopyright = ""
     , appGitHubAppId = error "unused"
