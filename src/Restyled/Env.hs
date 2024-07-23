@@ -44,7 +44,10 @@ eitherReader f = first unread . f
 
 connectInfo :: AsUnread e => Reader e ConnectInfo
 connectInfo = eitherReader $ \url ->
-  TLS.parseConnectInfo clientParamsNoVerify url <|> parseConnectInfo url
+  -- No more <|> for Either, womp
+  case (TLS.parseConnectInfo clientParamsNoVerify url, parseConnectInfo url) of
+    (x@Right {}, _) -> x
+    (_, y) -> y
 
 githubId :: AsUnread e => Reader e (Id a)
 githubId = fmap (mkId Proxy) . auto

@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoDeriveAnyClass #-}
 {-# OPTIONS_GHC -Wno-missing-deriving-strategies #-}
