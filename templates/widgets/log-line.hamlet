@@ -3,7 +3,7 @@ $newline never
   <span .level-#{level} .prefix>
     #{padTo 9 level}
   <span .level-#{level} .content>
-    ^{renderWithURLs $ padTo 31 $ loggedMessageText lm}
+    ^{renderWithURLs $ padTo 50 $ loggedMessageText lm}
     $maybe src <- loggedMessageLogSource lm
       ^{renderKeyMap $ KeyMap.singleton "source" $ String src}
     ^{renderKeyMap $ loggedMessageThreadContext lm}
