@@ -13,7 +13,7 @@ Website and backend for Restyled, https://restyled.io.
 1. Initialize dependencies, the database, build, lint and test:
 
    ```console
-   make bootstrap
+   just bootstrap
    ```
 
 From here, you can use any `stack`-based development and testing work-flow.
@@ -30,7 +30,7 @@ From here, you can use any `stack`-based development and testing work-flow.
 1. Run the site and backend locally:
 
    ```console
-   make watch
+   just watch
    ```
 
 1. Run ngrok:
