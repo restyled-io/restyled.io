@@ -37,10 +37,27 @@ jobLogLineContent = _jobLogLineContent
 jobLogLineContentJSON :: JobLogLine -> LoggedMessage
 jobLogLineContentJSON ll =
   fromMaybe (fakeLoggedMessage ll)
-    $ decode
-    $ BSL.fromStrict
-    $ encodeUtf8
-    $ jobLogLineContent ll
+    $ asum
+      [ decode $ BSL.fromStrict $ encodeUtf8 $ jobLogLineContent ll
+      , do
+          msg <- T.stripPrefix actStarPrefix $ jobLogLineContent ll
+          pure
+            $ (fakeLoggedMessage ll)
+              { loggedMessageLevel = LevelInfo
+              , loggedMessageText = "% " <> msg
+              , loggedMessageLogSource = Just "act"
+              }
+      , do
+          stripped <- T.stripPrefix actOutputPrefix $ jobLogLineContent ll
+          lm <- decode $ BSL.fromStrict $ encodeUtf8 stripped
+          pure $ setLoggedMessageSource "restyler" lm
+      ]
+ where
+  actStarPrefix :: Text
+  actStarPrefix = "[Agent/restyled] ⭐ Run Main "
+
+  actOutputPrefix :: Text
+  actOutputPrefix = "[Agent/restyled]   | "
 
 jobLogLineContentPatch :: JobLogLine -> Maybe Text
 jobLogLineContentPatch = loggedMessageTextPatch . jobLogLineContentJSON
@@ -56,6 +73,10 @@ loggedMessageIsPatch :: LoggedMessage -> Bool
 loggedMessageIsPatch LoggedMessage {..} = fromMaybe False $ do
   Bool patch <- KeyMap.lookup "patch" loggedMessageThreadContext
   pure patch
+
+setLoggedMessageSource :: LogSource -> LoggedMessage -> LoggedMessage
+setLoggedMessageSource src lm =
+  lm {loggedMessageLogSource = loggedMessageLogSource lm <|> Just src}
 
 fakeLoggedMessage :: JobLogLine -> LoggedMessage
 fakeLoggedMessage ll =
