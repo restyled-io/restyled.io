@@ -16,8 +16,10 @@ import Restyled.Prelude hiding (hoistEither)
 
 import Amazonka (AWSPager, AWSRequest, AWSResponse, Env)
 import qualified Amazonka as AWS
+import Amazonka.Env (env_logger)
 import Conduit
 import qualified Control.Monad.Logger as Logger
+import Lens.Micro ((.~))
 import Yesod.Core.Types (HandlerData)
 import Yesod.Core.Types.Lens
 
@@ -33,16 +35,16 @@ instance HasAWS env => HasAWS (HandlerData child env) where
 discover :: MonadLoggerIO m => m Env
 discover = do
   loggerIO <- askLoggerIO
+
+  let logger level msg = do
+        loggerIO
+          Logger.defaultLoc
+          "Amazonka"
+          (fromLevel level)
+          (Logger.toLogStr msg)
+
   env <- liftIO $ AWS.newEnv AWS.discover
-  pure
-    $ env
-      { AWS.envLogger = \level msg -> do
-          loggerIO
-            Logger.defaultLoc
-            "Amazonka"
-            (fromLevel level)
-            (Logger.toLogStr msg)
-      }
+  pure $ env & env_logger .~ logger
 
 fromLevel :: AWS.LogLevel -> LogLevel
 fromLevel = \case
@@ -52,7 +54,13 @@ fromLevel = \case
   AWS.Trace -> LevelOther "trace"
 
 send
-  :: (MonadResource m, MonadReader env m, HasAWS env, AWSRequest a)
+  :: ( MonadResource m
+     , MonadReader env m
+     , HasAWS env
+     , AWSRequest a
+     , Typeable a
+     , Typeable (AWSResponse a)
+     )
   => a
   -> m (AWSResponse a)
 send req = do
@@ -60,7 +68,13 @@ send req = do
   AWS.send env req
 
 paginate
-  :: (MonadResource m, MonadReader env m, HasAWS env, AWSPager a)
+  :: ( MonadResource m
+     , MonadReader env m
+     , HasAWS env
+     , AWSPager a
+     , Typeable a
+     , Typeable (AWSResponse a)
+     )
   => a
   -> ConduitM () (AWSResponse a) m ()
 paginate req = do

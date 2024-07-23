@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 module Restyled.Prelude
@@ -29,7 +30,7 @@ module Restyled.Prelude
   , constrainMe
   ) where
 
-import Relude as X hiding (First (..), Last (..), get)
+import Relude as X hiding (First (..), Last (..), get, hoistMaybe)
 
 import Blammo.Logging as X
 import Control.Error.Util as X (exceptT, hush, hushT, note, noteT)

@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeOperators #-}
+
 module Restyled.Authentication
   ( authenticateUser
   ) where

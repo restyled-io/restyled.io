@@ -5,80 +5,15 @@
 
 packages:
 - completed:
-    name: amazonka
+    hackage: monad-validate-1.3.0.0@sha256:eb6ddd5c9cf72ff0563cba604fa00291376e96138fdb4932d00ff3a99d66706e,2605
     pantry-tree:
-      sha256: 0257a27c3332e400abc0f4a38f7a875c4a2a04b03ac342d7481e19d9d5665040
-      size: 1257
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
-    size: 27775608
-    subdir: lib/amazonka
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-    version: '2.0'
-  original:
-    subdir: lib/amazonka
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-- completed:
-    name: amazonka-core
-    pantry-tree:
-      sha256: 2eadbad33f65f20781409c4de9faee04e7e4baa92906db696b78689f53de0a83
-      size: 3117
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
-    size: 27775608
-    subdir: lib/amazonka-core
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-    version: '2.0'
-  original:
-    subdir: lib/amazonka-core
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-- completed:
-    name: amazonka-cloudwatch-logs
-    pantry-tree:
-      sha256: 601fdd737cfb7f67cc4bcacf72486bb78ba11b4a76b4503ed0f00192500217d5
-      size: 13187
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
-    size: 27775608
-    subdir: lib/services/amazonka-cloudwatch-logs
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-    version: '2.0'
-  original:
-    subdir: lib/services/amazonka-cloudwatch-logs
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-- completed:
-    name: amazonka-sso
-    pantry-tree:
-      sha256: f11babeeaf0481ae68134ced86e9d1d9396d1beb7bd70e0a1e6b77bc4148a192
-      size: 1869
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
-    size: 27775608
-    subdir: lib/services/amazonka-sso
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-    version: '2.0'
-  original:
-    subdir: lib/services/amazonka-sso
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-- completed:
-    name: amazonka-sts
-    pantry-tree:
-      sha256: 64ed22eaaea868b32cf56f162d1bd7332b048d8f2ea073c4e9827ed08e71cc70
-      size: 2932
-    sha256: 14aeaa9f748f7ac03683e8a8126760ed16aa82152404a96c0333b582444cd381
-    size: 27775608
-    subdir: lib/services/amazonka-sts
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-    version: '2.0'
-  original:
-    subdir: lib/services/amazonka-sts
-    url: https://github.com/brendanhay/amazonka/archive/f73a957d05f64863e867cf39d0db260718f0fadd.tar.gz
-- completed:
-    hackage: monad-validate-1.2.0.1@sha256:5a100da896f11ca4b7c123da85decbedeb46c37054a097f258ac911e715cb68d,2587
-    pantry-tree:
-      sha256: 034ee4de9765e38b763f5d73b236cc112205728e680cefbfe12d2882accc3264
+      sha256: 0b2a3a57be48fcc739708b214fca202f1e95b1cd773dd3bb9589d3007cf8cf5e
       size: 611
   original:
-    hackage: monad-validate-1.2.0.1
+    hackage: monad-validate-1.3.0.0
 snapshots:
 - completed:
-    sha256: 5a59b2a405b3aba3c00188453be172b85893cab8ebc352b1ef58b0eae5d248a2
-    size: 650475
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/26.yaml
-  original: lts-20.26
+    sha256: 795b7a893148a42f09956611a0fa1139293fe6ef934d053468d8e53e3e013390
+    size: 719577
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/30.yaml
+  original: lts-22.30
