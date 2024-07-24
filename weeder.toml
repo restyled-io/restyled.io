@@ -16,5 +16,5 @@ roots = [
   "^Restyled\\.Routes\\.jobLogR$",
   "^Restyled\\.Routes\\.repoR$",
   "^Restyled\\.Settings\\.widgetFile$",
-  ]
+]
 type-class-roots = true
