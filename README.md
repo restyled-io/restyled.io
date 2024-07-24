@@ -89,5 +89,4 @@ which I agree, see [here][level].
 
 [CHANGELOG](./CHANGELOG.md) | [LICENSE](./LICENSE) | [CONTRIBUTING][]
 
-[contributing]:
-  https://github.com/restyled-io/restyled.io/wiki/Contributing-to-Restyled
+[contributing]: https://github.com/restyled-io/restyled.io/wiki/Contributing-to-Restyled
