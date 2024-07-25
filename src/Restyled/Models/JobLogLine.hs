@@ -88,7 +88,7 @@ fakeLoggedMessage ll =
 
 stripLogLevel :: Text -> (Text, LogLevel)
 stripLogLevel content =
-  maybe (content, LevelDebug) getFirst
+  maybe (content, LevelOther "trace") getFirst
     $ foldMap (fmap First . firstM (`T.stripPrefix` content)) stylePrefixes
 
 stylePrefixes :: [(Text, LogLevel)]

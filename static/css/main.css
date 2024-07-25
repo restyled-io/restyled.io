@@ -193,6 +193,10 @@ details {
   color: #d3d3d3;
 }
 
+.js .log-line-level-trace {
+  display: none;
+}
+
 .log-line .level-debug.prefix, .log-line .level-debug.content {
   color: gray;
 }
