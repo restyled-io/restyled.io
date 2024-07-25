@@ -8,26 +8,21 @@ import Restyled.Prelude hiding (First)
 
 import Amazonka.CloudWatchLogs.CreateLogStream
 import Amazonka.CloudWatchLogs.DeleteLogStream
-import Amazonka.CloudWatchLogs.PutLogEvents
 import Amazonka.CloudWatchLogs.Types
 import qualified Blammo.Logging.LogSettings.Env as LoggingEnv
 import Control.Monad.Trans.Resource (MonadResource, ResourceT, runResourceT)
-import qualified Data.List.NonEmpty as NE
+import qualified Data.Text as T
 import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
 import Restyled.AWS (HasAWS (..))
 import qualified Restyled.AWS as AWS
 import Restyled.DB
+import Restyled.Development.LogEvent
 import Restyled.Env
 import Restyled.Marketplace
 import Restyled.Models
 import Restyled.PrivateRepoAllowance
 import Restyled.UsCents
-
--- Fort the catching_, ignoring_ overrides
-import Data.Monoid (First)
-import Lens.Micro (Getting)
-import Lens.Micro.Mtl (preview)
-import UnliftIO.Exception (catchJust)
+import UnliftIO.Exception.Lens (handling_)
 
 data AppSettings = AppSettings
   { appDatabaseConf :: PostgresConf
@@ -93,6 +88,7 @@ runApp f = do
 seedDB
   :: ( MonadUnliftIO m
      , MonadResource m
+     , MonadLogger m
      , MonadReader env m
      , HasSettings env
      , HasAWS env
@@ -168,6 +164,7 @@ restyledRepoPrivate name = (restyledRepo name) {repoIsPrivate = True}
 seedJob
   :: ( MonadUnliftIO m
      , MonadResource m
+     , MonadLogger m
      , MonadReader env m
      , HasSettings env
      , HasAWS env
@@ -194,15 +191,15 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
         }
 
   -- Capture it "running"
-  let jobLogLines = uncurry jobLogLine <$> timestamped
+  let jobLogLines = zipWith jobLogLine (msecondsFrom createdAt) untimestamped
 
   lift $ seedJobLogLines jobId jobLogLines
 
   -- Complete it if appropriate
   for_ mExitCode $ \ec -> do
     let
-      lastLogLineAt = jobLogLineCreatedAt $ NE.last jobLogLines
-      completedAt = addUTCTime 1 lastLogLineAt
+      mLastLogLineAt = jobLogLineCreatedAt . last <$> nonEmpty jobLogLines
+      completedAt = addUTCTime 1 $ fromMaybe createdAt mLastLogLineAt
 
     update
       jobId
@@ -900,12 +897,13 @@ configErrorOutput1 =
 seedJobLogLines
   :: ( MonadUnliftIO m
      , MonadResource m
+     , MonadLogger m
      , MonadReader env m
      , HasSettings env
      , HasAWS env
      )
   => JobId
-  -> NonEmpty JobLogLine
+  -> [JobLogLine]
   -> m ()
 seedJobLogLines jobId jobLogLines = do
   AppSettings {..} <- view settingsL
@@ -913,31 +911,26 @@ seedJobLogLines jobId jobLogLines = do
   let
     logGroup = appRestylerLogGroup
     logStream = appRestylerLogStreamPrefix <> toPathPiece jobId
-    events = toInputLogEvent <$> jobLogLines
+    events = map toInputLogEvent jobLogLines
 
-  ignoring _ResourceNotFoundException
-    $ void
-    $ AWS.send
-    $ newDeleteLogStream
-      logGroup
-      logStream
-
-  void $ AWS.send $ newCreateLogStream logGroup logStream
-  void $ AWS.send $ newPutLogEvents logGroup logStream events
+  handling_ _ResourceNotFoundException (pure ()) $ do
+    void $ AWS.send $ newDeleteLogStream logGroup logStream
+    void $ AWS.send $ newCreateLogStream logGroup logStream
+    result <- runExceptT $ putLogEvents logGroup logStream events
+    case result of
+      Left exs -> do
+        logError $ pack (displayException exs) :# []
+        exitFailure
+      Right () -> pure ()
 
 toInputLogEvent :: JobLogLine -> InputLogEvent
 toInputLogEvent ln =
-  newInputLogEvent
-    (utcTimeToPOSIXMilliseconds $ jobLogLineCreatedAt ln)
-    (jobLogLineContent ln)
+  newInputLogEvent createdMs $ ensureNonEmpty $ jobLogLineContent ln
+ where
+  createdMs = utcTimeToPOSIXMilliseconds $ jobLogLineCreatedAt ln
+  ensureNonEmpty t
+    | T.null t = " "
+    | otherwise = t
 
 utcTimeToPOSIXMilliseconds :: Integral n => UTCTime -> n
 utcTimeToPOSIXMilliseconds = round . (* 1000) . utcTimeToPOSIXSeconds
-
-ignoring
-  :: MonadUnliftIO m => Getting (First a) SomeException a -> m () -> m ()
-ignoring l f = catching_ l f $ pure ()
-
-catching_
-  :: MonadUnliftIO m => Getting (First a) SomeException a -> m r -> m r -> m r
-catching_ l a b = catchJust (preview l) a (const b)
