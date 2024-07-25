@@ -22,4 +22,5 @@ restylers:
       include:
         - "**/*"
         - "!**/*.hamlet"
+        - "!seeds/output/**/*"
   - "*"

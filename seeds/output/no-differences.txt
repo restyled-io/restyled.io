@@ -1,0 +1,7 @@
+Branch 'lucky/ela-skills-debugger' set up to track remote branch 'lucky/ela-skills-debugger' from 'origin'.
+Switched to a new branch 'lucky/ela-skills-debugger'
+[Info] Restyling freckle/megarepo#8616
+[Info] Restyled PR does not exist
+Switched to a new branch 'lucky/ela-skills-debugger-restyled'
+[Info] Setting status of no differences for 686fe0a
+[Info] No style differences found
