@@ -44,13 +44,11 @@ jobLogLineContentJSON ll =
           pure
             $ (fakeLoggedMessage ll)
               { loggedMessageLevel = LevelInfo
-              , loggedMessageText = "% " <> msg
-              , loggedMessageLogSource = Just "act"
+              , loggedMessageText = "=> " <> msg
               }
       , do
           stripped <- T.stripPrefix actOutputPrefix $ jobLogLineContent ll
-          lm <- decode $ BSL.fromStrict $ encodeUtf8 stripped
-          pure $ setLoggedMessageSource "restyler" lm
+          decode $ BSL.fromStrict $ encodeUtf8 stripped
       ]
  where
   actStarPrefix :: Text
@@ -73,10 +71,6 @@ loggedMessageIsPatch :: LoggedMessage -> Bool
 loggedMessageIsPatch LoggedMessage {..} = fromMaybe False $ do
   Bool patch <- KeyMap.lookup "patch" loggedMessageThreadContext
   pure patch
-
-setLoggedMessageSource :: LogSource -> LoggedMessage -> LoggedMessage
-setLoggedMessageSource src lm =
-  lm {loggedMessageLogSource = loggedMessageLogSource lm <|> Just src}
 
 fakeLoggedMessage :: JobLogLine -> LoggedMessage
 fakeLoggedMessage ll =
