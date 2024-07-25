@@ -223,8 +223,8 @@ seedJob Repo {..} pullRequest createdAt mExitCode untimestamped = do
       , JobExitCode =. Just ec
       ]
 
-secondsFrom :: UTCTime -> NonEmpty UTCTime
-secondsFrom = NE.iterate $ addUTCTime 1
+msecondsFrom :: UTCTime -> [UTCTime]
+msecondsFrom = iterate $ addUTCTime 0.001
 
 seedJobLogLines
   :: ( MonadUnliftIO m
