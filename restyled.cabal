@@ -166,6 +166,7 @@ library
     , esqueleto
     , extra
     , file-embed
+    , filepath
     , formatting
     , generic-arbitrary
     , github

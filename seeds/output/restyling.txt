@@ -1,0 +1,11 @@
+Switched to a new branch 'issue#87'
+Branch 'issue#87' set up to track remote branch 'issue#87' from 'origin'.
+[Info] Restyling restyled-io/restyler#88
+[Info] Restyled PR does not exist
+Switched to a new branch 'issue#87-restyled'
+[Info] Restyling "app/Http/Controllers/Store.php" via "php-cs-fixer"
+[Debug] Loaded config default from "/code/.php_cs".
+Paths from configuration file have been overridden by paths provided as command arguments.
+ 
+Fixed all files in 0.010 seconds, 10.000 MB memory used
+[Info] Restyling "app/Models/Example.php" via "php-cs-fixer"
