@@ -114,7 +114,6 @@ library:
     - transformers
     - unliftio
     - unliftio-core
-    - uri-encode
     - uuid
     - vector
     - wai

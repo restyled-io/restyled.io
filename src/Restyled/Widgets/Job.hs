@@ -20,7 +20,6 @@ import qualified Data.Text as T
 import qualified Data.Vector as V
 import Formatting (format)
 import Formatting.Time (diff)
-import qualified Network.URI.Encode as URI
 import Restyled.Foundation
 import Restyled.Job.Completion
 import Restyled.Models hiding (jobLogLine)
@@ -29,7 +28,6 @@ import Restyled.Settings
 import Restyled.Widgets.ContainsURLs
 import Restyled.Yesod
 import Text.Julius (RawJS (..))
-import Text.Shakespeare.Text (st)
 
 githubActionsWarning :: Widget
 githubActionsWarning = $(widgetFile "widgets/github-actions-warning")
@@ -37,54 +35,12 @@ githubActionsWarning = $(widgetFile "widgets/github-actions-warning")
 jobCard :: Entity Job -> Widget
 jobCard jobE@(Entity jobId job) = do
   now <- liftIO getCurrentTime
-  issueUrl <- jobIssueURL jobE <$> getUrlRender
   $(widgetFile "widgets/job-card")
 
 jobListItem :: Entity Job -> Widget
 jobListItem (Entity jobId job) = do
   now <- liftIO getCurrentTime
   $(widgetFile "widgets/job-list-item")
-
-jobIssueURL :: Entity Job -> (Route App -> Text) -> Text
-jobIssueURL (Entity jobId Job {..}) urlRender =
-  "https://github.com/restyled-io/restyler/issues/new"
-    <> "?title="
-    <> URI.encodeText title
-    <> "&body="
-    <> URI.encodeText body
- where
-  title = "Problem with Restyler Job #" <> toPathPiece jobId
-  body =
-    [st|
-Please use the below template to report an issue with this Job. **Don't submit
-sensitive information**, this is a public project. If you'd rather communicate
-privately, email support@restyled.io.
-
-Before reporting, please check the _Common Errors_ section found in [the wiki](https://github.com/restyled-io/restyled.io/wiki)
-sidebar.
-
----
-
-Hi there-
-
-I'm having a problem with a Restyled Job
-
-- **Restyled Job**: #{urlRender $ repoP jobOwner jobRepo $ jobR jobId}
-- **GitHub PR**: #{repoPullPath jobOwner jobRepo jobPullRequest}
-
-**What I expected to happen**:
-
-**What happened instead**:
-
-_Please try to be specific. Avoid saying "it failed" or "it errored"; instead,
-copy over any error messages or other details when available._
-
-**Configuration** (if applicable):
-
-```yaml
-# .restyled.yaml as it was in the commit for the Job
-```
-|]
 
 jobOutput :: Entity Job -> Widget
 jobOutput (Entity jobId job) = $(widgetFile "widgets/job-output")
