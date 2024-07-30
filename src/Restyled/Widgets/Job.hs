@@ -2,7 +2,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Restyled.Widgets.Job
-  ( jobCard
+  ( githubActionsWarning
+  , jobCard
   , jobListItem
   , jobOutput
   , jobLogLine
@@ -29,6 +30,9 @@ import Restyled.Widgets.ContainsURLs
 import Restyled.Yesod
 import Text.Julius (RawJS (..))
 import Text.Shakespeare.Text (st)
+
+githubActionsWarning :: Widget
+githubActionsWarning = $(widgetFile "widgets/github-actions-warning")
 
 jobCard :: Entity Job -> Widget
 jobCard jobE@(Entity jobId job) = do

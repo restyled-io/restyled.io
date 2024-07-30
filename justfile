@@ -90,6 +90,13 @@ watch:
     --exec bin/restyled-restart \
     --ghc-options -DDEVELOPMENT
 
+# Rebuild the project on file changes
+watch-no-test:
+  stack build \
+    --fast --pedantic --test --no-run-tests --file-watch \
+    --exec bin/restyled-restart \
+    --ghc-options -DDEVELOPMENT
+
 # Run an ngrok process
 ngrok-http:
   ngrok http --subdomain restyled 3000

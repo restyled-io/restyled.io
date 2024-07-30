@@ -262,6 +262,11 @@ form.toggle-debug label {
   padding: 5px 20px;
 }
 
+.card.warn header {
+  background-color: #f9ab84;
+  color: #595959;
+}
+
 .card .permalink {
   float: right;
   font-size: 85%;

@@ -1,3 +1,5 @@
+^{githubActionsWarning}
+
 <div .card>
   <header>
     <a .permalink href=@{repoP (jobOwner job) (jobRepo job) $ jobR jobId}>permalink
