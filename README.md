@@ -1,3 +1,8 @@
+> [!WARNING]
+> The Restyled GitHub App is deprecated and will be disabled in the coming months. Please [run Restyled using GitHub Actions](https://github.com/restyled-io/actions#readme) . It works just as well or better, and is completely free, even for private repositories.
+>
+> If you're interested in why we're making this change, see [here](https://github.com/restyled-io/restyled.io/wiki/GitHub-Actions-Pivot).
+
 # restyled.io
 
 Website and backend for Restyled, https://restyled.io.
