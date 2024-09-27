@@ -88,13 +88,18 @@ fakeLoggedMessage ll =
 
 stripLogLevel :: Text -> (Text, LogLevel)
 stripLogLevel content =
-  maybe (content, LevelOther "trace") getFirst
+  maybe (content, LevelDebug) getFirst
     $ foldMap (fmap First . firstM (`T.stripPrefix` content)) stylePrefixes
 
 stylePrefixes :: [(Text, LogLevel)]
 stylePrefixes =
-  [ ("[Debug] ", LevelDebug)
-  , ("[Info] ", LevelInfo)
-  , ("[Warn] ", LevelWarn)
-  , ("[Error] ", LevelError)
-  ]
+  mconcat
+    [ [(p, LevelDebug) | p <- mkPrefixes "Debug"]
+    , [(p, LevelInfo) | p <- mkPrefixes "Info"]
+    , [(p, LevelWarn) | p <- mkPrefixes "Warn"]
+    , [(p, LevelError) | p <- mkPrefixes "Error"]
+    ]
+ where
+  mkPrefixes x =
+    let ps = [x, T.toLower x, "[" <> x <> "]", "[" <> T.toLower x <> "]"]
+    in  map (<> ": ") ps <> map (<> " ") ps <> ps

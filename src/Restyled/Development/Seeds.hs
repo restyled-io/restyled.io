@@ -115,6 +115,7 @@ seedDB = do
   restylingOutputGHA <- readSeedOutput "gha1"
   restylingOutputGHAPatch <- readSeedOutput "gha-patch"
   configErrorOutput1 <- readSeedOutput "config-error1"
+  prettierErrorOutput <- readSeedOutput "prettier"
 
   seedJob demo 1 now (Just 127) invalidArgumentOutput
   seedJob restyled 1 now (Just 0) noDifferencesOutput
@@ -122,6 +123,7 @@ seedDB = do
   seedJob restyled 3 now (Just 0) restylingOutputGHAPatch
   seedJob restyler 1 now Nothing restylingOutput
   seedJob restyler 2 now (Just 10) configErrorOutput1
+  seedJob restyler 3 now (Just 2) prettierErrorOutput
 
   Entity discountPlanId _ <-
     findOrCreateMarketplacePlan
