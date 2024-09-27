@@ -25,6 +25,13 @@ packages:
       size: 611
   original:
     hackage: monad-validate-1.3.0.0
+- completed:
+    hackage: github-app-token-0.0.3.0@sha256:798a9997ce6550b09c49488bbcae5d00833028750075f48b64f9e35b8940beaa,4706
+    pantry-tree:
+      sha256: 09018dcbe86da58eca08abfbcf54dbc2e79278ac48ec70f7f5c9dd08b1a02941
+      size: 978
+  original:
+    hackage: github-app-token-0.0.3.0
 snapshots:
 - completed:
     sha256: 795b7a893148a42f09956611a0fa1139293fe6ef934d053468d8e53e3e013390

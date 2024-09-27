@@ -74,6 +74,7 @@ library:
     - formatting
     - generic-arbitrary
     - github
+    - github-app-token
     - gitrev
     - graphula
     - hashable
