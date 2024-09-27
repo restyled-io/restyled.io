@@ -1,0 +1,48 @@
+{"time":"2024-09-27T15:58:16.0793057Z","level":"info","location":{"package":"restyler-0.2.1.0-DyO5DeMlAdAFZ59Xnx0p0c","module":"Restyler.Setup","file":"src/Restyler/Setup.hs","line":56,"char":3},"message":{"text":"Restyler started","meta":{"owner":"freckle","repo":"environment-deleter","pull":26}}}
+Switched to branch 'pull-26'
+{"time":"2024-09-27T15:58:16.465420935Z","level":"info","location":{"package":"restyler-0.2.1.0-DyO5DeMlAdAFZ59Xnx0p0c","module":"Restyler.Setup","file":"src/Restyler/Setup.hs","line":89,"char":3},"message":{"text":"Cloning repository"}}
+{"time":"2024-09-27T15:58:16.943544082Z","level":"info","location":{"package":"restyler-0.2.1.0-DyO5DeMlAdAFZ59Xnx0p0c","module":"Restyler.RemoteFile","file":"src/Restyler/RemoteFile.hs","line":29,"char":3},"message":{"text":"Fetching remote file","meta":{"path":"/tmp/restylers-stable.yaml"}}}
+Unable to find image 'restyled/restyler-fourmolu:v0.14.1.0' locally
+v0.14.1.0: Pulling from restyled/restyler-fourmolu
+9c704ecd0c69: Pulling fs layer
+159bf0f3b2e1: Pulling fs layer
+ad0fcae621ce: Pulling fs layer
+9259dc38bc17: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+9259dc38bc17: Waiting
+4f4fb700ef54: Waiting
+{"time":"2024-09-27T15:58:17.574621036Z","level":"info","location":{"package":"restyler-0.2.1.0-DyO5DeMlAdAFZ59Xnx0p0c","module":"Restyler.Restyler.Run","file":"src/Restyler/Restyler/Run.hs","line":309,"char":3},"message":{"text":"Restyling","meta":{"restyler":"fourmolu","run":"1 of 1","style":"RestylerRunStylePathsOverwriteSep"}}}
+9c704ecd0c69: Verifying Checksum
+9c704ecd0c69: Download complete
+159bf0f3b2e1: Verifying Checksum
+159bf0f3b2e1: Download complete
+9259dc38bc17: Verifying Checksum
+9259dc38bc17: Download complete
+4f4fb700ef54: Verifying Checksum
+4f4fb700ef54: Download complete
+ad0fcae621ce: Verifying Checksum
+ad0fcae621ce: Download complete
+9c704ecd0c69: Pull complete
+159bf0f3b2e1: Pull complete
+ad0fcae621ce: Pull complete
+9259dc38bc17: Pull complete
+4f4fb700ef54: Pull complete
+Digest: sha256:4f4b16482c1d0cf2efe06c40471283c02f787c9fc50c3f31b29bd5bedf767f81
+Status: Downloaded newer image for restyled/restyler-fourmolu:v0.14.1.0
+Loaded config from: /code/fourmolu.yaml
+{"time":"2024-09-27T15:58:21.380618228Z","level":"info","location":{"package":"restyler-0.2.1.0-DyO5DeMlAdAFZ59Xnx0p0c","module":"Restyler.Restyler.Run","file":"src/Restyler/Restyler/Run.hs","line":309,"char":3},"message":{"text":"Restyling","meta":{"restyler":"prettier-yaml","run":"1 of 1","style":"RestylerRunStylePathsOverwriteSep"}}}
+yarn link v1.22.19
+warning You don't appear to have an internet connection. Try the --offline flag to use the cache for registry queries.
+success Using linked package for "tailwindcss".
+Done in 0.07s.
+package.yaml 61ms (unchanged)
+stack.yaml 2ms (unchanged)
+yarn unlink v1.22.19
+warning You don't appear to have an internet connection. Try the --offline flag to use the cache for registry queries.
+success Removed linked package "tailwindcss".
+info You will need to run `yarn install --force` to re-install the package that was linked.
+Done in 0.04s.
+{"time":"2024-09-27T15:58:23.234387747Z","level":"info","location":{"package":"restyler-0.2.1.0-DyO5DeMlAdAFZ59Xnx0p0c","module":"Restyler.Restyler.Run","file":"src/Restyler/Restyler/Run.hs","line":309,"char":3},"message":{"text":"Restyling","meta":{"restyler":"whitespace","run":"1 of 1","style":"RestylerRunStylePathsOverwriteSep"}}}
+{"time":"2024-09-27T15:58:23.841069616Z","level":"info","location":{"package":"restyler-0.2.1.0-DyO5DeMlAdAFZ59Xnx0p0c","module":"Restyler.PullRequest.Status","file":"src/Restyler/PullRequest/Status.hs","line":57,"char":3},"message":{"text":"Setting PR status","meta":{"status":"no differences","commit":"e39438b"}}}
+{"time":"2024-09-27T15:58:24.243505978Z","level":"info","location":{"package":"restyler-0.2.1.0-DyO5DeMlAdAFZ59Xnx0p0c","module":"Restyler.App.Class","file":"src/Restyler/App/Class.hs","line":52,"char":3},"message":{"text":"No style differences found"}}
+{"time":"2024-09-27T15:58:24.284022636Z","level":"info","location":{"package":"main","module":"Main","file":"app/main.hs","line":29,"char":7},"message":{"text":"Restyler done","meta":{"exitCode":0}}}

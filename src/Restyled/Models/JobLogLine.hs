@@ -96,10 +96,11 @@ stylePrefixes =
   mconcat
     [ [(p, LevelDebug) | p <- mkPrefixes "Debug"]
     , [(p, LevelInfo) | p <- mkPrefixes "Info"]
+    , [(p, LevelWarn) | p <- mkPrefixes "Warning"]
     , [(p, LevelWarn) | p <- mkPrefixes "Warn"]
     , [(p, LevelError) | p <- mkPrefixes "Error"]
     ]
  where
   mkPrefixes x =
     let ps = [x, T.toLower x, "[" <> x <> "]", "[" <> T.toLower x <> "]"]
-    in  map (<> ": ") ps <> map (<> " ") ps <> ps
+    in  map (<> ": ") ps <> map (<> " ") ps
