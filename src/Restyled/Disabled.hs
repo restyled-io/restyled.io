@@ -20,40 +20,40 @@ data Webhook = Webhook
   , pull_request :: PullRequest
   }
   deriving stock (Generic)
-  deriving anyclass (FromJSON)
+  deriving anyclass (FromJSON, ToJSON)
 
 newtype Installation = Installation
   { id :: Int
   }
   deriving stock (Generic)
-  deriving anyclass (FromJSON)
+  deriving anyclass (FromJSON, ToJSON)
 
 data PullRequest = PullRequest
   { base :: Commit
   , head :: Commit
   }
   deriving stock (Generic)
-  deriving anyclass (FromJSON)
+  deriving anyclass (FromJSON, ToJSON)
 
 data Commit = Commit
   { repo :: Repo
   , sha :: Text
   }
   deriving stock (Generic)
-  deriving anyclass (FromJSON)
+  deriving anyclass (FromJSON, ToJSON)
 
 data Repo = Repo
   { owner :: Owner
   , name :: Text
   }
   deriving stock (Generic)
-  deriving anyclass (FromJSON)
+  deriving anyclass (FromJSON, ToJSON)
 
 newtype Owner = Owner
   { login :: Text
   }
   deriving stock (Generic)
-  deriving anyclass (FromJSON)
+  deriving anyclass (FromJSON, ToJSON)
 
 -- | Decide if we should emit a disabled status intead of processing
 --
@@ -70,11 +70,12 @@ shouldEmitDisabledStatus webhook =
     ]
 
 emitDisabledStatus
-  :: (MonadUnliftIO m, MonadReader env m, HasSettings env)
+  :: (MonadIO m, MonadLogger m, MonadReader env m, HasSettings env)
   => BSL.ByteString
   -> m (Either String GitHub.Status)
 emitDisabledStatus body = runExceptT $ do
   webhook <- hoistEither $ eitherDecode body
+  logDebug $ "Webhook" :# ["contents" .= webhook]
   guard $ shouldEmitDisabledStatus webhook
   settings <- lift $ view settingsL
   token <- generateToken settings webhook
