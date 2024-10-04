@@ -2,4 +2,6 @@
 - ignore: {name: Redundant ^.}
 
 # Too aggressive
+- ignore: {name: Use &&}
+- ignore: {name: Use ||}
 - ignore: {name: Functor law}
