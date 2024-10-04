@@ -57,11 +57,12 @@ newtype Owner = Owner
 
 -- | Decide if we should emit a disabled status intead of processing
 --
--- Some ideas:
+-- Rough plan:
 --
--- - Our own testing repositories
--- - All public repositories
--- - All except those orgs who are still paying
+-- - [x] Our own testing repositories
+-- - [ ] All public repositories
+-- - [ ] All except those orgs who are still paying
+-- - [ ] Every
 shouldEmitDisabledStatus :: Webhook -> Bool
 shouldEmitDisabledStatus webhook =
   and
