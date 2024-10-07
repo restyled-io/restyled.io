@@ -43,7 +43,8 @@ data Commit = Commit
   deriving anyclass (FromJSON, ToJSON)
 
 data Repo = Repo
-  { owner :: Owner
+  { private :: Bool
+  , owner :: Owner
   , name :: Text
   }
   deriving stock (Generic)
@@ -60,15 +61,14 @@ newtype Owner = Owner
 -- Rough plan:
 --
 -- - [x] Our own testing repositories
--- - [ ] All public repositories
+-- - [x] All public repositories
 -- - [ ] All except those orgs who are still paying
 -- - [ ] Every
 shouldEmitDisabledStatus :: Webhook -> Bool
-shouldEmitDisabledStatus webhook =
-  and
-    [ webhook.pull_request.base.repo.owner.login == "restyled-io"
-    , webhook.pull_request.base.repo.name == "demo"
-    ]
+shouldEmitDisabledStatus webhook
+  | webhook.pull_request.base.repo.owner.login == "restyled-io" = True
+  | not webhook.pull_request.base.repo.private = True
+  | otherwise = False
 
 emitDisabledStatus
   :: (MonadIO m, MonadLogger m, MonadReader env m, HasSettings env)
