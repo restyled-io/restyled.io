@@ -14,13 +14,14 @@ import Restyled.Yesod
 
 postWebhooksR :: Handler ()
 postWebhooksR = do
+  qs <- view queuesL
   body <- runConduit $ rawRequestBody .| sinkLbs
 
   emitDisabledStatus body >>= \case
-    Left {} -> do
-      -- Not emitted, proceed normally
-      qs <- view queuesL
-      runRedis $ enqueue qs $ toStrict body
-    Right {} -> pure ()
+    Left err -> do
+      logDebug $ "Disabled status not emitted" :# ["reason" .= err]
+      runRedis $ enqueue qs $ toStrict body -- proceed normally
+    Right status -> do
+      logInfo $ "Disabled status emitted" :# ["status" .= show @Text status]
 
   sendResponseStatus @_ @Text status201 ""
