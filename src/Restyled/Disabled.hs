@@ -29,7 +29,8 @@ newtype Installation = Installation
   deriving anyclass (FromJSON, ToJSON)
 
 data PullRequest = PullRequest
-  { base :: Commit
+  { number :: Int
+  , base :: Commit
   , head :: Commit
   }
   deriving stock (Generic)
@@ -49,6 +50,9 @@ data Repo = Repo
   }
   deriving stock (Generic)
   deriving anyclass (FromJSON, ToJSON)
+
+repoFullName :: Repo -> Text
+repoFullName repo = repo.owner.login <> "/" <> repo.name
 
 newtype Owner = Owner
   { login :: Text
@@ -76,10 +80,18 @@ emitDisabledStatus
   -> m (Either String GitHub.Status)
 emitDisabledStatus body = runExceptT $ do
   webhook <- hoistEither $ eitherDecode body
-  logDebug $ "Webhook" :# ["contents" .= webhook]
   guard $ shouldEmitDisabledStatus webhook
+
   settings <- lift $ view settingsL
   token <- generateToken settings webhook
+
+  logInfo
+    $ "Emitted disabled status"
+    :# [ "repository" .= repoFullName webhook.pull_request.base.repo
+       , "pullRequest" .= webhook.pull_request.number
+       , "commitSha" .= webhook.pull_request.head.sha
+       ]
+
   createStatus token webhook
 
 generateToken
