@@ -62,7 +62,7 @@ waiMiddleware app =
     . methodOverridePost
     . requestLogger app
     . defaultMiddlewaresNoLogging
-    . routedMiddleware (not . isLogsRoute) (timeout timeoutSeconds)
+    . routedMiddleware shouldTimeoutRoute (timeout timeoutSeconds)
  where
   timeoutSeconds = app ^. settingsL . to appRequestTimeout
   forceSSL' =
@@ -70,8 +70,14 @@ waiMiddleware app =
       then forceSSL
       else id
 
-isLogsRoute :: [Text] -> Bool
-isLogsRoute = maybe False ((`elem` ["log", "patch"]) . NE.last) . NE.nonEmpty
+shouldTimeoutRoute :: [Text] -> Bool
+shouldTimeoutRoute = go . reverse
+ where
+  go = \case
+    ("logs" : _) -> False
+    ("patch" : _) -> False
+    ("webhooks" : _) -> False
+    _ -> True
 
 warpSettings :: App -> Settings
 warpSettings app =
