@@ -11,7 +11,6 @@ module Restyled.Application
 
 import Restyled.Prelude
 
-import qualified Data.List.NonEmpty as NE
 import Lens.Micro (to, (^.))
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp
