@@ -60,28 +60,12 @@ newtype Owner = Owner
   deriving stock (Generic)
   deriving anyclass (FromJSON, ToJSON)
 
--- | Decide if we should emit a disabled status intead of processing
---
--- Rough plan:
---
--- - [x] Our own testing repositories
--- - [x] All public repositories
--- - [ ] All except those orgs who are still paying
--- - [ ] Every
-shouldEmitDisabledStatus :: Webhook -> Bool
-shouldEmitDisabledStatus webhook
-  | webhook.pull_request.base.repo.owner.login == "restyled-io" = True
-  | not webhook.pull_request.base.repo.private = True
-  | otherwise = False
-
 emitDisabledStatus
   :: (MonadIO m, MonadLogger m, MonadReader env m, HasSettings env)
   => BSL.ByteString
   -> m (Either String GitHub.Status)
 emitDisabledStatus body = runExceptT $ do
   webhook <- hoistEither $ eitherDecode body
-  guard $ shouldEmitDisabledStatus webhook
-
   settings <- lift $ view settingsL
   token <- generateToken settings webhook
 
@@ -140,5 +124,5 @@ createStatus token webhook =
 docs :: Text
 docs = "https://docs.restyled.io/docs/migrating-to-github-actions/"
 
-unTry :: (MonadError String m, Show e) => m (Either e a) -> m a
-unTry f = either (throwError . show) pure =<< f
+unTry :: (MonadError String m, Exception e) => m (Either e a) -> m a
+unTry f = either (throwError . displayException) pure =<< f
