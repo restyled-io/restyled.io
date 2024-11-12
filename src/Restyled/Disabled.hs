@@ -122,7 +122,7 @@ createStatus token webhook =
       }
 
 docs :: Text
-docs = "https://docs.restyled.io/docs/migrating-to-github-actions/"
+docs = "https://github.com/restyled-io/actions/wiki/Migrating-from-the-Restyled-App"
 
 unTry :: (MonadError String m, Exception e) => m (Either e a) -> m a
 unTry f = either (throwError . displayException) pure =<< f
