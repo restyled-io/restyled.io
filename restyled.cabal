@@ -159,7 +159,6 @@ library
     , cassava
     , composition-extra
     , conduit
-    , conduit-extra
     , data-default
     , data-default-class
     , envparse
