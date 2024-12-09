@@ -8,7 +8,7 @@ Historical placeholder, to point users elsewhere.
 docker compose up --build
 ```
 
-``console
+```console
 $BROWSER http://localhost:3000
 ```
 
