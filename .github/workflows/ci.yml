@@ -111,20 +111,3 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: restyled-io
           dockerfile_name: Dockerfile.web
-
-      - uses: restyled-io/gitops-deploy-action@main
-        with:
-          token: ${{ secrets.GITOPS_ACCESS_TOKEN }}
-          parameter-name: RestyledImage
-          parameter-value: ${{ needs.image.outputs.image }}
-          committer-name: Restyled Commits
-          committer-email: commits@restyled.io
-          repository: restyled-io/ops
-          stacks: cg-app/stacks/*/*/prod/services/sync-marketplace.yaml
-
-      - uses: desiderati/github-action-pushover@v1
-        if: ${{ always() }}
-        with:
-          job-status: ${{ job.status }}
-          pushover-api-token: ${{ secrets.PUSHOVER_API_TOKEN }}
-          pushover-user-key: ${{ secrets.PUSHOVER_USER_KEY }}
