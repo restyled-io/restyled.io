@@ -1,7 +1,0 @@
-# Gets confused by Database.Esqueleto.(^.) vs Control.Lens.(^.)
-- ignore: {name: Redundant ^.}
-
-# Too aggressive
-- ignore: {name: Use &&}
-- ignore: {name: Use ||}
-- ignore: {name: Functor law}

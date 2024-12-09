@@ -1,7 +1,0 @@
-.env*
-!.env.example
-!.env.test
-.stack-work/
-static/tmp/
-static/combined/
-config/client_session_key.aes
