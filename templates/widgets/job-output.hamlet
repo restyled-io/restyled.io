@@ -1,7 +1,0 @@
-<pre
-  .logs-stream
-  ##{streamElementId}
-  data-stream-url=@{repoP (jobOwner job) (jobRepo job) $ jobLogR jobId}
-  data-stream-loaded=false
-  >
-  Fetching job log...

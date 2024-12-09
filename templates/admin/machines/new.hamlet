@@ -1,5 +1,0 @@
-<section>
-  <form method=post action=@{AdminP $ AdminMachinesP AdminMachinesR} enctype=#{enctype}>
-    ^{widget}
-    <footer .action>
-      <button>Create

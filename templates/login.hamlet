@@ -1,9 +1,0 @@
-<section .login>
-  <ul>
-    $forall plugin <- plugins
-      $with name <- apName plugin
-        $maybe formatted <- formatPluginName name
-          <li>
-            <a .button .#{name} href=@{AuthR $ PluginR name ["forward"]}>
-              <span .logo>
-              Log in with #{formatted}

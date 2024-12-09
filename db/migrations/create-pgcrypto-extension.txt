@@ -1,8 +1,0 @@
-# vim: ft=yaml
-Description: Create pgcrypto extension
-Created: 2020-04-14 00:48:57 UTC
-Depends:
-Apply: |
-  CREATE EXTENSION IF NOT EXISTS pgcrypto;
-Revert: |
-  DROP EXTENSION IF EXISTS pgcrypto;

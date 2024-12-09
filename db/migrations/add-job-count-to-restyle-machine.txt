@@ -1,9 +1,0 @@
-# vim: ft=yaml
-Description: Add job_count to restyle_machine table
-Created: 2019-11-26 15:33:42 UTC
-Depends: create-restyle-machine
-Apply: |
-  ALTER TABLE "restyle_machine"
-    ADD COLUMN job_count integer NOT NULL DEFAULT 0
-Revert: |
-  ALTER TABLE "restyle_machine" DROP COLUMN IF EXISTS job_count

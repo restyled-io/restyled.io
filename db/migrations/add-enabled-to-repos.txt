@@ -1,9 +1,0 @@
-# vim: ft=yaml
-Description: Add enabled to repos
-Created: 2019-12-04 00:57:22 UTC
-Depends: create-repo
-Apply: |
-  ALTER TABLE repo
-    ADD COLUMN enabled boolean NOT NULL DEFAULT true
-Revert: |
-  ALTER TABLE repo DROP COLUMN IF EXISTS enabled

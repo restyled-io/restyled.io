@@ -1,7 +1,0 @@
-#!/bin/sh
-#
-# Execute the restyled.io binary, loading .env.development. This really just
-# helps the long-line in Makefile's watch target.
-#
-###
-AWS_PROFILE=restyled exec stack exec -- "$1" --env-file .env.development

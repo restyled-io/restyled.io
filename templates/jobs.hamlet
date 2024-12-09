@@ -1,5 +1,0 @@
-<section>
-  ^{githubActionsWarning}
-
-<section>
-  ^{renderPaginated jobListItem page}

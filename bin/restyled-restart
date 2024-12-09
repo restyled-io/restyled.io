@@ -1,8 +1,0 @@
-#!/bin/sh
-#
-# Kills and restarts restyled.io backend processes to the background. This
-# really just helps the long-line in Makefile's watch target.
-#
-###
-pkill restyled.io
-bin/restyled.io-dev restyled.io &

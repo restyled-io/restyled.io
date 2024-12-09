@@ -1,9 +1,0 @@
-# vim: ft=yaml
-Description: Add reconciling to restyle_machine
-Created: 2020-08-07 18:10:27 UTC
-Depends: create-restyle-machine
-Apply: |
-    ALTER TABLE "restyle_machine"
-    ADD COLUMN reconciling bool NOT NULL DEFAULT false
-Revert: |
-  ALTER TABLE "restyle_machine" DROP COLUMN IF EXISTS reconciling
