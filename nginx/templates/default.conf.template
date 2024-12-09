@@ -1,0 +1,4 @@
+server {
+  listen ${PORT} default_server;
+  autoindex on;
+}
