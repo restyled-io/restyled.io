@@ -1,19 +1,8 @@
 # restyled.io
 
-Historical placeholder, to point users elsewhere.
+This project only exists to redirect restyled.io to github.com/restyled-io.
 
-## Development & Testing
-
-```console
-docker compose up --build
-```
-
-```console
-$BROWSER http://localhost:3000
-```
-
-> [!NOTE]
-> `nginx/html/` is volume-mounted so changes will be seen immediately.
+It will be replaced by DNS redirect eventually.
 
 ## Deployment
 
